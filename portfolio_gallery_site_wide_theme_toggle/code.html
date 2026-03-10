@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Portfolio - Dezan Digitizing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">        tailwind.config = {
+            darkMode: "selector",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d4af35",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#201d12",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-tab {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body, header, footer, main, nav, div, button, input {
+        transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    }
+</style><style>
+    .reveal-on-scroll {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .reveal-on-scroll.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .portfolio-card {
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    }
+    .portfolio-card:active, .portfolio-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 10px 25px -5px rgba(212, 175, 53, 0.2);
+        z-index: 10;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style></head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-primary/10">
+<div class="flex items-center p-4 justify-between max-w-xl mx-auto w-full">
+<div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/20">
+<span class="material-symbols-outlined text-primary">diamond</span>
+</div>
+<h1 class="text-xl font-bold leading-tight tracking-tight flex-1 text-center">Portfolio</h1>
+<div class="flex items-center justify-end">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 hover:bg-primary/10 text-slate-900 dark:text-slate-100 transition-colors mr-1" id="theme-toggle">
+<span class="material-symbols-outlined" id="theme-toggle-icon">light_mode</span>
+</button><button class="flex items-center justify-center rounded-lg h-10 w-10 hover:bg-primary/10 text-slate-900 dark:text-slate-100 transition-colors">
+<span class="material-symbols-outlined">search</span>
+</button>
+</div>
+</div>
+<!-- Filters -->
+<div class="flex gap-3 px-4 pb-4 overflow-x-auto no-scrollbar max-w-xl mx-auto w-full py-2">
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary text-background-dark px-5 text-sm font-semibold transition-colors">
+                All
+            </button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary/10 border border-primary/20 text-slate-900 dark:text-slate-100 px-4 text-sm font-medium hover:bg-primary/20 transition-colors">
+                Embroidery
+            </button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary/10 border border-primary/20 text-slate-900 dark:text-slate-100 px-4 text-sm font-medium hover:bg-primary/20 transition-colors">
+                Vector Art
+            </button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary/10 border border-primary/20 text-slate-900 dark:text-slate-100 px-4 text-sm font-medium hover:bg-primary/20 transition-colors">
+                Patches
+            </button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 max-w-xl mx-auto w-full pb-32">
+<div class="grid grid-cols-2 gap-4 p-4">
+<!-- Portfolio Item 1 -->
+<div class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 reveal-on-scroll portfolio-card">
+<img alt="Detailed embroidery of a dog portrait on canvas" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" data-alt="Detailed pet portrait embroidery showcase" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbOQ2qWawHi_d7qimQpRjBYMwvrO7eEaxsfXhyGt6fE1T8fAKdXENXRTzcxBGzfCd6w9flLWlQdE2YaJ8lFTt7vgWAWYAjBzLW37kAABOi7_6UBPSpqRYA0hhmUH2r-SYLhofUcXVW9DzgrU5gO08BCq8u3HBox3ywA4cM2gYLFRYu3BKBfLo1CSUqR6mL4m6bBuvdzvGZUGL1tY0numo9C9aLxxN19FqyQ2quja0-MjppsRayu8wqlNd9op7xgJPBmq2qgTgNMrjI"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
+<p class="text-white text-sm font-bold tracking-tight">Pet Portrait</p>
+<p class="text-primary text-[10px] font-medium uppercase tracking-widest">Embroidery</p>
+</div>
+</div>
+<!-- Portfolio Item 2 -->
+<div class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 reveal-on-scroll portfolio-card">
+<img alt="Minimalist company logo embroidered on a black polo shirt" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" data-alt="Professional company logo embroidery on polo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6xIKILkZW2WW1GMQYX3d00JD3FRvUPyDqcTB2B-XhRYTo-Ei1u6fLIt1AL3D_GpoVXNZdXS7oqp52fP2PriS6qZE0ZOIXZUi3RTUbv_y1vXe2JJGzRbVLbSqLLm0e7XwIAWXih9nvNA6r8LQ_5P_WXZXYa-pVGU1eh8xVCt2r3hFjuWPu1Ps6Gn259tP6LQZJ9kTklgrtKA_Ps5YljH0Pg5IjfAoPSoSYAYXQeUv60MHDjrbScthdgnylL_NTbIKItFUYs_78D_S5"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
+<p class="text-white text-sm font-bold tracking-tight">Company Logo</p>
+<p class="text-primary text-[10px] font-medium uppercase tracking-widest">Corporate</p>
+</div>
+</div>
+<!-- Portfolio Item 3 -->
+<div class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 reveal-on-scroll portfolio-card">
+<img alt="Bold athletic mascot emblem embroidered on a varsity jacket" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" data-alt="Dynamic sports emblem embroidery on jacket" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCVryyCZ0l4qBWoWv4BxrDlcV3roMTxExewQr6P5rSsvhoibGhxgFCt21sPoX2CfMlBFalZvCCa4uyOAXP9LpjNPH-BBbc20i_rCLwU1AuyM4tFlxKtneVM3kaJwDl_lSILxPE90Nv-4jI5Z7RUrfbhdix2IOa6F-rPTXdYUcWa5Fzga3gs_Scr6Wg2kwN2BLMgUK-tSo1J1iP4vofWBNRvYrgph3CIJgnioFT24-09114CoQm_b70s24GI182BWCYiU95qU_95ETc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
+<p class="text-white text-sm font-bold tracking-tight">Sports Emblem</p>
+<p class="text-primary text-[10px] font-medium uppercase tracking-widest">Athletic</p>
+</div>
+</div>
+<!-- Portfolio Item 4 -->
+<div class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 reveal-on-scroll portfolio-card">
+<img alt="Close up of a cap with intricate 3D puff embroidery" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" data-alt="High quality cap embroidery sample" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0eE7dfJY8ML2g6RMPCHTIQiWL-03Opcltzm4Z11vmtr4Iqt78SCrWJvMSVcy-l6OeaLYdRDUJ7rKNxHUQIKDKSI4EUuTBSfIXOXBexzI2S4guSwWYZg3bYITMYGT-w4NcoZXq05ua9pqWmxqfRvHNYTt7ShjSd01KqgQngxNaHgjt5XTLFNrPyjyMLo_eG4_viIPSQVJ9rbxfpL5cpZACS-4SRWbniskDGFZSHxb8WALreiTO_Gf7X960_QROrorMcQ4EZLWN1pkg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
+<p class="text-white text-sm font-bold tracking-tight">Cap Embroidery</p>
+<p class="text-primary text-[10px] font-medium uppercase tracking-widest">3D Puff</p>
+</div>
+</div>
+<!-- Portfolio Item 5 -->
+<div class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 reveal-on-scroll portfolio-card">
+<img alt="Sharp vector art illustration of a lion head" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" data-alt="Clean vector art illustration design" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4TcM9QdbvjOlIgoBjbRDh9lDiTSKCEZn1jg0yRg1i4OOUHiLoOs4a90h77IQ2JgxtkxHQMXEGISAd9k04-2gb-dn35PXmqkl-ybYW6jiytCTQ6hIgOGRw1Psvkoj4BoDvp_3An2e-2Gi6zCB_fJ3g9__ZS3omL3E2Fvf4_5RPmNUs14_kfvzDYaLaFk05hDe7blVUQ2ZxZTMgOjik4CLvMZahy2fmAdoJ7ob1TpKbhgUbXujpRinZqhImgYSkhVyDr5mmn5xW5I23"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
+<p class="text-white text-sm font-bold tracking-tight">Vector Logo Trace</p>
+<p class="text-primary text-[10px] font-medium uppercase tracking-widest">Vector Art</p>
+</div>
+</div>
+<!-- Portfolio Item 6 -->
+<div class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 reveal-on-scroll portfolio-card">
+<img alt="Large intricate embroidery design on the back of a denim jacket" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" data-alt="Large scale jacket back embroidery" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCllFX1fPJ3If9X0_6dTd0SCHK5vIRgoRfA1M4YLGV6iPS5HYE1bzraUetJVuoFITXNK4UWidfiXLcup7yR7LL0aNeAcr7xx4zQfd_NM5Dm0nt74Z6mBupebCOExOkNjek2NpAoDXgyZeTK_VoojdIbzPJE8XSC61s8mSyGTi0FqoSRylkwTIuNSalqkCQWAlK1T9PKEzw9RwntpxMk65U9GbblEa3t7jlBmPldCIk9pWKITkQuX_tNH0nNiruRaUz1rjoKMnCF8T77"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
+<p class="text-white text-sm font-bold tracking-tight">Jacket Back Art</p>
+<p class="text-primary text-[10px] font-medium uppercase tracking-widest">Custom Design</p>
+</div>
+</div>
+</div>
+<!-- Action Button -->
+<div class="px-4 py-8">
+<button class="w-full bg-primary text-background-dark py-4 rounded-xl font-bold text-base shadow-lg shadow-primary/20 hover:brightness-110 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">request_quote</span>
+                Request a Quote
+            </button>
+<p class="text-center text-slate-500 dark:text-slate-400 text-xs mt-4 px-8">
+                Get a high-quality preview of your design within 24 hours.
+            </p>
+</div>
+</main>
+<!-- Bottom Navigation -->
+<footer class="bg-background-dark/50 border-t border-primary/10 pt-12 pb-36 px-4">
+<div class="max-w-xl mx-auto flex flex-col items-center gap-8">
+<!-- Footer Brand -->
+<div class="flex flex-col items-center gap-2">
+<div class="flex size-12 items-center justify-center rounded-full bg-primary/20 mb-2">
+<span class="material-symbols-outlined text-primary text-2xl">diamond</span>
+</div>
+<h2 class="text-xl font-bold tracking-tight text-slate-100">Dezan Digitizing</h2>
+<p class="text-slate-400 text-sm text-center px-4">Premium embroidery digitizing and vector conversion services.</p>
+</div>
+<!-- Quick Links -->
+<div class="grid grid-cols-2 gap-x-12 gap-y-4 text-center w-full">
+<a class="text-slate-400 hover:text-primary text-sm transition-colors" href="#">Home</a>
+<a class="text-slate-400 hover:text-primary text-sm transition-colors" href="#">Services</a>
+<a class="text-slate-400 hover:text-primary text-sm transition-colors" href="#">Portfolio</a>
+<a class="text-slate-400 hover:text-primary text-sm transition-colors" href="#">Pricing</a>
+<a class="text-slate-400 hover:text-primary text-sm transition-colors" href="#">About</a>
+<a class="text-slate-400 hover:text-primary text-sm transition-colors" href="#">Contact</a>
+</div>
+<!-- Social Media -->
+<div class="w-full max-w-sm flex flex-col items-center gap-4 mt-8 px-4">
+<div class="text-center">
+<h3 class="text-lg font-bold text-slate-100 mb-1">Stay Updated</h3>
+<p class="text-slate-400 text-xs">Get the latest updates on our services and special offers.</p>
+</div>
+<form class="w-full flex flex-col gap-2 sm:flex-row">
+<input class="flex-1 bg-primary/5 border border-primary/20 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-primary transition-colors w-full" placeholder="Enter your email" required="" type="email"/>
+<button class="bg-primary text-background-dark px-6 py-2.5 rounded-lg font-bold text-sm hover:brightness-110 transition-all w-full py-3" type="submit">
+            Subscribe
+        </button>
+</form>
+</div><div class="flex gap-6 mt-4">
+<a class="h-10 w-10 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-background-dark transition-all" href="#">
+<span class="material-symbols-outlined text-xl">public</span>
+</a>
+<a class="h-10 w-10 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-background-dark transition-all" href="#">
+<span class="material-symbols-outlined text-xl">share</span>
+</a>
+<a class="h-10 w-10 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-background-dark transition-all" href="#">
+<span class="material-symbols-outlined text-xl">mail</span>
+</a>
+</div>
+<!-- Copyright -->
+<div class="pt-8 border-t border-primary/10 w-full text-center">
+<p class="text-slate-500 text-[10px] uppercase tracking-widest font-medium">
+                © 2024 Dezan Digitizing. All rights reserved.
+            </p>
+</div>
+</div>
+</footer><nav class="fixed bottom-0 left-0 right-0 bg-background-light dark:bg-background-dark border-t border-primary/10 px-4 pb-6 pt-2 z-50 pb-8">
+<div class="max-w-xl mx-auto flex items-center justify-between">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-semibold uppercase tracking-wider">Home</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined active-tab">grid_view</span>
+<span class="text-[10px] font-semibold uppercase tracking-wider">Portfolio</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">shopping_bag</span>
+<span class="text-[10px] font-semibold uppercase tracking-wider">Orders</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-semibold uppercase tracking-wider">Profile</span>
+</a>
+</div>
+</nav>
+<script>
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeToggleIcon = document.getElementById('theme-toggle-icon');
+    const htmlElement = document.documentElement;
+
+    // Set initial icon based on current state
+    if (htmlElement.classList.contains('dark')) {
+        themeToggleIcon.textContent = 'light_mode';
+    } else {
+        themeToggleIcon.textContent = 'dark_mode';
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+        if (htmlElement.classList.contains('dark')) {
+            htmlElement.classList.remove('dark');
+            themeToggleIcon.textContent = 'dark_mode';
+            localStorage.setItem('theme', 'light');
+        } else {
+            htmlElement.classList.add('dark');
+            themeToggleIcon.textContent = 'light_mode';
+            localStorage.setItem('theme', 'dark');
+        }
+    });
+</script><script>
+    const revealCallback = (entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    };
+
+    const revealObserver = new IntersectionObserver(revealCallback, {
+        threshold: 0.1
+    });
+
+    document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+        revealObserver.observe(el);
+    });
+</script></body></html>

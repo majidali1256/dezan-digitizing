@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dezan Digitizing Portfolio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d4af35",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#201d12",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @keyframes reveal {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .reveal-item {
+            opacity: 0;
+        }
+        .reveal-item.visible {
+            animation: reveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-background-light/80 backdrop-blur-md border-b border-primary/10">
+<div class="flex items-center p-4 justify-between max-w-md mx-auto">
+<div class="text-slate-900 dark:text-slate-100 flex size-10 shrink-0 items-center justify-center">
+<span class="material-symbols-outlined text-2xl">menu</span>
+</div>
+<h1 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center">Dezan Digitizing</h1>
+<div class="flex w-10 items-center justify-end">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-transparent text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined text-2xl">account_circle</span>
+</button>
+</div>
+</div>
+<!-- Category Tabs -->
+<div class="max-w-md mx-auto">
+<div class="flex border-b border-primary/10 px-4 gap-8">
+<a class="flex flex-col items-center justify-center border-b-2 border-primary text-primary pb-3 pt-2" href="#">
+<p class="text-sm font-bold">Embroidery</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 pb-3 pt-2" href="#">
+<p class="text-sm font-bold">Vector Art</p>
+</a>
+</div>
+</div>
+</header>
+<main class="max-w-md mx-auto pb-24">
+<!-- Quick Filters -->
+<div class="flex gap-3 p-4 overflow-x-auto no-scrollbar">
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary text-white px-4">
+<p class="text-sm font-medium">All Work</p>
+<span class="material-symbols-outlined text-lg">keyboard_arrow_down</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary/10 text-slate-700 px-4">
+<p class="text-sm font-medium">Recent</p>
+<span class="material-symbols-outlined text-lg">keyboard_arrow_down</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary/10 text-slate-700 px-4">
+<p class="text-sm font-medium">Top Rated</p>
+<span class="material-symbols-outlined text-lg">keyboard_arrow_down</span>
+</button>
+</div>
+<div class="px-4 pt-2 pb-4">
+<h2 class="text-2xl font-bold tracking-tight text-slate-900">Portfolio Gallery</h2>
+<p class="text-sm text-slate-500 mt-1">High-quality digitizing for every garment type.</p>
+</div>
+<!-- Portfolio Grid -->
+<div class="grid grid-cols-2 gap-4 px-4">
+<!-- Item 1 -->
+<div class="flex flex-col gap-2 group reveal-item active:scale-[0.98] transition-all duration-300">
+<div class="aspect-square w-full overflow-hidden rounded-xl bg-slate-200">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Detailed embroidery of a colorful pet portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4B2oEMrCG8oc21NOZofHkrjE3fu_LjAfyW8GXrPo0Hn-DehrvrSM02rpyltv-ecS4a_ka618zuizVCONxVUBsfyRCXKZnlbmotuddTn7cDGcDK77-iu5WRjn5dC8tekYVUV9zLphAg9OZTnHyr2Y0racM-v69zSeSavIj4ZnhD17fiZoVTFOMnfCDED51CKU7KSLM4_7C1xAsl4yfN-gpoQnsvhQKaJBuotM5cdxFu1fxL4tKtTHJeAOGOi8aM8DpQ5d9Xo_6Yp7G"/>
+</div>
+<div>
+<p class="text-xs font-bold text-primary uppercase tracking-wider">Pet Portrait</p>
+<p class="text-sm font-semibold text-slate-900">Custom Golden Retriever</p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex flex-col gap-2 group reveal-item active:scale-[0.98] transition-all duration-300">
+<div class="aspect-square w-full overflow-hidden rounded-xl bg-slate-200">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Clean vector logo on left chest of a polo shirt" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5mJKgxp7yr0fvBs5pGKCLMJeeoScS3-4cLdMjDymLFMC3WxxrKe7EFb8SwJZJDvrICXhWotGM7oC7_9f2VGR0ymvDoOslb_XJmf47ACqqZkeqXdk56nC0sGWg9WV_-PBuLCIET-zf_pDe8B8B8GePdb-l6eo_l2yYosW4w9qL49ey8KACGCYOp_6-7EjqhwBcHrVBGEcSdOAAGzXYIyDtol6m_FkRXEQvuHuhwWi-hen-8dpdRqcy-DTJi9CDuOw9mRQ_GhjrFWDt"/>
+</div>
+<div>
+<p class="text-xs font-bold text-primary uppercase tracking-wider">Left Chest</p>
+<p class="text-sm font-semibold text-slate-900">Corporate Tech Logo</p>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex flex-col gap-2 group reveal-item active:scale-[0.98] transition-all duration-300">
+<div class="aspect-square w-full overflow-hidden rounded-xl bg-slate-200">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Large detailed embroidery art on the back of a denim jacket" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtPc-elNEouerM1dgYE_gUf-xr6nGG27FeIYORpgt6VS7jlJrxhbZYyFUDHooCkzyd_JFP7p-mHO-Lr3m1WJc_VwnOcn2fzX_skNpPmPw0Khm-0FhD9xj6JCbFuzGR_zsI-IfHEotVWmtWBj1ZIT2J3PAI1Z2CgJQmE_79TpJ9duL1nU2Tl951xdUF8xFPCTIhU_GTge8v_OGL5W8zToKR2h7Q_Ub0dMdcYVWMIGjv8VooPwIEJw9c1w5FehAVUX7i4JpQEB-A5LNt"/>
+</div>
+<div>
+<p class="text-xs font-bold text-primary uppercase tracking-wider">Jacket Back</p>
+<p class="text-sm font-semibold text-slate-900">Vintage Eagle Emblem</p>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="flex flex-col gap-2 group reveal-item active:scale-[0.98] transition-all duration-300">
+<div class="aspect-square w-full overflow-hidden rounded-xl bg-slate-200">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Professional embroidery design of a company crest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIslykMP3HSmbhIHjvAwmcVUXJEJkPJNWkikameTJzSQwl3O83trUyyJeUIlb7Cu1DRIjfUmUXc-N8BuQLSSszN6K4nkPm5-2qf3l9JofAWCwkuvN_SbwZNgo2zMsXbW78j56Z1lEema9aLh001PpVI5db9gHz7jGmSuo_AyGGwwqlHiOPrUh9y3CCrIpwecim9R8lxl8eBEGIukMceiYaYY96q2iehd6S3H3HhYObowEtF7AaQkjpqbb0HM7u82dDPee1GpLB52CF"/>
+</div>
+<div>
+<p class="text-xs font-bold text-primary uppercase tracking-wider">Embroidery</p>
+<p class="text-sm font-semibold text-slate-900">University Crest Digitizing</p>
+</div>
+</div>
+<!-- Item 5 -->
+<div class="flex flex-col gap-2 group reveal-item active:scale-[0.98] transition-all duration-300">
+<div class="aspect-square w-full overflow-hidden rounded-xl bg-slate-200">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Sharp vector art illustration of a custom badge" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALXD3CZoBslhid20M9Mj9b26IXe6SRMoNGeSfoY2dNkOxcEwgx1FwiblsfuSoVVbQ3pgoMaRHXLsB84ueIz2YjcOGAEsoGHi3vYqVE-Vpq1tWYj2ZQd7eEtGs_MPO5AyizoKcHFD_GkAFCKLz_-QePz0DjWMurT2c8O5Kl2Uyj8HK3F98RzsBfZcCo93cqvjVXiD4BDBusgI6nHKl0sEBCCAnrt0Okwp6cyzI9yLwuJ0158Ojgfduoks0684VQy6rvjFRvXivFb4Qh"/>
+</div>
+<div>
+<p class="text-xs font-bold text-primary uppercase tracking-wider">Vector Art</p>
+<p class="text-sm font-semibold text-slate-900">Custom Motor Club Badge</p>
+</div>
+</div>
+<!-- Item 6 -->
+<div class="flex flex-col gap-2 group reveal-item active:scale-[0.98] transition-all duration-300">
+<div class="aspect-square w-full overflow-hidden rounded-xl bg-slate-200">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Multiple embroidered patches on a table" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARqGwU5wAqXgHpw4CpuFQnas6J8IorcWO5NaUq1dPz1i9Bud4eeVMgzOhA6A7QsCTAxAhw9ngXkV7iUWIAo_OzrVXw7OmXnILK-Bo7IicScVVDiIV3pPBXJVHEDZnPLJ2OTtBmOtAb8UuSqWv3XrRMZ4b--pKk21GMrH0siChD4O0LnGimm5TzSYRoY2lIgUnxyIeCezCZc4Li0ijps9MfJQGvKuM7h7BxAi5WOAyfASBMgZNXDGnuaLgZajynw7OaCBSMr0kIFRNH"/>
+</div>
+<div>
+<p class="text-xs font-bold text-primary uppercase tracking-wider">Patch Work</p>
+<p class="text-sm font-semibold text-slate-900">Bulk Series Patch Set</p>
+</div>
+</div>
+</div>
+<!-- Pagination or Load More -->
+<div class="p-8 flex justify-center">
+<button class="px-6 py-2 rounded-full border border-primary text-primary font-bold text-sm hover:bg-primary/5 transition-colors">
+                Load More Projects
+            </button>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50">
+<div class="flex max-w-md mx-auto px-4 pb-6 pt-2">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">home</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">collections</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Gallery</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">payments</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Pricing</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">person</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Account</p>
+</a>
+</div>
+</nav>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, index * 100); // Staggered effect
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal-item').forEach(item => {
+            observer.observe(item);
+        });
+    });
+</script>
+</body></html>

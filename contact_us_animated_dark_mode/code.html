@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Contact Us - Dezan Digitizing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d4af35",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#201d12",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    html, body {
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    * {
+        transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeToggleIcon = document.getElementById('theme-toggle-icon');
+        const htmlElement = document.documentElement;
+
+        function updateIcon() {
+            if (htmlElement.classList.contains('dark')) {
+                themeToggleIcon.textContent = 'light_mode';
+            } else {
+                themeToggleIcon.textContent = 'dark_mode';
+            }
+        }
+
+        // Initialize icon
+        updateIcon();
+
+        themeToggleBtn.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark');
+            updateIcon();
+            
+            // Optional: Persist user preference
+            const isDark = htmlElement.classList.contains('dark');
+            localStorage.setItem('color-theme', isDark ? 'dark' : 'light');
+        });
+    });
+</script><link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
+<style>
+    .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+    .reveal.active { opacity: 1; transform: translateY(0); }
+    .reveal-right { opacity: 0; transform: translateX(30px); transition: all 0.8s ease-out; }
+    .reveal-right.active { opacity: 1; transform: translateX(0); }
+</style></head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<!-- Header / Navigation -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-primary/20">
+<div class="flex items-center p-4 justify-between max-w-md mx-auto">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-2xl">arrow_back</span>
+<h1 class="text-lg font-bold tracking-tight">Contact Us</h1>
+</div>
+<button class="size-10 rounded-full bg-primary/20 flex items-center justify-center hover:bg-primary/30 transition-colors focus:outline-none" id="theme-toggle">
+<span class="material-symbols-outlined text-primary text-xl" id="theme-toggle-icon">light_mode</span>
+</button>
+</div>
+</header>
+<main class="max-w-md mx-auto pb-24">
+<!-- Hero Section -->
+<section class="px-4 pt-8 pb-6">
+<h2 class="text-3xl font-bold text-slate-900 dark:text-white leading-tight">Get in Touch</h2>
+<p class="text-slate-600 dark:text-slate-400 mt-2 text-base">
+                Have a project in mind? Let's talk about your custom digitizing and embroidery needs.
+            </p>
+</section>
+<!-- Form Section -->
+<section class="px-4 py-4 reveal">
+<form class="space-y-5">
+<div class="space-y-2">
+<label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Full Name</label>
+<input class="w-full h-14 px-4 rounded-xl border-slate-200 dark:border-primary/20 bg-white dark:bg-primary/5 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all dark:text-white" placeholder="e.g. John Doe" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Email Address</label>
+<input class="w-full h-14 px-4 rounded-xl border-slate-200 dark:border-primary/20 bg-white dark:bg-primary/5 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all dark:text-white" placeholder="john@example.com" type="email"/>
+</div>
+<div class="space-y-2">
+<label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Subject</label>
+<select class="w-full h-14 px-4 rounded-xl border-slate-200 dark:border-primary/20 bg-white dark:bg-primary/5 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all dark:text-white">
+<option>Custom Digitizing Quote</option>
+<option>Vector Conversion</option>
+<option>Order Status</option>
+<option>General Inquiry</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Message</label>
+<textarea class="w-full p-4 rounded-xl border-slate-200 dark:border-primary/20 bg-white dark:bg-primary/5 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all dark:text-white resize-none" placeholder="Tell us about your project requirements..." rows="4"></textarea>
+</div>
+<button class="w-full h-14 bg-primary hover:bg-primary/90 text-background-dark font-bold rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200" type="submit">
+<span>Send Message</span>
+<span class="material-symbols-outlined">send</span>
+</button>
+</form>
+</section>
+<!-- Contact Cards -->
+<section class="px-4 py-8 space-y-4 reveal">
+<div class="p-5 rounded-xl bg-slate-100 dark:bg-primary/10 border border-slate-200 dark:border-primary/20 flex items-start gap-4">
+<div class="p-3 rounded-lg bg-primary/20">
+<span class="material-symbols-outlined text-primary">mail</span>
+</div>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-white">Email Us</h4>
+<p class="text-slate-600 dark:text-slate-400">info@dezandigitizing.com</p>
+</div>
+</div>
+<div class="p-5 rounded-xl bg-slate-100 dark:bg-primary/10 border border-slate-200 dark:border-primary/20 flex items-start gap-4">
+<div class="p-3 rounded-lg bg-primary/20">
+<span class="material-symbols-outlined text-primary">call</span>
+</div>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-white">Call Us</h4>
+<p class="text-slate-600 dark:text-slate-400">+1 (555) 000-1234</p>
+</div>
+</div>
+<div class="p-5 rounded-xl bg-slate-100 dark:bg-primary/10 border border-slate-200 dark:border-primary/20 flex items-start gap-4">
+<div class="p-3 rounded-lg bg-primary/20">
+<span class="material-symbols-outlined text-primary">location_on</span>
+</div>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-white">Studio Address</h4>
+<p class="text-slate-600 dark:text-slate-400">123 Creative Plaza, Design District<br/>New York, NY 10001</p>
+</div>
+</div>
+</section>
+<!-- Map Section -->
+<section class="px-4 py-4 reveal-right">
+<div class="rounded-2xl overflow-hidden h-64 relative border border-slate-200 dark:border-primary/20 shadow-inner">
+<img class="w-full h-full object-cover grayscale opacity-80 dark:opacity-60" data-alt="Map showing office location in New York City" data-location="New York" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCu3BxJq7jMhknaxskHchCyeB78HTmFecygi4yp4mj0md8i6j4ri81iDAIjVLGFfHxP6kl_tcWAqjlBj1eUtR8wTf7W8o8DxnMPr8EQeTVLlukzkZntsnUobd6KQ_ESmT6CeT3tG2YaaUvUzEmFm88eNitE9WqTc9jIcutXJ4qLTgbMNaD7c0lgKLPZuEIkNklXHuN2-ToD7qC-UG_f1GiSUHqx_3WEnwrbTUkM51K2tUGnJ4lCMywh1KdGXyqqbUK8h16-duLPevfE"/>
+<div class="absolute inset-0 bg-primary/10 mix-blend-overlay"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+<span class="material-symbols-outlined text-primary text-5xl drop-shadow-lg">location_on</span>
+</div>
+</div>
+</section>
+<!-- Newsletter / Footer Update -->
+<footer class="mt-12 px-4 py-8 bg-slate-100 dark:bg-primary/5 rounded-t-3xl border-t border-slate-200 dark:border-primary/20">
+<div class="text-center mb-8">
+<h3 class="text-xl font-bold text-slate-900 dark:text-white">Join Our Newsletter</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400 mt-2">Get the latest trends in digitizing and exclusive offers.</p>
+<div class="mt-4 flex gap-2">
+<input class="flex-1 h-12 px-4 rounded-lg border-slate-200 dark:border-primary/20 bg-white dark:bg-background-dark outline-none focus:ring-1 focus:ring-primary text-sm" placeholder="Your email" type="email"/>
+<button class="bg-primary text-background-dark px-6 rounded-lg font-bold text-sm">Join</button>
+</div>
+</div>
+<div class="flex justify-center gap-6 text-slate-400 mb-8">
+<span class="material-symbols-outlined hover:text-primary transition-colors cursor-pointer hover:scale-125 transition-transform duration-200">social_leaderboard</span>
+<span class="material-symbols-outlined hover:text-primary transition-colors cursor-pointer hover:scale-125 transition-transform duration-200">photo_camera</span>
+<span class="material-symbols-outlined hover:text-primary transition-colors cursor-pointer hover:scale-125 transition-transform duration-200">alternate_email</span>
+</div>
+<p class="text-center text-xs text-slate-500 dark:text-slate-500 pb-12">
+                © 2024 Dezan Digitizing. All rights reserved.
+            </p>
+</footer>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-[#302c1c] border-t border-slate-200 dark:border-primary/20 px-4 pb-4 pt-2 z-50">
+<div class="flex justify-between items-end max-w-md mx-auto">
+<a class="flex flex-1 flex-col items-center gap-1 text-slate-400 dark:text-primary/60" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Home</span>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1 text-slate-400 dark:text-primary/60" href="#">
+<span class="material-symbols-outlined">design_services</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Services</span>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1 text-slate-400 dark:text-primary/60" href="#">
+<span class="material-symbols-outlined">folder_special</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Portfolio</span>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">mail</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Contact</span>
+</a>
+</div>
+</nav>
+<script>
+    const observerOptions = {
+        threshold: 0.1
+    };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal, .reveal-right').forEach(el => observer.observe(el));
+</script></body></html>

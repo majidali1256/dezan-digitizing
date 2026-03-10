@@ -1,0 +1,225 @@
+/* ============================================
+   DEZAN DIGITIZING - Shared Styles
+   ============================================ */
+
+/* Base Settings */
+body {
+    font-family: 'Inter', sans-serif;
+    min-height: max(884px, 100dvh);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.filled-icon {
+    font-variation-settings: 'FILL' 1;
+}
+
+.fill-1 {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.active-tab {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Dark Mode Transitions */
+html {
+    scroll-behavior: smooth;
+}
+
+html.dark {
+    color-scheme: dark;
+}
+
+header,
+section,
+footer,
+div,
+p,
+span,
+h1,
+h2,
+h3,
+h4,
+a,
+button,
+input,
+textarea,
+select,
+nav,
+main,
+li,
+ul,
+form,
+label,
+img {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* ============================================
+   Reveal on Scroll Animations
+   ============================================ */
+.reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+}
+
+.reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.reveal-right {
+    opacity: 0;
+    transform: translateX(30px);
+    transition: all 0.8s ease-out;
+}
+
+.reveal-right.revealed {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* ============================================
+   Hover Effects
+   ============================================ */
+.hover-scale {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out !important;
+}
+
+.hover-scale:hover {
+    transform: scale(1.02);
+}
+
+.hover-scale:active {
+    transform: scale(0.98);
+}
+
+.hover-lift {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+.hover-lift:active {
+    transform: scale(0.96);
+}
+
+.btn-hover-effect {
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-hover-effect:hover {
+    transform: translateY(-2px);
+}
+
+.btn-hover-effect:active {
+    transform: scale(0.95);
+}
+
+/* Pricing Card Hover */
+.pricing-card:hover {
+    transform: translateY(-4px);
+    transition: transform 0.3s ease;
+}
+
+/* Portfolio Card Hover */
+.portfolio-card {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+
+.portfolio-card:active,
+.portfolio-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 25px -5px rgba(212, 175, 53, 0.2);
+    z-index: 10;
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* ============================================
+   Keyframe Animations
+   ============================================ */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   Order System - Upload Zone
+   ============================================ */
+.upload-zone {
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.upload-zone.drag-active {
+    border-color: #d4af35;
+    background-color: rgba(212, 175, 53, 0.08);
+    border-style: solid;
+}
+
+.upload-zone:hover {
+    border-color: #d4af35;
+}
+
+/* ============================================
+   Order Success - Checkmark Animation
+   ============================================ */
+@keyframes successPop {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.animate-success-pop {
+    animation: successPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+}
+
+/* ============================================
+   PayPal Button Container
+   ============================================ */
+#paypal-button-container {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* ============================================
+   Form Validation Error Pulse
+   ============================================ */
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    15%, 45%, 75% { transform: translateX(-4px); }
+    30%, 60%, 90% { transform: translateX(4px); }
+}
+
+#form-error:not(.hidden) {
+    animation: errorShake 0.4s ease-in-out;
+}

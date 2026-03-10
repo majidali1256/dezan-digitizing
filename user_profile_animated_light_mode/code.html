@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dezan Digitizing - Premium Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d4af35",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#201d12",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .reveal-item {
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .hover-scale {
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .hover-scale:hover {
+      transform: scale(1.02);
+    }
+
+    * {
+      transition-property: background-color, border-color, color, fill, stroke;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-duration: 300ms;
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="max-w-screen-md mx-auto bg-white dark:bg-slate-900 min-h-screen shadow-xl flex flex-col">
+<header class="flex items-center bg-white dark:bg-slate-900 p-4 sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800">
+<div class="text-slate-900 dark:text-slate-100 flex size-10 items-center justify-center cursor-pointer hover-scale">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight flex-1 ml-2">My Account</h2>
+<div class="flex size-10 items-center justify-end hover-scale">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-transparent text-slate-900 dark:text-slate-100 hover-scale">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</header>
+<main class="flex-grow">
+<!-- User Profile Section -->
+<div class="p-6 flex flex-col items-center">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-28 w-28 border-4 border-primary/20" data-alt="Professional male user profile portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBcKu21NTg64YLl4YecPqUpx0GzkNXEsX5Bju7MR_bqCaTlwYquQh37lkpk3ckXIUqBDzn7aARLQDPUKY3fBUhuMj2pTg2441A6-q34gfmO00wRNHwyg536aPBua9xhs0e6vrrrzSZMrR7ff32UhPnvf8rP1brUPR0QQ6CiWkF_Jvkw2ahQA07myM92aKUYmpSG1Kp3Pext8Gh4Kl3yEZqVqorCQ7-096CKpEEJa_mE1aMlzd_dj9dluVxvucRtoCFl8m5pqw-B-CSx");'>
+</div>
+<div class="absolute bottom-1 right-1 bg-primary text-white p-1.5 rounded-full border-2 border-white">
+<span class="material-symbols-outlined text-xs block">edit</span>
+</div>
+</div>
+<div class="mt-4 text-center">
+<p class="text-slate-900 dark:text-slate-100 text-2xl font-bold tracking-tight">Dezan User</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">premium.user@dezan-digitizing.com</p>
+</div>
+</div>
+<!-- Stats Overview -->
+<div class="px-6 flex gap-3 overflow-x-auto no-scrollbar pb-2 reveal-item">
+<div class="flex min-w-[120px] flex-1 flex-col gap-1 rounded-xl p-4 bg-primary/10 border border-primary/20">
+<p class="text-primary text-xs font-bold uppercase tracking-wider">Active</p>
+<p class="text-slate-900 dark:text-slate-100 text-2xl font-extrabold">03</p>
+</div>
+<div class="flex min-w-[120px] flex-1 flex-col gap-1 rounded-xl p-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+<p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">Completed</p>
+<p class="text-slate-900 dark:text-slate-100 text-2xl font-extrabold">142</p>
+</div>
+<div class="flex min-w-[120px] flex-1 flex-col gap-1 rounded-xl p-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+<p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">Savings</p>
+<p class="text-slate-900 dark:text-slate-100 text-2xl font-extrabold">$240</p>
+</div>
+</div>
+<!-- Active Orders -->
+<div class="mt-8 px-6 reveal-item">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold">Active Orders</h3>
+<span class="text-primary text-sm font-semibold cursor-pointer">View All</span>
+</div>
+<div class="space-y-3">
+<div class="flex items-center p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm hover-scale cursor-pointer">
+<div class="size-12 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">auto_fix_high</span>
+</div>
+<div class="ml-4 flex-1">
+<p class="text-slate-900 dark:text-slate-100 font-bold text-sm">Complex Embroidery Pack</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Order #DZ-9942 • May 14</p>
+</div>
+<div class="bg-primary/20 text-primary text-[10px] font-bold uppercase px-2 py-1 rounded">In Progress</div>
+</div>
+<div class="flex items-center p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm hover-scale cursor-pointer">
+<div class="size-12 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">slide_library</span>
+</div>
+<div class="ml-4 flex-1">
+<p class="text-slate-900 dark:text-slate-100 font-bold text-sm">Vector Logo Conversion</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Order #DZ-9938 • May 13</p>
+</div>
+<div class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase px-2 py-1 rounded">Reviewing</div>
+</div>
+</div>
+</div>
+<!-- Finished Designs -->
+<div class="mt-8 px-6 reveal-item">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold">Finished Designs</h3>
+<span class="text-primary text-sm font-semibold cursor-pointer">Explore Gallery</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="group relative overflow-hidden rounded-xl bg-slate-100 aspect-square">
+<div class="w-full h-full bg-cover bg-center" data-alt="Embroidery design preview on white fabric" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDQXIau21p_TAQYByLjl0RRJ5vO6QFX0dSgYvqetSB42OJrnBFRlDeO8oBdDxWooYrbRINy7U_2oKDYOuDpc88KDSixtAesOgISK8jY-y8eNe4gZF5cN5dtdTEYoVv67dW9rAHYBNelGapLwDmBhjPMzYBBIlRhbsoAt3Ba95wf1tAjf4B26jUxyjYJD9zK0mqNDKwS2_EZnF0akgGZO_J3zSfpdnJK3w8I8i-KvJelRmDLU1QRnGgSCvz3ylw5Bjjw9tfOPSGh_m4Q');"></div>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+<button class="bg-white p-2 rounded-full text-slate-900"><span class="material-symbols-outlined">download</span></button>
+<button class="bg-white p-2 rounded-full text-slate-900"><span class="material-symbols-outlined">visibility</span></button>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl bg-slate-100 aspect-square">
+<div class="w-full h-full bg-cover bg-center" data-alt="Vector logo artwork on dark background" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDz2dwjGKC-aG818Kii2C9NwURRvNu_kJLIS0N0Oqr6WPfDS9YerVT5fkqBYtqzeXURv90Z-PgVGy7RJ9D1XefPMLFzTuZVnNTH5tQIeVeQsqAFDiD3mYkaW573-0CnZaDudSovTsP6B23donZcS2xULU2GG_Dwwojizuct7xVtYZVVgtG_ls6njbV7QVEGCBTPIJKku2hQmZuu6MEC2IakGHuOyMVTH7D6f7tTlxAaXPmiWSuTFVqC0fRD5RM7klPaQQVoTErgyDWr');"></div>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+<button class="bg-white p-2 rounded-full text-slate-900"><span class="material-symbols-outlined">download</span></button>
+<button class="bg-white p-2 rounded-full text-slate-900"><span class="material-symbols-outlined">visibility</span></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Links -->
+<div class="mt-8 px-6 pb-24">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold mb-4">Quick Links</h3>
+<div class="space-y-1">
+<a class="flex items-center p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors hover-scale" href="#">
+<span class="material-symbols-outlined text-slate-400 mr-4">person</span>
+<span class="flex-1 font-medium">My Details</span>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</a>
+<a class="flex items-center p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors hover-scale" href="#">
+<span class="material-symbols-outlined text-slate-400 mr-4">payments</span>
+<span class="flex-1 font-medium">Payment Methods</span>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</a>
+<a class="flex items-center p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors hover-scale" href="#">
+<span class="material-symbols-outlined text-slate-400 mr-4">history</span>
+<span class="flex-1 font-medium">Order History</span>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</a>
+<a class="flex items-center p-4 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors mt-2 hover-scale" href="#">
+<span class="material-symbols-outlined mr-4">logout</span>
+<span class="flex-1 font-medium">Logout</span>
+</a>
+</div>
+</div>
+</main>
+<!-- Newsletter Section -->
+<footer class="bg-slate-50 dark:bg-slate-950 px-6 py-8 border-t border-slate-100 dark:border-slate-800">
+<div class="mb-6">
+<h4 class="text-slate-900 dark:text-slate-100 font-bold mb-2">Join our Newsletter</h4>
+<p class="text-slate-500 dark:text-slate-400 text-xs mb-4">Get the latest digitizing trends and exclusive offers directly to your inbox.</p>
+<div class="flex gap-2">
+<input class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="Email address" type="email"/>
+<button class="bg-primary text-white font-bold text-xs px-4 py-2 rounded-lg hover-scale active:scale-95 transition-all">SUBSCRIBE</button>
+</div>
+</div>
+<div class="flex flex-wrap gap-4 text-xs text-slate-400 font-medium">
+<a class="hover:text-primary" href="#">Support</a>
+<a class="hover:text-primary" href="#">Privacy Policy</a>
+<a class="hover:text-primary" href="#">Terms of Service</a>
+<a class="hover:text-primary" href="#">Contact Us</a>
+</div>
+<p class="text-[10px] text-slate-400 mt-6">© 2024 Dezan Digitizing. All rights reserved.</p>
+</footer>
+<!-- Bottom Navigation Bar -->
+<div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-screen-md border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pb-3 pt-2">
+<div class="flex gap-2">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-primary" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">home</span>
+</div>
+<p class="text-[10px] font-bold uppercase leading-normal tracking-wider">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-primary" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">history</span>
+</div>
+<p class="text-[10px] font-bold uppercase leading-normal tracking-wider">Orders</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-primary" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">palette</span>
+</div>
+<p class="text-[10px] font-bold uppercase leading-normal tracking-wider">Designs</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">person</span>
+</div>
+<p class="text-[10px] font-bold uppercase leading-normal tracking-wider">Profile</p>
+</a>
+</div>
+</div>
+</div>
+</body></html>

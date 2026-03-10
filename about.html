@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>About Us | Dezan Digitizing</title>
+    <meta name="description"
+        content="Learn about Dezan Digitizing — 15+ years of premium embroidery digitizing and vector art services." />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { "primary": "#d4af35", "background-light": "#f8f7f6", "background-dark": "#201d12" },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+
+    <!-- ===== UNIFIED HEADER ===== -->
+    <header
+        class="sticky top-0 z-50 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-primary/20">
+        <div class="flex items-center justify-between px-4 py-3 max-w-6xl mx-auto">
+            <a href="index.html" class="flex items-center gap-2">
+                <div class="bg-primary p-1.5 rounded-lg">
+                    <span class="material-symbols-outlined text-background-dark text-xl">diamond</span>
+                </div>
+                <span class="text-lg font-black tracking-tight">DEZAN</span>
+            </a>
+            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
+                <a href="index.html" class="hover:text-primary transition-colors" data-nav="index.html">Home</a>
+                <a href="about.html" class="hover:text-primary transition-colors" data-nav="about.html">About</a>
+                <a href="services.html" class="hover:text-primary transition-colors"
+                    data-nav="services.html">Services</a>
+                <a href="portfolio.html" class="hover:text-primary transition-colors"
+                    data-nav="portfolio.html">Portfolio</a>
+                <a href="pricing.html" class="hover:text-primary transition-colors" data-nav="pricing.html">Pricing</a>
+                <a href="contact.html" class="hover:text-primary transition-colors" data-nav="contact.html">Contact</a>
+            </nav>
+            <div class="flex items-center gap-2">
+                <button class="theme-toggle-btn p-2 rounded-lg hover:bg-primary/10 transition-colors"
+                    aria-label="Toggle theme">
+                    <span class="material-symbols-outlined theme-toggle-icon text-xl">light_mode</span>
+                </button>
+                <a href="profile.html" class="p-2 rounded-lg hover:bg-primary/10 transition-colors">
+                    <span class="material-symbols-outlined text-xl">account_circle</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="pb-20">
+
+        <!-- Hero -->
+        <section class="relative py-16 md:py-24 reveal">
+            <div class="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
+                <div class="flex flex-col gap-6">
+                    <span class="text-primary font-bold tracking-widest text-xs uppercase">Est. 2008</span>
+                    <h1 class="text-4xl md:text-5xl font-black leading-tight tracking-tight">
+                        Crafting Excellence: <span class="text-primary">Turning threads</span> into art
+                    </h1>
+                    <p class="text-lg text-slate-600 dark:text-slate-400 max-w-lg leading-relaxed">
+                        Sophisticated digitizing for modern embroidery. We bridge the gap between digital vision and
+                        tactile reality with unmatched precision.
+                    </p>
+                    <div class="flex flex-wrap gap-4 pt-2">
+                        <a href="portfolio.html"
+                            class="bg-primary text-background-dark px-8 py-3 rounded-lg font-bold btn-hover-effect">View
+                            Portfolio</a>
+                        <a href="services.html"
+                            class="border-2 border-primary/30 hover:border-primary px-8 py-3 rounded-lg font-bold transition-all">Our
+                            Services</a>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="aspect-square rounded-2xl overflow-hidden shadow-2xl bg-slate-200">
+                        <img alt="Embroidery Art" class="w-full h-full object-cover"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGn3h2rtzbKNxN5Vlr57LNRGFSRGAfKEkPpZWUxqpu9bNDp0zLl-62Yzhv0vwiR6bJoqw1KNDq_VRYp_xVWpRkjaI71nzI8GDG93nF9Zmc8h-rfi780ieDVCQ7J97n8eZwy7wwZtTX0KR7OU8q-NXAKeNtaeZV3yOtfmgQWv-gXUpUv_4JrSM2U7Dv8IYHy88Rbcwf0Kh9ROf4dE2uql1Mkd815OSq43nLvWNLgkkxXahF-kRpumqCXrFsO6npOb-hqJNtt0XAB82v" />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="py-16 reveal">
+            <div class="max-w-6xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-primary/5 dark:bg-primary/10 p-6 rounded-2xl border border-primary/10 text-center">
+                    <h3 class="text-3xl font-black text-primary mb-1">15+</h3>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Years Excellence</p>
+                </div>
+                <div class="bg-primary/5 dark:bg-primary/10 p-6 rounded-2xl border border-primary/10 text-center">
+                    <h3 class="text-3xl font-black text-primary mb-1">10k+</h3>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Projects Done</p>
+                </div>
+                <div class="bg-primary/5 dark:bg-primary/10 p-6 rounded-2xl border border-primary/10 text-center">
+                    <h3 class="text-3xl font-black text-primary mb-1">24h</h3>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Turnaround</p>
+                </div>
+                <div class="bg-primary/5 dark:bg-primary/10 p-6 rounded-2xl border border-primary/10 text-center">
+                    <h3 class="text-3xl font-black text-primary mb-1">99%</h3>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Happy Clients</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Our Story -->
+        <section class="py-16 reveal">
+            <div class="max-w-4xl mx-auto px-4">
+                <h2 class="text-3xl font-bold mb-6 border-l-4 border-primary pl-3">Our Story</h2>
+                <div class="space-y-4 text-slate-600 dark:text-slate-400 leading-relaxed text-lg">
+                    <p>From a small, dedicated workshop founded over 15 years ago to becoming a global industry leader,
+                        Dezan Digitizing has been defined by one thing: <strong
+                            class="text-slate-900 dark:text-slate-100">uncompromising precision</strong>.</p>
+                    <p>Our journey began with a passion for traditional craftsmanship and a vision to translate it into
+                        the digital era. We recognized that embroidery is not just about stitches — it's about the soul
+                        of a design.</p>
+                    <p>Today, we combine decades of hands-on experience with the latest digitizing technologies to
+                        transform complex designs into flawless stitch files, ensuring every thread placement serves the
+                        art perfectly.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Choose Dezan -->
+        <section class="py-16 reveal">
+            <div class="max-w-6xl mx-auto px-4">
+                <h2 class="text-3xl font-bold mb-10 text-center">Why Choose Dezan?</h2>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div
+                        class="group p-8 rounded-2xl bg-white dark:bg-slate-800 border border-primary/5 hover:border-primary/40 transition-all shadow-sm">
+                        <div
+                            class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
+                            <span class="material-symbols-outlined text-3xl">workspace_premium</span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Superior Quality</h3>
+                        <p class="text-slate-500 leading-relaxed">Zero thread breaks and perfectly balanced stitch
+                            density for every fabric type.</p>
+                    </div>
+                    <div
+                        class="group p-8 rounded-2xl bg-white dark:bg-slate-800 border border-primary/5 hover:border-primary/40 transition-all shadow-sm">
+                        <div
+                            class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
+                            <span class="material-symbols-outlined text-3xl">bolt</span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Fast Turnaround</h3>
+                        <p class="text-slate-500 leading-relaxed">Get your digitizing and vector files back in 12-24
+                            hours without sacrificing quality.</p>
+                    </div>
+                    <div
+                        class="group p-8 rounded-2xl bg-white dark:bg-slate-800 border border-primary/5 hover:border-primary/40 transition-all shadow-sm">
+                        <div
+                            class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
+                            <span class="material-symbols-outlined text-3xl">support_agent</span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Expert Support</h3>
+                        <p class="text-slate-500 leading-relaxed">Direct access to senior digitizers. Free edits and
+                            technical advice included.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Craftsmanship Process -->
+        <section class="py-16 reveal">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="bg-primary/5 dark:bg-primary/10 rounded-2xl p-8 md:p-12">
+                    <h2 class="text-3xl font-bold mb-8 border-l-4 border-primary pl-3">Our Craftsmanship Process</h2>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <ul class="space-y-6">
+                            <li class="flex gap-4">
+                                <span class="material-symbols-outlined text-primary mt-1 shrink-0">check_circle</span>
+                                <div>
+                                    <h4 class="font-bold mb-1">Optimized Stitch Density</h4>
+                                    <p class="text-sm text-slate-500">Customized density settings based on your specific
+                                        fabric choice.</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4">
+                                <span class="material-symbols-outlined text-primary mt-1 shrink-0">check_circle</span>
+                                <div>
+                                    <h4 class="font-bold mb-1">Precision Color Blending</h4>
+                                    <p class="text-sm text-slate-500">Advanced gradients and shading techniques for
+                                        realistic textures.</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4">
+                                <span class="material-symbols-outlined text-primary mt-1 shrink-0">check_circle</span>
+                                <div>
+                                    <h4 class="font-bold mb-1">Vector Art Cleanup</h4>
+                                    <p class="text-sm text-slate-500">We refine every line and curve before the
+                                        digitizing process begins.</p>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="grid grid-cols-2 gap-3">
+                            <img alt="Embroidery machine" class="rounded-xl w-full h-40 object-cover"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlOJArkoEJbSrO7rJ8MuVKWnn0sfFH6dd3KoJKzUotIn50leegJb8yjvwYSIxkIL2HSufRp4NkXA2Aft_9IbRcD9dqCop6F1Hki8Srrzo60f5kDFWJ-jMY_7ssqXjxrsURWa1vss9Z9GZSsSEXPQXSuw_881TsJQEmAnvehVyzoHN1DgpFLcCDSxdxXumeXb5Xh8UIpRalKhVhYw6OhhFcP_5vxNCyocmxemsZmG3IUWDThL2GuAbikggJfLp-qaj-UGTsRFCBs3H9" />
+                            <img alt="Digital stitch patterns" class="rounded-xl w-full h-40 object-cover"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWIY52FDiJuWr3DIeaHawdLB1ed1xxdqCWvF97tdaWz96bYyT5hHH-yhQoiBHvmlpvKUxE0gMc2HE1dXlnWiIrODDVhCPJlCXy8Q-fH4fNbqrG0SO55XLEK9RsO3T7K3S1grgJEuK22E_8-LAkOnMjEAlSXPF8Pj7mFkxwEo396Wz4yHzRcwybN3RdsGNmPxb3zytOLAD-HOSx5TPJ5fkhIytJNMagDB4KgQKudp5yydoNOc1PHC5SsJBhDBy-pXCMJgJLoHxPzJiY" />
+                            <img alt="Mountain embroidery art" class="rounded-xl w-full h-40 object-cover"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbvEqyjvp2wpHkBgfWGMUrk6yiS4Lh_ozuly5pFhy6QS1uG3Wdh_gQ3sOyyHLov8fO6dfrkzmJvFi0r-tZe8yyjNvp_8xZDOyrUwSadoeJdNd3YqNmV9W2ja6fd_8uWh-eXRLtKHdEivr658o2pvjBbXwXtSXitIruOah_2g5sW-Rkqc8p6DFwK-Vmr-dbWl4wz3DzukcIVkGTfTfuNSI_F0Ex7JfZ7HUsOELeLSLe1A3z7Gxv9T_U2jhyggHPaREnXlYoYFJ49gAY" />
+                            <img alt="Colored threads" class="rounded-xl w-full h-40 object-cover"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQa43O3efhuCho4OzZhwHucZfxfJ79yHb2CmHqASY2PE0KeW1y1b2PmAg7BN9dGAlf5mxTmrdej55JpwfCIgM81ajetumsBVNTmrgHcBXe1EtCiZBfU6VZ6FR7wfGLz3NCAgics-SQLs20A6hr5mAgKeJZpS6aa9Fx01ikUFmFeDak6ofuJD9duahRl25ZbMoriM2xA4VfAn_IY_Y7wv12_HtCVEwqjoT6qPHNNUncLDZ95aFESpic_cJeBNTj6CCp7QZ-j2O3xqTb" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="py-16 reveal">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="bg-slate-900 text-white p-8 md:p-12 rounded-2xl text-center space-y-6">
+                    <h2 class="text-3xl font-bold">Ready to elevate your embroidery?</h2>
+                    <p class="text-slate-400">Contact us today for a free quote on your next project.</p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="pricing.html"
+                            class="bg-primary text-background-dark px-8 py-3 rounded-lg font-bold btn-hover-effect">Get
+                            a Quote</a>
+                        <a href="contact.html"
+                            class="border border-white/20 px-8 py-3 rounded-lg font-bold btn-hover-effect">Contact
+                            Us</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===== UNIFIED FOOTER ===== -->
+    <footer class="bg-slate-900 text-slate-400 pt-12 pb-24 md:pb-8 border-t border-primary/10">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+                <div class="col-span-2 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="bg-primary p-1.5 rounded-lg"><span
+                                class="material-symbols-outlined text-background-dark text-lg">diamond</span></div>
+                        <span class="text-white font-black tracking-tight">DEZAN</span>
+                    </div>
+                    <p class="text-sm mb-4">Professional digitizing &amp; vector services for brands that demand
+                        perfection.</p>
+                    <div class="flex gap-3">
+                        <a class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary hover:text-background-dark transition-all"
+                            href="#"><span class="material-symbols-outlined text-lg">public</span></a>
+                        <a class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary hover:text-background-dark transition-all"
+                            href="#"><span class="material-symbols-outlined text-lg">photo_camera</span></a>
+                        <a class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary hover:text-background-dark transition-all"
+                            href="#"><span class="material-symbols-outlined text-lg">mail</span></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-primary font-bold text-xs uppercase tracking-widest mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a class="hover:text-primary transition-colors" href="index.html">Home</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="about.html">About Us</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="services.html">Services</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="portfolio.html">Portfolio</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-primary font-bold text-xs uppercase tracking-widest mb-4">Company</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a class="hover:text-primary transition-colors" href="pricing.html">Pricing</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="contact.html">Contact</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Privacy Policy</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Terms</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-primary font-bold text-xs uppercase tracking-widest mb-4">Newsletter</h4>
+                    <p class="text-sm mb-3">Get tips &amp; exclusive offers.</p>
+                    <form class="flex gap-2" onsubmit="return false;">
+                        <input
+                            class="flex-1 bg-white/10 border-none rounded-lg text-sm px-3 py-2 focus:ring-1 focus:ring-primary text-white placeholder:text-slate-500"
+                            placeholder="Email" type="email" />
+                        <button
+                            class="bg-primary text-background-dark rounded-lg px-3 py-2 font-bold text-sm hover:brightness-110 transition-all"
+                            type="submit">Join</button>
+                    </form>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-6 text-center text-xs text-slate-500 uppercase tracking-widest">
+                © 2016-2025 Dezan Digitizing - All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== UNIFIED BOTTOM NAV (MOBILE) ===== -->
+    <nav
+        class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-t border-primary/20 px-2 pb-5 pt-2">
+        <div class="flex justify-around">
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="index.html"
+                data-page="index.html">
+                <span class="material-symbols-outlined text-xl">home</span>
+                <span class="text-[10px] font-semibold">Home</span>
+            </a>
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="services.html"
+                data-page="services.html">
+                <span class="material-symbols-outlined text-xl">design_services</span>
+                <span class="text-[10px] font-semibold">Services</span>
+            </a>
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="portfolio.html"
+                data-page="portfolio.html">
+                <span class="material-symbols-outlined text-xl">photo_library</span>
+                <span class="text-[10px] font-semibold">Portfolio</span>
+            </a>
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="pricing.html"
+                data-page="pricing.html">
+                <span class="material-symbols-outlined text-xl">payments</span>
+                <span class="text-[10px] font-semibold">Pricing</span>
+            </a>
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="contact.html"
+                data-page="contact.html">
+                <span class="material-symbols-outlined text-xl">mail</span>
+                <span class="text-[10px] font-semibold">Contact</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

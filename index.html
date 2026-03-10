@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Dezan Digitizing — Premium Embroidery & Vector Art</title>
+    <meta name="description"
+        content="Professional embroidery digitizing and vector art conversion services. Fast 12-24h turnaround, premium quality, and unlimited revisions." />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { "primary": "#d4af35", "background-light": "#f8f7f6", "background-dark": "#201d12" },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+
+    <!-- ===== UNIFIED HEADER ===== -->
+    <header
+        class="sticky top-0 z-50 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-primary/20">
+        <div class="flex items-center justify-between px-4 py-3 max-w-6xl mx-auto">
+            <a href="index.html" class="flex items-center gap-2">
+                <div class="bg-primary p-1.5 rounded-lg">
+                    <span class="material-symbols-outlined text-background-dark text-xl">diamond</span>
+                </div>
+                <span class="text-lg font-black tracking-tight">DEZAN</span>
+            </a>
+            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
+                <a href="index.html" class="text-primary" data-nav="index.html">Home</a>
+                <a href="about.html" class="hover:text-primary transition-colors" data-nav="about.html">About</a>
+                <a href="services.html" class="hover:text-primary transition-colors"
+                    data-nav="services.html">Services</a>
+                <a href="portfolio.html" class="hover:text-primary transition-colors"
+                    data-nav="portfolio.html">Portfolio</a>
+                <a href="pricing.html" class="hover:text-primary transition-colors" data-nav="pricing.html">Pricing</a>
+                <a href="contact.html" class="hover:text-primary transition-colors" data-nav="contact.html">Contact</a>
+            </nav>
+            <div class="flex items-center gap-2">
+                <button class="theme-toggle-btn p-2 rounded-lg hover:bg-primary/10 transition-colors"
+                    aria-label="Toggle theme">
+                    <span class="material-symbols-outlined theme-toggle-icon text-xl">light_mode</span>
+                </button>
+                <a href="profile.html" class="p-2 rounded-lg hover:bg-primary/10 transition-colors">
+                    <span class="material-symbols-outlined text-xl">account_circle</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="pb-20">
+
+        <!-- Hero Section -->
+        <section class="p-4 reveal">
+            <div class="relative overflow-hidden rounded-2xl aspect-[3/4] md:aspect-[2/1] flex flex-col justify-end p-6 md:p-12 bg-slate-800"
+                style='background-image: linear-gradient(0deg, rgba(32,29,18,0.9) 0%, rgba(32,29,18,0.2) 60%, rgba(32,29,18,0.4) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBqxr8Wrej_a61QA4IiNjy4E3-4MOTrhqN5RSx6sG3sqDgiSAGk7DZLzjs6IdO_QCbAapnhEF7JH7IOwMwd9hUobGbXuAMmFM2_oJQz8QcZYI-LM6Hob6-NjWfeapUpBmmoM46ZNTgdEMgone4iP4b5nBVjjy-xRVblGovInNzfbrvX_AutVEzwdKsm_W7rulhlAj95KUNKqPYK7Wopi8tR4tPUeqSAHkIqsul1uKVawbriBZgTuMgOlf7OIH_KtOmP9sprtv0UsgCC"); background-size: cover; background-position: center;'>
+                <div class="flex flex-col gap-4 max-w-lg">
+                    <h2 class="text-white text-3xl md:text-5xl font-black leading-tight">
+                        Dezan Digitizing Service
+                    </h2>
+                    <p class="text-slate-300 text-base">
+                        Embroidery Digitizing & Vector Art — Fast turnaround, premium quality.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                        <a href="pricing.html"
+                            class="py-3 px-8 bg-primary text-background-dark rounded-lg font-bold text-center hover:brightness-110 transition-all btn-hover-effect">
+                            Place Order
+                        </a>
+                        <a href="pricing.html"
+                            class="py-3 px-8 bg-white/10 border border-white/20 text-white rounded-lg font-bold text-center backdrop-blur-sm btn-hover-effect">
+                            View Pricing
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section class="px-4 py-8 reveal">
+            <h3 class="text-xl font-bold mb-6 border-l-4 border-primary pl-3">Our Services</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a href="services.html"
+                    class="bg-primary/5 dark:bg-primary/10 p-6 rounded-xl border border-primary/20 flex gap-4 items-start hover-scale">
+                    <div class="bg-primary p-3 rounded-lg text-background-dark shrink-0">
+                        <span class="material-symbols-outlined text-2xl">architecture</span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg mb-1">Embroidery Digitizing</h4>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">Custom designs optimized for smooth
+                            machine operation and crisp details.</p>
+                    </div>
+                </a>
+                <a href="services.html"
+                    class="bg-primary/5 dark:bg-primary/10 p-6 rounded-xl border border-primary/20 flex gap-4 items-start hover-scale">
+                    <div class="bg-primary p-3 rounded-lg text-background-dark shrink-0">
+                        <span class="material-symbols-outlined text-2xl">draw</span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg mb-1">Vector Art</h4>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">High-resolution vector conversion for
+                            professional printing and branding.</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Pricing Plans -->
+        <section class="px-4 py-8 reveal">
+            <h3 class="text-xl font-bold mb-6 border-l-4 border-primary pl-3">Pricing</h3>
+
+            <!-- Digitizing -->
+            <p class="text-xs font-bold text-primary uppercase tracking-widest mb-3">Digitizing</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-primary/5 dark:bg-primary/10 p-5 rounded-xl border border-primary/20 hover-scale">
+                    <div class="flex items-center justify-between mb-1">
+                        <h4 class="font-bold">Left Chest / Hat</h4>
+                        <span class="text-lg font-black text-primary">$10</span>
+                    </div>
+                    <p class="text-xs text-slate-500">Size up to 6" inches</p>
+                    <p class="text-[10px] text-primary/70 font-semibold mt-1">⏱ 5 Hour TAT</p>
+                </div>
+                <div class="bg-primary/5 dark:bg-primary/10 p-5 rounded-xl border border-primary/20 hover-scale">
+                    <div class="flex items-center justify-between mb-1">
+                        <h4 class="font-bold">Jacket Back</h4>
+                        <span class="text-lg font-black text-primary">$15 – $25</span>
+                    </div>
+                    <p class="text-xs text-slate-500">Size larger than 6" inches</p>
+                    <p class="text-[10px] text-primary/70 font-semibold mt-1">⏱ 12 Hour TAT</p>
+                </div>
+                <div class="bg-primary/5 dark:bg-primary/10 p-5 rounded-xl border border-primary/20 hover-scale">
+                    <div class="flex items-center justify-between mb-1">
+                        <h4 class="font-bold">Pet Portrait</h4>
+                        <span class="text-lg font-black text-primary">$25 – $50</span>
+                    </div>
+                    <p class="text-xs text-slate-500">Realistic images & pet portraits</p>
+                    <p class="text-[10px] text-primary/70 font-semibold mt-1">⏱ 1 to 2 Days TAT</p>
+                </div>
+            </div>
+
+            <!-- Vectorizing -->
+            <p class="text-xs font-bold text-primary uppercase tracking-widest mb-3">Vector Art</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-primary/5 dark:bg-primary/10 p-5 rounded-xl border border-primary/20 hover-scale">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold">Simple Vector</h4>
+                        <span class="text-lg font-black text-primary">$10</span>
+                    </div>
+                </div>
+                <div class="bg-primary/5 dark:bg-primary/10 p-5 rounded-xl border border-primary/20 hover-scale">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold">Complex Vector</h4>
+                        <span class="text-lg font-black text-primary">$20</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Portfolio Teaser -->
+        <section class="px-4 py-8 reveal">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold border-l-4 border-primary pl-3">Portfolio</h3>
+                <a class="text-primary text-sm font-semibold flex items-center gap-1" href="portfolio.html">View All
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div
+                    class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale">
+                    <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        alt="Custom embroidered pet portrait"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlga6HnLJ6qIb9R203VL0hWJF3u379QPcBJ6kxcRd9to-Hvmn5jMjjtBwNKt9pfLS4sKR6momCez9NR9jgIUrDf9m1bs7ZYvGGrDZqe80qlp7jOo_o2ClOGyitsYod3vNUslN53T_WFB1tKg3woHF-kMr_jVgOg2mcf1YfUZUqnxePb7A4NIfCELcz9Osd_Foia_SJKmk_Ikq2xaNekCQMfkmaaVsFmgFlmAut85kZaaKg_5e89iRUTSj-yt4egWYsavhEgEHzl9QD" />
+                    <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                        <p class="text-white text-xs font-bold">Pet Portraits</p>
+                        <p class="text-primary text-[10px] uppercase tracking-wider">Embroidery</p>
+                    </div>
+                </div>
+                <div
+                    class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale">
+                    <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        alt="Left chest logo embroidery"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYGfOGKWWvarFz1neTB60ndgYujsXq6rwFn9GitoS8ocQYFvvEkHHLbEliTrwWV8D4mbvSmFyOCt1l-X_lbqFb4iEcrw0J-5MMnctZD2jLuNhm5DbqY0pa6TlCoKn-11wgp7XytW4VmF9yFodAUqS3Fd_n42El9rHY3FRW8ay5BFjMNiND-voh31LSU-cjUUiT96jg6-TTVenTPB0OpkuN917fScKTXB38cu5snJa_oRPnrLN7PZAS0vW0XT1mz9fdkGBLgWlROg9m" />
+                    <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                        <p class="text-white text-xs font-bold">Left Chest Logos</p>
+                        <p class="text-primary text-[10px] uppercase tracking-wider">Corporate</p>
+                    </div>
+                </div>
+                <div
+                    class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale col-span-2 md:col-span-1">
+                    <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        alt="Large jacket back embroidery"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHbQoXSP3MjFE1RchIiUXHiAvC2yv-qPcKbnl6ofCq_16Z_6jG8fCTtH_ONWxI1QqJ8QagOL0fBu92ivIORzaMA97k0Iyx-zp-lRmI8WIvMbqhQLQSImnvVY8dk0sjsqL1yPPn392tlL5zHIKL6nVwn32ZtCH5uvb7frtvwV4r816ESM2dfPGl40Xvw8fwY5PK-zgHFxtW9nbWXBNL6HntWY8GZQQEMQ940AZ0pl7tnE91qnBf3reCMxE2ZSQ9Nw0MInqWnEbAKsLt" />
+                    <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                        <p class="text-white text-xs font-bold">Jacket Backs</p>
+                        <p class="text-primary text-[10px] uppercase tracking-wider">Custom Design</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Client Feedback -->
+        <section class="px-4 py-8 reveal">
+            <h3 class="text-xl font-bold mb-6 border-l-4 border-primary pl-3">Client's Feedback</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white dark:bg-slate-800/50 p-5 rounded-xl border border-primary/10 shadow-sm">
+                    <div class="flex gap-1 text-primary mb-2">
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 italic mb-3 text-sm">"Fresh out of the machine 😍 Thank
+                        you Felix Dezan for the amazing job with the digitizing! SEASIDE MOSTLY HATS"</p>
+                    <p class="text-sm font-bold">— Erkan Koyuncu</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800/50 p-5 rounded-xl border border-primary/10 shadow-sm">
+                    <div class="flex gap-1 text-primary mb-2">
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 italic mb-3 text-sm">"Excellent customer service!!
+                        ⭐⭐⭐⭐⭐ I will now use Dezan Digitizers for all future digitizing!"</p>
+                    <p class="text-sm font-bold">— Maralyn Kublek, Canada</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800/50 p-5 rounded-xl border border-primary/10 shadow-sm">
+                    <div class="flex gap-1 text-primary mb-2">
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 italic mb-3 text-sm">"Felix Dezan you're killing it!
+                        Thank you for all your hard work and patience. You're awesome and we couldn't do it without you!
+                        ❤️"</p>
+                    <p class="text-sm font-bold">— Sandy Escobar</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800/50 p-5 rounded-xl border border-primary/10 shadow-sm">
+                    <div class="flex gap-1 text-primary mb-2">
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 italic mb-3 text-sm">"Great customer service. Great
+                        digitizing. Easy to work with!"</p>
+                    <p class="text-sm font-bold">— Lisa Jenkins</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800/50 p-5 rounded-xl border border-primary/10 shadow-sm">
+                    <div class="flex gap-1 text-primary mb-2">
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 italic mb-3 text-sm">"His work is amazing, Quick
+                        response and very helpful"</p>
+                    <p class="text-sm font-bold">— Judith Staponkus</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800/50 p-5 rounded-xl border border-primary/10 shadow-sm">
+                    <div class="flex gap-1 text-primary mb-2">
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 italic mb-3 text-sm">"Fast and very kind. I'm hoping to
+                        use him in the future"</p>
+                    <p class="text-sm font-bold">— Susan Michael</p>
+                </div>
+                <div
+                    class="bg-white dark:bg-slate-800/50 p-5 rounded-xl border border-primary/10 shadow-sm md:col-span-2">
+                    <div class="flex gap-1 text-primary mb-2">
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        <span class="material-symbols-outlined text-sm fill-1">star</span>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 italic mb-3 text-sm">"I want to take a min and give a
+                        big 'shout out' to Dezan Digitizing! Need something digitized? Contact Felix! He and his team
+                        have done awesome work for me! Way to go FELIX! Thank you!"</p>
+                    <p class="text-sm font-bold">— Karen Parmenter Giddings</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===== UNIFIED FOOTER ===== -->
+    <footer class="bg-slate-900 text-slate-400 pt-12 pb-24 md:pb-8 border-t border-primary/10">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+                <div class="col-span-2 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="bg-primary p-1.5 rounded-lg">
+                            <span class="material-symbols-outlined text-background-dark text-lg">diamond</span>
+                        </div>
+                        <span class="text-white font-black tracking-tight">DEZAN</span>
+                    </div>
+                    <p class="text-sm mb-4">Professional digitizing &amp; vector services for brands that demand
+                        perfection.</p>
+                    <div class="flex gap-3">
+                        <a class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary hover:text-background-dark transition-all"
+                            href="#"><span class="material-symbols-outlined text-lg">public</span></a>
+                        <a class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary hover:text-background-dark transition-all"
+                            href="#"><span class="material-symbols-outlined text-lg">photo_camera</span></a>
+                        <a class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary hover:text-background-dark transition-all"
+                            href="#"><span class="material-symbols-outlined text-lg">mail</span></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-primary font-bold text-xs uppercase tracking-widest mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a class="hover:text-primary transition-colors" href="index.html">Home</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="about.html">About Us</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="services.html">Services</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="portfolio.html">Portfolio</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-primary font-bold text-xs uppercase tracking-widest mb-4">Company</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a class="hover:text-primary transition-colors" href="pricing.html">Pricing</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="contact.html">Contact</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Privacy Policy</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Terms</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-primary font-bold text-xs uppercase tracking-widest mb-4">Newsletter</h4>
+                    <p class="text-sm mb-3">Get tips &amp; exclusive offers.</p>
+                    <form class="flex gap-2" onsubmit="return false;">
+                        <input
+                            class="flex-1 bg-white/10 border-none rounded-lg text-sm px-3 py-2 focus:ring-1 focus:ring-primary text-white placeholder:text-slate-500"
+                            placeholder="Email" type="email" />
+                        <button
+                            class="bg-primary text-background-dark rounded-lg px-3 py-2 font-bold text-sm hover:brightness-110 transition-all"
+                            type="submit">Join</button>
+                    </form>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-6 text-center text-xs text-slate-500 uppercase tracking-widest">
+                © 2016-2025 Dezan Digitizing - All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== UNIFIED BOTTOM NAV (MOBILE) ===== -->
+    <nav
+        class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-t border-primary/20 px-2 pb-5 pt-2">
+        <div class="flex justify-around">
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="index.html"
+                data-page="index.html">
+                <span class="material-symbols-outlined text-xl">home</span>
+                <span class="text-[10px] font-semibold">Home</span>
+            </a>
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="services.html"
+                data-page="services.html">
+                <span class="material-symbols-outlined text-xl">design_services</span>
+                <span class="text-[10px] font-semibold">Services</span>
+            </a>
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="portfolio.html"
+                data-page="portfolio.html">
+                <span class="material-symbols-outlined text-xl">photo_library</span>
+                <span class="text-[10px] font-semibold">Portfolio</span>
+            </a>
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="pricing.html"
+                data-page="pricing.html">
+                <span class="material-symbols-outlined text-xl">payments</span>
+                <span class="text-[10px] font-semibold">Pricing</span>
+            </a>
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="contact.html"
+                data-page="contact.html">
+                <span class="material-symbols-outlined text-xl">mail</span>
+                <span class="text-[10px] font-semibold">Contact</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

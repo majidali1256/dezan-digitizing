@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Pricing & Order | Dezan Digitizing</title>
+    <meta name="description"
+        content="Embroidery Digitizing from $10. Left Chest/Hat, Jacket Back, Pet Portraits. Vector Art from $10. Fast turnaround." />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { "primary": "#d4af35", "background-light": "#f8f7f6", "background-dark": "#201d12" },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="styles.css" />
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <!-- PayPal JS SDK (SANDBOX — replace with live client-id before deploying) -->
+    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD&intent=capture"
+        data-sdk-integration-source="button-factory"></script>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+
+    <!-- ===== UNIFIED HEADER ===== -->
+    <header
+        class="sticky top-0 z-50 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-primary/20">
+        <div class="flex items-center justify-between px-4 py-3 max-w-6xl mx-auto">
+            <a href="index.html" class="flex items-center gap-2">
+                <div class="bg-primary p-1.5 rounded-lg"><span
+                        class="material-symbols-outlined text-background-dark text-xl">diamond</span></div>
+                <span class="text-lg font-black tracking-tight">DEZAN</span>
+            </a>
+            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
+                <a href="index.html" class="hover:text-primary transition-colors" data-nav="index.html">Home</a>
+                <a href="about.html" class="hover:text-primary transition-colors" data-nav="about.html">About</a>
+                <a href="services.html" class="hover:text-primary transition-colors"
+                    data-nav="services.html">Services</a>
+                <a href="portfolio.html" class="hover:text-primary transition-colors"
+                    data-nav="portfolio.html">Portfolio</a>
+                <a href="pricing.html" class="hover:text-primary transition-colors" data-nav="pricing.html">Pricing</a>
+                <a href="contact.html" class="hover:text-primary transition-colors" data-nav="contact.html">Contact</a>
+            </nav>
+            <div class="flex items-center gap-2">
+                <button class="theme-toggle-btn p-2 rounded-lg hover:bg-primary/10 transition-colors"
+                    aria-label="Toggle theme"><span
+                        class="material-symbols-outlined theme-toggle-icon text-xl">light_mode</span></button>
+                <a href="profile.html" class="p-2 rounded-lg hover:bg-primary/10 transition-colors"><span
+                        class="material-symbols-outlined text-xl">account_circle</span></a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="pb-20 max-w-4xl mx-auto">
+
+        <!-- Title -->
+        <section class="px-4 pt-8 pb-4 reveal">
+            <h1 class="text-3xl font-black tracking-tight">Price List</h1>
+            <p class="text-slate-500 mt-1">Professional embroidery digitizing & vector art services.</p>
+        </section>
+
+        <!-- Pricing Cards -->
+        <section class="px-4 py-4 space-y-8">
+
+            <!-- DIGITIZING -->
+            <div class="reveal">
+                <h2 class="text-lg font-black text-primary uppercase tracking-widest mb-4">Digitizing</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                    <!-- Left Chest / Hat -->
+                    <div
+                        class="flex flex-col gap-4 rounded-xl border border-primary/20 bg-white dark:bg-slate-800/50 p-6 pricing-card">
+                        <div class="flex flex-col gap-1">
+                            <h3 class="text-base font-bold uppercase tracking-wider">Left Chest / Hat</h3>
+                            <p class="text-xs text-slate-500">Size up to 6" inches</p>
+                            <div class="flex items-baseline gap-1 text-primary mt-1">
+                                <span class="text-4xl font-black">$10</span>
+                                <span class="text-sm font-semibold opacity-80">/design</span>
+                            </div>
+                        </div>
+                        <button onclick="selectPlan('Left Chest / Hat', 10)"
+                            class="select-plan-btn w-full h-12 bg-slate-200 dark:bg-slate-700 rounded-lg font-bold text-sm transition-all active:scale-95 border border-primary/10 btn-hover-effect">Select</button>
+                        <ul class="flex flex-col gap-3">
+                            <li class="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300"><span
+                                    class="material-symbols-outlined text-primary text-lg">schedule</span> 5 Hour
+                                Turnaround</li>
+                            <li class="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300"><span
+                                    class="material-symbols-outlined text-primary text-lg">check_circle</span> Flat rate
+                                for max 5"</li>
+                        </ul>
+                    </div>
+
+                    <!-- Jacket Back (Popular) -->
+                    <div
+                        class="relative flex flex-col gap-4 rounded-xl border-2 border-primary bg-primary/5 dark:bg-primary/10 p-6 pricing-card">
+                        <div
+                            class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-background-dark px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                            Most Popular</div>
+                        <div class="flex flex-col gap-1">
+                            <h3 class="text-base font-bold uppercase tracking-wider">Jacket Back</h3>
+                            <p class="text-xs text-slate-500">Size larger than 6" inches</p>
+                            <div class="flex items-baseline gap-1 text-primary mt-1">
+                                <span class="text-4xl font-black">$15</span>
+                                <span class="text-sm font-semibold opacity-80">– $25</span>
+                            </div>
+                        </div>
+                        <button onclick="selectPlan('Jacket Back', 20)"
+                            class="select-plan-btn w-full h-12 bg-primary text-background-dark rounded-lg font-bold text-sm shadow-lg shadow-primary/20 btn-hover-effect">Select</button>
+                        <ul class="flex flex-col gap-3">
+                            <li class="flex items-center gap-3 text-sm font-medium"><span
+                                    class="material-symbols-outlined text-primary text-lg filled-icon">schedule</span>
+                                12 Hour Turnaround</li>
+                            <li class="flex items-center gap-3 text-sm font-medium"><span
+                                    class="material-symbols-outlined text-primary text-lg filled-icon">check_circle</span>
+                                All source files included</li>
+                        </ul>
+                    </div>
+
+                    <!-- Pet Portrait -->
+                    <div
+                        class="flex flex-col gap-4 rounded-xl border border-primary/20 bg-white dark:bg-slate-800/50 p-6 pricing-card">
+                        <div class="flex flex-col gap-1">
+                            <h3 class="text-base font-bold uppercase tracking-wider">Pet Portrait</h3>
+                            <p class="text-xs text-slate-500">Realistic images & pet portraits</p>
+                            <div class="flex items-baseline gap-1 text-primary mt-1">
+                                <span class="text-4xl font-black">$25</span>
+                                <span class="text-sm font-semibold opacity-80">– $50</span>
+                            </div>
+                        </div>
+                        <button onclick="selectPlan('Pet Portrait', 35)"
+                            class="select-plan-btn w-full h-12 bg-slate-200 dark:bg-slate-700 rounded-lg font-bold text-sm transition-all active:scale-95 border border-primary/10 btn-hover-effect">Select</button>
+                        <ul class="flex flex-col gap-3">
+                            <li class="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300"><span
+                                    class="material-symbols-outlined text-primary text-lg">schedule</span> 1 to 2 Days
+                                Turnaround</li>
+                            <li class="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300"><span
+                                    class="material-symbols-outlined text-primary text-lg">check_circle</span> High
+                                detail stitch work</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VECTOR ART -->
+            <div class="reveal">
+                <h2 class="text-lg font-black text-primary uppercase tracking-widest mb-4">Vector Art</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <!-- Simple Vector -->
+                    <div
+                        class="flex flex-col gap-4 rounded-xl border border-primary/20 bg-white dark:bg-slate-800/50 p-6 pricing-card">
+                        <div class="flex flex-col gap-1">
+                            <h3 class="text-base font-bold uppercase tracking-wider">Simple Vector</h3>
+                            <div class="flex items-baseline gap-1 text-primary mt-1">
+                                <span class="text-4xl font-black">$10</span>
+                                <span class="text-sm font-semibold opacity-80">/design</span>
+                            </div>
+                        </div>
+                        <button onclick="selectPlan('Simple Vector', 10)"
+                            class="select-plan-btn w-full h-12 bg-slate-200 dark:bg-slate-700 rounded-lg font-bold text-sm transition-all active:scale-95 border border-primary/10 btn-hover-effect">Select</button>
+                    </div>
+
+                    <!-- Complex Vector -->
+                    <div
+                        class="flex flex-col gap-4 rounded-xl border border-primary/20 bg-white dark:bg-slate-800/50 p-6 pricing-card">
+                        <div class="flex flex-col gap-1">
+                            <h3 class="text-base font-bold uppercase tracking-wider">Complex Vector</h3>
+                            <div class="flex items-baseline gap-1 text-primary mt-1">
+                                <span class="text-4xl font-black">$20</span>
+                                <span class="text-sm font-semibold opacity-80">/design</span>
+                            </div>
+                        </div>
+                        <button onclick="selectPlan('Complex Vector', 20)"
+                            class="select-plan-btn w-full h-12 bg-slate-200 dark:bg-slate-700 rounded-lg font-bold text-sm transition-all active:scale-95 border border-primary/10 btn-hover-effect">Select</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Order Form -->
+        <section id="order-section" class="px-4 py-10 reveal">
+            <div class="bg-primary/5 dark:bg-primary/10 rounded-2xl p-6 md:p-8 border border-primary/20">
+
+                <!-- Selected Plan Banner -->
+                <div id="selected-plan-banner"
+                    class="hidden mb-6 p-4 bg-primary/10 dark:bg-primary/20 border border-primary/30 rounded-xl flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary text-2xl filled-icon">check_circle</span>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Selected Plan</p>
+                            <p class="font-black text-lg" id="selected-plan-name">—</p>
+                        </div>
+                    </div>
+                    <span class="text-2xl font-black text-primary" id="selected-plan-price">$0</span>
+                </div>
+
+                <h2 class="text-2xl font-black tracking-tight mb-1">Order Details</h2>
+                <p class="text-slate-500 text-sm mb-2">Fill in your details and upload your artwork to place an order.
+                </p>
+                <p class="text-slate-500 text-sm mb-8">For queries or multiple orders email us directly: <a
+                        href="mailto:fdezan91@gmail.com"
+                        class="text-primary font-semibold hover:underline">fdezan91@gmail.com</a></p>
+
+                <form id="order-form" class="flex flex-col gap-6">
+                    <!-- Hidden plan fields -->
+                    <input type="hidden" id="order-plan" value="" />
+                    <input type="hidden" id="order-amount" value="0" />
+
+                    <!-- Customer Info -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Your Name <span
+                                    class="text-red-400">*</span></label>
+                            <input id="customer-name" required
+                                class="w-full h-14 bg-white dark:bg-background-dark border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-5"
+                                placeholder="John Doe" type="text" />
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Your Email <span
+                                    class="text-red-400">*</span></label>
+                            <input id="customer-email" required
+                                class="w-full h-14 bg-white dark:bg-background-dark border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-5"
+                                placeholder="john@example.com" type="email" />
+                        </div>
+                    </div>
+
+                    <!-- Project Name -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Project Name <span
+                                class="text-red-400">*</span></label>
+                        <input id="project-name" required
+                            class="w-full h-14 bg-white dark:bg-background-dark border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-5"
+                            placeholder="e.g. Summer Collection Logo" type="text" />
+                    </div>
+
+                    <!-- Service & Placement -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Service Type</label>
+                            <select id="service-type"
+                                class="w-full h-14 bg-white dark:bg-background-dark border border-primary/30 focus:border-primary rounded-xl px-5 text-sm">
+                                <option value="Digitizing">Digitizing</option>
+                                <option value="Vectorizing">Vectorizing</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Style / Location <span
+                                    class="text-red-400">*</span></label>
+                            <input id="design-placement"
+                                class="w-full h-14 bg-white dark:bg-background-dark border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-5"
+                                placeholder="Left Chest / Hat / Jacket Back etc" type="text" required />
+                        </div>
+                    </div>
+
+                    <!-- Sizing & File Format -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Sizing <span
+                                    class="text-red-400">*</span></label>
+                            <input id="design-sizing"
+                                class="w-full h-14 bg-white dark:bg-background-dark border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-5"
+                                placeholder="e.g. 3.5 x 2.5 inches" type="text" required />
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">File Format <span
+                                    class="text-red-400">*</span></label>
+                            <input id="file-format"
+                                class="w-full h-14 bg-white dark:bg-background-dark border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-5"
+                                placeholder="DST, OFM, EXP, PES etc" type="text" required />
+                        </div>
+                    </div>
+
+                    <!-- Upload Artwork -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Attach Logo (Max
+                            10MB)</label>
+                        <div id="drop-zone"
+                            class="upload-zone w-full min-h-[128px] border-2 border-dashed border-primary/30 rounded-xl flex flex-col items-center justify-center bg-white/50 dark:bg-background-dark/50 gap-2 cursor-pointer hover:border-primary transition-colors p-4"
+                            onclick="document.getElementById('file-input').click()">
+                            <span class="material-symbols-outlined text-primary text-3xl"
+                                id="upload-icon">cloud_upload</span>
+                            <p class="text-xs font-semibold text-slate-500" id="upload-text">Click or drag files here —
+                                PNG, JPG, PDF, AI, EPS</p>
+                            <p class="text-xs text-slate-400" id="upload-filename"></p>
+                        </div>
+                        <input type="file" id="file-input" class="hidden"
+                            accept=".png,.jpg,.jpeg,.pdf,.ai,.eps,.svg,.bmp,.tiff" />
+                    </div>
+
+                    <!-- Additional Notes -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Additional Notes</label>
+                        <textarea id="order-notes"
+                            class="w-full bg-white dark:bg-background-dark border border-primary/30 focus:border-primary rounded-xl px-5 py-4"
+                            placeholder="Specific colors, thread types, fabric details, rush delivery..."
+                            rows="3"></textarea>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div id="order-summary"
+                        class="hidden p-5 bg-white dark:bg-slate-800 rounded-xl border border-primary/20">
+                        <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-lg">receipt_long</span>
+                            Order Summary
+                        </h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Plan</span>
+                                <span class="font-semibold" id="summary-plan">—</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Service</span>
+                                <span class="font-semibold" id="summary-service">—</span>
+                            </div>
+                            <div class="flex justify-between border-t border-primary/10 pt-2 mt-2">
+                                <span class="font-bold">Total</span>
+                                <span class="font-black text-primary text-lg" id="summary-total">$0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Validation message -->
+                    <div id="form-error"
+                        class="hidden p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-sm font-semibold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">error</span>
+                        <span id="form-error-text">Please select a plan and fill in all required fields.</span>
+                    </div>
+
+                    <!-- PayPal Button Container -->
+                    <div id="paypal-button-container" class="w-full min-h-[50px]">
+                        <!-- PayPal buttons render here -->
+                    </div>
+
+                    <!-- Fallback: pay later note -->
+                    <p class="text-center text-xs text-slate-400 flex items-center justify-center gap-1">
+                        <span class="material-symbols-outlined text-sm">lock</span>
+                        Secure payment powered by PayPal
+                    </p>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===== UNIFIED FOOTER ===== -->
+    <footer class="bg-slate-900 text-slate-400 pt-12 pb-24 md:pb-8 border-t border-primary/10">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+                <div class="col-span-2 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="bg-primary p-1.5 rounded-lg"><span
+                                class="material-symbols-outlined text-background-dark text-lg">diamond</span></div><span
+                            class="text-white font-black tracking-tight">DEZAN</span>
+                    </div>
+                    <p class="text-sm mb-4">Professional digitizing &amp; vector services for brands that demand
+                        perfection.</p>
+                    <div class="flex gap-3">
+                        <a class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary hover:text-background-dark transition-all"
+                            href="#"><span class="material-symbols-outlined text-lg">public</span></a>
+                        <a class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary hover:text-background-dark transition-all"
+                            href="#"><span class="material-symbols-outlined text-lg">photo_camera</span></a>
+                        <a class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary hover:text-background-dark transition-all"
+                            href="#"><span class="material-symbols-outlined text-lg">mail</span></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-primary font-bold text-xs uppercase tracking-widest mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a class="hover:text-primary transition-colors" href="index.html">Home</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="about.html">About Us</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="services.html">Services</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="portfolio.html">Portfolio</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-primary font-bold text-xs uppercase tracking-widest mb-4">Company</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a class="hover:text-primary transition-colors" href="pricing.html">Pricing</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="contact.html">Contact</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Privacy Policy</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Terms</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-primary font-bold text-xs uppercase tracking-widest mb-4">Newsletter</h4>
+                    <p class="text-sm mb-3">Get tips &amp; exclusive offers.</p>
+                    <form class="flex gap-2" onsubmit="return false;"><input
+                            class="flex-1 bg-white/10 border-none rounded-lg text-sm px-3 py-2 focus:ring-1 focus:ring-primary text-white placeholder:text-slate-500"
+                            placeholder="Email" type="email" /><button
+                            class="bg-primary text-background-dark rounded-lg px-3 py-2 font-bold text-sm hover:brightness-110 transition-all"
+                            type="submit">Join</button></form>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-6 text-center text-xs text-slate-500 uppercase tracking-widest">©
+                2016-2025 Dezan Digitizing - All Rights Reserved.</div>
+        </div>
+    </footer>
+
+    <!-- ===== UNIFIED BOTTOM NAV (MOBILE) ===== -->
+    <nav
+        class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-t border-primary/20 px-2 pb-5 pt-2">
+        <div class="flex justify-around">
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="index.html"
+                data-page="index.html"><span class="material-symbols-outlined text-xl">home</span><span
+                    class="text-[10px] font-semibold">Home</span></a>
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="services.html"
+                data-page="services.html"><span class="material-symbols-outlined text-xl">design_services</span><span
+                    class="text-[10px] font-semibold">Services</span></a>
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="portfolio.html"
+                data-page="portfolio.html"><span class="material-symbols-outlined text-xl">photo_library</span><span
+                    class="text-[10px] font-semibold">Portfolio</span></a>
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="pricing.html"
+                data-page="pricing.html"><span class="material-symbols-outlined text-xl">payments</span><span
+                    class="text-[10px] font-semibold">Pricing</span></a>
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="contact.html"
+                data-page="contact.html"><span class="material-symbols-outlined text-xl">mail</span><span
+                    class="text-[10px] font-semibold">Contact</span></a>
+        </div>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
