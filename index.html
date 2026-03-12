@@ -37,7 +37,7 @@
                 <span class="text-lg font-black tracking-tight">DEZAN</span>
             </a>
             <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
-                <a href="index.html" class="text-primary" data-nav="index.html">Home</a>
+                <a href="index.html" class="hover:text-primary transition-colors" data-nav="index.html">Home</a>
                 <a href="about.html" class="hover:text-primary transition-colors" data-nav="about.html">About</a>
                 <a href="services.html" class="hover:text-primary transition-colors"
                     data-nav="services.html">Services</a>
@@ -58,33 +58,39 @@
         </div>
     </header>
 
+    <!-- ===== ARC GALLERY HERO ===== -->
+    <section class="arc-gallery-hero relative overflow-hidden bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-[90vh] flex flex-col justify-center">
+      <!-- Background ring container that controls geometry -->
+      <div id="arc-gallery-container" class="relative mx-auto w-full transition-all duration-300">
+        <!-- Center pivot for transforms - positioned at bottom center -->
+        <div id="arc-gallery-pivot" class="absolute left-1/2 bottom-0 -translate-x-1/2">
+          <!-- Images injected by app.js -->
+        </div>
+      </div>
+
+      <!-- Content positioned below the arc -->
+      <div class="relative z-10 flex-1 flex flex-col items-center justify-center px-6 -mt-32 md:-mt-40 lg:-mt-52">
+        <div class="text-center max-w-3xl px-6 opacity-0 animate-fade-in-up" style="animation-delay: 800ms; animation-fill-mode: forwards;">
+          <h1 class="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight text-slate-900 dark:text-slate-100 uppercase">
+            Dezan Digitizing Service
+          </h1>
+          <p class="mt-4 text-sm sm:text-base lg:text-lg text-slate-600 dark:text-slate-400 font-semibold tracking-wide">
+            Embroidery Digitizing & Vector Art — Fast turnaround, premium quality.
+          </p>
+          <div class="mt-8 flex flex-col sm:flex-row gap-4 items-center justify-center">
+             <a href="pricing.html" class="w-full sm:w-auto py-3 px-8 bg-primary text-background-dark rounded-lg font-bold text-center hover:brightness-110 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                Place Order
+             </a>
+             <a href="pricing.html" class="w-full sm:w-auto py-3 px-8 border border-primary/20 hover:border-primary/50 text-slate-900 dark:text-slate-100 rounded-lg font-bold text-center transition-all bg-primary/5 hover:bg-primary/10">
+                View Pricing
+             </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== MAIN CONTENT ===== -->
     <main class="pb-20">
-
-        <!-- Hero Section -->
-        <section class="p-4 reveal">
-            <div class="relative overflow-hidden rounded-2xl aspect-[3/4] md:aspect-[2/1] flex flex-col justify-end p-6 md:p-12 bg-slate-800"
-                style='background-image: linear-gradient(0deg, rgba(32,29,18,0.9) 0%, rgba(32,29,18,0.2) 60%, rgba(32,29,18,0.4) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBqxr8Wrej_a61QA4IiNjy4E3-4MOTrhqN5RSx6sG3sqDgiSAGk7DZLzjs6IdO_QCbAapnhEF7JH7IOwMwd9hUobGbXuAMmFM2_oJQz8QcZYI-LM6Hob6-NjWfeapUpBmmoM46ZNTgdEMgone4iP4b5nBVjjy-xRVblGovInNzfbrvX_AutVEzwdKsm_W7rulhlAj95KUNKqPYK7Wopi8tR4tPUeqSAHkIqsul1uKVawbriBZgTuMgOlf7OIH_KtOmP9sprtv0UsgCC"); background-size: cover; background-position: center;'>
-                <div class="flex flex-col gap-4 max-w-lg">
-                    <h2 class="text-white text-3xl md:text-5xl font-black leading-tight">
-                        Dezan Digitizing Service
-                    </h2>
-                    <p class="text-slate-300 text-base">
-                        Embroidery Digitizing & Vector Art — Fast turnaround, premium quality.
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-3 pt-2">
-                        <a href="pricing.html"
-                            class="py-3 px-8 bg-primary text-background-dark rounded-lg font-bold text-center hover:brightness-110 transition-all btn-hover-effect">
-                            Place Order
-                        </a>
-                        <a href="pricing.html"
-                            class="py-3 px-8 bg-white/10 border border-white/20 text-white rounded-lg font-bold text-center backdrop-blur-sm btn-hover-effect">
-                            View Pricing
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <!-- Services Section -->
         <section class="px-4 py-8 reveal">
@@ -124,7 +130,7 @@
                 <a class="text-primary text-sm font-semibold flex items-center gap-1" href="portfolio.html">View All
                     <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 <div
                     class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale">
                     <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
@@ -242,12 +248,152 @@
             </div>
         </section>
 
+        <!-- ===== FACEBOOK REVIEWS (MASONRY) ===== -->
+        <section class="py-12 px-4 max-w-6xl mx-auto reveal">
+            <h2 class="text-2xl font-black tracking-tight mb-8 border-l-4 border-primary pl-3 uppercase">Reviews</h2>
+            
+            <div class="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+                
+                <!-- Review 1 (Erkan) -->
+                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                            <img src="https://placehold.co/40x40" alt="Erkan" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm">Erkan Koyuncu</p>
+                            <div class="flex items-center gap-1 text-xs text-slate-500">
+                                <span>Nov 21, 2022</span>
+                                <span class="material-symbols-outlined text-[10px]">public</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-sm mb-3">Fresh out of the machine 😍<br><br>Thank you <span class="text-blue-500 font-semibold cursor-pointer">Felix Dezan</span> for the amazing job with the digitizing!<br><br>SEASIDE MOSTLY HATS</p>
+                    <div class="grid grid-cols-3 gap-1 rounded-lg overflow-hidden">
+                        <div class="h-20 bg-slate-200 dark:bg-slate-700"><img src="https://images.unsplash.com/photo-1556888335-95371827d5fb?q=80&w=200&auto=format&fit=crop" class="w-full h-full object-cover" alt="Hat"></div>
+                        <div class="h-20 bg-slate-200 dark:bg-slate-700"><img src="https://images.unsplash.com/photo-1576871337622-98d48d1cf531?q=80&w=200&auto=format&fit=crop" class="w-full h-full object-cover" alt="Hat"></div>
+                        <div class="h-20 bg-slate-800 relative flex items-center justify-center text-white font-bold text-lg">
+                            <img src="https://images.unsplash.com/photo-1521369909029-2afed882baee?q=80&w=200&auto=format&fit=crop" class="w-full h-full object-cover opacity-50 absolute inset-0" alt="Hat">
+                            <span class="z-10">+6</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review 2 (Maralyn) -->
+                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                            <img src="https://placehold.co/40x40" alt="Maralyn" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm flex items-center gap-1">Maralyn Kublek <span class="bg-red-500 text-white rounded-[4px] px-1 text-[8px] uppercase font-bold ml-1">Recommends</span></p>
+                            <p class="text-xs font-semibold">Dezan Digitizing.</p>
+                            <div class="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5">
+                                <span>Dec 1, 2022</span>
+                                <span class="material-symbols-outlined text-[10px]">public</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-sm">Excellent customer service!! ⭐⭐⭐⭐⭐ I will now use Dezan Digitizers for all future digitizing!<br>Maralyn - Canada</p>
+                </div>
+
+                <!-- Review 3 (Lisa) -->
+                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                            <img src="https://placehold.co/40x40" alt="Lisa" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm flex items-center gap-1">Lisa Jenkins <span class="bg-red-500 text-white rounded-[4px] px-1 text-[8px] uppercase font-bold ml-1">Recommends</span></p>
+                            <p class="text-xs font-semibold">Dezan Digitizing.</p>
+                            <div class="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5">
+                                <span>Mar 7</span>
+                                <span class="material-symbols-outlined text-[10px]">public</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-sm">Great customer service. Great digitizing. Easy to work with!</p>
+                </div>
+
+                <!-- Review 4 (Sandy) -->
+                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                            <img src="https://placehold.co/40x40" alt="Sandy" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm">Sandy Escobar</p>
+                            <div class="flex items-center gap-1 text-xs text-slate-500">
+                                <span>6d</span>
+                                <span class="material-symbols-outlined text-[10px]">group</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-sm"><span class="text-blue-500 font-semibold cursor-pointer">Felix Dezan</span> you're killing it! Thank you for all your hard work and patience. You're awesome and we couldn't do it without you! ❤️ - 😃 feeling grateful.</p>
+                </div>
+
+                <!-- Review 5 (Judith) -->
+                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                            <img src="https://placehold.co/40x40" alt="Judith" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm flex items-center gap-1">Judith Staponkus <span class="bg-red-500 text-white rounded-[4px] px-1 text-[8px] uppercase font-bold ml-1">Recommends</span></p>
+                            <p class="text-xs font-semibold">Dezan Digitizing.</p>
+                            <div class="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5">
+                                <span>Nov 6, 2022</span>
+                                <span class="material-symbols-outlined text-[10px]">group</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-sm">His work is amazing, Quick response and very helpful</p>
+                </div>
+                
+                <!-- Review 6 (Susan) -->
+                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                            <img src="https://placehold.co/40x40" alt="Susan" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm flex items-center gap-1">Susan Michael <span class="bg-red-500 text-white rounded-[4px] px-1 text-[8px] uppercase font-bold ml-1">Recommends</span></p>
+                            <p class="text-xs font-semibold">Dezan Digitizing.</p>
+                            <div class="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5">
+                                <span>Oct 24, 2022</span>
+                                <span class="material-symbols-outlined text-[10px]">public</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-sm">fast and very kind. I'm hoping to use him in the future</p>
+                </div>
+                
+                <!-- Review 7 (Karen) -->
+                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                            <img src="https://placehold.co/40x40" alt="Karen" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm">Karen Parmenter Giddings</p>
+                            <div class="flex items-center gap-1 text-xs text-slate-500">
+                                <span>Apr 19</span>
+                                <span class="material-symbols-outlined text-[10px]">public</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-sm">i want to take a min and give a big 'shout out' to dezan digitizing! need something digitized? contact felix! he and his team have done awesome work for me! way to go FELIX thank you!</p>
+                </div>
+
+            </div>
+        </section>
+
     </main>
 
     <!-- ===== UNIFIED FOOTER ===== -->
     <footer class="bg-slate-900 text-slate-400 pt-12 pb-24 md:pb-8 border-t border-primary/10">
         <div class="max-w-6xl mx-auto px-4">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-10">
                 <div class="col-span-2 md:col-span-1">
                     <div class="flex items-center gap-2 mb-4">
                         <img src="logo.png" alt="Dezan Digitizing" class="w-7 h-7 rounded-full object-cover">
