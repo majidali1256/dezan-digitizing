@@ -90,8 +90,75 @@ document.addEventListener("DOMContentLoaded", () => {
     if (currentPage === "order-success.html" || currentPage === "order-success") {
         initSuccessPage();
     }
+    
+    // ===================================================================
+    //  LIGHTBOX FOR FEEDBACK IMAGES
+    // ===================================================================
+    initLightbox();
 
 });
+
+
+// ===================================================================
+//  LIGHTBOX FUNCTIONALITY
+// ===================================================================
+function initLightbox() {
+    const feedbackImages = document.querySelectorAll('.marquee-item, .carousel-track img');
+    if (feedbackImages.length === 0) return;
+
+    // Create lightbox HTML structure
+    const overlay = document.createElement('div');
+    overlay.className = 'lightbox-overlay';
+    
+    const imgEl = document.createElement('img');
+    imgEl.className = 'lightbox-image';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'lightbox-close';
+    closeBtn.innerHTML = '&times;';
+    
+    overlay.appendChild(imgEl);
+    overlay.appendChild(closeBtn);
+    document.body.appendChild(overlay);
+
+    // Open lightbox (using pointerdown because CSS animation moves the element, breaking 'click')
+    feedbackImages.forEach(img => {
+        img.addEventListener('pointerdown', (e) => {
+            // Ignore right-clicks
+            if (e.button !== 0 && e.pointerType === 'mouse') return;
+            
+            imgEl.src = img.src;
+            overlay.style.display = 'flex';
+            // Force reflow for transition
+            overlay.offsetHeight;
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        });
+    });
+
+    // Close lightbox
+    function closeLightbox() {
+        overlay.classList.remove('active');
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+        }, 300); // Matches CSS transition duration
+    }
+
+    closeBtn.addEventListener('click', closeLightbox);
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            closeLightbox();
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.classList.contains('active')) {
+            closeLightbox();
+        }
+    });
+}
 
 
 // ===================================================================
