@@ -380,10 +380,9 @@ function initOrderSystem() {
         });
     }
 
-    // ----- PayPal Buttons -----
+    // ----- Initialize PayPal and Checkouts -----
     renderPayPalButtons();
 }
-
 
 // ===================================================================
 //  PAYPAL INTEGRATION
@@ -392,13 +391,14 @@ function renderPayPalButtons() {
     const container = document.getElementById("paypal-button-container");
     if (!container || typeof paypal === "undefined") return;
 
+    container.innerHTML = ""; // Clear on re-init
+
     paypal.Buttons({
         style: {
             shape: "rect",
             color: "gold",
             layout: "vertical",
             label: "paypal",
-            height: 50
         },
 
         // Validate form before creating order
@@ -441,7 +441,9 @@ function renderPayPalButtons() {
                 const fileFormat = document.getElementById("file-format").value || "N/A";
                 const notes = document.getElementById("order-notes").value || "None";
 
-                // Send email notification
+                console.log("Payment Successful!", transactionId);
+
+                // Send email notification via EmailJS
                 sendOrderEmail({
                     transactionId,
                     planName,
@@ -470,7 +472,7 @@ function renderPayPalButtons() {
 
         onError: function (err) {
             console.error("PayPal error:", err);
-            showFormError("Payment error. Please try again or contact us at fdezan91@gmail.com");
+            showFormError("Payment gateway error. Please try again or contact fdezan91@gmail.com");
         }
     }).render("#paypal-button-container");
 }
