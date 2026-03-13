@@ -435,3 +435,22 @@ img {
     color: #d4af35;
     transform: scale(1.1);
 }
+
+/* ============================================
+   Hero Animated Border
+   ============================================ */
+@keyframes borderPulse {
+    0%, 100% {
+        border-color: rgba(212, 175, 53, 0.2);
+        box-shadow: 0 0 20px rgba(212, 175, 53, 0.05);
+    }
+    50% {
+        border-color: rgba(212, 175, 53, 0.5);
+        box-shadow: 0 0 35px rgba(212, 175, 53, 0.2);
+    }
+}
+
+.hero-animated-border {
+    border: 1px solid rgba(212, 175, 53, 0.2);
+    animation: borderPulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
