@@ -50,14 +50,14 @@
                 <span class="text-lg font-black tracking-tight">DEZAN</span>
             </a>
             <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
-                <a href="index.html" class="hover:text-primary transition-colors" data-nav="index.html">Home</a>
-                <a href="about.html" class="hover:text-primary transition-colors" data-nav="about.html">About</a>
-                <a href="services.html" class="hover:text-primary transition-colors"
+                <a href="index.html" class="nav-link-gold transition-colors" data-nav="index.html">Home</a>
+                <a href="about.html" class="nav-link-gold transition-colors" data-nav="about.html">About</a>
+                <a href="services.html" class="nav-link-gold transition-colors"
                     data-nav="services.html">Services</a>
-                <a href="portfolio.html" class="hover:text-primary transition-colors"
+                <a href="portfolio.html" class="nav-link-gold transition-colors"
                     data-nav="portfolio.html">Portfolio</a>
-                <a href="pricing.html" class="hover:text-primary transition-colors" data-nav="pricing.html">Pricing</a>
-                <a href="contact.html" class="hover:text-primary transition-colors" data-nav="contact.html">Contact</a>
+                <a href="pricing.html" class="nav-link-gold transition-colors" data-nav="pricing.html">Pricing</a>
+                <a href="contact.html" class="nav-link-gold transition-colors" data-nav="contact.html">Contact</a>
             </nav>
             <div class="flex items-center gap-2">
                 <button class="theme-toggle-btn p-2 rounded-lg hover:bg-primary/10 transition-colors"
@@ -95,7 +95,10 @@
              <a href="pricing.html" class="w-full sm:w-auto py-3 px-8 bg-primary text-background-dark rounded-lg font-bold text-center hover:brightness-110 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                 Place Order
              </a>
-             <a href="pricing.html" class="w-full sm:w-auto py-3 px-8 border border-primary/20 hover:border-primary/50 text-slate-900 dark:text-slate-100 rounded-lg font-bold text-center transition-all bg-primary/5 hover:bg-primary/10">
+             <a href="contact.html" class="w-full sm:w-auto py-3 px-8 border border-primary/20 hover:border-primary/50 text-slate-900 dark:text-slate-100 rounded-lg font-bold text-center transition-all bg-primary/5 hover:bg-primary/10">
+                Get a Free Quote
+             </a>
+             <a href="pricing.html" class="w-full sm:w-auto py-3 px-8 text-slate-500 dark:text-slate-400 font-bold text-center hover:text-primary transition-all text-sm">
                 View Pricing
              </a>
           </div>
@@ -111,7 +114,7 @@
             <h3 class="text-xl font-bold mb-6 border-l-4 border-primary pl-3">Our Services</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <a href="services.html"
-                    class="bg-primary/5 dark:bg-primary/10 p-6 rounded-xl border border-primary/20 flex gap-4 items-start hover-scale">
+                    class="bg-primary/5 dark:bg-primary/10 p-6 rounded-xl border border-primary/20 flex gap-4 items-start service-card-zoom shadow-sm">
                     <div class="bg-primary p-3 rounded-lg text-background-dark shrink-0">
                         <span class="material-symbols-outlined text-2xl">architecture</span>
                     </div>
@@ -121,7 +124,7 @@
                     </div>
                 </a>
                 <a href="services.html"
-                    class="bg-primary/5 dark:bg-primary/10 p-6 rounded-xl border border-primary/20 flex gap-4 items-start hover-scale">
+                    class="bg-primary/5 dark:bg-primary/10 p-6 rounded-xl border border-primary/20 flex gap-4 items-start service-card-zoom shadow-sm">
                     <div class="bg-primary p-3 rounded-lg text-background-dark shrink-0">
                         <span class="material-symbols-outlined text-2xl">draw</span>
                     </div>
@@ -187,89 +190,70 @@
             </div>
         </section>
 
-        <section class="py-12 reveal overflow-hidden">
-            <div class="px-4 max-w-6xl mx-auto mb-6">
+        <!-- ===== CUSTOMER'S FEEDBACK (Slider + Thumbnails) ===== -->
+        <section class="py-0 reveal" id="feedback-slider-section">
+            
+            <!-- Section heading moved outside the dark box -->
+            <div class="max-w-6xl mx-auto px-4 pt-12 pb-6">
                 <h3 class="text-xl font-bold border-l-4 border-primary pl-3">Client's Feedback</h3>
             </div>
-            
-            <!-- Infinite Carousel Container -->
-            <div class="relative w-full flex overflow-hidden">
-                <!-- Carousel Track -->
-                <div class="carousel-track items-center gap-6 px-3">
-                    <!-- First Set of Images -->
-                    <img src="Client FeedBack/rs=w_1160,h_972 (1).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (2).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (3).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (4).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (5).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (6).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (7).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (8).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (9).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (10).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (11).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (12).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (13).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (14).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (15).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (16).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (17).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (18).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (19).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (20).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (21).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (22).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (23).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (24).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (25).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (26).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (27).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (28).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972.webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_973 (1).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_973.webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_984,h_825 (1).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_984,h_825 (2).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_984,h_825.webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
 
-                    <!-- Second Set (Duplicate) for Seamless Looping -->
-                    <img src="Client FeedBack/rs=w_1160,h_972 (1).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (2).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (3).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (4).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (5).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (6).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (7).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (8).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (9).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (10).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (11).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (12).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (13).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (14).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (15).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (16).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (17).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (18).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (19).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (20).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (21).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (22).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (23).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (24).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (25).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (26).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (27).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972 (28).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_972.webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_973 (1).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_1160,h_973.webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_984,h_825 (1).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_984,h_825 (2).webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
-                    <img src="Client FeedBack/rs=w_984,h_825.webp" alt="Client Feedback" class="h-64 object-contain rounded-xl shadow-sm border border-primary/10">
+            <!-- Dark wrapper matching site theme -->
+            <div class="bg-slate-900 dark:bg-slate-950 relative overflow-hidden">
+
+                <!-- Background watermark logo -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06] select-none">
+                    <div class="text-center">
+                        <div class="text-[180px] md:text-[250px] font-black text-white leading-none tracking-tighter">D</div>
+                        <div class="text-3xl md:text-4xl font-bold tracking-[0.3em] text-white -mt-6">DEZAN</div>
+                        <div class="text-xs md:text-sm tracking-[0.5em] text-white mt-1">DIGITIZERS</div>
+                    </div>
+                </div>
+
+                <!-- Padding spacer for top of slider -->
+                <div class="relative z-10 pt-4"></div>
+
+                <!-- Main Slider (3-panel: prev | current | next) -->
+                <div class="relative w-full" id="feedback-slider-wrapper">
+                    <!-- Left arrow -->
+                    <button id="fb-main-prev" class="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center transition-all" aria-label="Previous image">
+                        <span class="material-symbols-outlined text-white text-2xl">chevron_left</span>
+                    </button>
+
+                    <!-- Slider track -->
+                    <div class="relative w-full overflow-hidden" style="height:clamp(280px,45vw,540px);">
+                        <div id="feedback-slide-track" class="flex transition-transform duration-600 ease-in-out h-full" style="transition-duration:600ms;">
+                            <!-- Images injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Right arrow -->
+                    <button id="fb-main-next" class="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center transition-all" aria-label="Next image">
+                        <span class="material-symbols-outlined text-white text-2xl">chevron_right</span>
+                    </button>
+
+                    <!-- Copyright watermark at bottom of viewer -->
+                    <div class="absolute bottom-2 left-0 right-0 text-center z-10 pointer-events-none">
+                        <span class="text-white/30 text-xs md:text-sm font-medium">All rights reserved Dezan Digitizing©</span>
+                    </div>
+                </div>
+
+                <!-- Thumbnail Strip -->
+                <div class="relative max-w-7xl mx-auto px-2 md:px-6 py-4">
+                    <button id="fb-thumb-prev" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 md:w-10 md:h-10 bg-white/10 hover:bg-white/20 backdrop-blur rounded-full flex items-center justify-center transition-all" aria-label="Scroll thumbnails left">
+                        <span class="material-symbols-outlined text-white text-lg">chevron_left</span>
+                    </button>
+                    <div id="feedback-thumb-strip" class="flex gap-1.5 md:gap-2 overflow-x-auto no-scrollbar py-1 px-10 md:px-14 scroll-smooth">
+                        <!-- Thumbnails injected by JS -->
+                    </div>
+                    <button id="fb-thumb-next" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 md:w-10 md:h-10 bg-white/10 hover:bg-white/20 backdrop-blur rounded-full flex items-center justify-center transition-all" aria-label="Scroll thumbnails right">
+                        <span class="material-symbols-outlined text-white text-lg">chevron_right</span>
+                    </button>
                 </div>
             </div>
         </section>
+
+
 
         <!-- ===== FACEBOOK REVIEWS (MASONRY) ===== -->
         <section class="py-12 px-4 max-w-6xl mx-auto reveal">
@@ -431,7 +415,27 @@
                         <a href="https://www.instagram.com/dezan.digitizing/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center h-10 w-10 border border-slate-700 bg-slate-800 hover:bg-slate-700 hover:scale-110 transition-all duration-300 rounded-lg cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
                         </a>
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center h-10 w-10 border border-slate-700 bg-slate-800 hover:bg-slate-700 hover:scale-110 transition-all duration-300 rounded-lg cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+                        </a>
                     </div>
+                </div>
+                <div>
+                    <h4 class="text-primary font-bold text-xs uppercase tracking-widest mb-4">Contact Info</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-primary text-sm mt-0.5">location_on</span>
+                            <span>Main Office: 123 Stitch Lane, Thread City, TC 10001</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-primary text-sm">phone</span>
+                            <span>+1 (555) 987-6543</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-primary text-sm">mail</span>
+                            <a href="mailto:fdezan91@gmail.com" class="hover:text-primary transition-colors">fdezan91@gmail.com</a>
+                        </li>
+                    </ul>
                 </div>
                 <div>
                     <h4 class="text-primary font-bold text-xs uppercase tracking-widest mb-4">Quick Links</h4>
