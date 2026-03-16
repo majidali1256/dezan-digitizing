@@ -95,6 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
     //  LIGHTBOX FOR FEEDBACK IMAGES
     // ===================================================================
     initLightbox();
+    initFeedbackSlider();
 
     // ===================================================================
     //  ARC GALLERY HERO (index.html only)
@@ -103,7 +104,22 @@ document.addEventListener("DOMContentLoaded", () => {
         initArcGallery();
     }
 
+    initStickyHeader();
 });
+
+// ===== STICKY HEADER LOGIC =====
+function initStickyHeader() {
+    const header = document.querySelector('header');
+    if (!header) return;
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 20) {
+            header.classList.add('header-scrolled');
+        } else {
+            header.classList.remove('header-scrolled');
+        }
+    });
+}
 
 // ===================================================================
 //  ARC GALLERY HERO FUNCTIONALITY
@@ -217,7 +233,7 @@ function initArcGallery() {
 //  LIGHTBOX FUNCTIONALITY
 // ===================================================================
 function initLightbox() {
-    const feedbackImages = document.querySelectorAll('.marquee-item, .carousel-track img');
+    const feedbackImages = document.querySelectorAll('.marquee-item, .carousel-track img, .portfolio-card img, #feedback-slide-track img');
     if (feedbackImages.length === 0) return;
 
     // Create lightbox HTML structure
@@ -599,4 +615,231 @@ function initSuccessPage() {
     if (projectEl) projectEl.textContent = params.get("project") || "—";
     if (serviceEl) serviceEl.textContent = params.get("service") || "—";
     if (amountEl) amountEl.textContent = "$" + (params.get("amount") || "0");
+}
+
+// ===================================================================
+//  FEEDBACK SLIDER (index.html — matches dezandigitizing.com design)
+//  Horizontal slide with peeking prev/next images
+// ===================================================================
+function initFeedbackSlider() {
+    const track = document.getElementById('feedback-slide-track');
+    const strip = document.getElementById('feedback-thumb-strip');
+    const wrapper = document.getElementById('feedback-slider-wrapper');
+    if (!track || !strip) return;
+
+    // All feedback image paths (sequenced alphabetically based on numeric values)
+    const images = [
+        'Client FeedBack/1.webp',
+        'Client FeedBack/2.webp',
+        'Client FeedBack/3.webp',
+        'Client FeedBack/4.webp',
+        'Client FeedBack/5.webp',
+        'Client FeedBack/6.webp',
+        'Client FeedBack/7.webp',
+        'Client FeedBack/8.webp',
+        'Client FeedBack/9.webp',
+        'Client FeedBack/10.webp',
+        'Client FeedBack/11.webp',
+        'Client FeedBack/12.webp',
+        'Client FeedBack/14.webp',
+        'Client FeedBack/15.webp',
+        'Client FeedBack/16.webp',
+        'Client FeedBack/17.webp',
+        'Client FeedBack/18.webp',
+        'Client FeedBack/19.webp',
+        'Client FeedBack/20.webp',
+        'Client FeedBack/21.webp',
+        'Client FeedBack/22.webp',
+        'Client FeedBack/23.webp',
+        'Client FeedBack/24.webp',
+        'Client FeedBack/25.webp',
+        'Client FeedBack/26.webp',
+        'Client FeedBack/27.webp',
+        'Client FeedBack/28.webp',
+        'Client FeedBack/29.webp',
+        'Client FeedBack/30.webp',
+        'Client FeedBack/31.webp',
+        'Client FeedBack/32.webp',
+        'Client FeedBack/33.webp',
+        'Client FeedBack/34.webp',
+        'Client FeedBack/35.webp',
+        'Client FeedBack/36.webp',
+        'Client FeedBack/37.webp',
+        'Client FeedBack/38.webp',
+        'Client FeedBack/39.webp',
+        'Client FeedBack/40.webp'
+    ];
+
+    const totalSlides = images.length;
+    let currentIndex = 0;
+    let autoTimer = null;
+    let isTransitioning = false;
+
+    // --- Slide width percentage (center panel takes ~65%, sides peek) ---
+    const SLIDE_WIDTH_PERCENT = 65; // center image width (sides peek smaller)
+
+    // --- Build slide images in track ---
+    images.forEach((src, i) => {
+        const slide = document.createElement('div');
+        slide.className = 'flex-shrink-0 h-full flex items-center justify-center';
+        slide.style.width = SLIDE_WIDTH_PERCENT + '%';
+        slide.style.transition = 'transform 600ms ease-in-out, opacity 600ms ease-in-out';
+
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = 'Client Feedback ' + (i + 1);
+        img.className = 'w-full h-full object-contain';
+        img.draggable = false;
+        slide.appendChild(img);
+        track.appendChild(slide);
+    });
+
+    const slides = track.querySelectorAll(':scope > div');
+
+    // --- Build Thumbnail Strip ---
+    images.forEach((src, i) => {
+        const thumb = document.createElement('img');
+        thumb.src = src;
+        thumb.alt = 'Thumbnail ' + (i + 1);
+        thumb.className = 'h-14 w-20 md:h-16 md:w-24 object-cover rounded cursor-pointer flex-shrink-0 border-2 transition-all duration-300 hover:border-primary';
+        thumb.style.borderColor = i === 0 ? 'var(--color-primary, #c9a84c)' : 'transparent';
+        thumb.addEventListener('click', () => goTo(i));
+        strip.appendChild(thumb);
+    });
+
+    const thumbs = strip.querySelectorAll('img');
+
+    // --- Apply scale/opacity to slides based on distance from center ---
+    function updateSlideStyles() {
+        slides.forEach((slide, i) => {
+            if (i === currentIndex) {
+                slide.style.transform = 'scale(1) translateX(0)';
+                slide.style.opacity = '1';
+                slide.style.zIndex = '2';
+            } else if (i < currentIndex) {
+                slide.style.transform = 'scale(0.85) translateX(20%)';
+                slide.style.opacity = '0.6';
+                slide.style.zIndex = '1';
+            } else {
+                slide.style.transform = 'scale(0.85) translateX(-20%)';
+                slide.style.opacity = '0.6';
+                slide.style.zIndex = '1';
+            }
+        });
+    }
+
+    // --- Position track so current slide is centered ---
+    function updatePosition(animate) {
+        if (!animate) {
+            track.style.transition = 'none';
+            slides.forEach(s => s.style.transition = 'none');
+        } else {
+            track.style.transition = 'transform 600ms ease-in-out';
+            slides.forEach(s => s.style.transition = 'transform 600ms ease-in-out, opacity 600ms ease-in-out');
+        }
+        // Offset: center the current slide
+        const offset = (50 - SLIDE_WIDTH_PERCENT / 2) - (currentIndex * SLIDE_WIDTH_PERCENT);
+        track.style.transform = 'translateX(' + offset + '%)';
+        updateSlideStyles();
+
+        if (!animate) {
+            // Force reflow then re-enable transitions
+            track.offsetHeight;
+            track.style.transition = 'transform 600ms ease-in-out';
+        }
+    }
+
+    // --- Go to a specific slide ---
+    function goTo(index, animate = true) {
+        if (isTransitioning && animate) return;
+        if (index === currentIndex && animate) return;
+
+        // Update thumbnail borders
+        thumbs[currentIndex].style.borderColor = 'transparent';
+        currentIndex = ((index % totalSlides) + totalSlides) % totalSlides;
+        thumbs[currentIndex].style.borderColor = 'var(--color-primary, #c9a84c)';
+
+        // Scroll active thumb into view, but only if the user is actually looking at the slider section.
+        // This prevents the page from auto-scrolling down to the slider on load when the auto-play timer ticks.
+        const sliderRect = wrapper.getBoundingClientRect();
+        const isSliderVisible = (
+            sliderRect.top < (window.innerHeight || document.documentElement.clientHeight) &&
+            sliderRect.bottom > 0
+        );
+
+        if (isSliderVisible) {
+            thumbs[currentIndex].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+
+        if (animate) {
+            isTransitioning = true;
+            updatePosition(true);
+            setTimeout(() => { isTransitioning = false; }, 650);
+        } else {
+            updatePosition(false);
+        }
+
+        resetAutoPlay();
+    }
+
+    // --- Initial position ---
+    updatePosition(false);
+
+    // --- Auto-play (3 seconds) ---
+    function startAutoPlay() {
+        autoTimer = setInterval(() => {
+            goTo(currentIndex + 1);
+        }, 3000);
+    }
+
+    function resetAutoPlay() {
+        clearInterval(autoTimer);
+        startAutoPlay();
+    }
+
+    startAutoPlay();
+
+    // --- Main viewer prev/next buttons ---
+    const mainPrev = document.getElementById('fb-main-prev');
+    const mainNext = document.getElementById('fb-main-next');
+
+    if (mainPrev) mainPrev.addEventListener('click', () => goTo(currentIndex - 1));
+    if (mainNext) mainNext.addEventListener('click', () => goTo(currentIndex + 1));
+
+    // --- Thumbnail strip scroll buttons ---
+    const thumbPrev = document.getElementById('fb-thumb-prev');
+    const thumbNext = document.getElementById('fb-thumb-next');
+
+    if (thumbPrev) thumbPrev.addEventListener('click', () => {
+        strip.scrollBy({ left: -300, behavior: 'smooth' });
+    });
+    if (thumbNext) thumbNext.addEventListener('click', () => {
+        strip.scrollBy({ left: 300, behavior: 'smooth' });
+    });
+
+    // Pause auto-play on hover over entire slider area
+    if (wrapper) {
+        wrapper.addEventListener('mouseenter', () => clearInterval(autoTimer));
+        wrapper.addEventListener('mouseleave', () => startAutoPlay());
+    }
+
+    // --- Touch/swipe support for mobile ---
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const sliderContainer = track.parentElement;
+
+    sliderContainer.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        clearInterval(autoTimer);
+    }, { passive: true });
+
+    sliderContainer.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 50) {
+            if (diff > 0) goTo(currentIndex + 1);
+            else goTo(currentIndex - 1);
+        }
+        startAutoPlay();
+    }, { passive: true });
 }

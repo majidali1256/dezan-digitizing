@@ -25,38 +25,13 @@ body {
     font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-/* Dark Mode Transitions */
+/* Dark Mode Transitions - targeted to specific properties */
 html {
     scroll-behavior: smooth;
 }
 
 html.dark {
     color-scheme: dark;
-}
-
-header,
-section,
-footer,
-div,
-p,
-span,
-h1,
-h2,
-h3,
-h4,
-a,
-button,
-input,
-textarea,
-select,
-nav,
-main,
-li,
-ul,
-form,
-label,
-img {
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* ============================================
@@ -472,4 +447,52 @@ img {
     to {
         background-position: 200% center;
     }
+}
+
+/* ============================================
+   Sticky Header & Nav Enhancements
+   ============================================ */
+.header-scrolled {
+    background-color: rgba(248, 247, 246, 0.95);
+    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.1);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.dark .header-scrolled {
+    background-color: rgba(32, 29, 18, 0.95);
+    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.3);
+}
+
+.nav-link-gold {
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.nav-link-gold::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #d4af35, #f3da82);
+    transition: width 0.3s ease;
+}
+
+.nav-link-gold:hover::after {
+    width: 100%;
+}
+
+.nav-link-gold:hover {
+    color: #d4af35 !important;
+}
+
+/* Service Card Zoom */
+.service-card-zoom {
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.service-card-zoom:hover {
+    transform: translateY(-8px) scale(1.02);
 }
