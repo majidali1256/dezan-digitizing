@@ -98,11 +98,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initFeedbackSlider();
 
     // ===================================================================
-    //  SCROLL-REVEAL HERO (index.html only)
-    // ===================================================================
-    if (document.getElementById('hero-scroll-section')) {
-        initHeroScrollReveal();
-    }
 
     initStickyHeader();
 });
@@ -119,49 +114,6 @@ function initStickyHeader() {
             header.classList.remove('header-scrolled');
         }
     });
-}
-
-// ===================================================================
-//  SCROLL-REVEAL HERO — Vector → Embroidery crossfade on scroll
-// ===================================================================
-function initHeroScrollReveal() {
-    const section = document.getElementById('hero-scroll-section');
-    const vectorImg = document.getElementById('hero-vector-img');
-    if (!section || !vectorImg) return;
-
-    let ticking = false;
-
-    function onScroll() {
-        if (ticking) return;
-        ticking = true;
-
-        requestAnimationFrame(() => {
-            const rect = section.getBoundingClientRect();
-            const sectionHeight = section.offsetHeight;
-            const viewportHeight = window.innerHeight;
-
-            // scrollDistance = how far we've scrolled past the top of the section
-            const scrollDistance = -rect.top;
-            // The extra scroll room (total height minus one viewport)
-            const extraScroll = sectionHeight - viewportHeight;
-
-            if (extraScroll <= 0) {
-                ticking = false;
-                return;
-            }
-
-            // Progress: 0 at top, 1 when sticky releases
-            const progress = Math.max(0, Math.min(1, scrollDistance / extraScroll));
-
-            // Fade vector image out: opacity goes from 1 → 0
-            vectorImg.style.opacity = 1 - progress;
-
-            ticking = false;
-        });
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll(); // Initial state
 }
 
 //  LIGHTBOX FUNCTIONALITY

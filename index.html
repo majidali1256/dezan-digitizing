@@ -71,9 +71,8 @@
         </div>
     </header>
 
-    <!-- ===== SCROLL-REVEAL HERO ===== -->
-    <section id="hero-scroll-section" class="relative" style="height: 150vh;">
-      <div class="sticky top-0 w-full overflow-hidden bg-background-light dark:bg-background-dark pt-32 pb-16 lg:pt-40 lg:pb-24">
+    <!-- ===== HERO SECTION ===== -->
+    <section id="hero-section" class="relative w-full overflow-hidden bg-background-light dark:bg-background-dark pt-24 pb-16 lg:pt-32 lg:pb-24">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 w-full">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
 
@@ -96,22 +95,20 @@
               </div>
             </div>
 
-            <!-- Right Column: Scroll-Driven Image Reveal -->
+            <!-- Right Column: Hover-Driven Image Reveal -->
             <div class="order-1 md:order-2 flex justify-center md:justify-end">
-              <div id="hero-image-stack" class="relative w-[280px] h-[280px] sm:w-[340px] sm:h-[340px] md:w-[400px] md:h-[400px] lg:w-[480px] lg:h-[480px]">
-                <!-- Embroidery (bottom layer, always visible) -->
+              <div class="relative group w-[280px] h-[280px] sm:w-[340px] sm:h-[340px] md:w-[400px] md:h-[400px] lg:w-[480px] lg:h-[480px] cursor-crosshair">
+                <!-- Embroidery (bottom layer, always visible but hidden by vector initially, zooms on hover) -->
                 <img src="Hero Page/Embroidery.png" alt="Embroidery digitizing result"
-                     class="absolute inset-0 w-full h-full object-contain select-none transform hover:scale-105 transition-transform duration-500" draggable="false" />
-                <!-- Vector (top layer, fades out on scroll) -->
-                <img id="hero-vector-img" src="Hero Page/Vector.png" alt="Vector art design"
-                     class="absolute inset-0 w-full h-full object-contain select-none transform hover:scale-105 transition-transform duration-500" draggable="false"
-                     style="opacity: 1;" />
+                     class="absolute inset-0 w-full h-full object-contain select-none transform transition-transform duration-500 scale-100 group-hover:scale-105" draggable="false" />
+                <!-- Vector (top layer, fades out and zooms on hover) -->
+                <img src="Hero Page/Vector.png" alt="Vector art design"
+                     class="absolute inset-0 w-full h-full object-contain select-none transform transition-all duration-500 scale-100 group-hover:scale-105 opacity-100 group-hover:opacity-0" draggable="false" />
               </div>
             </div>
 
           </div>
         </div>
-      </div>
     </section>
 
     <!-- ===== MAIN CONTENT ===== -->
