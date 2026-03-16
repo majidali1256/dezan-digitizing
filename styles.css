@@ -425,10 +425,6 @@ html.dark {
     }
 }
 
-.hero-animated-border {
-    border: 1px solid rgba(212, 175, 53, 0.2);
-    animation: borderPulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
 
 /* ============================================
    Premium Text Gradients & Hover States

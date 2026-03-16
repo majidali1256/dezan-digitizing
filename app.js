@@ -98,10 +98,10 @@ document.addEventListener("DOMContentLoaded", () => {
     initFeedbackSlider();
 
     // ===================================================================
-    //  ARC GALLERY HERO (index.html only)
+    //  SCROLL-REVEAL HERO (index.html only)
     // ===================================================================
-    if (document.getElementById('arc-gallery-container')) {
-        initArcGallery();
+    if (document.getElementById('hero-scroll-section')) {
+        initHeroScrollReveal();
     }
 
     initStickyHeader();
@@ -122,112 +122,46 @@ function initStickyHeader() {
 }
 
 // ===================================================================
-//  ARC GALLERY HERO FUNCTIONALITY
+//  SCROLL-REVEAL HERO — Vector → Embroidery crossfade on scroll
 // ===================================================================
-function initArcGallery() {
-    const container = document.getElementById('arc-gallery-container');
-    const pivot = document.getElementById('arc-gallery-pivot');
-    if (!container || !pivot) return;
+function initHeroScrollReveal() {
+    const section = document.getElementById('hero-scroll-section');
+    const vectorImg = document.getElementById('hero-vector-img');
+    if (!section || !vectorImg) return;
 
-    // High quality AI-generated mixed embroidery images
-    const images = [
-      'images/ai_flower.png',
-      'images/ai_anime_1.png',
-      'images/ai_car_1.png',
-      'images/ai_pet.png',
-      'images/ai_cartoon_1.png',
-      'images/ai_fruits.png',
-      'images/ai_anime_2.png',
-      'images/ai_character.png',
-      'images/ai_banana_2.png', // The single allowed banana
-      'images/ai_car_2.png',
-      'images/ai_cartoon_2.png',
-      'images/ai_cartoon_3.png',
-    ];
+    let ticking = false;
 
-    const startAngle = 20;
-    const endAngle = 160;
-    
-    // Configuration settings - Reduced base size slightly to better accommodate 12 images
-    const config = {
-        lg: { radius: 480, size: 110 },
-        md: { radius: 360, size: 90 },
-        sm: { radius: 260, size: 70 }
-    };
+    function onScroll() {
+        if (ticking) return;
+        ticking = true;
 
-    let currentConfig = config.lg;
+        requestAnimationFrame(() => {
+            const rect = section.getBoundingClientRect();
+            const sectionHeight = section.offsetHeight;
+            const viewportHeight = window.innerHeight;
 
-    const count = Math.max(images.length, 2);
-    const step = (endAngle - startAngle) / (count - 1);
+            // scrollDistance = how far we've scrolled past the top of the section
+            const scrollDistance = -rect.top;
+            // The extra scroll room (total height minus one viewport)
+            const extraScroll = sectionHeight - viewportHeight;
 
-    function renderArc() {
-        const width = window.innerWidth;
-        // Dynamically calculate radius and size to prevent horizontal overflow on all devices
-        if (width < 640) {
-            currentConfig = { 
-                radius: Math.min(width * 0.38, config.sm.radius), 
-                size: Math.min(width * 0.16, config.sm.size) 
-            };
-        } else if (width < 1024) {
-            currentConfig = { 
-                radius: Math.min(width * 0.42, config.md.radius), 
-                size: Math.min(width * 0.12, config.md.size) 
-            };
-        } else {
-            currentConfig = { 
-                radius: Math.min(width * 0.4, config.lg.radius), 
-                size: config.lg.size 
-            };
-        }
+            if (extraScroll <= 0) {
+                ticking = false;
+                return;
+            }
 
-        container.style.height = `${Math.max(currentConfig.radius * 1.2, 160)}px`;
-        pivot.innerHTML = ''; // Clear existing
+            // Progress: 0 at top, 1 when sticky releases
+            const progress = Math.max(0, Math.min(1, scrollDistance / extraScroll));
 
-        images.forEach((src, i) => {
-            const angle = startAngle + step * i;
-            const angleRad = (angle * Math.PI) / 180;
-            const x = Math.cos(angleRad) * currentConfig.radius;
-            const y = Math.sin(angleRad) * currentConfig.radius;
-            
-            const item = document.createElement('div');
-            item.className = 'absolute opacity-0 animate-fade-in-up-arc group';
-            // Styling exactly like the React component translated to standard DOM manipulation
-            item.style.width = `${currentConfig.size}px`;
-            item.style.height = `${currentConfig.size}px`;
-            item.style.left = `calc(50% + ${x}px)`;
-            item.style.bottom = `${y}px`;
-            item.style.transform = `translate(-50%, 50%)`;
-            item.style.animationDelay = `${i * 100}ms`;
-            item.style.animationFillMode = 'forwards';
-            item.style.zIndex = count - i;
+            // Fade vector image out: opacity goes from 1 → 0
+            vectorImg.style.opacity = 1 - progress;
 
-            const inner = document.createElement('div');
-            // Using Tailwind classes provided in the reference prompt
-            inner.className = 'rounded-2xl shadow-xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-700 bg-white dark:bg-slate-800 transition-transform duration-300 hover:scale-110 w-full h-full cursor-pointer';
-            inner.style.transform = `rotate(${angle / 4}deg)`;
-
-            const img = document.createElement('img');
-            img.src = src;
-            img.alt = 'Embroidery Work ' + (i + 1);
-            img.className = 'block w-full h-full object-cover transition-transform duration-500 group-hover:scale-110';
-            img.draggable = false;
-            img.onerror = () => { img.src = 'https://placehold.co/400x400/334155/e2e8f0?text=Image'; };
-
-            inner.appendChild(img);
-            item.appendChild(inner);
-            pivot.appendChild(item);
+            ticking = false;
         });
     }
 
-    // Initial render
-    renderArc();
-
-    // Re-render on resize with basic debounce
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(renderArc, 100);
-    });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // Initial state
 }
 
 //  LIGHTBOX FUNCTIONALITY
