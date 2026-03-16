@@ -98,6 +98,9 @@ document.addEventListener("DOMContentLoaded", () => {
     initFeedbackSlider();
 
     // ===================================================================
+    if (document.getElementById('hero-image-toggle')) {
+        initHeroToggle();
+    }
 
     initStickyHeader();
 });
@@ -113,6 +116,18 @@ function initStickyHeader() {
         } else {
             header.classList.remove('header-scrolled');
         }
+    });
+}
+
+// ===================================================================
+//  HERO IMAGE TOGGLE (Mobile Click Support)
+// ===================================================================
+function initHeroToggle() {
+    const container = document.getElementById('hero-image-toggle');
+    if (!container) return;
+
+    container.addEventListener('click', () => {
+        container.classList.toggle('is-toggled');
     });
 }
 

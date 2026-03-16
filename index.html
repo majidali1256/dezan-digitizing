@@ -95,14 +95,14 @@
               </div>
             </div>
 
-            <!-- Right Column: Hover-Driven Image Reveal -->
+            <!-- Right Column: Hover & Click Image Reveal -->
             <div class="order-1 md:order-2 flex justify-center md:justify-end">
-              <div class="relative group w-[280px] h-[280px] sm:w-[340px] sm:h-[340px] md:w-[400px] md:h-[400px] lg:w-[480px] lg:h-[480px] cursor-crosshair">
-                <!-- Embroidery (bottom layer, always visible but hidden by vector initially, zooms on hover) -->
+              <div id="hero-image-toggle" class="relative group w-[280px] h-[280px] sm:w-[340px] sm:h-[340px] md:w-[400px] md:h-[400px] lg:w-[480px] lg:h-[480px] cursor-pointer touch-manipulation [&.is-toggled>img]:scale-105 [&.is-toggled>#hero-vector]:opacity-0">
+                <!-- Embroidery (bottom layer, always visible but hidden by vector initially, zooms on hover/click) -->
                 <img src="Hero Page/Embroidery.png" alt="Embroidery digitizing result"
                      class="absolute inset-0 w-full h-full object-contain select-none transform transition-transform duration-500 scale-100 group-hover:scale-105" draggable="false" />
-                <!-- Vector (top layer, fades out and zooms on hover) -->
-                <img src="Hero Page/Vector.png" alt="Vector art design"
+                <!-- Vector (top layer, fades out and zooms on hover/click) -->
+                <img id="hero-vector" src="Hero Page/Vector.png" alt="Vector art design"
                      class="absolute inset-0 w-full h-full object-contain select-none transform transition-all duration-500 scale-100 group-hover:scale-105 opacity-100 group-hover:opacity-0" draggable="false" />
               </div>
             </div>
@@ -504,7 +504,7 @@
         </div>
     </nav>
 
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=4"></script>
 </body>
 
 </html>
