@@ -7,6 +7,7 @@ body {
     font-family: 'Inter', sans-serif;
     min-height: max(884px, 100dvh);
     transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
 }
 
 .material-symbols-outlined {
@@ -28,6 +29,7 @@ body {
 /* Dark Mode Transitions - targeted to specific properties */
 html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
 }
 
 html.dark {
