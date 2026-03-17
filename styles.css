@@ -29,7 +29,6 @@ body {
 /* Dark Mode Transitions - targeted to specific properties */
 html {
     scroll-behavior: smooth;
-    overflow-x: hidden;
 }
 
 html.dark {
