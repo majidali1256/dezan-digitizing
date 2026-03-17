@@ -95,15 +95,27 @@
               </div>
             </div>
 
-            <!-- Right Column: Hover & Click Image Reveal -->
+            <!-- Right Column: Before/After Comparison Slider -->
             <div class="order-1 md:order-2 flex-shrink-0 flex justify-center w-full md:w-auto mt-4 md:mt-0">
-              <div id="hero-image-toggle" class="relative group w-[288px] h-[288px] sm:w-[350px] sm:h-[350px] md:w-[412px] md:h-[412px] lg:w-[494px] lg:h-[494px] cursor-pointer touch-manipulation [&.is-toggled>img]:scale-105 [&.is-toggled>#hero-vector]:opacity-0">
-                <!-- Embroidery (bottom layer, always visible but hidden by vector initially, zooms on hover/click) -->
+              <div id="hero-compare-slider" class="relative w-[288px] h-[288px] sm:w-[350px] sm:h-[350px] md:w-[412px] md:h-[412px] lg:w-[494px] lg:h-[494px] select-none touch-manipulation rounded-2xl overflow-hidden cursor-col-resize">
+                <!-- After layer (Embroidery) — full background -->
                 <img src="Hero Page/Embroidery.png" alt="Embroidery digitizing result"
-                     class="absolute inset-0 w-full h-full object-contain select-none transform transition-transform duration-500 scale-100 group-hover:scale-105" draggable="false" />
-                <!-- Vector (top layer, fades out and zooms on hover/click) -->
-                <img id="hero-vector" src="Hero Page/Vector.png" alt="Vector art design"
-                     class="absolute inset-0 w-full h-full object-contain select-none transform transition-all duration-500 scale-100 group-hover:scale-105 opacity-100 group-hover:opacity-0" draggable="false" />
+                     class="absolute inset-0 w-full h-full object-contain pointer-events-none" draggable="false" />
+                <!-- Before layer (Vector) — clipped by JS -->
+                <div id="compare-before" class="absolute inset-0 overflow-hidden" style="width: 50%;">
+                  <img src="Hero Page/Vector.png" alt="Vector art design"
+                       class="absolute inset-0 w-full h-full object-contain pointer-events-none" style="min-width: 288px;" draggable="false" />
+                </div>
+                <!-- Divider line -->
+                <div id="compare-divider" class="absolute top-0 bottom-0 w-[3px] bg-white/80 shadow-lg pointer-events-none" style="left: 50%; transform: translateX(-50%);">
+                  <!-- Drag handle -->
+                  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full shadow-xl flex items-center justify-center pointer-events-auto cursor-col-resize border-2 border-primary/30">
+                    <span class="text-slate-600 text-sm sm:text-base font-bold tracking-tighter select-none">◀▶</span>
+                  </div>
+                </div>
+                <!-- Labels -->
+                <div class="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded-md uppercase tracking-wider pointer-events-none">Vector</div>
+                <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded-md uppercase tracking-wider pointer-events-none">Embroidery</div>
               </div>
             </div>
 

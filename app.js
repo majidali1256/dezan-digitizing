@@ -98,8 +98,8 @@ document.addEventListener("DOMContentLoaded", () => {
     initFeedbackSlider();
 
     // ===================================================================
-    if (document.getElementById('hero-image-toggle')) {
-        initHeroToggle();
+    if (document.getElementById('hero-compare-slider')) {
+        initCompareSlider();
     }
 
     initStickyHeader();
@@ -120,14 +120,58 @@ function initStickyHeader() {
 }
 
 // ===================================================================
-//  HERO IMAGE TOGGLE (Mobile Click Support)
+//  BEFORE / AFTER COMPARISON SLIDER
 // ===================================================================
-function initHeroToggle() {
-    const container = document.getElementById('hero-image-toggle');
-    if (!container) return;
+function initCompareSlider() {
+    const slider = document.getElementById('hero-compare-slider');
+    const beforeDiv = document.getElementById('compare-before');
+    const divider = document.getElementById('compare-divider');
+    const beforeImg = beforeDiv.querySelector('img');
+    if (!slider || !beforeDiv || !divider) return;
 
-    container.addEventListener('click', () => {
-        container.classList.toggle('is-toggled');
+    // Keep the before image sized to the full container width
+    function syncBeforeImageWidth() {
+        beforeImg.style.minWidth = slider.offsetWidth + 'px';
+    }
+    syncBeforeImageWidth();
+    window.addEventListener('resize', syncBeforeImageWidth);
+
+    let isDragging = false;
+
+    function updateSlider(clientX) {
+        const rect = slider.getBoundingClientRect();
+        let x = clientX - rect.left;
+        x = Math.max(0, Math.min(x, rect.width));
+        const pct = (x / rect.width) * 100;
+        beforeDiv.style.width = pct + '%';
+        divider.style.left = pct + '%';
+    }
+
+    // Mouse events
+    slider.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        updateSlider(e.clientX);
+        e.preventDefault();
+    });
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        updateSlider(e.clientX);
+    });
+    window.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+
+    // Touch events
+    slider.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        updateSlider(e.touches[0].clientX);
+    }, { passive: true });
+    window.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        updateSlider(e.touches[0].clientX);
+    }, { passive: true });
+    window.addEventListener('touchend', () => {
+        isDragging = false;
     });
 }
 
