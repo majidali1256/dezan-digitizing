@@ -189,10 +189,11 @@
                     
                     <div class="flex flex-col gap-1.5">
                         <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Attach Artwork (Optional)</label>
-                        <div onclick="document.getElementById('quote-upload').click()" class="w-full h-28 border-2 border-dashed border-primary/30 hover:border-primary rounded-xl flex items-center justify-center bg-white/60 dark:bg-slate-800/60 cursor-pointer transition-colors group">
-                            <div class="text-center text-slate-500 group-hover:text-primary transition-colors">
-                                <span class="material-symbols-outlined text-3xl mb-1">upload_file</span>
-                                <p class="text-xs font-semibold">Click to upload or drag files here</p>
+                        <div onclick="document.getElementById('quote-upload').click()" id="quote-drop-zone" class="w-full h-28 border-2 border-dashed border-primary/30 hover:border-primary rounded-xl flex flex-col items-center justify-center bg-white/60 dark:bg-slate-800/60 cursor-pointer transition-colors group">
+                            <div class="text-center text-slate-500 group-hover:text-primary transition-colors flex flex-col items-center">
+                                <span class="material-symbols-outlined text-3xl mb-1" id="quote-upload-icon">upload_file</span>
+                                <p class="text-xs font-semibold" id="quote-upload-text">Click to upload or drag files here</p>
+                                <p class="text-xs text-primary mt-1 font-medium" id="quote-upload-filename"></p>
                             </div>
                         </div>
                         <input type="file" name="attachment" id="quote-upload" class="hidden" multiple />
