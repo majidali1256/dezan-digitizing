@@ -97,10 +97,9 @@
         <section class="px-4 py-8 reveal">
             <div class="bg-white dark:bg-slate-800/50 rounded-2xl p-6 md:p-8 border border-primary/10 shadow-sm">
                 <h2 class="text-xl font-bold mb-6">Send us a message</h2>
-                <form id="contact-form" class="flex flex-col gap-5" action="https://api.web3forms.com/submit" method="POST">
-                    <input type="hidden" name="access_key" value="50403232-c15e-4646-974b-272e18a54015">
-                    <input type="hidden" name="subject" value="New Contact Message — Dezan Digitizing">
-                    <input type="hidden" name="from_name" value="Dezan Website">
+                <form action="process_form.php" method="POST" id="contact-form" class="space-y-6">
+                    <input type="hidden" name="subject" value="New Contact Message from Dezan Website">
+                    <input type="hidden" name="redirect" value="order-success.html">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="flex flex-col gap-1">
                             <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Your Name</label>
@@ -127,7 +126,6 @@
                             class="bg-background-light dark:bg-background-dark border border-primary/20 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-3"
                             rows="5" placeholder="Tell us about your project..."></textarea>
                     </div>
-                    <input type="hidden" name="redirect" value="https://web3forms.com/success">
                     <button
                         class="w-full h-14 bg-primary text-background-dark rounded-xl font-black text-lg shadow-xl shadow-primary/20 flex items-center justify-center gap-2 btn-hover-effect"
                         type="submit">
@@ -143,10 +141,9 @@
                 <div class="absolute top-0 right-0 w-48 h-48 bg-primary/20 rounded-bl-full -z-10 blur-3xl"></div>
                 <h2 class="text-2xl font-black mb-2 tracking-tight">Request a Custom Quote</h2>
                 <p class="text-slate-500 text-sm mb-6 max-w-2xl">Have a special project, bulk order, or complex vector artwork requirement? Fill out the details below and we'll get back to you with a comprehensive quote within 24 hours.</p>
-                <form id="quote-form" class="flex flex-col gap-5" action="https://api.web3forms.com/submit" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="access_key" value="50403232-c15e-4646-974b-272e18a54015">
-                    <input type="hidden" name="subject" value="New Quote Request — Dezan Digitizing">
-                    <input type="hidden" name="from_name" value="Dezan Website">
+                <form action="process_form.php" method="POST" enctype="multipart/form-data" id="quote-form" class="space-y-6">
+                <input type="hidden" name="subject" value="New Quote Request from Dezan Website">
+                <input type="hidden" name="redirect" value="order-success.html">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="flex flex-col gap-1.5">
                             <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Your Name <span class="text-red-400">*</span></label>
