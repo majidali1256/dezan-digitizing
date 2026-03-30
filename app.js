@@ -103,7 +103,104 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     initStickyHeader();
+    initFileUploads();
 });
+
+// ===================================================================
+// FILE UPLOAD SYSTEM
+// ===================================================================
+function initFileUploads() {
+    // ----- Pricing / Order Form Upload -----
+    const dropZone = document.getElementById("drop-zone");
+    const fileInput = document.getElementById("file-input");
+    const uploadIcon = document.getElementById("upload-icon");
+    const uploadText = document.getElementById("upload-text");
+    const uploadFilename = document.getElementById("upload-filename");
+
+    if (fileInput) {
+        fileInput.addEventListener("change", () => {
+            if (fileInput.files.length > 0) {
+                showUploadedFiles(fileInput.files, uploadIcon, uploadText, uploadFilename);
+            }
+        });
+    }
+
+    if (dropZone) {
+        dropZone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropZone.classList.add("drag-active");
+        });
+        dropZone.addEventListener("dragleave", () => {
+            dropZone.classList.remove("drag-active");
+        });
+        dropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropZone.classList.remove("drag-active");
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                showUploadedFiles(e.dataTransfer.files, uploadIcon, uploadText, uploadFilename);
+            }
+        });
+    }
+
+    // ----- Quote Form Upload (Contact Page) -----
+    const quoteDropZone = document.getElementById("quote-drop-zone");
+    const quoteUpload = document.getElementById("quote-upload");
+    const quoteUploadIcon = document.getElementById("quote-upload-icon");
+    const quoteUploadText = document.getElementById("quote-upload-text");
+    const quoteUploadFilename = document.getElementById("quote-upload-filename");
+
+    if (quoteUpload) {
+        quoteUpload.addEventListener("change", () => {
+            if (quoteUpload.files.length > 0) {
+                showUploadedFiles(quoteUpload.files, quoteUploadIcon, quoteUploadText, quoteUploadFilename);
+            }
+        });
+    }
+
+    if (quoteDropZone) {
+        quoteDropZone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            quoteDropZone.classList.add("border-primary", "bg-primary/5");
+        });
+        quoteDropZone.addEventListener("dragleave", () => {
+            quoteDropZone.classList.remove("border-primary", "bg-primary/5");
+        });
+        quoteDropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            quoteDropZone.classList.remove("border-primary", "bg-primary/5");
+            if (e.dataTransfer.files.length > 0) {
+                quoteUpload.files = e.dataTransfer.files;
+                showUploadedFiles(e.dataTransfer.files, quoteUploadIcon, quoteUploadText, quoteUploadFilename);
+            }
+        });
+    }
+
+    function showUploadedFiles(filesList, iconEl, textEl, filenameEl) {
+        if (!iconEl || !textEl || !filenameEl) return;
+        
+        iconEl.textContent = "check_circle";
+        iconEl.classList.add("text-green-500");
+        iconEl.classList.remove("text-primary", "text-slate-500");
+        
+        if (filesList.length === 1) {
+            textEl.textContent = "File selected:";
+            filenameEl.textContent = filesList[0].name + " (" + (filesList[0].size / 1024).toFixed(1) + " KB)";
+        } else if (filesList.length > 1) {
+            textEl.textContent = filesList.length + " Files selected:";
+            let totalSize = 0;
+            let fileNames = [];
+            for (let i = 0; i < filesList.length; i++) {
+                totalSize += filesList[i].size;
+                fileNames.push(filesList[i].name);
+            }
+            let displayNames = fileNames.slice(0, 2).join(", ");
+            if (filesList.length > 2) displayNames += ` and ${filesList.length - 2} more`;
+            
+            filenameEl.textContent = displayNames + " (" + (totalSize / 1024).toFixed(1) + " KB total)";
+        }
+    }
+}
 
 // ===== STICKY HEADER LOGIC =====
 function initStickyHeader() {
@@ -289,96 +386,6 @@ function initOrderSystem() {
     // *** REPLACE with your EmailJS public key ***
     if (typeof emailjs !== "undefined") {
         emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");
-    }
-
-    // ----- File Upload -----
-    const dropZone = document.getElementById("drop-zone");
-    const fileInput = document.getElementById("file-input");
-    const uploadIcon = document.getElementById("upload-icon");
-    const uploadText = document.getElementById("upload-text");
-    const uploadFilename = document.getElementById("upload-filename");
-
-    if (fileInput) {
-        fileInput.addEventListener("change", () => {
-            if (fileInput.files.length > 0) {
-                showUploadedFiles(fileInput.files, uploadIcon, uploadText, uploadFilename);
-            }
-        });
-    }
-
-    if (dropZone) {
-        dropZone.addEventListener("dragover", (e) => {
-            e.preventDefault();
-            dropZone.classList.add("drag-active");
-        });
-        dropZone.addEventListener("dragleave", () => {
-            dropZone.classList.remove("drag-active");
-        });
-        dropZone.addEventListener("drop", (e) => {
-            e.preventDefault();
-            dropZone.classList.remove("drag-active");
-            if (e.dataTransfer.files.length > 0) {
-                fileInput.files = e.dataTransfer.files;
-                showUploadedFiles(e.dataTransfer.files, uploadIcon, uploadText, uploadFilename);
-            }
-        });
-    }
-
-    // ----- Quote Form File Upload -----
-    const quoteDropZone = document.getElementById("quote-drop-zone");
-    const quoteUpload = document.getElementById("quote-upload");
-    const quoteUploadIcon = document.getElementById("quote-upload-icon");
-    const quoteUploadText = document.getElementById("quote-upload-text");
-    const quoteUploadFilename = document.getElementById("quote-upload-filename");
-
-    if (quoteUpload) {
-        quoteUpload.addEventListener("change", () => {
-            if (quoteUpload.files.length > 0) {
-                showUploadedFiles(quoteUpload.files, quoteUploadIcon, quoteUploadText, quoteUploadFilename);
-            }
-        });
-    }
-
-    if (quoteDropZone) {
-        quoteDropZone.addEventListener("dragover", (e) => {
-            e.preventDefault();
-            quoteDropZone.classList.add("border-primary");
-        });
-        quoteDropZone.addEventListener("dragleave", () => {
-            quoteDropZone.classList.remove("border-primary");
-        });
-        quoteDropZone.addEventListener("drop", (e) => {
-            e.preventDefault();
-            quoteDropZone.classList.remove("border-primary");
-            if (e.dataTransfer.files.length > 0) {
-                quoteUpload.files = e.dataTransfer.files;
-                showUploadedFiles(e.dataTransfer.files, quoteUploadIcon, quoteUploadText, quoteUploadFilename);
-            }
-        });
-    }
-
-    function showUploadedFiles(filesList, iconEl, textEl, filenameEl) {
-        iconEl.textContent = "check_circle";
-        iconEl.classList.add("text-green-500");
-        iconEl.classList.remove("text-primary");
-        
-        if (filesList.length === 1) {
-            textEl.textContent = "File selected:";
-            filenameEl.textContent = filesList[0].name + " (" + (filesList[0].size / 1024).toFixed(1) + " KB)";
-        } else if (filesList.length > 1) {
-            textEl.textContent = filesList.length + " Files selected:";
-            let totalSize = 0;
-            let fileNames = [];
-            for (let i = 0; i < filesList.length; i++) {
-                totalSize += filesList[i].size;
-                fileNames.push(filesList[i].name);
-            }
-            // Show the first 2 filenames and then "and X more" if there are >2
-            let displayNames = fileNames.slice(0, 2).join(", ");
-            if (filesList.length > 2) displayNames += ` and ${filesList.length - 2} more`;
-            
-            filenameEl.textContent = displayNames + " (" + (totalSize / 1024).toFixed(1) + " KB total)";
-        }
     }
 
     // ----- Service type sync with summary -----
