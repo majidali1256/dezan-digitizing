@@ -396,6 +396,7 @@ function initOrderSystem() {
             if (summaryService) summaryService.textContent = serviceType.value;
         });
     }
+}
 
 
 // ===================================================================
