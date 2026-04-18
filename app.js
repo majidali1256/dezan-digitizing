@@ -275,7 +275,7 @@ function initCompareSlider() {
 //  LIGHTBOX FUNCTIONALITY
 // ===================================================================
 function initLightbox() {
-    const feedbackImages = document.querySelectorAll('.marquee-item, .carousel-track img, .portfolio-card img, #feedback-slide-track img');
+    const feedbackImages = document.querySelectorAll('.marquee-item, .carousel-track img, .portfolio-card img, #feedback-slide-track img, .columns-1 img');
     if (feedbackImages.length === 0) return;
 
     // Create lightbox HTML structure
