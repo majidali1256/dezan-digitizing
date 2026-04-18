@@ -26,9 +26,6 @@
     <link rel="stylesheet" href="styles.css" />
     <!-- EmailJS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <!-- PayPal JS SDK (SANDBOX — replace with live client-id before deploying) -->
-    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD&intent=capture"
-        data-sdk-integration-source="button-factory"></script>
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
@@ -330,22 +327,14 @@
                         </div>
                     </div>
 
-                    <!-- Validation message -->
-                    <div id="form-error"
-                        class="hidden p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-sm font-semibold flex items-center gap-2">
-                        <span class="material-symbols-outlined text-lg">error</span>
-                        <span id="form-error-text">Please select a plan and fill in all required fields.</span>
-                    </div>
-
-                    <!-- PayPal Button Container -->
-                    <div id="paypal-button-container" class="w-full min-h-[50px]">
-                        <!-- PayPal buttons render here -->
-                    </div>
-
-                    <!-- Fallback: pay later note -->
-                    <p class="text-center text-xs text-slate-400 flex items-center justify-center gap-1">
-                        <span class="material-symbols-outlined text-sm">lock</span>
-                        Secure payment powered by PayPal
+                    <!-- Submit Button -->
+                    <button type="submit"
+                        class="w-full h-14 bg-primary text-background-dark rounded-xl font-black text-lg shadow-xl shadow-primary/20 flex items-center justify-center gap-2 btn-hover-effect">
+                        <span class="material-symbols-outlined">send</span> Send Order Details
+                    </button>
+                    
+                    <p class="text-center text-xs text-slate-400 text-balance">
+                        No payment required now. We will review your files and send an invoice later.
                     </p>
                 </form>
             </div>
