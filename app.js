@@ -122,6 +122,7 @@ function initFileUploads() {
         if (!dropZone || !rawInput || !fileListContainer) return;
 
         let filesArray = [];
+        let isSubmitting = false;
 
         // Ensure form supports multipart/form-data for files
         form.setAttribute("enctype", "multipart/form-data");
@@ -283,6 +284,93 @@ function initFileUploads() {
                 form.appendChild(dynamicInput);
             });
         }
+
+        // Intercept form submission to upload files via CORS first
+        form.addEventListener("submit", async (e) => {
+            if (isSubmitting) return;
+            if (filesArray.length === 0) return; // Native submit without attachments is allowed on free tier
+
+            e.preventDefault();
+            isSubmitting = true;
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnHTML = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+
+            const uploadUrls = [];
+
+            try {
+                for (let i = 0; i < filesArray.length; i++) {
+                    const file = filesArray[i];
+                    submitBtn.innerHTML = `
+                        <span class="inline-block animate-spin mr-2 border-2 border-current border-t-transparent rounded-full w-4 h-4"></span>
+                        Uploading File ${i + 1}/${filesArray.length}...
+                    `;
+
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("expire", "172800"); // 48 hours
+
+                    const response = await fetch("https://tmpfiles.org/api/v1/upload", {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Upload failed with status ${response.status}`);
+                    }
+
+                    const json = await response.json();
+                    if (json.status !== "success" || !json.data || !json.data.url) {
+                        throw new Error("Invalid response from upload service");
+                    }
+
+                    // Convert to direct download link
+                    const directUrl = json.data.url.replace("https://tmpfiles.org/", "https://tmpfiles.org/dl/");
+                    uploadUrls.push(directUrl);
+                }
+
+                submitBtn.innerHTML = `
+                    <span class="inline-block animate-spin mr-2 border-2 border-current border-t-transparent rounded-full w-4 h-4"></span>
+                    Submitting Request...
+                `;
+
+                // Remove file fields from form to bypass Web3Forms file upload (Pro feature) check
+                const fileInputs = form.querySelectorAll(`.dynamic-${containerId}-input`);
+                fileInputs.forEach(input => input.remove());
+
+                if (rawInput) {
+                    rawInput.removeAttribute("name");
+                }
+
+                // Add links as hidden text inputs
+                uploadUrls.forEach((url, index) => {
+                    const urlInput = document.createElement("input");
+                    urlInput.type = "hidden";
+                    urlInput.name = `Artwork_File_${index + 1}_Link`;
+                    urlInput.className = `dynamic-${containerId}-input`;
+                    urlInput.value = url;
+                    form.appendChild(urlInput);
+                });
+
+                const countInput = document.createElement("input");
+                countInput.type = "hidden";
+                countInput.name = "Total_Artwork_Files";
+                countInput.className = `dynamic-${containerId}-input`;
+                countInput.value = filesArray.length;
+                form.appendChild(countInput);
+
+                // Submit form natively
+                form.submit();
+
+            } catch (error) {
+                console.error("Submission error:", error);
+                alert(`Upload failed: ${error.message}. Please try again, or submit the form without files and email them to fdezan91@gmail.com.`);
+                isSubmitting = false;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHTML;
+            }
+        });
     }
 
     // Initialize both uploaders
