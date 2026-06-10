@@ -10,12 +10,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const html = document.documentElement;
     const savedTheme = localStorage.getItem("theme");
 
-    // Apply saved theme or default to dark
-    if (savedTheme === "light") {
-        html.classList.remove("dark");
-    } else {
+    // Apply saved theme or default to light
+    if (savedTheme === "dark") {
         html.classList.add("dark");
-        localStorage.setItem("theme", "dark");
+    } else {
+        html.classList.remove("dark");
+        localStorage.setItem("theme", "light");
     }
 
     // Update all theme toggle icons
