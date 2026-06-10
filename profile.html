@@ -36,14 +36,14 @@
                 <span class="text-lg font-black tracking-tight">DEZAN</span>
             </a>
             <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
-                <a href="index.html" class="hover:text-primary transition-colors" data-nav="index.html">Home</a>
-                <a href="about.html" class="hover:text-primary transition-colors" data-nav="about.html">About</a>
-                <a href="services.html" class="hover:text-primary transition-colors"
+                <a href="index.html" class="nav-link-gold transition-colors" data-nav="index.html">Home</a>
+                <a href="about.html" class="nav-link-gold transition-colors" data-nav="about.html">About</a>
+                <a href="services.html" class="nav-link-gold transition-colors"
                     data-nav="services.html">Services</a>
-                <a href="portfolio.html" class="hover:text-primary transition-colors"
+                <a href="portfolio.html" class="nav-link-gold transition-colors"
                     data-nav="portfolio.html">Feedbacks</a>
-                <a href="pricing.html" class="hover:text-primary transition-colors" data-nav="pricing.html">Order and Pricing</a>
-                <a href="contact.html" class="hover:text-primary transition-colors" data-nav="contact.html">Contact</a>
+                <a href="pricing.html" class="nav-link-gold transition-colors" data-nav="pricing.html">Order and Pricing</a>
+                <a href="contact.html" class="nav-link-gold transition-colors" data-nav="contact.html">Contact</a>
             </nav>
             <div class="flex items-center gap-2">
                 <button class="theme-toggle-btn p-2 rounded-lg hover:bg-primary/10 transition-colors"
@@ -66,8 +66,8 @@
                     <span class="material-symbols-outlined text-primary text-4xl">person</span>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-black tracking-tight">John Doe</h1>
-                    <p class="text-sm text-slate-500">john@example.com</p>
+                    <h1 class="text-2xl font-black tracking-tight" id="profile-name">John Doe</h1>
+                    <p class="text-sm text-slate-500" id="profile-email">john@example.com</p>
                     <span
                         class="inline-flex items-center gap-1 mt-1 bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full">
                         <span class="material-symbols-outlined text-xs">verified</span> Premium Member
@@ -139,28 +139,28 @@
         <section class="px-4 py-6 reveal">
             <h2 class="text-lg font-bold mb-4 border-l-4 border-primary pl-3">Account Settings</h2>
             <div class="space-y-2">
-                <button
+                <button id="btn-edit-profile"
                     class="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-800/50 rounded-xl border border-primary/10 hover:border-primary/30 transition-all text-left">
                     <div class="flex items-center gap-3"><span
                             class="material-symbols-outlined text-primary">edit</span><span
                             class="font-semibold text-sm">Edit Profile</span></div>
                     <span class="material-symbols-outlined text-slate-400 text-lg">chevron_right</span>
                 </button>
-                <button
+                <button id="btn-notifications"
                     class="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-800/50 rounded-xl border border-primary/10 hover:border-primary/30 transition-all text-left">
                     <div class="flex items-center gap-3"><span
                             class="material-symbols-outlined text-primary">notifications</span><span
                             class="font-semibold text-sm">Notifications</span></div>
                     <span class="material-symbols-outlined text-slate-400 text-lg">chevron_right</span>
                 </button>
-                <button
+                <button id="btn-security"
                     class="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-800/50 rounded-xl border border-primary/10 hover:border-primary/30 transition-all text-left">
                     <div class="flex items-center gap-3"><span
                             class="material-symbols-outlined text-primary">security</span><span
                             class="font-semibold text-sm">Password & Security</span></div>
                     <span class="material-symbols-outlined text-slate-400 text-lg">chevron_right</span>
                 </button>
-                <button
+                <button id="btn-logout"
                     class="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-800/50 rounded-xl border border-primary/10 hover:border-primary/30 transition-all text-left">
                     <div class="flex items-center gap-3"><span
                             class="material-symbols-outlined text-red-500">logout</span><span

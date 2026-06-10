@@ -104,6 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initStickyHeader();
     initFileUploads();
+    initInteractiveElements();
 });
 
 // ===================================================================
@@ -923,4 +924,278 @@ function initFeedbackSlider() {
         }
         startAutoPlay();
     }, { passive: true });
+}
+
+// ===================================================================
+//  GLOBAL INTERACTIVE ELEMENTS (TOASTS, MODALS, newsletter, profile)
+// ===================================================================
+function initInteractiveElements() {
+    // 1. Toast Notification Helper
+    window.showToast = function(message, type = 'success') {
+        const existingToast = document.querySelector('.global-toast');
+        if (existingToast) existingToast.remove();
+
+        const toast = document.createElement('div');
+        toast.className = `global-toast fixed top-20 right-4 z-[100] px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 border transition-all duration-300 transform translate-y-[-20px] opacity-0 pointer-events-none`;
+        
+        if (type === 'success') {
+            toast.className += ' bg-white dark:bg-slate-800 border-green-500/30 text-slate-800 dark:text-white';
+            toast.innerHTML = `
+                <span class="material-symbols-outlined text-green-500 text-xl filled-icon">check_circle</span>
+                <p class="text-sm font-semibold">${message}</p>
+            `;
+        } else if (type === 'error') {
+            toast.className += ' bg-white dark:bg-slate-800 border-red-500/30 text-slate-800 dark:text-white';
+            toast.innerHTML = `
+                <span class="material-symbols-outlined text-red-500 text-xl filled-icon">error</span>
+                <p class="text-sm font-semibold">${message}</p>
+            `;
+        } else {
+            toast.className += ' bg-white dark:bg-slate-800 border-primary/30 text-slate-800 dark:text-white';
+            toast.innerHTML = `
+                <span class="material-symbols-outlined text-primary text-xl">info</span>
+                <p class="text-sm font-semibold">${message}</p>
+            `;
+        }
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.remove('translate-y-[-20px]', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+        }, 50);
+
+        setTimeout(() => {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-[-20px]', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    };
+
+    // 2. Custom Dialog Modal Helper
+    window.showModalDialog = function(title, contentHTML, actionsHTML = '') {
+        const existingModal = document.querySelector('.global-dialog-modal');
+        if (existingModal) existingModal.remove();
+
+        const backdrop = document.createElement('div');
+        backdrop.className = 'global-dialog-modal fixed inset-0 z-[99] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity duration-300 opacity-0';
+        
+        const modal = document.createElement('div');
+        modal.className = 'bg-background-light dark:bg-background-dark border border-primary/20 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl transition-transform duration-300 transform scale-95 flex flex-col max-h-[85vh]';
+        
+        modal.innerHTML = `
+            <div class="flex items-center justify-between px-6 py-4 border-b border-primary/10 bg-slate-50/50 dark:bg-slate-900/50">
+                <h3 class="font-black text-gradient-gold text-lg">${title}</h3>
+                <button class="close-modal-btn text-slate-400 hover:text-red-500 transition-colors text-2xl font-light leading-none">&times;</button>
+            </div>
+            <div class="p-6 text-sm text-slate-600 dark:text-slate-300 overflow-y-auto space-y-4 flex-1">
+                ${contentHTML}
+            </div>
+            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/30 flex justify-end gap-3 border-t border-primary/10">
+                ${actionsHTML || `<button class="close-modal-btn bg-primary text-background-dark font-bold text-xs px-5 py-2.5 rounded-lg hover:brightness-110 transition-all">Close</button>`}
+            </div>
+        `;
+
+        backdrop.appendChild(modal);
+        document.body.appendChild(backdrop);
+
+        document.body.style.overflow = 'hidden';
+
+        setTimeout(() => {
+            backdrop.classList.add('opacity-100');
+            modal.classList.add('scale-100');
+            modal.classList.remove('scale-95');
+        }, 50);
+
+        const closeBtns = backdrop.querySelectorAll('.close-modal-btn');
+        const closeModal = () => {
+            backdrop.classList.remove('opacity-100');
+            modal.classList.remove('scale-100');
+            modal.classList.add('scale-95');
+            document.body.style.overflow = '';
+            setTimeout(() => backdrop.remove(), 300);
+        };
+
+        closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
+        backdrop.addEventListener('click', (e) => {
+            if (e.target === backdrop) closeModal();
+        });
+    };
+
+    // 3. Newsletter Submission Interceptor
+    document.querySelectorAll('footer form, main form').forEach(form => {
+        const emailInput = form.querySelector('input[type="email"]');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (emailInput && submitBtn && submitBtn.textContent.trim().toLowerCase() === 'join') {
+            form.removeAttribute('onsubmit');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = emailInput.value.trim();
+                if (!email) return;
+                
+                showToast(`Thank you! "${email}" has been added to our list.`, 'success');
+                emailInput.value = '';
+            });
+        }
+    });
+
+    // 4. Privacy & Terms Modals (Intercept # clicks containing Privacy or Terms)
+    document.querySelectorAll('a[href="#"]').forEach(link => {
+        const text = link.textContent.trim().toLowerCase();
+        if (text.includes('privacy')) {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const privacyContent = `
+                    <p class="font-bold text-slate-800 dark:text-slate-200">1. Information Collection</p>
+                    <p>We collect only the name, email address, project names, sizing, format requests, and artwork files uploaded via our order and quote forms. We do not use persistent cookies or trackers.</p>
+                    
+                    <p class="font-bold text-slate-800 dark:text-slate-200">2. Uploaded Artworks</p>
+                    <p>All client designs and logo files uploaded to Dezan Digitizing are held in absolute confidentiality. They are used solely to perform the embroidery digitizing and vector conversion services you request.</p>
+                    
+                    <p class="font-bold text-slate-800 dark:text-slate-200">3. File Retention</p>
+                    <p>Temporary file uploads (via tmpfiles.org) expire within 48 hours. Digitized production files (.DST, .PES, etc.) are kept in our secure cloud vaults for 5 years so you can retrieve them if lost.</p>
+                    
+                    <p class="font-bold text-slate-800 dark:text-slate-200">4. Third-Party Sharing</p>
+                    <p>We do not share, lease, sell, or distribute your artwork, designs, or personal details with any external organizations or third parties.</p>
+                `;
+                showModalDialog("Privacy Policy", privacyContent);
+            });
+        } else if (text.includes('terms')) {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const termsContent = `
+                    <p class="font-bold text-slate-800 dark:text-slate-200">1. Ordering & Approvals</p>
+                    <p>By placing an order, you confirm you own the legal rights or licenses to reproduce the uploaded artwork/logo designs.</p>
+                    
+                    <p class="font-bold text-slate-800 dark:text-slate-200">2. Free Review & Invoicing</p>
+                    <p>No upfront payment is required when submitting files. We will review your artwork and placement specs, verify if there are complex edits needed, and email you a direct invoice via PayPal or card processor.</p>
+                    
+                    <p class="font-bold text-slate-800 dark:text-slate-200">3. Delivery & Turnaround</p>
+                    <p>Standard delivery is 12-24 hours for Left Chest, Hat, and Simple Vector designs. Jacket Backs and Pet Portraits take up to 2-3 days depending on complexity.</p>
+                    
+                    <p class="font-bold text-slate-800 dark:text-slate-200">4. Free Edits & Revisions</p>
+                    <p>We offer unlimited minor edits/revisions (such as minor size adjustments, minor stitch adjustments, density edits) for 30 days after order delivery to guarantee perfect sewout results.</p>
+                `;
+                showModalDialog("Terms of Service", termsContent);
+            });
+        }
+    });
+
+    // 5. Profile settings buttons (profile.html only)
+    const currentPath = window.location.pathname;
+    const currentPage = currentPath.substring(currentPath.lastIndexOf("/") + 1) || "index.html";
+    if (currentPage === "profile.html" || currentPage === "profile") {
+        
+        // Load saved profile data
+        const profileNameEl = document.getElementById("profile-name");
+        const profileEmailEl = document.getElementById("profile-email");
+        if (profileNameEl && profileEmailEl) {
+            const savedName = localStorage.getItem("profileName");
+            const savedEmail = localStorage.getItem("profileEmail");
+            if (savedName) profileNameEl.textContent = savedName;
+            if (savedEmail) profileEmailEl.textContent = savedEmail;
+        }
+
+        // Edit Profile
+        const editProfileBtn = document.getElementById("btn-edit-profile");
+        if (editProfileBtn) {
+            editProfileBtn.addEventListener("click", () => {
+                const currentName = profileNameEl ? profileNameEl.textContent : "John Doe";
+                const currentEmail = profileEmailEl ? profileEmailEl.textContent : "john@example.com";
+                
+                const editHTML = `
+                    <div class="flex flex-col gap-4">
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-bold text-slate-600 dark:text-slate-400">Full Name</label>
+                            <input id="edit-name-input" type="text" class="w-full h-11 bg-white dark:bg-background-dark border border-primary/30 rounded-lg px-4 focus:ring-1 focus:ring-primary text-slate-800 dark:text-white" value="${currentName}">
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-bold text-slate-600 dark:text-slate-400">Email Address</label>
+                            <input id="edit-email-input" type="email" class="w-full h-11 bg-white dark:bg-background-dark border border-primary/30 rounded-lg px-4 focus:ring-1 focus:ring-primary text-slate-800 dark:text-white" value="${currentEmail}">
+                        </div>
+                    </div>
+                `;
+                
+                const actionsHTML = `
+                    <button class="close-modal-btn border border-primary/20 hover:bg-primary/5 text-slate-700 dark:text-slate-300 font-bold text-xs px-4 py-2.5 rounded-lg transition-all">Cancel</button>
+                    <button id="save-profile-btn" class="bg-primary text-background-dark font-bold text-xs px-5 py-2.5 rounded-lg hover:brightness-110 transition-all">Save Changes</button>
+                `;
+                
+                showModalDialog("Edit Profile Details", editHTML, actionsHTML);
+                
+                // Save button handler
+                const saveBtn = document.getElementById("save-profile-btn");
+                if (saveBtn) {
+                    saveBtn.addEventListener("click", () => {
+                        const newName = document.getElementById("edit-name-input").value.trim();
+                        const newEmail = document.getElementById("edit-email-input").value.trim();
+                        
+                        if (!newName || !newEmail) {
+                            showToast("Name and email are required.", "error");
+                            return;
+                        }
+                        
+                        localStorage.setItem("profileName", newName);
+                        localStorage.setItem("profileEmail", newEmail);
+                        
+                        if (profileNameEl) profileNameEl.textContent = newName;
+                        if (profileEmailEl) profileEmailEl.textContent = newEmail;
+                        
+                        showToast("Profile details updated successfully!", "success");
+                        
+                        // Close modal by clicking any close button
+                        const closeBtn = document.querySelector('.global-dialog-modal .close-modal-btn');
+                        if (closeBtn) closeBtn.click();
+                    });
+                }
+            });
+        }
+
+        // Notifications
+        const notifBtn = document.getElementById("btn-notifications");
+        if (notifBtn) {
+            notifBtn.addEventListener("click", () => {
+                showToast("You have no new notifications.", "info");
+            });
+        }
+
+        // Password & Security
+        const securityBtn = document.getElementById("btn-security");
+        if (securityBtn) {
+            securityBtn.addEventListener("click", () => {
+                showToast("Password and security settings are locked in demo mode.", "error");
+            });
+        }
+
+        // Log Out
+        const logoutBtn = document.getElementById("btn-logout");
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", () => {
+                const logoutHTML = `<p>Are you sure you want to log out of your profile account?</p>`;
+                const actionsHTML = `
+                    <button class="close-modal-btn border border-primary/20 hover:bg-primary/5 text-slate-700 dark:text-slate-300 font-bold text-xs px-4 py-2.5 rounded-lg transition-all">Cancel</button>
+                    <button id="confirm-logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-5 py-2.5 rounded-lg transition-all">Log Out</button>
+                `;
+                
+                showModalDialog("Confirm Log Out", logoutHTML, actionsHTML);
+                
+                const confirmBtn = document.getElementById("confirm-logout-btn");
+                if (confirmBtn) {
+                    confirmBtn.addEventListener("click", () => {
+                        localStorage.removeItem("profileName");
+                        localStorage.removeItem("profileEmail");
+                        showToast("Logging out...", "info");
+                        
+                        // Close modal
+                        const closeBtn = document.querySelector('.global-dialog-modal .close-modal-btn');
+                        if (closeBtn) closeBtn.click();
+                        
+                        setTimeout(() => {
+                            window.location.href = "index.html";
+                        }, 1200);
+                    });
+                }
+            });
+        }
+    }
 }
