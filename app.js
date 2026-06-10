@@ -6,6 +6,18 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
+    // ===== ADAPTIVE ENVIRONMENT ROUTING (LOCAL ONLY) =====
+    // If running locally, rewrite actions pointing to process_form.php back to Web3Forms
+    // so the user can test email delivery and uploads without a local PHP server.
+    const isLocal = window.location.hostname === 'localhost' || 
+                    window.location.hostname === '127.0.0.1' || 
+                    window.location.protocol === 'file:';
+    if (isLocal) {
+        document.querySelectorAll('form[action="process_form.php"]').forEach(form => {
+            form.setAttribute("action", "https://api.web3forms.com/submit");
+        });
+    }
+
     // ===== THEME TOGGLE =====
     const html = document.documentElement;
     const savedTheme = localStorage.getItem("theme");
@@ -271,11 +283,14 @@ function initFileUploads() {
             const existingInputs = form.querySelectorAll(`.dynamic-${containerId}-input`);
             existingInputs.forEach(input => input.remove());
 
+            const action = form.getAttribute("action") || "";
+            const isWeb3Forms = action.includes("web3forms.com");
+
             // Create and append a hidden input for each file
             filesArray.forEach((file, index) => {
                 const dynamicInput = document.createElement("input");
                 dynamicInput.type = "file";
-                dynamicInput.name = `${inputPrefix}${index + 1}`;
+                dynamicInput.name = isWeb3Forms ? `${inputPrefix}${index + 1}` : `${inputPrefix}[]`;
                 dynamicInput.className = `dynamic-${containerId}-input hidden`;
 
                 const dt = new DataTransfer();
@@ -288,6 +303,13 @@ function initFileUploads() {
 
         // Intercept form submission to upload files via CORS first
         form.addEventListener("submit", async (e) => {
+            const action = form.getAttribute("action") || "";
+            const isWeb3Forms = action.includes("web3forms.com");
+            if (!isWeb3Forms) {
+                // If it's a native submit (PHP process_form.php), let it proceed natively with files
+                return;
+            }
+
             if (isSubmitting) return;
             if (filesArray.length === 0) return; // Native submit without attachments is allowed on free tier
 
