@@ -110,96 +110,179 @@ document.addEventListener("DOMContentLoaded", () => {
 // FILE UPLOAD SYSTEM
 // ===================================================================
 function initFileUploads() {
-    // ----- Pricing / Order Form Upload -----
-    const dropZone = document.getElementById("drop-zone");
-    const fileInput = document.getElementById("file-input");
-    const uploadIcon = document.getElementById("upload-icon");
-    const uploadText = document.getElementById("upload-text");
-    const uploadFilename = document.getElementById("upload-filename");
+    // Reusable Multi-File Uploader Setup
+    function setupMultiUploader(containerId, formId, inputPrefix = "attachment") {
+        const container = document.getElementById(containerId);
+        const form = document.getElementById(formId);
+        if (!container || !form) return;
 
-    if (fileInput) {
-        fileInput.addEventListener("change", () => {
-            if (fileInput.files.length > 0) {
-                showUploadedFiles(fileInput.files, uploadIcon, uploadText, uploadFilename);
-            }
-        });
-    }
+        const dropZone = container.querySelector(".upload-zone");
+        const rawInput = container.querySelector(".raw-file-input");
+        const fileListContainer = container.querySelector(".file-list");
+        if (!dropZone || !rawInput || !fileListContainer) return;
 
-    if (dropZone) {
-        dropZone.addEventListener("dragover", (e) => {
-            e.preventDefault();
-            dropZone.classList.add("drag-active");
+        let filesArray = [];
+
+        // Ensure form supports multipart/form-data for files
+        form.setAttribute("enctype", "multipart/form-data");
+
+        // Click on drop zone opens file picker
+        dropZone.addEventListener("click", () => {
+            rawInput.click();
         });
-        dropZone.addEventListener("dragleave", () => {
-            dropZone.classList.remove("drag-active");
+
+        // Drag and drop listeners
+        ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
         });
+
+        ["dragenter", "dragover"].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.add("border-primary", "bg-primary/10", "scale-[1.01]");
+            }, false);
+        });
+
+        ["dragleave", "drop"].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.remove("border-primary", "bg-primary/10", "scale-[1.01]");
+            }, false);
+        });
+
         dropZone.addEventListener("drop", (e) => {
-            e.preventDefault();
-            dropZone.classList.remove("drag-active");
-            if (e.dataTransfer.files.length > 0) {
-                fileInput.files = e.dataTransfer.files;
-                showUploadedFiles(e.dataTransfer.files, uploadIcon, uploadText, uploadFilename);
+            const dt = e.dataTransfer;
+            if (dt && dt.files.length > 0) {
+                handleFiles(Array.from(dt.files));
             }
         });
-    }
 
-    // ----- Quote Form Upload (Contact Page) -----
-    const quoteDropZone = document.getElementById("quote-drop-zone");
-    const quoteUpload = document.getElementById("quote-upload");
-    const quoteUploadIcon = document.getElementById("quote-upload-icon");
-    const quoteUploadText = document.getElementById("quote-upload-text");
-    const quoteUploadFilename = document.getElementById("quote-upload-filename");
-
-    if (quoteUpload) {
-        quoteUpload.addEventListener("change", () => {
-            if (quoteUpload.files.length > 0) {
-                showUploadedFiles(quoteUpload.files, quoteUploadIcon, quoteUploadText, quoteUploadFilename);
+        rawInput.addEventListener("change", () => {
+            if (rawInput.files.length > 0) {
+                handleFiles(Array.from(rawInput.files));
+                rawInput.value = ""; // Clear value so same file can be chosen again
             }
         });
-    }
 
-    if (quoteDropZone) {
-        quoteDropZone.addEventListener("dragover", (e) => {
-            e.preventDefault();
-            quoteDropZone.classList.add("border-primary", "bg-primary/5");
-        });
-        quoteDropZone.addEventListener("dragleave", () => {
-            quoteDropZone.classList.remove("border-primary", "bg-primary/5");
-        });
-        quoteDropZone.addEventListener("drop", (e) => {
-            e.preventDefault();
-            quoteDropZone.classList.remove("border-primary", "bg-primary/5");
-            if (e.dataTransfer.files.length > 0) {
-                quoteUpload.files = e.dataTransfer.files;
-                showUploadedFiles(e.dataTransfer.files, quoteUploadIcon, quoteUploadText, quoteUploadFilename);
-            }
-        });
-    }
+        function handleFiles(newFiles) {
+            newFiles.forEach(file => {
+                // Size validation: max 5MB (5 * 1024 * 1024 bytes)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(`File "${file.name}" is too large. Max file size is 5MB.`);
+                    return;
+                }
 
-    function showUploadedFiles(filesList, iconEl, textEl, filenameEl) {
-        if (!iconEl || !textEl || !filenameEl) return;
-        
-        iconEl.textContent = "check_circle";
-        iconEl.classList.add("text-green-500");
-        iconEl.classList.remove("text-primary", "text-slate-500");
-        
-        if (filesList.length === 1) {
-            textEl.textContent = "File selected:";
-            filenameEl.textContent = filesList[0].name + " (" + (filesList[0].size / 1024).toFixed(1) + " KB)";
-        } else if (filesList.length > 1) {
-            textEl.textContent = filesList.length + " Files selected:";
-            let totalSize = 0;
-            let fileNames = [];
-            for (let i = 0; i < filesList.length; i++) {
-                totalSize += filesList[i].size;
-                fileNames.push(filesList[i].name);
+                // Duplicate check
+                const isDuplicate = filesArray.some(f => f.name === file.name && f.size === file.size);
+                if (isDuplicate) return;
+
+                // Max limit check: 5 files
+                if (filesArray.length >= 5) {
+                    alert("You can upload a maximum of 5 artwork files.");
+                    return;
+                }
+
+                filesArray.push(file);
+            });
+
+            updateUI();
+            updateFormInputs();
+        }
+
+        function removeFile(index) {
+            filesArray.splice(index, 1);
+            updateUI();
+            updateFormInputs();
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext)) {
+                return 'image';
             }
-            let displayNames = fileNames.slice(0, 2).join(", ");
-            if (filesList.length > 2) displayNames += ` and ${filesList.length - 2} more`;
-            
-            filenameEl.textContent = displayNames + " (" + (totalSize / 1024).toFixed(1) + " KB total)";
+            if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
+                return 'folder_zip';
+            }
+            if (['pdf'].includes(ext)) {
+                return 'picture_as_pdf';
+            }
+            if (['dst', 'pes', 'exp', 'ofm', 'jef', 'hus', 'vip', 'vp3', 'xxx'].includes(ext)) {
+                return 'architecture';
+            }
+            return 'description';
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function updateUI() {
+            if (filesArray.length === 0) {
+                fileListContainer.classList.add("hidden");
+                fileListContainer.innerHTML = "";
+                return;
+            }
+
+            fileListContainer.classList.remove("hidden");
+            fileListContainer.innerHTML = "";
+
+            filesArray.forEach((file, index) => {
+                const icon = getFileIcon(file.name);
+                const sizeStr = formatBytes(file.size);
+
+                const fileItem = document.createElement("div");
+                fileItem.className = "flex items-center justify-between p-3 bg-white/70 dark:bg-slate-800/80 border border-primary/10 rounded-xl text-left hover:border-primary/30 transition-all animate-fade-in";
+                fileItem.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden pr-2">
+                        <span class="material-symbols-outlined text-primary text-2xl flex-shrink-0">${icon}</span>
+                        <div class="overflow-hidden">
+                            <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">${file.name}</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500">${sizeStr}</p>
+                        </div>
+                    </div>
+                    <button type="button" class="remove-btn p-1.5 text-slate-400 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined text-xl">delete</span>
+                    </button>
+                `;
+
+                fileItem.querySelector(".remove-btn").addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    removeFile(index);
+                });
+
+                fileListContainer.appendChild(fileItem);
+            });
+        }
+
+        function updateFormInputs() {
+            // Remove existing dynamic inputs in this form
+            const existingInputs = form.querySelectorAll(`.dynamic-${containerId}-input`);
+            existingInputs.forEach(input => input.remove());
+
+            // Create and append a hidden input for each file
+            filesArray.forEach((file, index) => {
+                const dynamicInput = document.createElement("input");
+                dynamicInput.type = "file";
+                dynamicInput.name = `${inputPrefix}${index + 1}`;
+                dynamicInput.className = `dynamic-${containerId}-input hidden`;
+
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                dynamicInput.files = dt.files;
+
+                form.appendChild(dynamicInput);
+            });
         }
     }
+
+    // Initialize both uploaders
+    setupMultiUploader("quote-upload-container", "quote-form", "attachment");
+    setupMultiUploader("order-upload-container", "order-form", "attachment");
 }
 
 // ===== STICKY HEADER LOGIC =====

@@ -142,7 +142,7 @@
                 <div class="absolute top-0 right-0 w-48 h-48 bg-primary/20 rounded-bl-full -z-10 blur-3xl"></div>
                 <h2 class="text-2xl font-black mb-2 tracking-tight">Request a Custom Quote</h2>
                 <p class="text-slate-500 text-sm mb-6 max-w-2xl">Have a special project, bulk order, or complex vector artwork requirement? Fill out the details below and we'll get back to you with a comprehensive quote within 24 hours.</p>
-                <form action="https://api.web3forms.com/submit" method="POST" id="quote-form" class="space-y-6">
+                <form action="https://api.web3forms.com/submit" method="POST" id="quote-form" class="space-y-6" enctype="multipart/form-data">
                 <input type="hidden" name="access_key" value="50403232-c15e-4646-974b-272e18a54015">
                 <input type="hidden" name="subject" value="New Quote Request from Dezan Website">
                 <input type="hidden" name="redirect" value="order-success.html">
@@ -186,16 +186,18 @@
                             rows="4" placeholder="Please describe the size, fabric type, preferred machine formats (DST, PES, EPS), and turnaround expectations..."></textarea>
                     </div>
                     
-                    <div class="flex flex-col gap-1.5">
+                    <div class="flex flex-col gap-1.5" id="quote-upload-container">
                         <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Artwork Files</label>
-                        <div class="w-full border-2 border-dashed border-primary/30 rounded-xl flex flex-col items-center justify-center bg-white/60 dark:bg-slate-800/60 p-4 text-center">
-                            <span class="material-symbols-outlined text-3xl mb-1 text-primary">attach_email</span>
-                            <p class="text-xs font-semibold text-slate-500">After submitting this form, please email your artwork files to:</p>
-                            <a href="mailto:fdezan91@gmail.com" class="text-sm text-primary font-bold mt-1 hover:underline">fdezan91@gmail.com</a>
+                        <div class="upload-zone w-full border-2 border-dashed border-primary/30 hover:border-primary/80 dark:hover:border-primary/80 rounded-xl flex flex-col items-center justify-center bg-white/60 dark:bg-slate-800/60 p-5 text-center cursor-pointer transition-all hover:scale-[1.005]">
+                            <span class="material-symbols-outlined text-primary text-4xl mb-2">cloud_upload</span>
+                            <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Drag &amp; Drop artwork files here or <span class="text-primary font-bold">Browse</span></p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Upload up to 5 files (Max 5MB each)</p>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500">Formats: DST, PES, EXP, JPG, PNG, PDF, ZIP, etc.</p>
+                            <input type="file" class="raw-file-input hidden" multiple accept=".dst,.pes,.exp,.ofm,.jef,.hus,.vip,.vp3,.xxx,.pdf,.png,.jpg,.jpeg,.gif,.zip,.rar,.ai,.eps,.svg,.cdr">
                         </div>
+                        <div class="file-list mt-3 space-y-2 hidden"></div>
                     </div>
                     
-                    <input type="hidden" name="redirect" value="https://web3forms.com/success">
                     <button
                         class="w-full h-14 mt-2 bg-primary text-background-dark rounded-xl font-black text-lg shadow-xl shadow-primary/20 flex items-center justify-center gap-2 btn-hover-effect hover:-translate-y-0.5 transition-all"
                         type="submit">
