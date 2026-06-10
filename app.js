@@ -131,6 +131,11 @@ function initFileUploads() {
             rawInput.click();
         });
 
+        // Prevent click events on input from bubbling up to dropZone
+        rawInput.addEventListener("click", (e) => {
+            e.stopPropagation();
+        });
+
         // Drag and drop listeners
         ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
             dropZone.addEventListener(eventName, (e) => {
@@ -167,9 +172,9 @@ function initFileUploads() {
 
         function handleFiles(newFiles) {
             newFiles.forEach(file => {
-                // Size validation: max 5MB (5 * 1024 * 1024 bytes)
-                if (file.size > 5 * 1024 * 1024) {
-                    alert(`File "${file.name}" is too large. Max file size is 5MB.`);
+                // Size validation: max 10MB (10 * 1024 * 1024 bytes)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert(`File "${file.name}" is too large. Max file size is 10MB.`);
                     return;
                 }
 
