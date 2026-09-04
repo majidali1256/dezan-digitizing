@@ -427,10 +427,11 @@ html.dark {
 
 
 /* ============================================
+/* ============================================
    Premium Text Gradients & Hover States
    ============================================ */
 .text-gradient-gold {
-    background: linear-gradient(135deg, #d4af35 0%, #f3da82 50%, #b89324 100%);
+    background: linear-gradient(135deg, #8b6807 0%, #b89324 50%, #715203 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -439,10 +440,46 @@ html.dark {
     animation: textShine 4s linear infinite;
 }
 
+.dark .text-gradient-gold {
+    background: linear-gradient(135deg, #d4af35 0%, #f3da82 50%, #b89324 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+}
+
 @keyframes textShine {
     to {
         background-position: 200% center;
     }
+}
+
+/* ============================================
+   Light Mode Text Contrast Enhancements (WCAG 2.1 AA)
+   Ensures all text is crisp & readable against white/light backgrounds
+   ============================================ */
+:root:not(.dark) .text-primary {
+    color: #9a7810;
+}
+:root:not(.dark) .bg-slate-900 .text-primary,
+:root:not(.dark) .bg-slate-950 .text-primary,
+:root:not(.dark) .bg-card-dark .text-primary,
+:root:not(.dark) .bg-background-dark .text-primary,
+:root:not(.dark) .bg-black .text-primary {
+    color: #d4af35;
+}
+
+:root:not(.dark) .text-amber-400 {
+    color: #b45309;
+}
+:root:not(.dark) .bg-slate-900 .text-amber-400,
+:root:not(.dark) .bg-slate-950 .text-amber-400,
+:root:not(.dark) .bg-card-dark .text-amber-400 {
+    color: #fbbf24;
+}
+
+:root:not(.dark) .text-slate-400:not(.bg-slate-900 *):not(.bg-slate-950 *):not(.bg-card-dark *):not(.bg-black *) {
+    color: #475569;
 }
 
 /* ============================================

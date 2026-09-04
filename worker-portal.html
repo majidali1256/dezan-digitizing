@@ -33,37 +33,37 @@
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30">
 
     <!-- ===== ROLE DEMO SWITCHER BAR ===== -->
-    <div class="bg-card-dark border-b border-primary/20 py-2 px-4 text-xs">
+    <div class="bg-slate-100 dark:bg-card-dark border-b border-slate-200 dark:border-primary/20 py-2 px-4 text-xs text-slate-700 dark:text-slate-300">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 font-bold border border-purple-500/30 text-[10px]">
-                    <span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></span> RESTRICTED WORKER WORKSPACE
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-500/10 text-purple-800 dark:text-purple-400 font-bold border border-purple-300 dark:border-purple-500/30 text-[10px]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-purple-600 dark:bg-purple-400 animate-pulse"></span> RESTRICTED WORKER WORKSPACE
                 </span>
-                <span class="text-slate-400 hidden sm:inline">Logged in as: <strong id="top-worker-name" class="text-white">Alex Miller</strong></span>
+                <span class="text-slate-600 dark:text-slate-400 hidden sm:inline">Logged in as: <strong id="top-worker-name" class="text-slate-900 dark:text-white font-bold">Alex Miller</strong></span>
             </div>
             <div class="flex items-center gap-2">
                 <span class="text-slate-500 text-[11px] hidden md:inline">Switch Workspace:</span>
-                <button onclick="window.insforgeClient.loginAsDemo('admin')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-primary border border-primary/30 text-[10px] font-bold">Admin</button>
-                <button onclick="window.insforgeClient.loginAsDemo('client')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]">Client</button>
-                <button onclick="window.insforgeClient.signOut()" class="px-2 py-1 rounded bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-[10px] font-bold ml-2">Sign Out</button>
+                <button onclick="window.insforgeClient.loginAsDemo('admin')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-800 dark:text-primary border border-slate-300 dark:border-primary/30 text-[10px] font-bold transition-colors">Admin</button>
+                <button onclick="window.insforgeClient.loginAsDemo('client')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-transparent text-[10px] font-semibold transition-colors">Client</button>
+                <button onclick="window.insforgeClient.signOut()" class="px-2.5 py-1 rounded-lg bg-red-100 dark:bg-red-500/10 hover:bg-red-200 dark:hover:bg-red-500/20 text-red-700 dark:text-red-400 border border-red-300 dark:border-red-500/20 text-[10px] font-bold ml-2 transition-colors">Sign Out</button>
             </div>
         </div>
     </div>
 
     <!-- ===== HEADER ===== -->
-    <header class="sticky top-0 z-40 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-primary/20">
+    <header class="sticky top-0 z-40 bg-white/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-primary/20">
         <div class="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
             <a href="index.html" class="flex items-center gap-2">
                 <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover shadow-md shadow-primary/20">
-                <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN <span class="text-primary text-xs uppercase font-bold tracking-widest ml-1">Digitizer Hub</span></span>
+                <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN <span class="text-amber-800 dark:text-primary text-xs uppercase font-bold tracking-widest ml-1">Digitizer Hub</span></span>
             </a>
 
             <div class="flex items-center gap-3">
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/20 text-xs font-semibold">
                     <span class="material-symbols-outlined text-xs">shield</span> Client PII & Price Masked
                 </div>
-                <button class="theme-toggle-btn p-2 rounded-lg hover:bg-primary/10 transition-colors" aria-label="Toggle theme">
-                    <span class="material-symbols-outlined theme-toggle-icon text-lg text-primary">light_mode</span>
+                <button class="theme-toggle-btn p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors border border-slate-200 dark:border-primary/20" aria-label="Toggle theme">
+                    <span class="material-symbols-outlined theme-toggle-icon text-lg text-amber-800 dark:text-primary">dark_mode</span>
                 </button>
             </div>
         </div>
@@ -73,16 +73,16 @@
     <main class="flex-1 max-w-5xl mx-auto px-4 py-8 w-full">
 
         <!-- Welcome Banner -->
-        <div class="p-6 rounded-2xl bg-white dark:bg-card-dark border border-primary/25 shadow-xl mb-8 flex flex-wrap items-center justify-between gap-4">
+        <div class="p-6 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 shadow-sm mb-8 flex flex-wrap items-center justify-between gap-4">
             <div>
-                <span class="text-xs font-bold text-primary tracking-widest uppercase mb-1 block">Production Queue</span>
+                <span class="text-xs font-bold text-amber-800 dark:text-primary tracking-widest uppercase mb-1 block">Production Queue</span>
                 <h2 class="text-2xl font-black text-slate-900 dark:text-white" id="worker-greeting">Assigned Work Tickets</h2>
-                <p class="text-xs text-slate-400 mt-1">Only technical embroidery specifications and raw artwork files assigned to your User ID</p>
+                <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-medium">Only technical embroidery specifications and raw artwork files assigned to your User ID</p>
             </div>
             <div class="flex items-center gap-3">
                 <div class="text-right">
-                    <span class="text-[11px] text-slate-400 uppercase font-bold block">Active Jobs</span>
-                    <span class="text-2xl font-black text-primary" id="worker-active-count">0</span>
+                    <span class="text-[11px] text-slate-600 dark:text-slate-400 uppercase font-bold block">Active Jobs</span>
+                    <span class="text-2xl font-black text-amber-800 dark:text-primary" id="worker-active-count">0</span>
                 </div>
             </div>
         </div>
@@ -95,7 +95,7 @@
     </main>
 
     <!-- ===== FOOTER ===== -->
-    <footer class="py-6 text-center text-xs text-slate-500 border-t border-primary/10">
+    <footer class="py-6 text-center text-xs text-slate-600 dark:text-slate-500 border-t border-slate-200 dark:border-primary/10">
         © 2016-2026 Dezan Digitizing · Restricted Worker Operations
     </footer>
 
@@ -105,8 +105,34 @@
         // Guard check: digitizer or admin role only
         const currentUser = window.insforgeClient.requireAuth(['digitizer', 'admin']);
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // Default to white/light theme; check if user explicitly chose dark
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
             document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        function updateThemeIcon() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const icon = document.querySelector('.theme-toggle-icon');
+            if (icon) {
+                icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+            }
+        }
+        updateThemeIcon();
+
+        const themeBtn = document.querySelector('.theme-toggle-btn');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                const isDark = document.documentElement.classList.contains('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                updateThemeIcon();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
             if (currentUser) {
                 document.getElementById('top-worker-name').textContent = currentUser.displayName;
                 document.getElementById('worker-greeting').textContent = `Hello, ${currentUser.displayName}`;
@@ -124,10 +150,10 @@
 
             if (tasks.length === 0) {
                 container.innerHTML = `
-                    <div class="p-12 text-center rounded-2xl bg-card-dark border border-primary/15">
-                        <span class="material-symbols-outlined text-4xl text-slate-600 mb-2">assignment_turned_in</span>
-                        <h4 class="text-sm font-bold text-slate-400">No assigned tasks right now</h4>
-                        <p class="text-xs text-slate-500 mt-1">When the Admin assigns you an order ticket, it will appear here automatically.</p>
+                    <div class="p-12 text-center rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/15 shadow-sm">
+                        <span class="material-symbols-outlined text-4xl text-slate-400 dark:text-slate-600 mb-2">assignment_turned_in</span>
+                        <h4 class="text-sm font-bold text-slate-800 dark:text-slate-400">No assigned tasks right now</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-500 mt-1">When the Admin assigns you an order ticket, it will appear here automatically.</p>
                     </div>
                 `;
                 return;
@@ -138,58 +164,58 @@
                 const rawFile = task.rawArtworkFiles[0] || { name: 'raw_logo.png', url: 'logo.png' };
 
                 return `
-                    <div class="p-6 rounded-2xl bg-white dark:bg-card-dark border border-primary/25 shadow-xl transition-all ${isCompleted ? 'opacity-70' : 'hover:border-primary/60'}">
+                    <div class="p-6 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 shadow-sm transition-all ${isCompleted ? 'opacity-75' : 'hover:border-amber-400 dark:hover:border-primary/60'}">
                         
                         <!-- Task Header (SANITIZED) -->
-                        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-primary/15 mb-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-primary/15 mb-4">
                             <div class="flex items-center gap-2.5">
-                                <span class="px-3 py-1 rounded-lg bg-primary/15 border border-primary/30 font-mono font-black text-xs text-primary">
+                                <span class="px-3 py-1 rounded-lg bg-amber-100 dark:bg-primary/15 border border-amber-300 dark:border-primary/30 font-mono font-black text-xs text-amber-900 dark:text-primary">
                                     ${task.orderNumber}
                                 </span>
-                                <span class="text-xs font-bold text-slate-300">${task.serviceType}</span>
+                                <span class="text-xs font-bold text-slate-800 dark:text-slate-300">${task.serviceType}</span>
                                 <span class="text-[11px] text-slate-500 font-mono">(${task.taskId})</span>
                             </div>
 
                             <div>
                                 ${isCompleted 
-                                    ? '<span class="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-xs">check_circle</span> Completed</span>'
-                                    : '<span class="px-3 py-1 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-xs">pending</span> Work In Progress</span>'
+                                    ? '<span class="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-xs">check_circle</span> Completed</span>'
+                                    : '<span class="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-500/15 text-amber-900 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-xs">pending</span> Work In Progress</span>'
                                 }
                             </div>
                         </div>
 
                         <!-- Technical Design Specifications (No Client Data, No Price) -->
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                            <div class="p-3 rounded-xl bg-slate-900/60 border border-primary/15">
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Placement Location</span>
-                                <strong class="text-xs text-white">${task.placement}</strong>
+                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/15">
+                                <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-0.5">Placement Location</span>
+                                <strong class="text-xs text-slate-900 dark:text-white font-bold">${task.placement}</strong>
                             </div>
 
-                            <div class="p-3 rounded-xl bg-slate-900/60 border border-primary/15">
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Dimensions / Size</span>
-                                <strong class="text-xs text-white">${task.sizing}</strong>
+                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/15">
+                                <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-0.5">Dimensions / Size</span>
+                                <strong class="text-xs text-slate-900 dark:text-white font-bold">${task.sizing}</strong>
                             </div>
 
-                            <div class="p-3 rounded-xl bg-slate-900/60 border border-primary/15">
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Required Formats</span>
-                                <strong class="text-xs text-primary">${task.fileFormat}</strong>
+                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/15">
+                                <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-0.5">Required Formats</span>
+                                <strong class="text-xs text-amber-800 dark:text-primary font-bold">${task.fileFormat}</strong>
                             </div>
                         </div>
 
                         <!-- Instructions -->
-                        <div class="p-4 rounded-xl bg-slate-900/40 border border-primary/10 mb-5">
-                            <span class="text-[10px] font-bold text-primary uppercase tracking-wider block mb-1">Production Guidelines & Notes</span>
-                            <p class="text-xs text-slate-300 leading-relaxed">${task.instructions || 'Standard Wilcom stitch density.'}</p>
+                        <div class="p-4 rounded-xl bg-amber-50/50 dark:bg-slate-900/40 border border-amber-200 dark:border-primary/10 mb-5">
+                            <span class="text-[10px] font-bold text-amber-900 dark:text-primary uppercase tracking-wider block mb-1">Production Guidelines & Notes</span>
+                            <p class="text-xs text-slate-800 dark:text-slate-300 leading-relaxed font-medium">${task.instructions || 'Standard Wilcom stitch density.'}</p>
                         </div>
 
                         <!-- Raw Artwork Download & Upload Controls -->
-                        <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-primary/15">
+                        <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-200 dark:border-primary/15">
                             
                             <!-- Download Raw Logo Button -->
                             <div>
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Customer Raw Artwork</span>
-                                <a href="${rawFile.url}" download="${task.orderNumber}_raw_logo" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-primary/30 text-xs font-bold flex items-center gap-2 transition-all hover:scale-[1.02]">
-                                    <span class="material-symbols-outlined text-sm text-primary">download</span>
+                                <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">Customer Raw Artwork</span>
+                                <a href="${rawFile.url}" download="${task.orderNumber}_raw_logo" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white border border-slate-300 dark:border-primary/30 text-xs font-bold flex items-center gap-2 transition-all hover:scale-[1.02]">
+                                    <span class="material-symbols-outlined text-sm text-amber-800 dark:text-primary">download</span>
                                     <span>Download ${rawFile.name}</span>
                                 </a>
                             </div>
@@ -198,18 +224,18 @@
                             ${!isCompleted ? `
                                 <div class="flex items-center gap-3">
                                     <input type="file" id="file-upload-${task.orderNumber}" multiple accept=".dst,.emb,.pes,.exp" class="hidden" onchange="handleDeliverableSelected('${task.orderNumber}', event)" />
-                                    <button onclick="document.getElementById('file-upload-${task.orderNumber}').click()" class="px-3.5 py-2 rounded-xl bg-slate-900 border border-primary/40 hover:border-primary text-xs font-bold text-slate-200 flex items-center gap-1.5 transition-all">
-                                        <span class="material-symbols-outlined text-sm text-primary">attach_file</span>
+                                    <button onclick="document.getElementById('file-upload-${task.orderNumber}').click()" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-primary/40 hover:border-amber-600 dark:hover:border-primary text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 transition-all">
+                                        <span class="material-symbols-outlined text-sm text-amber-800 dark:text-primary">attach_file</span>
                                         <span id="label-${task.orderNumber}">Select .DST & .EMB</span>
                                     </button>
-                                    <button onclick="submitTaskDeliverables('${task.orderNumber}')" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs shadow-md shadow-primary/25 flex items-center gap-1.5 transition-all hover:scale-[1.02]">
+                                    <button onclick="submitTaskDeliverables('${task.orderNumber}')" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs shadow-md shadow-primary/25 flex items-center gap-1.5 transition-all hover:scale-[1.02]">
                                         <span class="material-symbols-outlined text-sm">cloud_done</span>
                                         <span>Submit & Complete</span>
                                     </button>
                                 </div>
                             ` : `
                                 <div class="text-right">
-                                    <span class="text-xs text-emerald-400 font-bold flex items-center gap-1 justify-end">
+                                    <span class="text-xs text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1 justify-end">
                                         <span class="material-symbols-outlined text-sm">check_circle</span> Files submitted to Client Portal
                                     </span>
                                     <span class="text-[10px] text-slate-500">Task marked as completed</span>
@@ -231,7 +257,7 @@
             const label = document.getElementById(`label-${orderNumber}`);
             if (label) {
                 label.textContent = `${files.length} file(s) ready (${files[0].name})`;
-                label.className = 'text-primary font-bold';
+                label.className = 'text-amber-800 dark:text-primary font-bold';
             }
         }
 
@@ -253,11 +279,6 @@
             renderWorkerTasks();
             alert(`🎉 Task for ${orderNumber} marked as Completed! The client can now download the finished files.`);
         }
-
-        // Theme toggle
-        document.querySelector('.theme-toggle-btn').addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-        });
     </script>
 </body>
 

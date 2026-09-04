@@ -20,9 +20,11 @@
 ## 3. Technology Stack & Framework Rules
 - **Structure:** Semantic HTML5
 - **Styling:** CSS3 (Vanilla CSS + Tailwind CSS utilities via CDN for dynamic layout classes)
-- **Design Tokens:** Established in `DESIGN.md` (Gold `#d4af35`, Dark Luxury `#201d12`, Inter/Outfit typography)
+- **Design Tokens:** Established in `DESIGN.md` (Default White Theme `#f8f7f6` with Dark Luxury `#201d12` optional toggle, Gold `#d4af35`, high-contrast text `#8b6807`/`#9a7810` in light mode, Inter/Outfit typography)
+- **Theme Default:** **White/Light theme** is the universal default for all visitors, portal users, clients, admins, and workers. Dark mode is user-toggleable and persisted in `localStorage`.
+- **Text Contrast Standard:** Strict WCAG 2.1 AA compliant text contrast ratios ($\ge 4.5:1$) across both light and dark modes.
 - **Logic:** Vanilla JavaScript (ES6+) — *Strictly zero client-side frameworks (no React, Vue, Angular)*
-- **Backend / Database Engine:** InsForge (Agent-Native BaaS with PostgreSQL, Row-Level Security, JWT Auth, and S3 Storage)
+- **Backend / Database Engine:** InsForge BaaS (`https://e8rw998g.us-east.insforge.app` with PostgreSQL, Row-Level Security, JWT Auth, and S3 Storage)
 - **Integrations:**
   - **PayPal JS SDK:** Order billing and secure checkout
   - **EmailJS:** Instant automated transactional email notifications
