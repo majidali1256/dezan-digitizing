@@ -54,8 +54,19 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 
 ### Role-Based Order Portal (Implemented & Live)
 - `/portal-login.html`: Unified authentication page with automatic role routing and 1-click test switcher.
-- `/client-portal.html`: Client Portal (Order tracking, New Order Wizard, Completed file downloads).
-- `/admin-portal.html`: Master Admin Backend (KPI metrics, All clients, Total revenue, Global order table, Worker assignment modal).
+- `/client-portal.html`: Redesigned Client Portal (Matching user's reference mockup with warm Dezan gold theme):
+  - **Header**: Bold title + "Track orders, pay invoices, and request quotes easily."
+  - **3 Quick-Action Cards**: Place Order, Request Quote, Track Order.
+  - **4 Stat Metric Badges**: Open Orders, Completed, Quotes, Balance Due.
+  - **Live Search & Filter Bar**: Real-time filtering by order # or job name + status dropdown.
+  - **Sectioned Layout**:
+    - **Open Orders**: Dynamic cards with Order #, Date, Job Name, Price, Status Badge, and View Details.
+    - **Completed Orders**: Machine deliverable downloads (`.DST`, `.EMB`) + View Invoice & Receipt.
+    - **Quotes**: Quote estimation status or clean empty state with `+ Request Quote` action.
+  - **Client Invoice & Printable Receipt Modal**: Official itemized tax invoice and work order with `@media print` support.
+  - **Client Account Modal**: Profile information, billing terms, active balance, theme toggle, and sign out.
+  - **Fixed Bottom Navigation Dock**: 4 quick-access tabs (`Home`, `Orders`, `Quotes`, `Account`).
+- `/admin-portal.html`: Master Admin Backend (KPI metrics, All clients, Total revenue, Global order table, Worker assignment modal, Financial ledger & CSV export).
 - `/worker-portal.html`: Digitizer Restricted Workspace (Only assigned jobs, sanitized specs, raw logo download, `.dst`/`.emb` file uploader).
 
 ### Header Navigation Authentication State

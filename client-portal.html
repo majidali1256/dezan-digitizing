@@ -28,6 +28,41 @@
         }
     </script>
     <link rel="stylesheet" href="styles.css" />
+    <style>
+        @media print {
+            body {
+                background: white !important;
+                color: #0f172a !important;
+            }
+            body * {
+                visibility: hidden !important;
+            }
+            #client-invoice-modal, #client-invoice-print-area, #client-invoice-print-area * {
+                visibility: visible !important;
+            }
+            #client-invoice-modal {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                display: block !important;
+            }
+            #client-invoice-print-area {
+                position: relative !important;
+                width: 100% !important;
+                padding: 16px !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30 transition-colors duration-200">
@@ -71,67 +106,167 @@
     </header>
 
     <!-- ===== MAIN DASHBOARD ===== -->
-    <main class="flex-1 max-w-7xl mx-auto px-4 py-8 w-full">
+    <main class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full pb-28">
 
-        <!-- Welcome Banner & Metrics -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div class="md:col-span-2 p-6 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 shadow-md dark:shadow-xl relative overflow-hidden flex flex-col justify-between">
-                <div class="relative z-10">
-                    <span class="text-xs font-black text-primary-dark dark:text-primary tracking-widest uppercase mb-1 block">Account Dashboard</span>
-                    <h2 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white mb-2" id="client-greeting">Welcome back!</h2>
-                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400" id="client-company-name">Falcon Apparel Co. · Client ID: #FC-882</p>
-                </div>
-                <div class="mt-4 flex gap-2 relative z-10">
-                    <button onclick="openNewOrderModal()" class="px-3.5 py-2 rounded-lg bg-primary text-background-dark text-xs font-black shadow hover:brightness-105 cursor-pointer">Submit Design Specs</button>
-                    <a href="pricing.html" class="px-3.5 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-primary/20">View Pricing</a>
-                </div>
-                <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none hidden dark:block"></div>
-            </div>
-
-            <div class="p-5 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/20 shadow-md flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 flex items-center justify-center border border-amber-200 dark:border-amber-500/20">
-                    <span class="material-symbols-outlined text-2xl">pending</span>
-                </div>
-                <div>
-                    <span class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block">In Production</span>
-                    <span class="text-2xl font-black text-slate-900 dark:text-white" id="metric-in-progress">0</span>
-                </div>
-            </div>
-
-            <div class="p-5 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/20 shadow-md flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center border border-emerald-200 dark:border-emerald-500/20">
-                    <span class="material-symbols-outlined text-2xl">cloud_download</span>
-                </div>
-                <div>
-                    <span class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block">Ready to Download</span>
-                    <span class="text-2xl font-black text-slate-900 dark:text-white" id="metric-completed">0</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Orders Section Header -->
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <!-- Header Title & Subtitle -->
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div>
-                <h3 class="text-lg font-black tracking-tight text-slate-900 dark:text-white">Your Order Tickets</h3>
-                <p class="text-xs font-medium text-slate-600 dark:text-slate-400">Live production tracking, invoices, and completed embroidery files</p>
+                <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">Client Portal</h1>
+                <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">Track orders, pay invoices, and request quotes easily.</p>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
                 <div id="db-sync-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-[11px] shadow-sm">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span id="db-sync-text" class="text-emerald-800 dark:text-emerald-300 font-bold">InsForge DB Live</span>
                 </div>
-                <button onclick="renderOrders()" class="text-xs text-primary-dark dark:text-primary hover:underline flex items-center gap-1 font-bold cursor-pointer">
-                    <span class="material-symbols-outlined text-sm">refresh</span> Refresh
+                <button onclick="renderOrders()" class="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-primary/20 text-slate-600 dark:text-slate-300 hover:text-amber-800 dark:hover:text-primary transition-colors cursor-pointer" title="Refresh data">
+                    <span class="material-symbols-outlined text-sm">refresh</span>
                 </button>
             </div>
         </div>
 
-        <!-- Orders List Container -->
-        <div id="client-orders-container" class="space-y-4">
-            <!-- Rendered by JS -->
+        <!-- 3 Quick Action Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6">
+            <!-- Place Order -->
+            <button onclick="openNewOrderModal()" class="flex items-center gap-3.5 p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-md hover:border-primary dark:hover:border-primary transition-all text-left group cursor-pointer">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-800 dark:text-primary flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0 border border-amber-500/20">
+                    <span class="material-symbols-outlined text-2xl">add_shopping_cart</span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black text-slate-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">Place Order</h3>
+                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Start a new order</p>
+                </div>
+            </button>
+
+            <!-- Request Quote -->
+            <button onclick="openRequestQuoteModal()" class="flex items-center gap-3.5 p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-md hover:border-primary dark:hover:border-primary transition-all text-left group cursor-pointer">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-800 dark:text-primary flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0 border border-amber-500/20">
+                    <span class="material-symbols-outlined text-2xl">request_quote</span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black text-slate-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">Request Quote</h3>
+                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Get a custom quote</p>
+                </div>
+            </button>
+
+            <!-- Track Order -->
+            <button onclick="focusOrderSearch()" class="flex items-center gap-3.5 p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-md hover:border-primary dark:hover:border-primary transition-all text-left group cursor-pointer">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-800 dark:text-primary flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0 border border-amber-500/20">
+                    <span class="material-symbols-outlined text-2xl">travel_explore</span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black text-slate-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">Track Order</h3>
+                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Check order status</p>
+                </div>
+            </button>
         </div>
 
+        <!-- 4 Stat Metric Badges -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            <div class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs flex flex-col justify-between">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Open Orders</span>
+                <span id="metric-open-orders" class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">0</span>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs flex flex-col justify-between">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Completed</span>
+                <span id="metric-completed-orders" class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">0</span>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs flex flex-col justify-between">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Quotes</span>
+                <span id="metric-quotes-count" class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">0</span>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs flex flex-col justify-between">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Balance Due</span>
+                <span id="metric-balance-due" class="text-2xl sm:text-3xl font-black text-amber-800 dark:text-primary">$0.00</span>
+            </div>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="mb-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            <div class="relative flex-1">
+                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">search</span>
+                <input type="text" id="order-search-input" oninput="handleSearchFilter()" placeholder="Search by order # or job name..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 rounded-xl text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-primary shadow-xs transition-colors" />
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="relative flex-1 sm:flex-initial">
+                    <select id="status-filter-select" onchange="handleSearchFilter()" class="w-full sm:w-auto px-3.5 py-2.5 bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-primary shadow-xs cursor-pointer">
+                        <option value="all">All Statuses</option>
+                        <option value="open">Open Orders</option>
+                        <option value="completed">Completed Orders</option>
+                        <option value="quotes">Quotes Only</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Open Orders -->
+        <section id="section-open-orders" class="mb-8">
+            <div class="flex items-center justify-between mb-3.5">
+                <h2 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>Open Orders</span>
+                    <span id="badge-open-count" class="text-xs px-2 py-0.5 rounded-full bg-amber-50 dark:bg-primary/10 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/20 font-bold">0</span>
+                </h2>
+                <button onclick="filterBySection('open')" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</button>
+            </div>
+            <div id="open-orders-container" class="space-y-3.5">
+                <!-- Rendered by JS -->
+            </div>
+        </section>
+
+        <!-- Section: Completed Orders -->
+        <section id="section-completed-orders" class="mb-8">
+            <div class="flex items-center justify-between mb-3.5">
+                <h2 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>Completed Orders</span>
+                    <span id="badge-completed-count" class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 font-bold">0</span>
+                </h2>
+                <button onclick="filterBySection('completed')" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</button>
+            </div>
+            <div id="completed-orders-container" class="space-y-3.5">
+                <!-- Rendered by JS -->
+            </div>
+        </section>
+
+        <!-- Section: Quotes -->
+        <section id="section-quotes" class="mb-8">
+            <div class="flex items-center justify-between mb-3.5">
+                <h2 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>Quotes</span>
+                    <span id="badge-quotes-count" class="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 font-bold">0</span>
+                </h2>
+                <button onclick="filterBySection('quotes')" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</button>
+            </div>
+            <div id="quotes-container" class="space-y-3.5">
+                <!-- Rendered by JS -->
+            </div>
+        </section>
+
     </main>
+
+    <!-- ===== FIXED BOTTOM NAVIGATION DOCK ===== -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-slate-200 dark:border-primary/20 py-2 px-4 shadow-lg transition-colors no-print">
+        <div class="max-w-md mx-auto flex items-center justify-around">
+            <button onclick="scrollToTop()" class="flex flex-col items-center gap-0.5 text-amber-800 dark:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group">
+                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">home</span>
+                <span class="text-[11px] font-bold">Home</span>
+            </button>
+            <button onclick="scrollToSection('section-open-orders')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group">
+                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">receipt_long</span>
+                <span class="text-[11px] font-bold">Orders</span>
+            </button>
+            <button onclick="scrollToSection('section-quotes')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group">
+                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">request_quote</span>
+                <span class="text-[11px] font-bold">Quotes</span>
+            </button>
+            <button onclick="openAccountModal()" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group">
+                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">account_circle</span>
+                <span class="text-[11px] font-bold">Account</span>
+            </button>
+        </div>
+    </nav>
 
     <!-- ===== NEW ORDER MODAL ===== -->
     <div id="new-order-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
@@ -220,6 +355,92 @@
         </div>
     </div>
 
+    <!-- ===== CLIENT INVOICE & RECEIPT MODAL ===== -->
+    <div id="client-invoice-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div id="client-invoice-print-area" class="w-full max-w-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto relative text-slate-900 dark:text-slate-100">
+            
+            <!-- Modal Header (no-print actions) -->
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-primary/20 mb-6">
+                <div>
+                    <span class="text-[10px] font-black tracking-widest uppercase text-amber-800 dark:text-primary block">Official Work Order & Invoice</span>
+                    <h3 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2" id="invoice-modal-title">
+                        Order #0000
+                    </h3>
+                </div>
+                <div class="flex items-center gap-2 no-print">
+                    <button onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-primary text-xs font-bold flex items-center gap-1.5 transition-colors border border-amber-500/30 cursor-pointer">
+                        <span class="material-symbols-outlined text-sm">print</span> Print
+                    </button>
+                    <button onclick="closeClientInvoiceModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+                        <span class="material-symbols-outlined text-lg">close</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Invoice Content Body -->
+            <div id="invoice-modal-content" class="space-y-6">
+                <!-- Dynamically populated by JS -->
+            </div>
+
+            <!-- Modal Footer (no-print) -->
+            <div class="pt-5 mt-6 border-t border-slate-200 dark:border-primary/15 flex items-center justify-between no-print">
+                <span class="text-[11px] font-semibold text-slate-500">InsForge BaaS Verified Ticket</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="closeClientInvoiceModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer">Close</button>
+                    <button type="button" onclick="window.print()" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow cursor-pointer">Print Receipt</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ACCOUNT / PROFILE MODAL ===== -->
+    <div id="account-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl p-6 relative text-slate-900 dark:text-slate-100">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-primary/20 mb-4">
+                <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-amber-800 dark:text-primary">account_circle</span> Client Account
+                </h3>
+                <button onclick="closeAccountModal()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+                    <span class="material-symbols-outlined text-base">close</span>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex items-center gap-3.5 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/10">
+                    <div class="w-12 h-12 rounded-full bg-amber-500/10 text-amber-800 dark:text-primary flex items-center justify-center font-black text-lg border border-amber-500/20">
+                        FA
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black text-slate-900 dark:text-white" id="account-modal-name">Client User</h4>
+                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400" id="account-modal-company">Falcon Apparel Co.</p>
+                        <span class="text-[10px] font-mono text-amber-800 dark:text-primary font-bold">Client ID: #FC-882</span>
+                    </div>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/10 space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-slate-500">Account Status</span>
+                        <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-500/20 text-[10px]">Active · Verified</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-slate-500">Billing Terms</span>
+                        <span class="font-black text-slate-800 dark:text-slate-200">Net 30 · Auto-Invoice</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-slate-500">Balance Due</span>
+                        <span id="account-modal-balance" class="font-black text-emerald-700 dark:text-emerald-400">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex flex-col gap-2">
+                    <button onclick="window.insforgeClient.signOut()" class="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 text-xs font-bold border border-red-200 dark:border-red-500/20 transition-colors cursor-pointer">
+                        Sign Out of Portal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="js/insforge-client.js"></script>
     <script>
@@ -254,13 +475,19 @@
         // Guard check: client or admin only
         const currentUser = window.insforgeClient.requireAuth(['client', 'admin']);
         let selectedFile = null;
+        let cachedOrders = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             if (currentUser) {
-                document.getElementById('top-user-name').textContent = currentUser.displayName;
-                document.getElementById('client-greeting').textContent = `Welcome back, ${currentUser.displayName}!`;
-                if (currentUser.company) {
-                    document.getElementById('client-company-name').textContent = `${currentUser.company} · Client ID: #${currentUser.id.slice(-4).toUpperCase()}`;
+                const topUserName = document.getElementById('top-user-name');
+                if (topUserName) topUserName.textContent = currentUser.displayName;
+                
+                const accountName = document.getElementById('account-modal-name');
+                if (accountName) accountName.textContent = currentUser.displayName;
+                
+                const accountCompany = document.getElementById('account-modal-company');
+                if (accountCompany && currentUser.company) {
+                    accountCompany.textContent = currentUser.company;
                 }
             }
             renderOrders();
@@ -300,132 +527,435 @@
             }
 
             const orders = await window.insforgeClient.fetchOrders();
-            const container = document.getElementById('client-orders-container');
+            cachedOrders = orders || [];
 
             if (syncBadge && syncText) {
                 const status = window.insforgeClient.getDatabaseSyncStatus();
                 syncText.textContent = `InsForge DB Live (${status.lastSynced})`;
             }
-            
-            // Metrics calculation
-            const inProgress = orders.filter(o => o.status === 'in_progress' || o.status === 'assigned' || o.status === 'pending_review').length;
-            const completed = orders.filter(o => o.status === 'completed').length;
-            document.getElementById('metric-in-progress').textContent = inProgress;
-            document.getElementById('metric-completed').textContent = completed;
 
-            if (orders.length === 0) {
-                container.innerHTML = `
-                    <div class="p-12 text-center rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/15 shadow-sm">
-                        <span class="material-symbols-outlined text-4xl text-slate-400 mb-2">inventory_2</span>
-                        <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300">No active orders yet</h4>
-                        <p class="text-xs text-slate-500 mt-1 mb-4">Submit your first vector or logo to start production</p>
-                        <button onclick="openNewOrderModal()" class="px-4 py-2 bg-primary text-background-dark font-black text-xs rounded-xl shadow cursor-pointer">Submit New Order</button>
-                    </div>
-                `;
-                return;
+            // Update stats
+            updateMetrics(cachedOrders);
+
+            // Render sections
+            renderSectionsWithFilter();
+        }
+
+        function updateMetrics(orders) {
+            // Open orders: pending_review, assigned, in_progress (excluding quotes)
+            const openOrders = orders.filter(o => 
+                (o.status === 'in_progress' || o.status === 'assigned' || o.status === 'pending_review') &&
+                !(o.plan_name && o.plan_name.includes('Custom Quote')) &&
+                !(o.service_type && o.service_type.toLowerCase().includes('quote'))
+            );
+
+            // Completed orders
+            const completedOrders = orders.filter(o => o.status === 'completed');
+
+            // Quotes: items with Custom Quote plan or quote in service type
+            const quotes = orders.filter(o => 
+                (o.plan_name && o.plan_name.includes('Custom Quote')) ||
+                (o.service_type && o.service_type.toLowerCase().includes('quote'))
+            );
+
+            // Metrics badges
+            const openMetric = document.getElementById('metric-open-orders');
+            const compMetric = document.getElementById('metric-completed-orders');
+            const quoteMetric = document.getElementById('metric-quotes-count');
+            const balMetric = document.getElementById('metric-balance-due');
+
+            if (openMetric) openMetric.textContent = openOrders.length;
+            if (compMetric) compMetric.textContent = completedOrders.length;
+            if (quoteMetric) quoteMetric.textContent = quotes.length;
+            if (balMetric) balMetric.textContent = '$0.00';
+
+            // Section badge counts
+            const openBadge = document.getElementById('badge-open-count');
+            const compBadge = document.getElementById('badge-completed-count');
+            const quoteBadge = document.getElementById('badge-quotes-count');
+
+            if (openBadge) openBadge.textContent = openOrders.length;
+            if (compBadge) compBadge.textContent = completedOrders.length;
+            if (quoteBadge) quoteBadge.textContent = quotes.length;
+        }
+
+        function handleSearchFilter() {
+            renderSectionsWithFilter();
+        }
+
+        function renderSectionsWithFilter() {
+            const query = (document.getElementById('order-search-input')?.value || '').trim().toLowerCase();
+            const filterType = document.getElementById('status-filter-select')?.value || 'all';
+
+            // Filter base orders
+            let filtered = cachedOrders.filter(order => {
+                if (!query) return true;
+                const orderNum = (order.order_number || '').toLowerCase();
+                const projName = (order.project_name || '').toLowerCase();
+                const service = (order.service_type || '').toLowerCase();
+                return orderNum.includes(query) || projName.includes(query) || service.includes(query);
+            });
+
+            // Categorize
+            const openOrders = filtered.filter(o => 
+                (o.status === 'in_progress' || o.status === 'assigned' || o.status === 'pending_review') &&
+                !(o.plan_name && o.plan_name.includes('Custom Quote')) &&
+                !(o.service_type && o.service_type.toLowerCase().includes('quote'))
+            );
+
+            const completedOrders = filtered.filter(o => o.status === 'completed');
+
+            const quotes = filtered.filter(o => 
+                (o.plan_name && o.plan_name.includes('Custom Quote')) ||
+                (o.service_type && o.service_type.toLowerCase().includes('quote'))
+            );
+
+            // Section elements
+            const sectionOpen = document.getElementById('section-open-orders');
+            const sectionComp = document.getElementById('section-completed-orders');
+            const sectionQuotes = document.getElementById('section-quotes');
+
+            if (filterType === 'open') {
+                sectionOpen.classList.remove('hidden');
+                sectionComp.classList.add('hidden');
+                sectionQuotes.classList.add('hidden');
+            } else if (filterType === 'completed') {
+                sectionOpen.classList.add('hidden');
+                sectionComp.classList.remove('hidden');
+                sectionQuotes.classList.add('hidden');
+            } else if (filterType === 'quotes') {
+                sectionOpen.classList.add('hidden');
+                sectionComp.classList.add('hidden');
+                sectionQuotes.classList.remove('hidden');
+            } else {
+                sectionOpen.classList.remove('hidden');
+                sectionComp.classList.remove('hidden');
+                sectionQuotes.classList.remove('hidden');
             }
 
-            container.innerHTML = orders.map(order => {
-                const isCompleted = order.status === 'completed';
-                const statusBadge = getStatusBadge(order.status);
-
-                return `
-                    <div class="p-5 sm:p-6 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 shadow-md hover:shadow-lg transition-all">
-                        <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
-                            <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="text-xs font-black text-amber-900 dark:text-primary px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-primary/10 border border-amber-300 dark:border-primary/30">${order.order_number}</span>
-                                    <span class="text-xs font-bold text-slate-600 dark:text-slate-400">${new Date(order.created_at).toLocaleDateString()}</span>
-                                </div>
-                                <h4 class="text-lg font-black text-slate-900 dark:text-white">${order.project_name}</h4>
-                                <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">${order.service_type} · ${order.placement} (${order.sizing})</p>
-                            </div>
-
-                            <div class="flex items-center gap-3">
-                                <div class="text-right">
-                                    <span class="text-xs font-bold text-slate-500 uppercase block">Total</span>
-                                    <span class="text-lg font-black text-amber-800 dark:text-primary">$${order.price.toFixed(2)}</span>
-                                </div>
-                                <div>${statusBadge}</div>
-                            </div>
+            // 1. Render Open Orders
+            const openContainer = document.getElementById('open-orders-container');
+            if (openContainer) {
+                if (openOrders.length === 0) {
+                    openContainer.innerHTML = `
+                        <div class="p-8 text-center rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/15 shadow-xs">
+                            <span class="material-symbols-outlined text-3xl text-slate-400 mb-1">checklist</span>
+                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">No open orders at this time</h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 mb-3">All your orders are either completed or you haven't placed one yet.</p>
+                            <button onclick="openNewOrderModal()" class="px-3.5 py-1.5 bg-primary text-background-dark font-black text-xs rounded-xl shadow cursor-pointer">Place New Order</button>
                         </div>
+                    `;
+                } else {
+                    openContainer.innerHTML = openOrders.map(order => renderOrderCard(order, false)).join('');
+                }
+            }
 
-                        <!-- Technical Specs Bar -->
-                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-primary/10 text-xs mb-3">
-                            <span class="text-slate-600 dark:text-slate-400 font-bold uppercase text-[10px] tracking-wider block mb-1">Instructions</span>
-                            <p class="text-slate-800 dark:text-slate-200 text-xs leading-relaxed">${order.instructions || 'Standard digitizing specs.'}</p>
+            // 2. Render Completed Orders
+            const compContainer = document.getElementById('completed-orders-container');
+            if (compContainer) {
+                if (completedOrders.length === 0) {
+                    compContainer.innerHTML = `
+                        <div class="p-8 text-center rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/15 shadow-xs">
+                            <span class="material-symbols-outlined text-3xl text-slate-400 mb-1">inventory_2</span>
+                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">No completed orders yet</h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Your completed orders will appear here once ready.</p>
                         </div>
+                    `;
+                } else {
+                    compContainer.innerHTML = completedOrders.map(order => renderOrderCard(order, true)).join('');
+                }
+            }
 
-                        <!-- Raw Artwork Attachment Badge -->
-                        <div class="p-3 rounded-xl bg-amber-50/40 dark:bg-slate-900/40 border border-amber-200/60 dark:border-primary/10 flex flex-wrap items-center justify-between gap-2 text-xs mb-3">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Raw Artwork:</span>
-                                ${order.raw_artwork_files && order.raw_artwork_files.length > 0 ? order.raw_artwork_files.map(file => `
-                                    <a href="${file.url}" target="_blank" download="${file.name}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-primary/20 text-amber-900 dark:text-primary border border-amber-300 dark:border-primary/30 font-bold text-xs transition-all shadow-xs">
-                                        <span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">cloud_download</span>
-                                        <span>${file.name}</span>
-                                        <span class="text-[10px] text-slate-400 font-mono">(${file.size ? (file.size / 1024).toFixed(0) + 'KB' : 'InsForge S3'})</span>
-                                    </a>
-                                `).join('') : '<span class="text-slate-400 italic">No file attached</span>'}
-                            </div>
-                            <span class="text-[11px] font-bold text-slate-500">Formats: ${order.file_format}</span>
+            // 3. Render Quotes
+            const quotesContainer = document.getElementById('quotes-container');
+            if (quotesContainer) {
+                if (quotes.length === 0) {
+                    quotesContainer.innerHTML = `
+                        <div class="p-8 text-center rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/15 shadow-xs">
+                            <span class="material-symbols-outlined text-3xl text-slate-400 mb-1">request_quote</span>
+                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">No open quotes at this time</h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 mb-3">Request a quote and we'll get back to you soon.</p>
+                            <button onclick="openRequestQuoteModal()" class="px-3.5 py-1.5 bg-white dark:bg-slate-800 text-amber-900 dark:text-primary border border-amber-300 dark:border-primary/30 font-black text-xs rounded-xl shadow-xs hover:bg-amber-50 dark:hover:bg-primary/10 cursor-pointer">
+                                + Request Quote
+                            </button>
                         </div>
+                    `;
+                } else {
+                    quotesContainer.innerHTML = quotes.map(order => renderQuoteCard(order)).join('');
+                }
+            }
+        }
 
-                        <!-- Completed Deliverables Download Card -->
-                        ${isCompleted ? `
-                            <div class="p-4 rounded-xl bg-emerald-50 dark:bg-gradient-to-r dark:from-emerald-500/10 dark:via-primary/15 dark:to-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 flex flex-wrap items-center justify-between gap-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-400 flex items-center justify-center font-bold">
-                                        <span class="material-symbols-outlined">check_circle</span>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs font-black text-slate-900 dark:text-white">Digitizing Complete & Ready!</p>
-                                        <p class="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Download production machine stitch files from InsForge Storage</p>
-                                    </div>
-                                </div>
-                                <div class="flex flex-wrap items-center gap-2">
-                                    ${order.deliverables && order.deliverables.length > 0 ? order.deliverables.map(deliv => `
-                                        <a href="${deliv.url}" target="_blank" download="${deliv.name}" class="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-background-dark text-xs font-black flex items-center gap-1.5 shadow-sm transition-all hover:scale-[1.02]">
-                                            <span class="material-symbols-outlined text-xs">download</span> Download ${deliv.format || 'FILE'}: ${deliv.name}
-                                        </a>
-                                    `).join('') : `
-                                        <span class="text-xs font-bold text-slate-500">Final deliverables available soon</span>
-                                    `}
-                                </div>
-                            </div>
-                        ` : `
-                            <div class="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 pt-2 border-t border-slate-200 dark:border-primary/10">
-                                <span class="flex items-center gap-1.5 font-semibold">
-                                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                                    ${order.status === 'pending_review' ? 'Awaiting Admin Review & Assignment' : 'Design currently in production with Digitizer'}
-                                </span>
-                                <span class="text-[11px] font-bold text-slate-500">Bucket: artworks</span>
-                            </div>
-                        `}
+        function renderOrderCard(order, isCompleted) {
+            const dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Sep 4, 2026';
+            const statusBadge = getStatusBadge(order.status);
+            const priceFormatted = `$${(order.price || 15.00).toFixed(2)}`;
+
+            return `
+                <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-md transition-all">
+                    <!-- Top Bar: Order # & Date -->
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="text-xs font-black text-amber-900 dark:text-primary">Order #${order.order_number}</span>
+                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Created ${dateStr}</span>
                     </div>
-                `;
-            }).join('');
+
+                    <!-- Middle: Job Name & Details -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 my-2">
+                        <div>
+                            <h3 class="text-base font-black text-slate-900 dark:text-white">${order.project_name}</h3>
+                            <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-0.5">
+                                ${order.service_type || 'Embroidery Digitizing'} · ${order.placement || 'Left Chest'} ${order.sizing ? `(${order.sizing})` : ''}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-lg font-black text-slate-900 dark:text-white">${priceFormatted}</span>
+                            <div>${statusBadge}</div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Action & Delivery Bar -->
+                    <div class="pt-3 mt-3 border-t border-slate-100 dark:border-primary/15 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            ${isCompleted && order.deliverables && order.deliverables.length > 0 ? order.deliverables.map(deliv => `
+                                <a href="${deliv.url}" target="_blank" download="${deliv.name}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 text-xs font-bold border border-emerald-300 dark:border-emerald-500/30 hover:scale-105 transition-all shadow-xs">
+                                    <span class="material-symbols-outlined text-xs">download</span> ${deliv.format || 'DST'}: ${deliv.name}
+                                </a>
+                            `).join('') : `
+                                <span class="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-xs text-amber-600">info</span>
+                                    Format: ${order.file_format || 'DST, EMB'}
+                                </span>
+                            `}
+                        </div>
+
+                        <button onclick="openClientInvoiceModal('${order.id}')" class="inline-flex items-center gap-1 text-xs font-black text-amber-800 dark:text-primary hover:underline cursor-pointer">
+                            <span>${isCompleted ? 'View Invoice & Receipt' : 'View Details'}</span>
+                            <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderQuoteCard(order) {
+            const dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Sep 4, 2026';
+            const priceFormatted = order.price ? `$${order.price.toFixed(2)}` : 'Quote in Review';
+
+            return `
+                <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-md transition-all">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="text-xs font-black text-blue-900 dark:text-blue-400">Quote #${order.order_number}</span>
+                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Requested ${dateStr}</span>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 my-2">
+                        <div>
+                            <h3 class="text-base font-black text-slate-900 dark:text-white">${order.project_name}</h3>
+                            <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-0.5">
+                                ${order.service_type || 'Custom Quote'} · ${order.placement || 'Custom'} ${order.sizing ? `(${order.sizing})` : ''}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-lg font-black text-slate-900 dark:text-white">${priceFormatted}</span>
+                            <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/30 text-xs font-bold">
+                                Quote Review
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 mt-3 border-t border-slate-100 dark:border-primary/15 flex items-center justify-between">
+                        <span class="text-[11px] font-semibold text-slate-500">Awaiting master digitizer estimation</span>
+                        <button onclick="openClientInvoiceModal('${order.id}')" class="inline-flex items-center gap-1 text-xs font-black text-amber-800 dark:text-primary hover:underline cursor-pointer">
+                            <span>View Quote Specs</span>
+                            <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+            `;
         }
 
         function getStatusBadge(status) {
             switch(status) {
                 case 'completed':
-                    return '<span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30 text-xs font-black flex items-center gap-1"><span class="material-symbols-outlined text-xs">verified</span> Completed</span>';
+                    return '<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30 text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-xs">verified</span> Completed</span>';
                 case 'in_progress':
-                    return '<span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/30 text-xs font-black flex items-center gap-1"><span class="material-symbols-outlined text-xs">sync</span> In Production</span>';
+                    return '<span class="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/30 text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-xs">sync</span> In Progress</span>';
                 case 'assigned':
-                    return '<span class="px-3 py-1 rounded-full bg-purple-100 text-purple-800 border border-purple-300 dark:bg-purple-500/15 dark:text-purple-400 dark:border-purple-500/30 text-xs font-black flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span> Assigned</span>';
+                    return '<span class="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-300 dark:bg-purple-500/15 dark:text-purple-400 dark:border-purple-500/30 text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span> Assigned</span>';
                 default:
-                    return '<span class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/30 text-xs font-black flex items-center gap-1"><span class="material-symbols-outlined text-xs">hourglass_empty</span> Pending Review</span>';
+                    return '<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/30 text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-xs">hourglass_empty</span> Pending Review</span>';
             }
         }
 
+        // Action Handlers
+        function filterBySection(section) {
+            const filterSelect = document.getElementById('status-filter-select');
+            if (filterSelect) {
+                filterSelect.value = section;
+                handleSearchFilter();
+            }
+            if (section === 'open') scrollToSection('section-open-orders');
+            else if (section === 'completed') scrollToSection('section-completed-orders');
+            else if (section === 'quotes') scrollToSection('section-quotes');
+        }
+
+        function focusOrderSearch() {
+            const input = document.getElementById('order-search-input');
+            if (input) {
+                input.focus();
+                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openRequestQuoteModal() {
+            const modal = document.getElementById('new-order-modal');
+            const titleEl = modal?.querySelector('h3');
+            if (titleEl) {
+                titleEl.innerHTML = '<span class="material-symbols-outlined text-primary-dark dark:text-primary">request_quote</span> Request Custom Quote';
+            }
+            const planSelect = document.getElementById('modal-plan');
+            if (planSelect) planSelect.value = 'Custom Quote';
+            modal.classList.remove('hidden');
+        }
+
         function openNewOrderModal() {
-            document.getElementById('new-order-modal').classList.remove('hidden');
+            const modal = document.getElementById('new-order-modal');
+            const titleEl = modal?.querySelector('h3');
+            if (titleEl) {
+                titleEl.innerHTML = '<span class="material-symbols-outlined text-primary-dark dark:text-primary">add_box</span> Submit New Order / Quote';
+            }
+            const planSelect = document.getElementById('modal-plan');
+            if (planSelect) planSelect.value = 'Left Chest / Hat';
+            modal.classList.remove('hidden');
         }
 
         function closeNewOrderModal() {
             document.getElementById('new-order-modal').classList.add('hidden');
+        }
+
+        function openAccountModal() {
+            document.getElementById('account-modal').classList.remove('hidden');
+        }
+
+        function closeAccountModal() {
+            document.getElementById('account-modal').classList.add('hidden');
+        }
+
+        function openClientInvoiceModal(orderId) {
+            const order = cachedOrders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const modalTitle = document.getElementById('invoice-modal-title');
+            if (modalTitle) modalTitle.textContent = `Order #${order.order_number}`;
+
+            const content = document.getElementById('invoice-modal-content');
+            const isCompleted = order.status === 'completed';
+            const price = order.price ? order.price.toFixed(2) : '15.00';
+            const dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Sep 4, 2026';
+
+            content.innerHTML = `
+                <!-- Invoice Info Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/15 text-xs">
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase block">Invoice Date</span>
+                        <span class="font-black text-slate-900 dark:text-white">${dateStr}</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase block">Order Status</span>
+                        <div class="mt-0.5">${getStatusBadge(order.status)}</div>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase block">Payment Terms</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Net 30 / On Account</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase block">Total Due</span>
+                        <span class="font-black text-amber-800 dark:text-primary text-sm">$${price}</span>
+                    </div>
+                </div>
+
+                <!-- Job Specifications Table -->
+                <div class="border border-slate-200 dark:border-primary/20 rounded-xl overflow-hidden text-xs">
+                    <div class="bg-slate-100 dark:bg-slate-800/80 px-4 py-2.5 font-bold text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-primary/15">
+                        Job Specifications: ${order.project_name}
+                    </div>
+                    <div class="divide-y divide-slate-100 dark:divide-slate-800/60 p-4 space-y-2">
+                        <div class="flex justify-between py-1">
+                            <span class="text-slate-500 font-semibold">Service Type:</span>
+                            <span class="font-bold text-slate-900 dark:text-white">${order.service_type || 'Embroidery Digitizing'}</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-slate-500 font-semibold">Package Tier:</span>
+                            <span class="font-bold text-slate-900 dark:text-white">${order.plan_name || 'Standard'}</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-slate-500 font-semibold">Target Placement:</span>
+                            <span class="font-bold text-slate-900 dark:text-white">${order.placement || 'Left Chest'}</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-slate-500 font-semibold">Dimensions:</span>
+                            <span class="font-bold text-slate-900 dark:text-white">${order.sizing || 'Standard 3.5"'}</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-slate-500 font-semibold">Machine Format:</span>
+                            <span class="font-bold text-slate-900 dark:text-white">${order.file_format || 'DST, EMB'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Production Instructions -->
+                <div class="p-3.5 rounded-xl bg-amber-50/30 dark:bg-slate-900/40 border border-amber-200/50 dark:border-primary/15 text-xs">
+                    <span class="text-[10px] font-bold text-amber-900 dark:text-primary uppercase tracking-wider block mb-1">Production Notes:</span>
+                    <p class="text-slate-800 dark:text-slate-200 leading-relaxed">${order.instructions || 'Standard digitized stitch specs. Auto trim and tie-in enabled.'}</p>
+                </div>
+
+                <!-- Raw Artwork Attachments -->
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/15 text-xs">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Original Artwork Uploaded:</span>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        ${order.raw_artwork_files && order.raw_artwork_files.length > 0 ? order.raw_artwork_files.map(file => `
+                            <a href="${file.url}" target="_blank" download="${file.name}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 text-amber-900 dark:text-primary border border-amber-300 dark:border-primary/30 font-bold text-xs shadow-xs hover:bg-amber-50">
+                                <span class="material-symbols-outlined text-xs">cloud_download</span>
+                                <span>${file.name}</span>
+                            </a>
+                        `).join('') : '<span class="text-slate-400 italic">No artwork attached</span>'}
+                    </div>
+                </div>
+
+                <!-- Completed Deliverables (if any) -->
+                ${isCompleted ? `
+                    <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-xs">
+                        <div class="flex items-center gap-2 mb-2 font-black text-emerald-800 dark:text-emerald-400">
+                            <span class="material-symbols-outlined text-base">check_circle</span>
+                            <span>Finished Machine Stitch Files</span>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            ${order.deliverables && order.deliverables.length > 0 ? order.deliverables.map(deliv => `
+                                <a href="${deliv.url}" target="_blank" download="${deliv.name}" class="px-3.5 py-1.5 rounded-lg bg-primary text-background-dark font-black text-xs flex items-center gap-1 shadow hover:scale-105 transition-all">
+                                    <span class="material-symbols-outlined text-xs">download</span> Download ${deliv.format || 'FILE'}: ${deliv.name}
+                                </a>
+                            `).join('') : '<span class="text-slate-500">Deliverables ready for immediate dispatch</span>'}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('client-invoice-modal').classList.remove('hidden');
+        }
+
+        function closeClientInvoiceModal() {
+            document.getElementById('client-invoice-modal').classList.add('hidden');
         }
 
         function handleFileSelected(e) {
@@ -515,6 +1045,7 @@
                 let price = 15.00;
                 if (planName.includes('Jacket Back')) price = 55.00;
                 else if (planName.includes('Left Chest')) price = 15.00;
+                else if (planName.includes('Custom Quote')) price = 35.00;
 
                 await window.insforgeClient.createOrder({
                     serviceType,
