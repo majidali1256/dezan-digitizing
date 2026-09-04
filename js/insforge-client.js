@@ -163,6 +163,60 @@ class InsForgeClient {
     }
 
     // ===================================================================
+    //  INSFORGE CLOUD STORAGE (S3-BACKED FILE UPLOADS & CDN DOWNLOADS)
+    // ===================================================================
+
+    /**
+     * Uploads a File object directly to an InsForge Storage Bucket ('artworks' or 'deliverables')
+     * @param {string} bucket - Target bucket name ('artworks' | 'deliverables')
+     * @param {File} file - Browser File object
+     * @returns {Promise<{bucket: string, key: string, url: string, name: string, size: number, mimeType: string, format: string}>}
+     */
+    async uploadFile(bucket, file) {
+        if (!file) throw new Error('No file provided for upload');
+        
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const uploadUrl = `${this.baseUrl}/api/storage/buckets/${encodeURIComponent(bucket)}/objects`;
+        
+        const response = await fetch(uploadUrl, {
+            method: 'POST',
+            headers: {
+                'apikey': this.anonKey,
+                'Authorization': `Bearer ${this.anonKey}`
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            let errorMsg = `Storage upload failed with status ${response.status}`;
+            try {
+                const errJson = await response.json();
+                errorMsg = errJson.message || errJson.error || errorMsg;
+            } catch (_) {}
+            throw new Error(errorMsg);
+        }
+
+        const data = await response.json();
+        const ext = file.name.split('.').pop().toUpperCase();
+        const objectKey = data.key;
+        const cdnUrl = data.url || `${this.baseUrl}/api/storage/buckets/${bucket}/objects/${encodeURIComponent(objectKey)}`;
+
+        return {
+            bucket: data.bucket || bucket,
+            key: objectKey,
+            url: cdnUrl,
+            name: file.name,
+            size: file.size,
+            mimeType: file.type || data.mimeType || 'application/octet-stream',
+            format: ext,
+            uploadedAt: data.uploadedAt || new Date().toISOString()
+        };
+    }
+
+
+    // ===================================================================
     //  AUTHENTICATION & SESSION MANAGEMENT
     // ===================================================================
 

@@ -264,13 +264,29 @@
                         </td>
                         <td class="px-5 py-4">
                             <span class="text-slate-900 dark:text-white font-semibold block">${order.project_name}</span>
-                            <span class="text-slate-600 dark:text-slate-400 text-[11px] font-medium">${order.placement} (${order.sizing})</span>
+                            <span class="text-slate-600 dark:text-slate-400 text-[11px] font-medium block mb-1">${order.placement} (${order.sizing})</span>
+                            <div class="flex flex-wrap items-center gap-2 mt-1">
+                                ${order.raw_artwork_files && order.raw_artwork_files.length > 0 ? `
+                                    <a href="${order.raw_artwork_files[0].url}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 dark:bg-primary/10 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/20 text-[10px] font-bold hover:bg-amber-100">
+                                        <span class="material-symbols-outlined text-[12px]">attach_file</span> Artwork (${order.raw_artwork_files[0].name.slice(0, 15)})
+                                    </a>
+                                ` : ''}
+                                ${order.deliverables && order.deliverables.length > 0 ? `
+                                    <div class="flex items-center gap-1">
+                                        ${order.deliverables.map(d => `
+                                            <a href="${d.url}" target="_blank" class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold hover:bg-emerald-100">
+                                                <span class="material-symbols-outlined text-[11px]">download</span> ${d.format}
+                                            </a>
+                                        `).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
                         </td>
                         <td class="px-5 py-4 font-black text-slate-900 dark:text-slate-100 text-sm">$${order.price.toFixed(2)}</td>
                         <td class="px-5 py-4">${getStatusBadge(order.status)}</td>
                         <td class="px-5 py-4 text-xs">${assignedText}</td>
                         <td class="px-5 py-4 text-right">
-                            <button onclick="openAssignModal('${order.order_number}')" class="px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 dark:hover:bg-primary text-amber-900 dark:text-primary hover:text-amber-950 dark:hover:text-background-dark border border-amber-300 dark:border-primary/30 font-bold text-[11px] transition-all">
+                            <button onclick="openAssignModal('${order.order_number}')" class="px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 dark:hover:bg-primary text-amber-900 dark:text-primary hover:text-amber-950 dark:hover:text-background-dark border border-amber-300 dark:border-primary/30 font-bold text-[11px] transition-all cursor-pointer">
                                 ${order.assigned_digitizer_id ? 'Reassign' : 'Assign Worker'}
                             </button>
                         </td>

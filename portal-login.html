@@ -169,8 +169,29 @@
                 </button>
             </form>
 
+            <!-- 1-Click Demo Accounts (Instant Test) -->
+            <div class="mt-6 pt-4 border-t border-slate-200 dark:border-primary/15">
+                <span class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center mb-2.5">
+                    ⚡ 1-Click Demo Accounts (Instant Test)
+                </span>
+                <div class="grid grid-cols-1 gap-2">
+                    <button type="button" onclick="window.insforgeClient.loginAsDemo('client')" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/60 dark:hover:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-primary/20 text-xs font-bold flex items-center justify-between transition-all cursor-pointer hover:border-primary">
+                        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary">person</span> Login as Client (John Falcon)</span>
+                        <span class="text-[10px] text-slate-500 font-mono">client@falconapparel.com</span>
+                    </button>
+                    <button type="button" onclick="window.insforgeClient.loginAsDemo('admin')" class="w-full px-3.5 py-2.5 rounded-xl bg-amber-50/70 hover:bg-amber-100/70 dark:bg-primary/10 dark:hover:bg-primary/20 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30 text-xs font-bold flex items-center justify-between transition-all cursor-pointer hover:border-amber-400">
+                        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-amber-600 dark:text-primary">shield_person</span> Login as Master Admin (Faisal Dezan)</span>
+                        <span class="text-[10px] text-slate-500 font-mono">admin@dezandigitizing.com</span>
+                    </button>
+                    <button type="button" onclick="window.insforgeClient.loginAsDemo('digitizer')" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/60 dark:hover:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-primary/20 text-xs font-bold flex items-center justify-between transition-all cursor-pointer hover:border-purple-400">
+                        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-purple-600">engineering</span> Login as Digitizer Worker (Alex Miller)</span>
+                        <span class="text-[10px] text-slate-500 font-mono">worker.alex@dezandigitizing.com</span>
+                    </button>
+                </div>
+            </div>
+
             <!-- Data Masking Compliance Badge -->
-            <div class="mt-6 pt-5 border-t border-slate-200 dark:border-primary/10 text-center">
+            <div class="mt-4 pt-3 border-t border-slate-200 dark:border-primary/10 text-center">
                 <span class="inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 font-semibold">
                     <span class="material-symbols-outlined text-sm text-primary-dark dark:text-primary">verified_user</span>
                     Zero-Leakage Worker Data Masking Active

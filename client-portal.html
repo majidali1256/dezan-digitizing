@@ -59,7 +59,7 @@
             </a>
 
             <div class="flex items-center gap-3">
-                <button onclick="openNewOrderModal()" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs shadow-md shadow-primary/20 transition-all flex items-center gap-1.5 cursor-pointer">
+                <button id="open-new-order-btn" onclick="openNewOrderModal()" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs shadow-md shadow-primary/20 transition-all flex items-center gap-1.5 cursor-pointer">
                     <span class="material-symbols-outlined text-sm">add_circle</span>
                     <span>New Order</span>
                 </button>
@@ -143,7 +143,7 @@
                 </button>
             </div>
 
-            <form onsubmit="handleCreateOrder(event)" class="space-y-4">
+            <form id="new-order-form" onsubmit="handleCreateOrder(event)" class="space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Service Type</label>
@@ -308,9 +308,24 @@
                         </div>
 
                         <!-- Technical Specs Bar -->
-                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-primary/10 text-xs mb-4">
+                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-primary/10 text-xs mb-3">
                             <span class="text-slate-600 dark:text-slate-400 font-bold uppercase text-[10px] tracking-wider block mb-1">Instructions</span>
                             <p class="text-slate-800 dark:text-slate-200 text-xs leading-relaxed">${order.instructions || 'Standard digitizing specs.'}</p>
+                        </div>
+
+                        <!-- Raw Artwork Attachment Badge -->
+                        <div class="p-3 rounded-xl bg-amber-50/40 dark:bg-slate-900/40 border border-amber-200/60 dark:border-primary/10 flex flex-wrap items-center justify-between gap-2 text-xs mb-3">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Raw Artwork:</span>
+                                ${order.raw_artwork_files && order.raw_artwork_files.length > 0 ? order.raw_artwork_files.map(file => `
+                                    <a href="${file.url}" target="_blank" download="${file.name}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-primary/20 text-amber-900 dark:text-primary border border-amber-300 dark:border-primary/30 font-bold text-xs transition-all shadow-xs">
+                                        <span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">cloud_download</span>
+                                        <span>${file.name}</span>
+                                        <span class="text-[10px] text-slate-400 font-mono">(${file.size ? (file.size / 1024).toFixed(0) + 'KB' : 'InsForge S3'})</span>
+                                    </a>
+                                `).join('') : '<span class="text-slate-400 italic">No file attached</span>'}
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-500">Formats: ${order.file_format}</span>
                         </div>
 
                         <!-- Completed Deliverables Download Card -->
@@ -322,16 +337,17 @@
                                     </div>
                                     <div>
                                         <p class="text-xs font-black text-slate-900 dark:text-white">Digitizing Complete & Ready!</p>
-                                        <p class="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Download production machine stitch files</p>
+                                        <p class="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Download production machine stitch files from InsForge Storage</p>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <a href="${order.deliverables?.[0]?.url || 'images/dezan-logo.png'}" download="${order.order_number}.dst" class="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-background-dark text-xs font-black flex items-center gap-1 shadow-sm">
-                                        <span class="material-symbols-outlined text-xs">download</span> Download .DST
-                                    </a>
-                                    <a href="${order.deliverables?.[1]?.url || 'images/dezan-logo.png'}" download="${order.order_number}.emb" class="px-3.5 py-2 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-900 dark:text-white border border-slate-300 dark:border-primary/30 text-xs font-bold flex items-center gap-1 shadow-sm">
-                                        <span class="material-symbols-outlined text-xs">download</span> .EMB
-                                    </a>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    ${order.deliverables && order.deliverables.length > 0 ? order.deliverables.map(deliv => `
+                                        <a href="${deliv.url}" target="_blank" download="${deliv.name}" class="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-background-dark text-xs font-black flex items-center gap-1.5 shadow-sm transition-all hover:scale-[1.02]">
+                                            <span class="material-symbols-outlined text-xs">download</span> Download ${deliv.format || 'FILE'}: ${deliv.name}
+                                        </a>
+                                    `).join('') : `
+                                        <span class="text-xs font-bold text-slate-500">Final deliverables available soon</span>
+                                    `}
                                 </div>
                             </div>
                         ` : `
@@ -340,7 +356,7 @@
                                     <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                                     ${order.status === 'pending_review' ? 'Awaiting Admin Review & Assignment' : 'Design currently in production with Digitizer'}
                                 </span>
-                                <span class="text-[11px] font-bold text-slate-500">Formats: ${order.file_format}</span>
+                                <span class="text-[11px] font-bold text-slate-500">Bucket: artworks</span>
                             </div>
                         `}
                     </div>
@@ -374,11 +390,48 @@
             if (!file) return;
             selectedFile = file;
             document.getElementById('file-preview-tag').classList.remove('hidden');
-            document.getElementById('file-name-display').textContent = file.name;
+            const sizeStr = (file.size / 1024).toFixed(0) + ' KB';
+            document.getElementById('file-name-display').textContent = `${file.name} (${sizeStr})`;
         }
 
-        function handleCreateOrder(e) {
+        // Drag and drop setup for dropzone
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropzone = document.getElementById('dropzone');
+            if (dropzone) {
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropzone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropzone.classList.add('border-primary', 'bg-amber-50/40');
+                    }, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropzone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropzone.classList.remove('border-primary', 'bg-amber-50/40');
+                    }, false);
+                });
+
+                dropzone.addEventListener('drop', (e) => {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+                    if (files.length > 0) {
+                        selectedFile = files[0];
+                        document.getElementById('file-preview-tag').classList.remove('hidden');
+                        const sizeStr = (selectedFile.size / 1024).toFixed(0) + ' KB';
+                        document.getElementById('file-name-display').textContent = `${selectedFile.name} (${sizeStr})`;
+                    }
+                }, false);
+            }
+        });
+
+        async function handleCreateOrder(e) {
             e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+
             const serviceType = document.getElementById('modal-service').value;
             const planName = document.getElementById('modal-plan').value;
             const projectName = document.getElementById('modal-project').value.trim();
@@ -387,32 +440,64 @@
             const fileFormat = document.getElementById('modal-format').value.trim();
             const instructions = document.getElementById('modal-instructions').value.trim();
 
-            const rawArtworkFiles = selectedFile ? [
-                { name: selectedFile.name, url: 'logo.png', size: selectedFile.size }
-            ] : [
-                { name: 'logo_vector.ai', url: 'logo.png', size: 104000 }
-            ];
+            let rawArtworkFiles = [];
 
-            // Estimate price based on plan
-            let price = 15.00;
-            if (planName.includes('Jacket Back')) price = 55.00;
-            else if (planName.includes('Left Chest')) price = 15.00;
+            try {
+                if (selectedFile) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = `
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="material-symbols-outlined animate-spin text-sm">sync</span>
+                            <span>Uploading to InsForge Storage...</span>
+                        </span>
+                    `;
+                    
+                    const uploadedObj = await window.insforgeClient.uploadFile('artworks', selectedFile);
+                    rawArtworkFiles.push({
+                        name: uploadedObj.name,
+                        url: uploadedObj.url,
+                        key: uploadedObj.key,
+                        size: uploadedObj.size,
+                        mimeType: uploadedObj.mimeType
+                    });
+                } else {
+                    rawArtworkFiles.push({
+                        name: 'sample_vector_logo.ai',
+                        url: 'logo.png',
+                        size: 104000
+                    });
+                }
 
-            window.insforgeClient.createOrder({
-                serviceType,
-                planName,
-                projectName,
-                placement,
-                sizing,
-                fileFormat,
-                instructions,
-                rawArtworkFiles,
-                price
-            });
+                // Estimate price based on plan
+                let price = 15.00;
+                if (planName.includes('Jacket Back')) price = 55.00;
+                else if (planName.includes('Left Chest')) price = 15.00;
 
-            closeNewOrderModal();
-            renderOrders();
-            alert('🎉 Order placed successfully! The Admin will review and assign to a digitizer.');
+                window.insforgeClient.createOrder({
+                    serviceType,
+                    planName,
+                    projectName,
+                    placement,
+                    sizing,
+                    fileFormat,
+                    instructions,
+                    rawArtworkFiles,
+                    price
+                });
+
+                closeNewOrderModal();
+                selectedFile = null;
+                document.getElementById('new-order-form').reset();
+                document.getElementById('file-preview-tag').classList.add('hidden');
+                renderOrders();
+                alert('🎉 Order placed successfully! Your artwork was securely saved to InsForge Cloud Storage and sent to the Admin queue.');
+            } catch (err) {
+                console.error('Order creation error:', err);
+                alert(`⚠️ Upload error: ${err.message}. Please check your connection and try again.`);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
         }
     </script>
 </body>
