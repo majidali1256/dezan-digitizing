@@ -22,7 +22,7 @@
 - **Styling:** CSS3 (Vanilla CSS + Tailwind CSS utilities via CDN for dynamic layout classes)
 - **Design Tokens:** Established in `DESIGN.md` (Gold `#d4af35`, Dark Luxury `#201d12`, Inter/Outfit typography)
 - **Logic:** Vanilla JavaScript (ES6+) — *Strictly zero client-side frameworks (no React, Vue, Angular)*
-- **Backend / Database Engine:** Cloud Firestore (Firebase) with Firebase Auth & Cloud Storage (or Supabase PostgreSQL with RLS)
+- **Backend / Database Engine:** InsForge (Agent-Native BaaS with PostgreSQL, Row-Level Security, JWT Auth, and S3 Storage)
 - **Integrations:**
   - **PayPal JS SDK:** Order billing and secure checkout
   - **EmailJS:** Instant automated transactional email notifications

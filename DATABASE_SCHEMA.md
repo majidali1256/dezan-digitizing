@@ -1,200 +1,183 @@
 # Database Schema & Security Rules Specification (DATABASE_SCHEMA.md)
+*Engine: InsForge (Agent-Native PostgreSQL BaaS with Row-Level Security & S3 Storage)*
 
-## 1. Entity Model Overview
+---
 
-The database uses three primary operational collections and one administrative audit log collection:
+## 1. Entity Relationship Model
 
 ```
  ┌─────────────────┐       1:N       ┌─────────────────┐
- │      users      ├─────────────────┤     orders      │
+ │ public.profiles ├─────────────────┤  public.orders  │
  └────────┬────────┘                 └────────┬────────┘
           │                                   │
           │ 1:N                               │ 1:1
           ▼                                   ▼
- ┌─────────────────┐                 ┌─────────────────┐
- │ digitizer_tasks │◄────────────────┤   audit_logs    │
- └─────────────────┘                 └─────────────────┘
+ ┌────────────────────────┐          ┌─────────────────┐
+ │ public.digitizer_tasks │◄─────────┤   audit_logs    │
+ └────────────────────────┘          └─────────────────┘
 ```
 
 ---
 
-## 2. Collection Schemas
+## 2. InsForge PostgreSQL Tables & DDL
 
-### 2.1 `users` Collection
-Stores authentication metadata, assigned roles, and user profile information.
+### 2.1 `public.profiles` Table
+Stores user profile information, contact metadata, and the critical `role` attribute (`client`, `admin`, `digitizer`).
 
-```json
-{
-  "uid": "USER_FIREBASE_AUTH_UID_STRING",
-  "role": "client", // Enum: "client" | "admin" | "digitizer"
-  "email": "customer@example.com",
-  "displayName": "John Doe",
-  "company": "Falcon Apparel Co.", // Optional, Client role only
-  "phone": "+1 555-0199", // Optional
-  "status": "active", // Enum: "active" | "pending" | "suspended"
-  "createdAt": "TIMESTAMP",
-  "lastLoginAt": "TIMESTAMP"
-}
+```sql
+CREATE TABLE public.profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    role VARCHAR(20) NOT NULL CHECK (role IN ('client', 'admin', 'digitizer')),
+    email VARCHAR(255) NOT NULL,
+    display_name VARCHAR(255) NOT NULL,
+    company VARCHAR(255),
+    phone VARCHAR(50),
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'pending', 'suspended')),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- Profiles Policies
+CREATE POLICY "Users can view own profile or admin can view all" 
+ON public.profiles FOR SELECT 
+USING (auth.uid() = id OR (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY "Users can update own profile or admin can update all" 
+ON public.profiles FOR UPDATE 
+USING (auth.uid() = id OR (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
 ```
 
-### 2.2 `orders` Collection (Master Commercial Records)
+---
+
+### 2.2 `public.orders` Table (Master Commercial Orders)
 > [!CAUTION]
-> **Strict Authorization**: Readable only by `role == 'admin'` or `clientId == request.auth.uid`. Digitizers have ZERO read permissions on this collection.
+> **Strict Authorization**: Readable only by Admin and the Client owner (`client_id == auth.uid()`). Digitizers are **strictly blocked** by RLS from reading or writing to this table.
 
-```json
-{
-  "orderId": "ORD-2026-8841",
-  "clientId": "CLIENT_USER_UID",
-  "clientName": "John Doe",
-  "clientEmail": "customer@example.com",
-  "clientCompany": "Falcon Apparel Co.",
-  "serviceType": "Digitizing", // "Digitizing" | "Vectorizing"
-  "plan": "Left Chest / Hat",
-  "projectName": "Falcon Crest Left Chest",
-  "placement": "Left Chest",
-  "sizing": "3.5\" W x 2.2\" H",
-  "fileFormat": "DST, EMB",
-  "instructions": "Need 3D puff on the letter 'F', 75/11 needle density for pique polo fabric.",
-  "rawArtworkFiles": [
-    {
-      "name": "falcon_logo.ai",
-      "url": "https://firebasestorage.googleapis.com/.../artworks/falcon_logo.ai",
-      "size": 1548290,
-      "type": "application/postscript",
-      "uploadedAt": "TIMESTAMP"
-    }
-  ],
-  "pricing": {
-    "amount": 25.00,
-    "currency": "USD",
-    "paymentStatus": "paid", // "unpaid" | "invoice_sent" | "paid" | "refunded"
-    "paymentMethod": "PayPal",
-    "transactionId": "PP-9823481239"
-  },
-  "assignment": {
-    "digitizerId": "WORKER_USER_UID",
-    "digitizerName": "Alex M.",
-    "assignedAt": "TIMESTAMP"
-  },
-  "status": "in_progress", // "pending_review" | "assigned" | "in_progress" | "qa_review" | "completed" | "revision"
-  "deliverables": [
-    {
-      "format": "dst",
-      "url": "https://firebasestorage.googleapis.com/.../deliverables/falcon_crest.dst",
-      "name": "falcon_crest.dst",
-      "size": 24900,
-      "uploadedAt": "TIMESTAMP"
-    },
-    {
-      "format": "emb",
-      "url": "https://firebasestorage.googleapis.com/.../deliverables/falcon_crest.emb",
-      "name": "falcon_crest.emb",
-      "size": 128400,
-      "uploadedAt": "TIMESTAMP"
-    }
-  ],
-  "createdAt": "TIMESTAMP",
-  "updatedAt": "TIMESTAMP"
-}
-```
+```sql
+CREATE TABLE public.orders (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_number VARCHAR(50) UNIQUE NOT NULL, -- e.g. 'ORD-2026-8841'
+    client_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+    client_name VARCHAR(255) NOT NULL,       -- PII (Masked from Worker)
+    client_email VARCHAR(255) NOT NULL,      -- PII (Masked from Worker)
+    client_company VARCHAR(255),             -- PII (Masked from Worker)
+    service_type VARCHAR(50) NOT NULL,       -- 'Digitizing' | 'Vectorizing'
+    plan_name VARCHAR(100) NOT NULL,         -- 'Left Chest / Hat', 'Jacket Back', etc.
+    project_name VARCHAR(255) NOT NULL,
+    placement VARCHAR(100) NOT NULL,         -- 'Left Chest', 'Cap', 'Jacket Back'
+    sizing VARCHAR(100) NOT NULL,            -- e.g. '3.5" W x 2.2" H'
+    file_format VARCHAR(100) NOT NULL,       -- 'DST, EMB'
+    instructions TEXT,
+    raw_artwork_files JSONB DEFAULT '[]'::jsonb, -- [{ name, url, size, type }]
+    
+    -- Commercial & Financial Details (Masked from Worker)
+    price NUMERIC(10, 2) DEFAULT 0.00,
+    currency VARCHAR(10) DEFAULT 'USD',
+    payment_status VARCHAR(50) DEFAULT 'unpaid' CHECK (payment_status IN ('unpaid', 'invoice_sent', 'paid', 'refunded')),
+    payment_method VARCHAR(50),              -- 'PayPal', 'Card'
+    transaction_id VARCHAR(255),
+    
+    -- Assignment Tracking
+    assigned_digitizer_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    assigned_digitizer_name VARCHAR(255),
+    assigned_at TIMESTAMPTZ,
+    
+    status VARCHAR(50) DEFAULT 'pending_review' CHECK (status IN (
+        'pending_review', 'assigned', 'in_progress', 'qa_review', 'completed', 'revision', 'cancelled'
+    )),
+    deliverables JSONB DEFAULT '[]'::jsonb,   -- [{ format: 'dst', url: '...', name: '...' }]
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 
-### 2.3 `digitizer_tasks` Collection (Sanitized Worker Queue)
-> [!IMPORTANT]
-> **Data Masking Guarantee**: Contains NO client name, NO email, NO company, and NO pricing data. Digitizers can only read documents where `assignedDigitizerId == request.auth.uid`.
+-- Enable Row Level Security (RLS)
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 
-```json
-{
-  "taskId": "TSK-2026-8841",
-  "orderId": "ORD-2026-8841", // Reference code
-  "assignedDigitizerId": "WORKER_USER_UID",
-  "serviceType": "Digitizing",
-  "placement": "Left Chest",
-  "sizing": "3.5\" W x 2.2\" H",
-  "fileFormat": "DST, EMB",
-  "instructions": "Need 3D puff on the letter 'F', 75/11 needle density for pique polo fabric.",
-  "rawArtworkFiles": [
-    {
-      "name": "falcon_logo.ai",
-      "url": "https://firebasestorage.googleapis.com/.../artworks/falcon_logo.ai",
-      "size": 1548290
-    }
-  ],
-  "status": "in_progress", // "assigned" | "in_progress" | "completed" | "revision"
-  "deliverables": [
-    {
-      "format": "dst",
-      "url": "https://firebasestorage.googleapis.com/.../deliverables/falcon_crest.dst",
-      "name": "falcon_crest.dst",
-      "uploadedAt": "TIMESTAMP"
-    }
-  ],
-  "assignedAt": "TIMESTAMP",
-  "completedAt": null
-}
+-- Orders Policies
+CREATE POLICY "Clients can view their own orders; Admins can view all"
+ON public.orders FOR SELECT
+USING (
+    auth.uid() = client_id 
+    OR (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+);
+
+CREATE POLICY "Clients can insert orders"
+ON public.orders FOR INSERT
+WITH CHECK (auth.uid() = client_id);
+
+CREATE POLICY "Admins can update all orders, Clients can update pending orders"
+ON public.orders FOR UPDATE
+USING (
+    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+    OR (auth.uid() = client_id AND status = 'pending_review')
+);
+
+CREATE POLICY "Only admins can delete orders"
+ON public.orders FOR DELETE
+USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
 ```
 
 ---
 
-## 3. Cloud Firestore Security Rules (RBAC & Data Masking)
+### 2.3 `public.digitizer_tasks` Table (Sanitized Worker Queue)
+> [!IMPORTANT]
+> **Data Masking Guarantee**: Contains **zero** client PII and **zero** pricing information. Digitizers can only read records where `assigned_digitizer_id == auth.uid()`.
 
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
+```sql
+CREATE TABLE public.digitizer_tasks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    task_number VARCHAR(50) UNIQUE NOT NULL,  -- e.g. 'TSK-2026-8841'
+    order_number VARCHAR(50) NOT NULL,       -- Reference code 'ORD-2026-8841'
+    order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+    assigned_digitizer_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    service_type VARCHAR(50) NOT NULL,
+    placement VARCHAR(100) NOT NULL,
+    sizing VARCHAR(100) NOT NULL,
+    file_format VARCHAR(100) NOT NULL,
+    instructions TEXT,
+    raw_artwork_files JSONB DEFAULT '[]'::jsonb, -- [{ name, url, size }]
+    status VARCHAR(50) DEFAULT 'assigned' CHECK (status IN ('assigned', 'in_progress', 'completed', 'revision')),
+    deliverables JSONB DEFAULT '[]'::jsonb,       -- [{ format: 'dst', url: '...', name: '...' }]
+    assigned_at TIMESTAMPTZ DEFAULT NOW(),
+    completed_at TIMESTAMPTZ
+);
 
-    // Helper functions
-    function isAuthenticated() {
-      return request.auth != null;
-    }
+-- Enable Row Level Security (RLS)
+ALTER TABLE public.digitizer_tasks ENABLE ROW LEVEL SECURITY;
 
-    function getUserData() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-    }
+-- Digitizer Tasks Policies
+CREATE POLICY "Digitizers can view only their assigned tasks; Admins view all"
+ON public.digitizer_tasks FOR SELECT
+USING (
+    auth.uid() = assigned_digitizer_id
+    OR (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+);
 
-    function isAdmin() {
-      return isAuthenticated() && getUserData().role == 'admin';
-    }
+CREATE POLICY "Only admins can insert new tasks"
+ON public.digitizer_tasks FOR INSERT
+WITH CHECK ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
 
-    function isClient() {
-      return isAuthenticated() && getUserData().role == 'client';
-    }
-
-    function isDigitizer() {
-      return isAuthenticated() && getUserData().role == 'digitizer';
-    }
-
-    // USERS COLLECTION
-    match /users/{userId} {
-      // Users can read and update their own profile; Admin can read and edit all
-      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
-      allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
-      allow delete: if isAdmin();
-    }
-
-    // ORDERS COLLECTION (STRICTLY FORBIDDEN TO DIGITIZERS)
-    match /orders/{orderId} {
-      // Digitizers can NEVER read or list orders
-      allow read: if isAdmin() || (isClient() && resource.data.clientId == request.auth.uid);
-      
-      // Only Clients (for creating) and Admins can write
-      allow create: if isClient() && request.resource.data.clientId == request.auth.uid;
-      allow update: if isAdmin() || (isClient() && resource.data.clientId == request.auth.uid);
-      allow delete: if isAdmin();
-    }
-
-    // DIGITIZER TASKS COLLECTION (SANITIZED WORKER QUEUE)
-    match /digitizer_tasks/{taskId} {
-      // Digitizers can only read tasks explicitly assigned to their UID; Admin sees all
-      allow read: if isAdmin() || (isDigitizer() && resource.data.assignedDigitizerId == request.auth.uid);
-      
-      // Only Admin can create and assign tasks
-      allow create: if isAdmin();
-      
-      // Digitizer can update status to in_progress/completed and append deliverables
-      allow update: if isAdmin() || (isDigitizer() && resource.data.assignedDigitizerId == request.auth.uid);
-      allow delete: if isAdmin();
-    }
-  }
-}
+CREATE POLICY "Digitizers can update status & deliverables on assigned tasks"
+ON public.digitizer_tasks FOR UPDATE
+USING (
+    auth.uid() = assigned_digitizer_id
+    OR (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+);
 ```
+
+---
+
+## 3. InsForge S3 Storage Buckets
+
+1. **`artworks` Bucket**:
+   - Location: `/artworks/{order_number}/*`
+   - Allowed Extensions: `.ai`, `.eps`, `.pdf`, `.png`, `.jpg`, `.jpeg`, `.svg`, `.zip`, `.rar`
+   - Read Access: Client owner, Admin, and assigned Digitizer.
+2. **`deliverables` Bucket**:
+   - Location: `/deliverables/{order_number}/*`
+   - Allowed Extensions: `.dst`, `.emb`, `.pxf`, `.pes`, `.exp`, `.pdf`
+   - Write Access: Assigned Digitizer and Admin.
+   - Read Access: Assigned Digitizer, Admin, and Client owner (when `payment_status = 'paid'`).
