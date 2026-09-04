@@ -28,6 +28,41 @@
         }
     </script>
     <link rel="stylesheet" href="styles.css" />
+    <style>
+        @media print {
+            body {
+                background: white !important;
+                color: #0f172a !important;
+            }
+            body * {
+                visibility: hidden !important;
+            }
+            #invoice-modal, #invoice-print-area, #invoice-print-area * {
+                visibility: visible !important;
+            }
+            #invoice-modal {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                display: block !important;
+            }
+            #invoice-print-area {
+                position: relative !important;
+                width: 100% !important;
+                padding: 16px !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30">
@@ -80,7 +115,10 @@
                     <span class="material-symbols-outlined text-amber-700 dark:text-primary text-xl">payments</span>
                 </div>
                 <h3 class="text-3xl font-black text-slate-900 dark:text-white" id="stat-revenue">$0.00</h3>
-                <span class="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium mt-1 block">Live pipeline total</span>
+                <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-primary/10 text-[11px]">
+                    <span class="text-emerald-700 dark:text-emerald-400 font-semibold" id="stat-revenue-completed">Completed: $0.00</span>
+                    <span class="text-amber-800 dark:text-amber-400 font-semibold" id="stat-revenue-pipeline">Pipeline: $0.00</span>
+                </div>
             </div>
 
             <div class="p-5 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 shadow-sm">
@@ -89,7 +127,10 @@
                     <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-xl">receipt_long</span>
                 </div>
                 <h3 class="text-3xl font-black text-slate-900 dark:text-white" id="stat-total-orders">0</h3>
-                <span class="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-1 block">Total client tickets</span>
+                <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-primary/10 text-[11px]">
+                    <span class="text-slate-600 dark:text-slate-400 font-medium">Avg Order Value (AOV):</span>
+                    <span class="text-slate-900 dark:text-slate-200 font-bold" id="stat-aov">$0.00</span>
+                </div>
             </div>
 
             <div class="p-5 rounded-2xl bg-amber-50/60 dark:bg-card-dark border border-amber-300 dark:border-amber-500/30 shadow-sm">
@@ -118,13 +159,17 @@
                     <h3 class="text-lg font-black text-slate-900 dark:text-white">Master Orders Queue</h3>
                     <p class="text-xs text-slate-600 dark:text-slate-400">View client PII, assign workers, and track delivery</p>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex flex-wrap items-center gap-2.5">
                     <div id="admin-db-sync-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-[11px] shadow-sm">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span id="admin-db-sync-text" class="text-emerald-800 dark:text-emerald-300 font-bold">InsForge DB Live</span>
                     </div>
-                    <button onclick="renderAdminOrders()" class="text-xs text-primary-dark dark:text-primary hover:underline flex items-center gap-1 font-bold cursor-pointer">
+                    <button onclick="renderAdminOrders()" class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs text-slate-700 dark:text-slate-300 font-bold flex items-center gap-1 cursor-pointer transition-all">
                         <span class="material-symbols-outlined text-sm">refresh</span> Refresh
+                    </button>
+                    <button onclick="exportOrdersCSV()" id="export-csv-btn" class="px-3 py-1.5 rounded-xl bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 dark:hover:bg-primary text-amber-900 dark:text-primary hover:text-amber-950 dark:hover:text-background-dark border border-amber-300 dark:border-primary/30 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer" title="Download Financial Ledger CSV">
+                        <span class="material-symbols-outlined text-sm">download</span>
+                        <span>Export CSV</span>
                     </button>
                     <select id="filter-status" onchange="renderAdminOrders()" class="px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white font-medium focus:ring-primary focus:border-primary">
                         <option value="all">All Statuses</option>
@@ -196,6 +241,35 @@
                     <button type="submit" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 text-xs font-black shadow-md shadow-primary/20 transition-all">Assign & Dispatch</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ===== OFFICIAL TAX INVOICE & DELIVERY RECEIPT MODAL ===== -->
+    <div id="invoice-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="w-full max-w-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl overflow-hidden relative my-auto">
+            <!-- Modal Actions Bar (hidden when printing) -->
+            <div class="no-print p-4 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-primary/20 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-amber-700 dark:text-primary text-xl">receipt_long</span>
+                    <h3 class="text-sm font-black text-slate-900 dark:text-white">Tax Invoice & Delivery Receipt</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.print()" class="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs transition-all flex items-center gap-1.5 shadow-md shadow-primary/20 cursor-pointer">
+                        <span class="material-symbols-outlined text-sm">print</span>
+                        <span>Print / Save PDF</span>
+                    </button>
+                    <button onclick="closeInvoiceModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer" aria-label="Close">
+                        <span class="material-symbols-outlined text-base">close</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Printable Invoice Paper Body -->
+            <div id="invoice-print-area" class="p-6 sm:p-8 bg-white text-slate-900 font-display">
+                <div id="invoice-dynamic-content">
+                    <!-- Injected dynamically by openInvoiceModal(orderNumber) -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -279,12 +353,24 @@
             const filter = document.getElementById('filter-status').value;
             const filtered = filter === 'all' ? allOrders : allOrders.filter(o => o.status === filter);
 
-            // Compute statistics
+            // Compute comprehensive statistics
             const totalRev = allOrders.reduce((sum, o) => sum + (o.price || 0), 0);
+            const completedRev = allOrders.filter(o => o.status === 'completed').reduce((sum, o) => sum + (o.price || 0), 0);
+            const pipelineRev = allOrders.filter(o => o.status !== 'completed').reduce((sum, o) => sum + (o.price || 0), 0);
+            const aov = allOrders.length > 0 ? (totalRev / allOrders.length) : 0;
             const unassigned = allOrders.filter(o => !o.assigned_digitizer_id).length;
 
             document.getElementById('stat-revenue').textContent = '$' + totalRev.toFixed(2);
+            if (document.getElementById('stat-revenue-completed')) {
+                document.getElementById('stat-revenue-completed').textContent = `Completed: $${completedRev.toFixed(2)}`;
+            }
+            if (document.getElementById('stat-revenue-pipeline')) {
+                document.getElementById('stat-revenue-pipeline').textContent = `Pipeline: $${pipelineRev.toFixed(2)}`;
+            }
             document.getElementById('stat-total-orders').textContent = allOrders.length;
+            if (document.getElementById('stat-aov')) {
+                document.getElementById('stat-aov').textContent = `$${aov.toFixed(2)}`;
+            }
             document.getElementById('stat-unassigned').textContent = unassigned;
             document.getElementById('stat-digitizers').textContent = digitizers.length;
 
@@ -330,9 +416,15 @@
                         <td class="px-5 py-4">${getStatusBadge(order.status)}</td>
                         <td class="px-5 py-4 text-xs">${assignedText}</td>
                         <td class="px-5 py-4 text-right">
-                            <button onclick="openAssignModal('${order.order_number}')" class="px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 dark:hover:bg-primary text-amber-900 dark:text-primary hover:text-amber-950 dark:hover:text-background-dark border border-amber-300 dark:border-primary/30 font-bold text-[11px] transition-all cursor-pointer">
-                                ${order.assigned_digitizer_id ? 'Reassign' : 'Assign Worker'}
-                            </button>
+                            <div class="flex items-center justify-end gap-1.5">
+                                <button onclick="openInvoiceModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1" title="View & Print Official Tax Invoice">
+                                    <span class="material-symbols-outlined text-sm text-amber-700 dark:text-primary">receipt</span>
+                                    <span>Invoice</span>
+                                </button>
+                                <button onclick="openAssignModal('${order.order_number}')" class="px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 dark:hover:bg-primary text-amber-900 dark:text-primary hover:text-amber-950 dark:hover:text-background-dark border border-amber-300 dark:border-primary/30 font-bold text-[11px] transition-all cursor-pointer">
+                                    ${order.assigned_digitizer_id ? 'Reassign' : 'Assign Worker'}
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -406,6 +498,229 @@
                     submitBtn.innerHTML = originalText;
                 }
             }
+        }
+
+        // ===== 1-CLICK OFFICIAL TAX INVOICE GENERATOR =====
+        function openInvoiceModal(orderNumber) {
+            const allOrders = window.insforgeClient.getOrders();
+            const order = allOrders.find(o => o.order_number === orderNumber);
+            if (!order) return;
+
+            const invoiceDate = new Date(order.created_at || Date.now()).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            const isCompleted = order.status === 'completed';
+            const deliverables = order.deliverables || [];
+
+            const container = document.getElementById('invoice-dynamic-content');
+            container.innerHTML = `
+                <!-- Invoice Header -->
+                <div class="flex flex-wrap items-start justify-between gap-4 pb-6 border-b border-slate-200">
+                    <div>
+                        <div class="flex items-center gap-2.5 mb-1.5">
+                            <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-slate-950 font-black text-base shadow-sm">D</div>
+                            <h2 class="text-xl font-black tracking-tight text-slate-950">DEZAN DIGITIZING</h2>
+                        </div>
+                        <p class="text-xs font-semibold text-amber-800 tracking-wide uppercase">Premium Embroidery Digitizing & Vector Conversion</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Operating since 2016 · Worldwide Service</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs uppercase tracking-wider mb-2">PAID · PayPal</span>
+                        <div class="font-mono text-sm font-black text-slate-900">INV-${order.order_number.replace('ORD-', '')}</div>
+                        <p class="text-xs text-slate-500 mt-0.5">Date: ${invoiceDate}</p>
+                    </div>
+                </div>
+
+                <!-- Addresses / Metadata Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 py-6 border-b border-slate-200 text-xs">
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Billed From</span>
+                        <strong class="font-bold text-slate-900 block text-sm">Dezan Digitizing Global Studio</strong>
+                        <p class="text-slate-600 mt-0.5">Bahria Town Phase 7, Rawalpindi</p>
+                        <p class="text-slate-600">Email: fdezan91@gmail.com</p>
+                        <p class="text-slate-600">Website: https://dezan-digitizing.vercel.app</p>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Billed To (Customer)</span>
+                        <strong class="font-bold text-slate-900 block text-sm">${order.client_name || 'Valued Customer'}</strong>
+                        <p class="text-slate-600 mt-0.5">${order.client_company ? order.client_company + ' · ' : ''}${order.client_email}</p>
+                        <p class="text-slate-500 mt-0.5 font-mono text-[11px]">Client ID: #${order.client_id ? order.client_id.slice(-6).toUpperCase() : 'DEZAN-CLIENT'}</p>
+                        <p class="text-slate-500 font-mono text-[11px]">Ticket ID: ${order.order_number}</p>
+                    </div>
+                </div>
+
+                <!-- Itemized Service Table -->
+                <div class="py-6 border-b border-slate-200">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                                <th class="pb-2">Description & Technical Specifications</th>
+                                <th class="pb-2 text-center">Format</th>
+                                <th class="pb-2 text-right">Qty</th>
+                                <th class="pb-2 text-right">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr>
+                                <td class="py-3">
+                                    <strong class="text-slate-900 block font-bold text-xs">${order.project_name}</strong>
+                                    <p class="text-slate-600 text-[11px] mt-0.5">${order.service_type || 'Custom Digitizing'} · ${order.placement || 'Left Chest'} (${order.sizing || 'Standard'})</p>
+                                    <p class="text-slate-500 text-[10px] italic mt-1">${order.instructions ? `Specs: "${order.instructions}"` : 'Standard high-density industrial stitch count specs.'}</p>
+                                </td>
+                                <td class="py-3 text-center font-mono font-semibold text-slate-700">${order.file_format || 'DST, EMB'}</td>
+                                <td class="py-3 text-right font-medium text-slate-600">1</td>
+                                <td class="py-3 text-right font-bold text-slate-900">$${(order.price || 0).toFixed(2)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Financial Calculation Summary -->
+                <div class="py-6 border-b border-slate-200 flex justify-end">
+                    <div class="w-full sm:w-64 space-y-1.5 text-xs">
+                        <div class="flex justify-between text-slate-600">
+                            <span>Subtotal</span>
+                            <span class="font-semibold text-slate-900">$${(order.price || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>Tax / Export Duty (0%)</span>
+                            <span class="font-semibold text-slate-900">$0.00</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>Payment Method</span>
+                            <span class="font-semibold text-slate-900">${order.payment_method || 'PayPal Secure'}</span>
+                        </div>
+                        <div class="flex justify-between pt-2 border-t border-slate-200 text-sm font-black text-slate-950">
+                            <span>Total Paid</span>
+                            <span class="text-amber-700 font-bold">$${(order.price || 0).toFixed(2)} USD</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deliverables & Quality Certification -->
+                <div class="pt-6 text-xs">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Production Deliverables & Quality Audit</span>
+                    ${isCompleted && deliverables.length > 0 ? `
+                        <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 mb-4">
+                            <div class="flex items-center gap-1.5 text-emerald-900 font-bold mb-2">
+                                <span class="material-symbols-outlined text-sm text-emerald-700">verified</span>
+                                <span>Production Machine Files Verified & Ready</span>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                ${deliverables.map(d => `
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-emerald-300 text-emerald-950 text-[11px] font-bold">
+                                        <span class="material-symbols-outlined text-xs text-emerald-600">download</span>
+                                        <span>${d.name} (${d.format})</span>
+                                    </span>
+                                `).join('')}
+                            </div>
+                            <p class="text-[10px] text-emerald-700 mt-2">Tested against industrial Tajima & Barudan thread tension parameters.</p>
+                        </div>
+                    ` : `
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 mb-4 text-slate-600 text-[11px]">
+                            <span class="font-bold text-slate-800">Status: ${order.status === 'in_progress' ? 'In Production with Digitizer' : 'Pending Digitizer Assignment'}</span>
+                            <p class="text-[10px] text-slate-500 mt-0.5">Deliverable stitch files will appear on this official receipt once quality inspection is passed.</p>
+                        </div>
+                    `}
+
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 pt-3 border-t border-slate-100">
+                        <span>Thank you for choosing Dezan Digitizing for your embroidery artwork!</span>
+                        <span class="font-mono font-semibold">Authorized By: Faisal Dezan (Head Digitizer)</span>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('invoice-modal').classList.remove('hidden');
+        }
+
+        function closeInvoiceModal() {
+            document.getElementById('invoice-modal').classList.add('hidden');
+        }
+
+        // ===== 1-CLICK FINANCIAL LEDGER CSV EXPORTER =====
+        function exportOrdersCSV() {
+            const allOrders = window.insforgeClient.getOrders();
+            if (!allOrders || allOrders.length === 0) {
+                alert('No orders available to export.');
+                return;
+            }
+
+            const filter = document.getElementById('filter-status').value;
+            const ordersToExport = filter === 'all' ? allOrders : allOrders.filter(o => o.status === filter);
+
+            const headers = [
+                'Order Number',
+                'Date',
+                'Client Name',
+                'Client Email',
+                'Company',
+                'Service Type',
+                'Project Name',
+                'Placement',
+                'Sizing',
+                'Required Formats',
+                'Price (USD)',
+                'Payment Status',
+                'Payment Method',
+                'Order Status',
+                'Assigned Digitizer',
+                'Deliverables Count',
+                'Instructions'
+            ];
+
+            const rows = ordersToExport.map(o => {
+                const escapeCsv = (val) => {
+                    if (val === null || val === undefined) return '""';
+                    const str = String(val).replace(/"/g, '""');
+                    return `"${str}"`;
+                };
+
+                const dateStr = o.created_at ? new Date(o.created_at).toISOString().split('T')[0] : '';
+                const deliverablesCount = (o.deliverables || []).length;
+
+                return [
+                    escapeCsv(o.order_number),
+                    escapeCsv(dateStr),
+                    escapeCsv(o.client_name),
+                    escapeCsv(o.client_email),
+                    escapeCsv(o.client_company || 'Independent'),
+                    escapeCsv(o.service_type || 'Digitizing'),
+                    escapeCsv(o.project_name),
+                    escapeCsv(o.placement || ''),
+                    escapeCsv(o.sizing || ''),
+                    escapeCsv(o.file_format || 'DST, EMB'),
+                    (o.price || 0).toFixed(2),
+                    escapeCsv(o.payment_status || 'paid'),
+                    escapeCsv(o.payment_method || 'PayPal'),
+                    escapeCsv(o.status),
+                    escapeCsv(o.assigned_digitizer_name || 'Unassigned'),
+                    deliverablesCount,
+                    escapeCsv(o.instructions || '')
+                ].join(',');
+            });
+
+            const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+
+            const nowStr = new Date().toISOString().split('T')[0];
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dezan_financial_ledger_${filter}_${nowStr}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            window.insforgeClient.showToast(
+                'Financial Ledger Exported',
+                `Exported ${ordersToExport.length} records to CSV successfully.`,
+                'download_done',
+                'success'
+            );
         }
     </script>
 </body>

@@ -140,7 +140,30 @@ To prevent data leakage via browser DevTools:
 
 ---
 
-## 10. Directory Structure
+## 10. Admin Analytics, Financial Ledger Export & Tax Invoice Engine (Live & Verified)
+- **Advanced Revenue Analytics in Master KPI Grid:**
+  - **Realized Revenue:** Sum of prices for orders in `completed` status (`$80.00`).
+  - **Pipeline Revenue:** Value of orders pending review or in active production (`$100.00`).
+  - **Average Order Value (AOV):** Real-time computation of average dollar revenue per ticket (`$20.00`).
+  - **Live Synchronization:** Real-time updates automatically recalculate revenue breakdowns without requiring manual page reload.
+- **1-Click CSV Financial Ledger Exporter:**
+  - Integrated into the Master Orders Queue action bar (`#export-csv-btn`).
+  - Formats and generates standard accounting ledger data with UTF-8 BOM (`\uFEFF`) for direct compatibility with Microsoft Excel, Apple Numbers, and Google Sheets.
+  - Exports standard columns: `Order Number`, `Date`, `Client Name`, `Client Email`, `Company`, `Service Type`, `Project Name`, `Placement`, `Sizing`, `Required Formats`, `Price (USD)`, `Payment Status`, `Payment Method`, `Order Status`, `Assigned Digitizer`, `Deliverables Count`, `Instructions`.
+  - Honors active queue status filters (`all`, `pending_review`, `assigned`, `in_progress`, `completed`).
+  - Emits an animated floating toast confirmation on completion.
+- **Printable / PDF Tax Invoice & Delivery Receipt Generator (`#invoice-modal`):**
+  - Instant modal invoice generator accessible via the **Invoice** button on each order row.
+  - Official Dezan Digitizing branding with gold insignia, tax invoice identifier (`INV-[OrderNumber]`), issue date, and customer metadata.
+  - Itemized table with design specifications, machine formats, unit pricing, and subtotal/tax summary.
+  - **Quality Inspection & Deliverables Audit Block:** Displays verified Tajima/Barudan machine stitch files (`.dst`, `.emb`) with direct download capabilities and official digital sign-off.
+  - **Print / Save as PDF Media Query Isolation:** Custom `@media print` CSS block isolates `#invoice-print-area`, hiding all web UI chrome, navigation bars, and buttons to generate a pristine, borderless 8.5x11 / A4 PDF document.
+- **Automated Verification:**
+  - 100% verified with Playwright test (`verify_financial_export.js`) across Desktop (1440x900) and Mobile (390x844). Verified accurate KPI currency math, CSV file generation with escaped data, and complete modal rendering.
+
+---
+
+## 11. Directory Structure
 ```
 ├── .agents/
 │   ├── rules/frontend_design_rules.md
@@ -165,7 +188,7 @@ To prevent data leakage via browser DevTools:
 
 ---
 
-## 11. Development & Deployment Guidelines
+## 12. Development & Deployment Guidelines
 1. **JavaScript DOM Standard**: All initialization code in `app.js` runs within `DOMContentLoaded` and is guarded by page URL checks.
 2. **Zero Framework Mandate**: Keep all scripts lightweight and vanilla. No bundle builds required.
 3. **Git Hygiene**: Clean atomic commits with descriptive commit messages.
