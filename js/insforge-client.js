@@ -88,8 +88,8 @@ const INITIAL_DEMO_ORDERS = [
         ],
         price: 15.00,
         currency: 'USD',
-        payment_status: 'paid',
-        payment_method: 'PayPal',
+        payment_status: 'unpaid',
+        payment_method: 'Pending Invoice',
         assigned_digitizer_id: null,
         assigned_digitizer_name: null,
         assigned_at: null,
@@ -799,8 +799,8 @@ class InsForgeClient {
             raw_artwork_files: orderData.rawArtworkFiles || [],
             price: parseFloat(orderData.price) || 20.00,
             currency: 'USD',
-            payment_status: 'paid',
-            payment_method: 'PayPal',
+            payment_status: orderData.paymentStatus || 'unpaid',
+            payment_method: orderData.paymentMethod || (orderData.paymentStatus === 'paid' ? 'PayPal' : 'Pending Invoice'),
             assigned_digitizer_id: null,
             assigned_digitizer_name: null,
             assigned_at: null,
@@ -820,7 +820,8 @@ class InsForgeClient {
             orderNumber: newOrder.order_number,
             clientName: newOrder.client_name,
             projectName: newOrder.project_name,
-            price: newOrder.price
+            price: newOrder.price,
+            paymentStatus: newOrder.payment_status
         });
 
         // Persist directly to InsForge PostgreSQL via REST
@@ -846,6 +847,58 @@ class InsForgeClient {
         }
 
         return newOrder;
+    }
+
+    /**
+     * Updates an order's payment status (e.g. completes due payment, marks as paid)
+     * @param {string} orderIdOrNumber 
+     * @param {string} paymentStatus - 'paid' | 'unpaid' | 'pending'
+     * @param {string} paymentMethod - 'PayPal' | 'Credit Card' | 'Stripe'
+     * @returns {Promise<boolean>}
+     */
+    async updateOrderPayment(orderIdOrNumber, paymentStatus = 'paid', paymentMethod = 'PayPal') {
+        const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+        const order = allOrders.find(o => o.id === orderIdOrNumber || o.order_number === orderIdOrNumber);
+        if (!order) {
+            console.warn('Order not found for payment update:', orderIdOrNumber);
+            return false;
+        }
+
+        order.payment_status = paymentStatus;
+        order.payment_method = paymentMethod;
+        order.updated_at = new Date().toISOString();
+        localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
+
+        // Broadcast to other open tabs
+        this.broadcastEvent('order_paid', {
+            orderId: order.id,
+            orderNumber: order.order_number,
+            paymentStatus,
+            paymentMethod,
+            price: order.price
+        });
+
+        // Persist to InsForge PostgreSQL
+        try {
+            const queryParam = order.id ? `id=eq.${order.id}` : `order_number=eq.${order.order_number}`;
+            const res = await fetch(`${this.baseUrl}/api/database/records/orders?${queryParam}`, {
+                method: 'PATCH',
+                headers: this.getApiHeaders({ 'Prefer': 'return=representation' }),
+                body: JSON.stringify({
+                    payment_status: paymentStatus,
+                    payment_method: paymentMethod,
+                    updated_at: order.updated_at
+                })
+            });
+            if (res.ok) {
+                console.log(`✅ Order ${order.order_number} payment status updated live in PostgreSQL: ${paymentStatus}`);
+                localStorage.setItem('dezan_db_last_synced', new Date().toISOString());
+            }
+        } catch (err) {
+            console.warn('Payment status remote sync notice (cached locally):', err.message);
+        }
+
+        return true;
     }
 
     /**

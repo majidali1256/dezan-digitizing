@@ -178,8 +178,11 @@
                 <span id="metric-quotes-count" class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">0</span>
             </div>
 
-            <div class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs flex flex-col justify-between">
-                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Balance Due</span>
+            <div onclick="filterBySection('due')" class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs flex flex-col justify-between cursor-pointer hover:border-amber-400 dark:hover:border-primary transition-all group" title="Click to filter orders with payment due">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Balance Due</span>
+                    <span id="badge-due-count" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold group-hover:bg-amber-100 dark:group-hover:bg-primary/20 transition-colors">0 Due</span>
+                </div>
                 <span id="metric-balance-due" class="text-2xl sm:text-3xl font-black text-amber-800 dark:text-primary">$0.00</span>
             </div>
         </div>
@@ -194,6 +197,7 @@
                 <div class="relative flex-1 sm:flex-initial">
                     <select id="status-filter-select" onchange="handleSearchFilter()" class="w-full sm:w-auto px-3.5 py-2.5 bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-primary shadow-xs cursor-pointer">
                         <option value="all">All Statuses</option>
+                        <option value="due">Payment Due / Incomplete</option>
                         <option value="open">Open Orders</option>
                         <option value="completed">Completed Orders</option>
                         <option value="quotes">Quotes Only</option>
@@ -344,7 +348,28 @@
 
                 <div>
                     <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Technical Instructions / Fabric Type</label>
-                    <textarea id="modal-instructions" rows="3" placeholder="Color stops, 3D foam puff, pique knit, denim, thread guidelines..." class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary"></textarea>
+                    <textarea id="modal-instructions" rows="2" placeholder="Color stops, 3D foam puff, pique knit, denim, thread guidelines..." class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary"></textarea>
+                </div>
+
+                <!-- Payment Preference Choice -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">Payment Terms / Settlement</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <label class="flex items-start gap-2.5 p-3 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 cursor-pointer">
+                            <input type="radio" name="modal-payment-choice" value="unpaid" checked class="text-primary focus:ring-primary h-4 w-4 mt-0.5" />
+                            <div>
+                                <span class="text-xs font-bold text-slate-900 dark:text-white block">Pay on Invoice (Due Later)</span>
+                                <span class="text-[10px] text-slate-600 dark:text-slate-400">Order is created with payment due upon completion (Net 30)</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-2.5 p-3 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 cursor-pointer hover:border-primary">
+                            <input type="radio" name="modal-payment-choice" value="paid" class="text-primary focus:ring-primary h-4 w-4 mt-0.5" />
+                            <div>
+                                <span class="text-xs font-bold text-slate-900 dark:text-white block">Pay Upfront Now</span>
+                                <span class="text-[10px] text-slate-600 dark:text-slate-400">Instant PayPal / Card authorization (Marked Paid)</span>
+                            </div>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="pt-3 border-t border-slate-200 dark:border-primary/15 flex items-center justify-end gap-2">
@@ -352,6 +377,84 @@
                     <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow-md shadow-primary/20 cursor-pointer">Submit Order</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ===== CHECKOUT / PAY NOW MODAL ===== -->
+    <div id="checkout-payment-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl p-6 relative text-slate-900 dark:text-slate-100">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-primary/20 mb-4">
+                <div>
+                    <span class="text-[10px] font-black uppercase text-amber-800 dark:text-primary tracking-wider block">Secure Payment Checkout</span>
+                    <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2" id="checkout-modal-order-number">
+                        Order #ORD-0000
+                    </h3>
+                </div>
+                <button onclick="closeCheckoutModal()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+                    <span class="material-symbols-outlined text-base">close</span>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Order Summary Card -->
+                <div class="p-3.5 rounded-xl bg-amber-50/40 dark:bg-slate-900/60 border border-amber-200/60 dark:border-primary/15 flex items-center justify-between">
+                    <div>
+                        <h4 class="text-xs font-black text-slate-900 dark:text-white" id="checkout-modal-project-name">Design Project</h4>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400" id="checkout-modal-service-details">Embroidery Digitizing</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] uppercase font-bold text-slate-500 block">Amount Due</span>
+                        <span class="text-lg font-black text-rose-600 dark:text-rose-400" id="checkout-modal-amount">$15.00</span>
+                    </div>
+                </div>
+
+                <!-- Payment Method Selection -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Select Payment Method</label>
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                        <button type="button" onclick="selectCheckoutMethod('paypal')" id="checkout-tab-paypal" class="p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-sm text-primary">account_balance_wallet</span> PayPal
+                        </button>
+                        <button type="button" onclick="selectCheckoutMethod('card')" id="checkout-tab-card" class="p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer">
+                            <span class="material-symbols-outlined text-sm">credit_card</span> Credit Card
+                        </button>
+                    </div>
+
+                    <!-- PayPal Container -->
+                    <div id="checkout-panel-paypal" class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 text-center">
+                        <p class="text-xs text-slate-600 dark:text-slate-300 mb-3">Pay securely with your PayPal account or linked card balance.</p>
+                        <button type="button" onclick="executeOrderPayment('PayPal')" class="w-full py-2.5 rounded-xl bg-[#ffc439] hover:bg-[#f6b92a] text-[#003087] font-black text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-sm">payments</span> Complete with PayPal
+                        </button>
+                    </div>
+
+                    <!-- Card Form Container -->
+                    <div id="checkout-panel-card" class="hidden p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 space-y-2.5">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase">Card Number</label>
+                            <input type="text" placeholder="4532 •••• •••• 8821" value="•••• •••• •••• 8821" class="w-full px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-primary/20 rounded-lg text-xs font-mono text-slate-900 dark:text-white" />
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase">Expires</label>
+                                <input type="text" placeholder="12/28" value="08/28" class="w-full px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-primary/20 rounded-lg text-xs font-mono text-slate-900 dark:text-white" />
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase">CVC</label>
+                                <input type="text" placeholder="CVC" value="982" class="w-full px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-primary/20 rounded-lg text-xs font-mono text-slate-900 dark:text-white" />
+                            </div>
+                        </div>
+                        <button type="button" onclick="executeOrderPayment('Credit Card')" class="w-full py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer mt-1">
+                            <span class="material-symbols-outlined text-sm">lock</span> Pay Securely Now
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-2 text-center text-[10px] text-slate-500 flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined text-xs text-emerald-600">verified_user</span>
+                    <span>256-bit Encrypted SSL · Instant InsForge PostgreSQL Settlement</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -385,7 +488,7 @@
             <!-- Modal Footer (no-print) -->
             <div class="pt-5 mt-6 border-t border-slate-200 dark:border-primary/15 flex items-center justify-between no-print">
                 <span class="text-[11px] font-semibold text-slate-500">InsForge BaaS Verified Ticket</span>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2" id="invoice-modal-footer-actions">
                     <button type="button" onclick="closeClientInvoiceModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer">Close</button>
                     <button type="button" onclick="window.print()" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow cursor-pointer">Print Receipt</button>
                 </div>
@@ -476,6 +579,7 @@
         const currentUser = window.insforgeClient.requireAuth(['client', 'admin']);
         let selectedFile = null;
         let cachedOrders = [];
+        let activeCheckoutOrderId = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             if (currentUser) {
@@ -511,6 +615,14 @@
                         `Order ${payload.orderNumber} is assigned to digitizer ${payload.digitizerName}.`,
                         'precision_manufacturing',
                         'info'
+                    );
+                    await renderOrders();
+                } else if (type === 'order_paid') {
+                    window.insforgeClient.showToast(
+                        'Payment Received',
+                        `Order ${payload.orderNumber} payment confirmed ($${payload.price}). Balance updated.`,
+                        'payments',
+                        'success'
                     );
                     await renderOrders();
                 } else if (type === 'remote_db_change') {
@@ -558,16 +670,42 @@
                 (o.service_type && o.service_type.toLowerCase().includes('quote'))
             );
 
+            // Calculate unpaid orders & active balance due
+            const unpaidOrders = orders.filter(o => o.payment_status === 'unpaid' || o.payment_status === 'pending');
+            const balanceDue = unpaidOrders.reduce((sum, o) => sum + (parseFloat(o.price) || 0), 0);
+
             // Metrics badges
             const openMetric = document.getElementById('metric-open-orders');
             const compMetric = document.getElementById('metric-completed-orders');
             const quoteMetric = document.getElementById('metric-quotes-count');
             const balMetric = document.getElementById('metric-balance-due');
+            const dueBadge = document.getElementById('badge-due-count');
 
             if (openMetric) openMetric.textContent = openOrders.length;
             if (compMetric) compMetric.textContent = completedOrders.length;
             if (quoteMetric) quoteMetric.textContent = quotes.length;
-            if (balMetric) balMetric.textContent = '$0.00';
+            
+            if (balMetric) {
+                balMetric.textContent = `$${balanceDue.toFixed(2)}`;
+                if (balanceDue > 0) {
+                    balMetric.className = 'text-2xl sm:text-3xl font-black text-rose-600 dark:text-rose-400';
+                } else {
+                    balMetric.className = 'text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-400';
+                }
+            }
+
+            if (dueBadge) {
+                dueBadge.textContent = balanceDue > 0 ? `${unpaidOrders.length} Due` : 'All settled';
+                dueBadge.className = balanceDue > 0 
+                    ? 'text-[10px] px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300 font-bold border border-rose-200 dark:border-rose-500/30'
+                    : 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-500/30';
+            }
+
+            const accountBalance = document.getElementById('account-modal-balance');
+            if (accountBalance) {
+                accountBalance.textContent = `$${balanceDue.toFixed(2)}`;
+                accountBalance.className = balanceDue > 0 ? 'font-black text-rose-600 dark:text-rose-400' : 'font-black text-emerald-700 dark:text-emerald-400';
+            }
 
             // Section badge counts
             const openBadge = document.getElementById('badge-open-count');
@@ -595,6 +733,11 @@
                 const service = (order.service_type || '').toLowerCase();
                 return orderNum.includes(query) || projName.includes(query) || service.includes(query);
             });
+
+            // If filterType is 'due', filter only unpaid/pending orders
+            if (filterType === 'due') {
+                filtered = filtered.filter(o => o.payment_status === 'unpaid' || o.payment_status === 'pending');
+            }
 
             // Categorize
             const openOrders = filtered.filter(o => 
@@ -627,6 +770,10 @@
                 sectionOpen.classList.add('hidden');
                 sectionComp.classList.add('hidden');
                 sectionQuotes.classList.remove('hidden');
+            } else if (filterType === 'due') {
+                sectionOpen.classList.remove('hidden');
+                sectionComp.classList.remove('hidden');
+                sectionQuotes.classList.add('hidden');
             } else {
                 sectionOpen.classList.remove('hidden');
                 sectionComp.classList.remove('hidden');
@@ -640,8 +787,12 @@
                     openContainer.innerHTML = `
                         <div class="p-8 text-center rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/15 shadow-xs">
                             <span class="material-symbols-outlined text-3xl text-slate-400 mb-1">checklist</span>
-                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">No open orders at this time</h4>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 mb-3">All your orders are either completed or you haven't placed one yet.</p>
+                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                ${filterType === 'due' ? 'No unpaid open orders found' : 'No open orders at this time'}
+                            </h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 mb-3">
+                                ${filterType === 'due' ? 'All your active open orders are settled.' : 'All your orders are either completed or you haven\'t placed one yet.'}
+                            </p>
                             <button onclick="openNewOrderModal()" class="px-3.5 py-1.5 bg-primary text-background-dark font-black text-xs rounded-xl shadow cursor-pointer">Place New Order</button>
                         </div>
                     `;
@@ -657,7 +808,9 @@
                     compContainer.innerHTML = `
                         <div class="p-8 text-center rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/15 shadow-xs">
                             <span class="material-symbols-outlined text-3xl text-slate-400 mb-1">inventory_2</span>
-                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">No completed orders yet</h4>
+                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                ${filterType === 'due' ? 'No unpaid completed orders' : 'No completed orders yet'}
+                            </h4>
                             <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Your completed orders will appear here once ready.</p>
                         </div>
                     `;
@@ -689,13 +842,21 @@
         function renderOrderCard(order, isCompleted) {
             const dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Sep 4, 2026';
             const statusBadge = getStatusBadge(order.status);
+            const isPaid = order.payment_status === 'paid';
             const priceFormatted = `$${(order.price || 15.00).toFixed(2)}`;
 
+            const paymentBadge = isPaid 
+                ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 text-[10px] font-bold">Paid</span>'
+                : '<span class="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/30 text-xs font-black flex items-center gap-1"><span class="material-symbols-outlined text-xs">pending_actions</span> Payment Due</span>';
+
             return `
-                <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-md transition-all">
+                <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border ${isPaid ? 'border-slate-200/90 dark:border-primary/25' : 'border-rose-200 dark:border-rose-500/30 ring-1 ring-rose-500/10'} shadow-sm hover:shadow-md transition-all">
                     <!-- Top Bar: Order # & Date -->
                     <div class="flex items-center justify-between gap-2 mb-2">
-                        <span class="text-xs font-black text-amber-900 dark:text-primary">Order #${order.order_number}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black text-amber-900 dark:text-primary">Order #${order.order_number}</span>
+                            ${paymentBadge}
+                        </div>
                         <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Created ${dateStr}</span>
                     </div>
 
@@ -708,7 +869,7 @@
                             </p>
                         </div>
                         <div class="flex items-center gap-3">
-                            <span class="text-lg font-black text-slate-900 dark:text-white">${priceFormatted}</span>
+                            <span class="text-lg font-black ${isPaid ? 'text-slate-900 dark:text-white' : 'text-rose-600 dark:text-rose-400'}">${priceFormatted}</span>
                             <div>${statusBadge}</div>
                         </div>
                     </div>
@@ -728,10 +889,17 @@
                             `}
                         </div>
 
-                        <button onclick="openClientInvoiceModal('${order.id}')" class="inline-flex items-center gap-1 text-xs font-black text-amber-800 dark:text-primary hover:underline cursor-pointer">
-                            <span>${isCompleted ? 'View Invoice & Receipt' : 'View Details'}</span>
-                            <span class="material-symbols-outlined text-xs">arrow_forward</span>
-                        </button>
+                        <div class="flex items-center gap-2">
+                            ${!isPaid ? `
+                                <button onclick="openCheckoutModal('${order.id}')" class="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs flex items-center gap-1 shadow-sm transition-all hover:scale-105 cursor-pointer">
+                                    <span class="material-symbols-outlined text-xs">credit_card</span> Pay Now ($${(order.price || 15).toFixed(2)})
+                                </button>
+                            ` : ''}
+                            <button onclick="openClientInvoiceModal('${order.id}')" class="inline-flex items-center gap-1 text-xs font-black text-amber-800 dark:text-primary hover:underline cursor-pointer">
+                                <span>${isCompleted ? 'View Invoice & Receipt' : 'View Details'}</span>
+                                <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -797,6 +965,7 @@
             if (section === 'open') scrollToSection('section-open-orders');
             else if (section === 'completed') scrollToSection('section-completed-orders');
             else if (section === 'quotes') scrollToSection('section-quotes');
+            else if (section === 'due') scrollToSection('section-open-orders');
         }
 
         function focusOrderSearch() {
@@ -861,10 +1030,27 @@
 
             const content = document.getElementById('invoice-modal-content');
             const isCompleted = order.status === 'completed';
+            const isPaid = order.payment_status === 'paid';
             const price = order.price ? order.price.toFixed(2) : '15.00';
             const dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Sep 4, 2026';
 
             content.innerHTML = `
+                ${!isPaid ? `
+                    <!-- Unpaid Due Payment Banner -->
+                    <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-300 dark:border-rose-500/30 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-rose-600 dark:text-rose-400 text-xl">pending_actions</span>
+                            <div>
+                                <span class="text-xs font-black text-rose-900 dark:text-rose-200 block">Payment Due: $${price}</span>
+                                <span class="text-[11px] text-rose-700/80 dark:text-rose-300/80">This order has an outstanding balance. Settle now for instant receipt.</span>
+                            </div>
+                        </div>
+                        <button type="button" onclick="closeClientInvoiceModal(); openCheckoutModal('${order.id}');" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs flex items-center gap-1.5 shadow-sm transition-all hover:scale-105 cursor-pointer flex-shrink-0">
+                            <span class="material-symbols-outlined text-sm">credit_card</span> Pay Now
+                        </button>
+                    </div>
+                ` : ''}
+
                 <!-- Invoice Info Grid -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/15 text-xs">
                     <div>
@@ -876,12 +1062,17 @@
                         <div class="mt-0.5">${getStatusBadge(order.status)}</div>
                     </div>
                     <div>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase block">Payment Terms</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">Net 30 / On Account</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase block">Payment Status</span>
+                        <div class="mt-0.5">
+                            ${isPaid 
+                                ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 text-[10px] font-bold">Paid</span>'
+                                : '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/30 text-[10px] font-black">Payment Due</span>'
+                            }
+                        </div>
                     </div>
                     <div>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase block">Total Due</span>
-                        <span class="font-black text-amber-800 dark:text-primary text-sm">$${price}</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase block">Total Amount</span>
+                        <span class="font-black ${isPaid ? 'text-amber-800 dark:text-primary' : 'text-rose-600 dark:text-rose-400'} text-sm">$${price}</span>
                     </div>
                 </div>
 
@@ -951,11 +1142,126 @@
                 ` : ''}
             `;
 
+            const footerActions = document.getElementById('invoice-modal-footer-actions');
+            if (footerActions) {
+                if (!isPaid) {
+                    footerActions.innerHTML = `
+                        <button type="button" onclick="closeClientInvoiceModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer">Close</button>
+                        <button type="button" onclick="closeClientInvoiceModal(); openCheckoutModal('${order.id}');" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow flex items-center gap-1.5 cursor-pointer hover:scale-105 transition-all">
+                            <span class="material-symbols-outlined text-sm">credit_card</span> Pay Balance Due ($${price})
+                        </button>
+                        <button type="button" onclick="window.print()" class="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold cursor-pointer">Print</button>
+                    `;
+                } else {
+                    footerActions.innerHTML = `
+                        <button type="button" onclick="closeClientInvoiceModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer">Close</button>
+                        <button type="button" onclick="window.print()" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow cursor-pointer">Print Receipt</button>
+                    `;
+                }
+            }
+
             document.getElementById('client-invoice-modal').classList.remove('hidden');
         }
 
         function closeClientInvoiceModal() {
             document.getElementById('client-invoice-modal').classList.add('hidden');
+        }
+
+        // ===== CHECKOUT & DUE PAYMENT SETTLEMENT =====
+        let currentCheckoutOrderId = null;
+
+        function openCheckoutModal(orderId) {
+            const order = cachedOrders.find(o => o.id === orderId || o.order_number === orderId);
+            if (!order) return;
+            currentCheckoutOrderId = order.id;
+
+            const modal = document.getElementById('checkout-payment-modal');
+            const numEl = document.getElementById('checkout-modal-order-number');
+            const projEl = document.getElementById('checkout-modal-project-name');
+            const svcEl = document.getElementById('checkout-modal-service-details');
+            const amtEl = document.getElementById('checkout-modal-amount');
+
+            if (numEl) numEl.textContent = `Order #${order.order_number}`;
+            if (projEl) projEl.textContent = order.project_name || 'Design Order';
+            if (svcEl) svcEl.textContent = `${order.service_type || 'Digitizing'} · ${order.plan_name || 'Standard'}`;
+            const price = (order.price || 15).toFixed(2);
+            if (amtEl) amtEl.textContent = `$${price}`;
+
+            selectCheckoutMethod('paypal');
+            modal.classList.remove('hidden');
+        }
+
+        function closeCheckoutModal() {
+            const modal = document.getElementById('checkout-payment-modal');
+            if (modal) modal.classList.add('hidden');
+            currentCheckoutOrderId = null;
+        }
+
+        function selectCheckoutMethod(method) {
+            const paypalTab = document.getElementById('checkout-tab-paypal');
+            const cardTab = document.getElementById('checkout-tab-card');
+            const paypalPanel = document.getElementById('checkout-panel-paypal');
+            const cardPanel = document.getElementById('checkout-panel-card');
+
+            if (!paypalTab || !cardTab || !paypalPanel || !cardPanel) return;
+
+            if (method === 'paypal') {
+                paypalTab.className = 'p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-900 dark:text-white';
+                cardTab.className = 'p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
+                paypalPanel.classList.remove('hidden');
+                cardPanel.classList.add('hidden');
+            } else {
+                cardTab.className = 'p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-900 dark:text-white';
+                paypalTab.className = 'p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
+                cardPanel.classList.remove('hidden');
+                paypalPanel.classList.add('hidden');
+            }
+        }
+
+        async function executeOrderPayment(method) {
+            if (!currentCheckoutOrderId) return;
+            const order = cachedOrders.find(o => o.id === currentCheckoutOrderId || o.order_number === currentCheckoutOrderId);
+            if (!order) return;
+
+            const payBtn = event?.currentTarget;
+            let originalText = '';
+            if (payBtn) {
+                originalText = payBtn.innerHTML;
+                payBtn.disabled = true;
+                payBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">sync</span> Processing...';
+            }
+
+            try {
+                await window.insforgeClient.updateOrderPayment(order.id, 'paid', method);
+                closeCheckoutModal();
+                await renderOrders();
+                showPaymentSuccessToast(order.order_number, (order.price || 15).toFixed(2), method);
+            } catch (err) {
+                console.error('Payment error:', err);
+                alert(`Payment error: ${err.message}`);
+            } finally {
+                if (payBtn) {
+                    payBtn.disabled = false;
+                    payBtn.innerHTML = originalText;
+                }
+            }
+        }
+
+        function showPaymentSuccessToast(orderNumber, amount, method) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-emerald-700 text-white shadow-2xl flex items-center gap-3 border border-emerald-400/40 animate-fade-in transition-all';
+            toast.innerHTML = `
+                <span class="material-symbols-outlined text-2xl text-emerald-200">check_circle</span>
+                <div>
+                    <div class="font-black text-xs">Payment Received!</div>
+                    <div class="text-[11px] text-emerald-100">$${amount} settled for #${orderNumber} via ${method}.</div>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 400);
+            }, 4500);
         }
 
         function handleFileSelected(e) {
@@ -1013,6 +1319,10 @@
             const fileFormat = document.getElementById('modal-format').value.trim();
             const instructions = document.getElementById('modal-instructions').value.trim();
 
+            const paymentChoice = document.querySelector('input[name="modal-payment-choice"]:checked')?.value || 'unpaid';
+            const paymentStatus = paymentChoice === 'paid' ? 'paid' : 'unpaid';
+            const paymentMethod = paymentChoice === 'paid' ? 'Credit Card / Upfront' : 'Pending Invoice';
+
             let rawArtworkFiles = [];
 
             try {
@@ -1056,7 +1366,9 @@
                     fileFormat,
                     instructions,
                     rawArtworkFiles,
-                    price
+                    price,
+                    paymentStatus,
+                    paymentMethod
                 });
 
                 closeNewOrderModal();

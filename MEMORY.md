@@ -57,13 +57,18 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 - `/client-portal.html`: Redesigned Client Portal (Matching user's reference mockup with warm Dezan gold theme):
   - **Header**: Bold title + "Track orders, pay invoices, and request quotes easily."
   - **3 Quick-Action Cards**: Place Order, Request Quote, Track Order.
-  - **4 Stat Metric Badges**: Open Orders, Completed, Quotes, Balance Due.
-  - **Live Search & Filter Bar**: Real-time filtering by order # or job name + status dropdown.
+  - **4 Stat Metric Badges**: Open Orders, Completed, Quotes, **Balance Due** (Dynamically calculates total outstanding balance for unpaid/pending orders; displays rose badge with count `X Due` when > $0, or emerald `All settled` when $0.00; clickable to instantly filter by due payments).
+  - **Live Search & Filter Bar**: Real-time filtering by order # or job name + status dropdown (including `Payment Due / Incomplete` filter).
+  - **Due Payment & Incomplete Order Flow**:
+    - Orders created with deferred payment or incomplete checkouts have `payment_status: 'unpaid'`.
+    - Unpaid order cards feature a glowing rose accent border, a `Payment Due` badge, and an amber `Pay Now ($XX.00)` button.
+    - **1-Click Checkout Modal (`#checkout-payment-modal`)**: Tabbed payment interface supporting PayPal and Credit Card with instant 256-bit encrypted simulated gateway, toast alert notifications, and real-time InsForge PostgreSQL patch updates.
+    - **New Order Wizard**: Allows clients to select payment preference ("Pay on Invoice (Due Later)" vs. "Pay Upfront Now").
   - **Sectioned Layout**:
-    - **Open Orders**: Dynamic cards with Order #, Date, Job Name, Price, Status Badge, and View Details.
+    - **Open Orders**: Dynamic cards with Order #, Date, Job Name, Price, Status Badge, Pay Now button (if unpaid), and View Details.
     - **Completed Orders**: Machine deliverable downloads (`.DST`, `.EMB`) + View Invoice & Receipt.
     - **Quotes**: Quote estimation status or clean empty state with `+ Request Quote` action.
-  - **Client Invoice & Printable Receipt Modal**: Official itemized tax invoice and work order with `@media print` support.
+  - **Client Invoice & Printable Receipt Modal**: Official itemized tax invoice and work order with `@media print` support, unpaid alert banner, and direct "Pay Balance Due" action button.
   - **Client Account Modal**: Profile information, billing terms, active balance, theme toggle, and sign out.
   - **Fixed Bottom Navigation Dock**: 4 quick-access tabs (`Home`, `Orders`, `Quotes`, `Account`).
 - `/admin-portal.html`: Master Admin Backend (KPI metrics, All clients, Total revenue, Global order table, Worker assignment modal, Financial ledger & CSV export).
