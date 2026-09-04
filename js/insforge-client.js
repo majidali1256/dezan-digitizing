@@ -1,7 +1,7 @@
 /**
  * Dezan Digitizing — InsForge Client & RBAC State Engine
  * Backend Base: https://e8rw998g.us-east.insforge.app
- * Handles Authentication, PostgreSQL Database Sync, Worker Tasks, and S3 Storage uploads
+ * Handles Authentication, PostgreSQL Database Sync, Worker Tasks, S3 Storage, and Live Realtime Sync
  */
 
 const INSFORGE_CONFIG = {
@@ -135,6 +135,7 @@ class InsForgeClient {
         this.baseUrl = INSFORGE_CONFIG.baseUrl;
         this.anonKey = INSFORGE_CONFIG.anonKey;
         this.initStorage();
+        this.initRealtime();
     }
 
     generateUUID() {
@@ -179,6 +180,257 @@ class InsForgeClient {
                 }
             ]));
         }
+    }
+
+    // ===================================================================
+    //  REALTIME & AUTO-HEARTBEAT DUAL-ENGINE
+    // ===================================================================
+
+    initRealtime() {
+        this.subscribers = new Set();
+        this.lastKnownFingerprint = null;
+        this._heartbeatTimer = null;
+        this._processedEventKeys = new Set();
+
+        if (typeof window !== 'undefined') {
+            // 1. HTML5 BroadcastChannel for instantaneous multi-tab sync (< 5ms)
+            if (typeof BroadcastChannel !== 'undefined') {
+                try {
+                    this.broadcastChannel = new BroadcastChannel('dezan_realtime_sync');
+                    this.broadcastChannel.onmessage = (event) => {
+                        const { id, type, payload } = event.data || {};
+                        if (id && this._processedEventKeys.has(id)) return;
+                        if (id) {
+                            this._processedEventKeys.add(id);
+                            setTimeout(() => this._processedEventKeys.delete(id), 8000);
+                        }
+                        if (type) {
+                            console.log('⚡ Realtime Broadcast received:', type, payload);
+                            this.notifySubscribers(type, payload, false);
+                        }
+                    };
+                } catch (e) {
+                    console.warn('BroadcastChannel note:', e.message);
+                }
+            }
+
+            // 2. Storage event listener (Cross-tab secondary channel)
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'dezan_last_event' && e.newValue) {
+                    try {
+                        const { id, type, payload } = JSON.parse(e.newValue);
+                        if (id && this._processedEventKeys.has(id)) return;
+                        if (id) {
+                            this._processedEventKeys.add(id);
+                            setTimeout(() => this._processedEventKeys.delete(id), 8000);
+                        }
+                        this.notifySubscribers(type, payload, false);
+                    } catch (_) {}
+                }
+            });
+
+            // 3. Tab visibility listener (Reconciles instantly when tab becomes visible)
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    this.checkHeartbeatProbe();
+                }
+            });
+
+            // 4. Online state listener
+            window.addEventListener('online', () => {
+                console.log('🌐 Online event: reconnecting and probing database...');
+                this.checkHeartbeatProbe();
+            });
+
+            // 5. Start lightweight probe heartbeat (polls every 5s)
+            this.startAutoHeartbeat(5000);
+        }
+    }
+
+    onRealtimeEvent(callback) {
+        if (typeof callback === 'function') {
+            this.subscribers.add(callback);
+            return () => this.subscribers.delete(callback);
+        }
+        return () => {};
+    }
+
+    notifySubscribers(type, payload, isLocal = false) {
+        this.subscribers.forEach(cb => {
+            try {
+                cb({ type, payload, isLocal });
+            } catch (err) {
+                console.error('Realtime subscriber error:', err);
+            }
+        });
+    }
+
+    broadcastEvent(type, payload) {
+        const eventId = `${type}_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+        this._processedEventKeys.add(eventId);
+        setTimeout(() => this._processedEventKeys.delete(eventId), 8000);
+
+        const message = { id: eventId, type, payload, timestamp: Date.now() };
+
+        // 1. Post to BroadcastChannel
+        if (this.broadcastChannel) {
+            try {
+                this.broadcastChannel.postMessage(message);
+            } catch (_) {}
+        }
+
+        // 2. Update localStorage key for cross-tab storage event
+        try {
+            localStorage.setItem('dezan_last_event', JSON.stringify(message));
+        } catch (_) {}
+
+        // 3. Notify current tab's local subscribers
+        this.notifySubscribers(type, payload, true);
+    }
+
+    startAutoHeartbeat(intervalMs = 5000) {
+        if (this._heartbeatTimer) return;
+        // Run initial check
+        setTimeout(() => this.checkHeartbeatProbe(), 1000);
+        this._heartbeatTimer = setInterval(() => {
+            this.checkHeartbeatProbe();
+        }, intervalMs);
+    }
+
+    /**
+     * Bandwidth-efficient probe: queries only 4 small columns of the latest updated record
+     */
+    async checkHeartbeatProbe() {
+        try {
+            const res = await fetch(`${this.baseUrl}/api/database/records/orders?select=id,order_number,status,updated_at&order=updated_at.desc&limit=1`, {
+                headers: this.getApiHeaders()
+            });
+            if (!res.ok) return;
+            const rows = await res.json();
+            if (!Array.isArray(rows) || rows.length === 0) return;
+
+            const latest = rows[0];
+            const fingerprint = `${latest.order_number}:${latest.status}:${latest.updated_at}`;
+
+            if (this.lastKnownFingerprint && this.lastKnownFingerprint !== fingerprint) {
+                console.log('⚡ InsForge DB change detected by probe:', fingerprint);
+                this.lastKnownFingerprint = fingerprint;
+                this.notifySubscribers('remote_db_change', {
+                    orderNumber: latest.order_number,
+                    status: latest.status,
+                    updatedAt: latest.updated_at
+                }, false);
+            } else {
+                this.lastKnownFingerprint = fingerprint;
+            }
+
+            const timeStr = new Date().toLocaleTimeString();
+            localStorage.setItem('dezan_db_last_synced', new Date().toISOString());
+            this.updateSyncBadges(timeStr);
+        } catch (err) {
+            // Offline or intermittent network; quietly ignore
+        }
+    }
+
+    updateSyncBadges(timeStr) {
+        const textElements = document.querySelectorAll('#db-sync-text, #admin-db-sync-text, #worker-db-sync-text');
+        textElements.forEach(el => {
+            el.textContent = `Live Sync Active (${timeStr})`;
+        });
+    }
+
+    // Interactive Toast Notification Engine
+    showToast(title, message, icon = 'notifications', type = 'info') {
+        if (typeof document === 'undefined') return;
+
+        // Deduplicate identical toasts triggered in quick succession
+        const toastKey = `${title}:${message}`;
+        if (this._lastToastKey === toastKey && (Date.now() - (this._lastToastTime || 0) < 2000)) {
+            return;
+        }
+        this._lastToastKey = toastKey;
+        this._lastToastTime = Date.now();
+
+        let container = document.getElementById('dezan-toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'dezan-toast-container';
+            container.className = 'fixed bottom-5 right-5 z-[9999] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'pointer-events-auto flex items-start gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-primary/30 shadow-2xl backdrop-blur-md transition-all duration-300 transform translate-y-4 opacity-0';
+        
+        let iconBg = 'bg-amber-50 text-amber-900 dark:bg-primary/20 dark:text-primary';
+        if (type === 'success') {
+            iconBg = 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30';
+        } else if (type === 'info') {
+            iconBg = 'bg-blue-50 text-blue-800 dark:bg-blue-500/20 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30';
+        }
+
+        toast.innerHTML = `
+            <div class="w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-lg">${icon}</span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h5 class="text-xs font-black text-slate-900 dark:text-white leading-snug">${title}</h5>
+                <p class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-0.5 leading-tight">${message}</p>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white shrink-0 p-1 cursor-pointer" aria-label="Close">
+                <span class="material-symbols-outlined text-xs">close</span>
+            </button>
+        `;
+
+        container.appendChild(toast);
+        this.playNotificationChime();
+
+        // Animate entrance
+        requestAnimationFrame(() => {
+            toast.classList.remove('translate-y-4', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+        });
+
+        // Auto remove
+        setTimeout(() => {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-2', 'opacity-0');
+            setTimeout(() => toast.remove(), 350);
+        }, 4500);
+    }
+
+    // Synthesized Web Audio Notification Bell
+    playNotificationChime() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+            const now = ctx.currentTime;
+            
+            const osc1 = ctx.createOscillator();
+            const osc2 = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(587.33, now); // D5
+            osc1.frequency.exponentialRampToValueAtTime(880, now + 0.12); // A5
+
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(880, now + 0.12); // A5
+            osc2.frequency.exponentialRampToValueAtTime(1174.66, now + 0.3); // D6
+
+            gain.gain.setValueAtTime(0.06, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc1.start(now);
+            osc1.stop(now + 0.3);
+            osc2.start(now + 0.12);
+            osc2.stop(now + 0.5);
+        } catch (_) {}
     }
 
     // ===================================================================
@@ -239,7 +491,8 @@ class InsForgeClient {
     // ===================================================================
 
     getCurrentUser() {
-        const session = localStorage.getItem('dezan_session');
+        const session = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('dezan_session') : null) || 
+                        (typeof localStorage !== 'undefined' ? localStorage.getItem('dezan_session') : null);
         if (!session) return null;
         try {
             return JSON.parse(session);
@@ -248,12 +501,18 @@ class InsForgeClient {
         }
     }
 
-    setSession(user) {
-        localStorage.setItem('dezan_session', JSON.stringify(user));
+    setSession(user, sessionOnly = false) {
+        if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem('dezan_session', JSON.stringify(user));
+        }
+        if (!sessionOnly && typeof localStorage !== 'undefined') {
+            localStorage.setItem('dezan_session', JSON.stringify(user));
+        }
     }
 
     signOut() {
-        localStorage.removeItem('dezan_session');
+        if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem('dezan_session');
+        if (typeof localStorage !== 'undefined') localStorage.removeItem('dezan_session');
         window.location.href = 'portal-login.html';
     }
 
@@ -471,7 +730,6 @@ class InsForgeClient {
         const user = this.getCurrentUser();
         if (!user || (user.role !== 'digitizer' && user.role !== 'admin')) return [];
 
-        // Check local tasks cache first
         const cachedTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
         if (cachedTasks.length > 0) {
             const filtered = user.role === 'admin' 
@@ -515,7 +773,7 @@ class InsForgeClient {
     }
 
     /**
-     * Client Submits a New Order (persisted to PostgreSQL cloud database + local cache)
+     * Client Submits a New Order (persisted to PostgreSQL cloud database + local cache + broadcast)
      * @param {Object} orderData 
      * @returns {Promise<Object>} Created order
      */
@@ -557,6 +815,14 @@ class InsForgeClient {
         allOrders.unshift(newOrder);
         localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
 
+        // Broadcast to other tabs immediately
+        this.broadcastEvent('order_created', {
+            orderNumber: newOrder.order_number,
+            clientName: newOrder.client_name,
+            projectName: newOrder.project_name,
+            price: newOrder.price
+        });
+
         // Persist directly to InsForge PostgreSQL via REST
         try {
             const res = await fetch(`${this.baseUrl}/api/database/records/orders`, {
@@ -583,7 +849,7 @@ class InsForgeClient {
     }
 
     /**
-     * Admin Assigns a Ticket to a Digitizer (Updates orders and upserts sanitized digitizer_tasks in PostgreSQL)
+     * Admin Assigns a Ticket to a Digitizer (Updates orders and upserts sanitized digitizer_tasks in PostgreSQL + broadcast)
      * @param {string} orderNumber 
      * @param {string} digitizerId 
      * @param {string} digitizerName 
@@ -633,6 +899,14 @@ class InsForgeClient {
         }
         localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(allTasks));
 
+        // Broadcast to other tabs immediately
+        this.broadcastEvent('order_assigned', {
+            orderNumber: orderNumber,
+            taskNumber: taskNumber,
+            digitizerId: digitizerId,
+            digitizerName: digitizerName
+        });
+
         // Sync to InsForge PostgreSQL
         try {
             // 1. Patch orders table
@@ -680,7 +954,7 @@ class InsForgeClient {
     }
 
     /**
-     * Digitizer Submits Completed .dst/.emb Deliverables (persisted to PostgreSQL cloud database + local cache)
+     * Digitizer Submits Completed .dst/.emb Deliverables (persisted to PostgreSQL cloud database + local cache + broadcast)
      * @param {string} orderNumber 
      * @param {Array} deliverables 
      * @returns {Promise<boolean>}
@@ -707,6 +981,12 @@ class InsForgeClient {
             task.completed_at = completedAt;
             localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(allTasks));
         }
+
+        // Broadcast to other tabs immediately
+        this.broadcastEvent('order_completed', {
+            orderNumber: orderNumber,
+            deliverables: deliverables
+        });
 
         // Sync to InsForge PostgreSQL
         try {

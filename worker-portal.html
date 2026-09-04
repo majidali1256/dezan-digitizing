@@ -145,6 +145,26 @@
                 document.getElementById('worker-greeting').textContent = `Hello, ${currentUser.displayName}`;
             }
             renderWorkerTasks();
+
+            // Register Realtime Listener for Instant Worker Task Updates
+            window.insforgeClient.onRealtimeEvent(async ({ type, payload, isLocal }) => {
+                if (isLocal) return;
+                console.log('Worker Portal received realtime event:', type, payload);
+
+                if (type === 'order_assigned') {
+                    if (currentUser && (!payload.digitizerId || payload.digitizerId === currentUser.id)) {
+                        window.insforgeClient.showToast(
+                            'New Task Assigned!',
+                            `Order ${payload.orderNumber} was added to your production queue.`,
+                            'assignment_ind',
+                            'success'
+                        );
+                    }
+                    await renderWorkerTasks();
+                } else if (type === 'remote_db_change') {
+                    await renderWorkerTasks();
+                }
+            });
         });
 
         async function renderWorkerTasks() {

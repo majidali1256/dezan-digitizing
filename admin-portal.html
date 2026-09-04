@@ -234,6 +234,32 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             renderAdminOrders();
+
+            // Register Realtime Listener for Instant Admin Updates
+            window.insforgeClient.onRealtimeEvent(async ({ type, payload, isLocal }) => {
+                if (isLocal) return;
+                console.log('Admin Portal received realtime event:', type, payload);
+
+                if (type === 'order_created') {
+                    window.insforgeClient.showToast(
+                        'New Order Submitted',
+                        `${payload.clientName || 'Customer'} placed ${payload.orderNumber} ($${(payload.price || 0).toFixed(2)}).`,
+                        'inventory_2',
+                        'success'
+                    );
+                    await renderAdminOrders();
+                } else if (type === 'order_completed') {
+                    window.insforgeClient.showToast(
+                        'Deliverables Ready',
+                        `Stitch files for ${payload.orderNumber} were uploaded by digitizer.`,
+                        'task_alt',
+                        'success'
+                    );
+                    await renderAdminOrders();
+                } else if (type === 'remote_db_change') {
+                    await renderAdminOrders();
+                }
+            });
         });
 
         async function renderAdminOrders() {

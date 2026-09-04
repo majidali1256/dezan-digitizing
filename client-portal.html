@@ -264,6 +264,32 @@
                 }
             }
             renderOrders();
+
+            // Register Realtime Listener for Instant Updates
+            window.insforgeClient.onRealtimeEvent(async ({ type, payload, isLocal }) => {
+                if (isLocal) return;
+                console.log('Client Portal received realtime event:', type, payload);
+
+                if (type === 'order_completed') {
+                    window.insforgeClient.showToast(
+                        'Stitch Files Ready!',
+                        `Embroidery deliverables for ${payload.orderNumber} are ready to download.`,
+                        'verified',
+                        'success'
+                    );
+                    await renderOrders();
+                } else if (type === 'order_assigned') {
+                    window.insforgeClient.showToast(
+                        'Production Started',
+                        `Order ${payload.orderNumber} is assigned to digitizer ${payload.digitizerName}.`,
+                        'precision_manufacturing',
+                        'info'
+                    );
+                    await renderOrders();
+                } else if (type === 'remote_db_change') {
+                    await renderOrders();
+                }
+            });
         });
 
         async function renderOrders() {

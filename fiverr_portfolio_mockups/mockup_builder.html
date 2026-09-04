@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiverr Multi-Device Mockup Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: #0b0a08;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    padding: 20px 0;
+  }
+
+  /* 16:9 Showcase Canvas Container (1920x1080) */
+  .canvas {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 20%, #1e190d 0%, #0d0b07 60%, #050403 100%);
+    box-shadow: 0 30px 100px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Background Aesthetics: Golden Glows & Grid */
+  .glow-1 {
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    top: -200px;
+    left: 20%;
+    background: radial-gradient(circle, rgba(212, 175, 53, 0.18) 0%, rgba(212, 175, 53, 0) 70%);
+    filter: blur(80px);
+    pointer-events: none;
+  }
+  .glow-2 {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    bottom: -100px;
+    right: 10%;
+    background: radial-gradient(circle, rgba(212, 175, 53, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+    filter: blur(90px);
+    pointer-events: none;
+  }
+
+  .bg-grid {
+    position: absolute;
+    inset: 0;
+    background-size: 60px 60px;
+    background-image: 
+      linear-gradient(to right, rgba(212, 175, 53, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(212, 175, 53, 0.03) 1px, transparent 1px);
+    pointer-events: none;
+  }
+
+  /* Top Banner Header */
+  .header-bar {
+    position: relative;
+    z-index: 20;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 36px 60px 0 60px;
+  }
+
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .brand-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    border: 2px solid rgba(212, 175, 53, 0.5);
+    box-shadow: 0 4px 20px rgba(212, 175, 53, 0.3);
+  }
+
+  .brand-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, #ffffff 30%, #d4af35 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .brand-subtitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: #a39575;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .tags-group {
+    display: flex;
+    gap: 12px;
+  }
+
+  .tag-pill {
+    background: rgba(212, 175, 53, 0.1);
+    border: 1px solid rgba(212, 175, 53, 0.3);
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #e5c158;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-pill.live-badge {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.4);
+    color: #4ade80;
+  }
+
+  .dot-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #4ade80;
+    box-shadow: 0 0 10px #4ade80;
+  }
+
+  /* Main Stage for Devices */
+  .devices-stage {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 820px;
+    margin-top: 10px;
+  }
+
+  /* ================== MACBOOK PRO (LAPTOP) ================== */
+  .macbook {
+    position: absolute;
+    left: 280px;
+    top: 50px;
+    width: 1100px;
+    z-index: 10;
+    filter: drop-shadow(0 40px 60px rgba(0, 0, 0, 0.75));
+  }
+
+  .macbook-lid {
+    width: 1040px;
+    height: 660px;
+    margin: 0 auto;
+    background: #0f1012;
+    border-radius: 26px 26px 0 0;
+    padding: 18px 18px 0 18px;
+    border: 3px solid #383a3f;
+    border-bottom: none;
+    position: relative;
+    box-shadow: inset 0 0 0 2px #1f2125;
+  }
+
+  /* Notch & Camera */
+  .macbook-notch {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 110px;
+    height: 18px;
+    background: #0f1012;
+    border-radius: 0 0 10px 10px;
+    z-index: 30;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .macbook-camera {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #1a2634;
+    border: 1px solid #2e3c4e;
+  }
+
+  /* Screen Display */
+  .macbook-screen {
+    width: 100%;
+    height: 642px;
+    background: #111;
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .macbook-screen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+  }
+
+  /* Glare Overlay */
+  .screen-glare {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 45%;
+    height: 100%;
+    background: linear-gradient(125deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 60%);
+    pointer-events: none;
+  }
+
+  /* Base / Keyboard Deck */
+  .macbook-base {
+    width: 1100px;
+    height: 24px;
+    background: linear-gradient(to bottom, #d2d5db 0%, #9ca1aa 50%, #686d77 100%);
+    border-radius: 2px 2px 14px 14px;
+    position: relative;
+    margin: 0 auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+  }
+
+  .macbook-notch-base {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160px;
+    height: 7px;
+    background: #494c52;
+    border-radius: 0 0 8px 8px;
+  }
+
+  .macbook-bottom-lip {
+    width: 900px;
+    height: 6px;
+    background: #232529;
+    margin: 0 auto;
+    border-radius: 0 0 10px 10px;
+  }
+
+  /* Reflection below laptop */
+  .device-floor-reflection {
+    position: absolute;
+    bottom: -80px;
+    left: 100px;
+    width: 900px;
+    height: 60px;
+    background: radial-gradient(ellipse at center, rgba(212, 175, 53, 0.15) 0%, rgba(0,0,0,0) 75%);
+    filter: blur(20px);
+  }
+
+
+  /* ================== IPAD PRO (TABLET) ================== */
+  .ipad {
+    position: absolute;
+    left: 70px;
+    top: 240px;
+    width: 410px;
+    height: 570px;
+    background: #161719;
+    border-radius: 34px;
+    padding: 14px;
+    border: 3.5px solid #4a4d54;
+    box-shadow: 
+      0 35px 70px rgba(0,0,0,0.85),
+      0 0 0 1px #111214;
+    z-index: 25;
+    transform: rotate(-3deg);
+  }
+
+  .ipad-camera {
+    position: absolute;
+    top: 50%;
+    left: 7px;
+    transform: translateY(-50%);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #090a0c;
+  }
+
+  .ipad-screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 22px;
+    overflow: hidden;
+    position: relative;
+    background: #000;
+  }
+
+  .ipad-screen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+  }
+
+  .apple-pencil {
+    position: absolute;
+    top: 40px;
+    right: -18px;
+    width: 10px;
+    height: 480px;
+    background: linear-gradient(to right, #f3f4f6, #ffffff, #d1d5db);
+    border-radius: 6px;
+    box-shadow: 2px 10px 20px rgba(0,0,0,0.5);
+    z-index: 26;
+  }
+  .apple-pencil-tip {
+    position: absolute;
+    top: -16px;
+    left: 1px;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 16px solid #e5e7eb;
+  }
+
+
+  /* ================== IPHONE 15 PRO (MOBILE) ================== */
+  .iphone {
+    position: absolute;
+    right: 120px;
+    top: 290px;
+    width: 275px;
+    height: 565px;
+    background: #18191c;
+    border-radius: 46px;
+    padding: 12px;
+    border: 3.5px solid #6b7280;
+    box-shadow: 
+      0 35px 80px rgba(0,0,0,0.9),
+      0 0 0 1.5px #1a1c20;
+    z-index: 30;
+    transform: rotate(2.5deg);
+  }
+
+  /* Dynamic Island */
+  .dynamic-island {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 76px;
+    height: 20px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 40;
+  }
+
+  .iphone-screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 36px;
+    overflow: hidden;
+    position: relative;
+    background: #000;
+  }
+
+  .iphone-screen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+  }
+
+  .home-bar {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90px;
+    height: 4px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 4px;
+    z-index: 40;
+  }
+
+
+  /* Bottom Feature Highlights Bar */
+  .footer-bar {
+    position: relative;
+    z-index: 20;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 60px 36px 60px;
+  }
+
+  .features-list {
+    display: flex;
+    gap: 28px;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #e6e2d8;
+  }
+
+  .feature-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: rgba(212, 175, 53, 0.2);
+    color: #d4af35;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+  }
+
+  .rating-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(212, 175, 53, 0.3);
+    padding: 8px 18px;
+    border-radius: 12px;
+  }
+
+  .stars {
+    color: #f59e0b;
+    font-size: 16px;
+    letter-spacing: 2px;
+  }
+
+  .rating-text {
+    font-size: 13px;
+    font-weight: 800;
+    color: #ffffff;
+  }
+
+</style>
+</head>
+<body>
+
+  <!-- ================= CANVAS 1: HOME PAGE RESPONSIVE SHOWCASE ================= -->
+  <div id="canvas-hero" class="canvas">
+    <div class="glow-1"></div>
+    <div class="glow-2"></div>
+    <div class="bg-grid"></div>
+
+    <!-- Header -->
+    <div class="header-bar">
+      <div class="brand-group">
+        <img src="../logo.png" alt="Logo" class="brand-logo">
+        <div>
+          <div class="brand-title">DEZAN DIGITIZING</div>
+          <div class="brand-subtitle">Responsive Web Development Project</div>
+        </div>
+      </div>
+      <div class="tags-group">
+        <div class="tag-pill live-badge">
+          <div class="dot-pulse"></div>
+          100% COMPLETED PROJECT
+        </div>
+        <div class="tag-pill">
+          ⚡ DESKTOP • TABLET • MOBILE
+        </div>
+      </div>
+    </div>
+
+    <!-- Devices Stage -->
+    <div class="devices-stage">
+      <!-- Laptop / MacBook -->
+      <div class="macbook">
+        <div class="macbook-lid">
+          <div class="macbook-notch"><div class="macbook-camera"></div></div>
+          <div class="macbook-screen">
+            <img src="screenshots/desktop_index.png" alt="Desktop Real Screenshot">
+            <div class="screen-glare"></div>
+          </div>
+        </div>
+        <div class="macbook-base">
+          <div class="macbook-notch-base"></div>
+        </div>
+        <div class="macbook-bottom-lip"></div>
+      </div>
+
+      <!-- Tablet / iPad -->
+      <div class="ipad">
+        <div class="ipad-camera"></div>
+        <div class="ipad-screen">
+          <img src="screenshots/tablet_index.png" alt="Tablet Real Screenshot">
+          <div class="screen-glare"></div>
+        </div>
+        <div class="apple-pencil"><div class="apple-pencil-tip"></div></div>
+      </div>
+
+      <!-- Mobile / iPhone -->
+      <div class="iphone">
+        <div class="dynamic-island"></div>
+        <div class="iphone-screen">
+          <img src="screenshots/mobile_index.png" alt="Mobile Real Screenshot">
+          <div class="screen-glare"></div>
+          <div class="home-bar"></div>
+        </div>
+      </div>
+
+      <div class="device-floor-reflection"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-bar">
+      <div class="features-list">
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          Interactive Before/After Slider
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          Dark & Light Theme Mode
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          Custom Pricing & PayPal Integration
+        </div>
+      </div>
+
+      <div class="rating-badge">
+        <span class="stars">★★★★★</span>
+        <span class="rating-text">5.0 TOP RATED WORK</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================= CANVAS 2: MULTI-PAGE SHOWCASE (Home, Feedbacks, Services) ================= -->
+  <div id="canvas-multipage" class="canvas">
+    <div class="glow-1" style="left: 45%;"></div>
+    <div class="glow-2" style="right: 35%;"></div>
+    <div class="bg-grid"></div>
+
+    <!-- Header -->
+    <div class="header-bar">
+      <div class="brand-group">
+        <img src="../logo.png" alt="Logo" class="brand-logo">
+        <div>
+          <div class="brand-title">DEZAN DIGITIZING — ALL PAGES</div>
+          <div class="brand-subtitle">Clean Frontend Architecture & UI Design</div>
+        </div>
+      </div>
+      <div class="tags-group">
+        <div class="tag-pill live-badge">
+          <div class="dot-pulse"></div>
+          LIVE CLIENT WORK
+        </div>
+        <div class="tag-pill">
+          💎 PIXEL-PERFECT UI
+        </div>
+      </div>
+    </div>
+
+    <!-- Devices Stage -->
+    <div class="devices-stage">
+      <!-- Laptop showing Feedbacks / Portfolio -->
+      <div class="macbook">
+        <div class="macbook-lid">
+          <div class="macbook-notch"><div class="macbook-camera"></div></div>
+          <div class="macbook-screen">
+            <img src="screenshots/desktop_portfolio.png" alt="Desktop Portfolio Screenshot">
+            <div class="screen-glare"></div>
+          </div>
+        </div>
+        <div class="macbook-base">
+          <div class="macbook-notch-base"></div>
+        </div>
+        <div class="macbook-bottom-lip"></div>
+      </div>
+
+      <!-- Tablet showing Services Page -->
+      <div class="ipad">
+        <div class="ipad-camera"></div>
+        <div class="ipad-screen">
+          <img src="screenshots/tablet_index.png" alt="Tablet Index Screenshot">
+          <div class="screen-glare"></div>
+        </div>
+        <div class="apple-pencil"><div class="apple-pencil-tip"></div></div>
+      </div>
+
+      <!-- Mobile showing Portfolio / Feedbacks -->
+      <div class="iphone">
+        <div class="dynamic-island"></div>
+        <div class="iphone-screen">
+          <img src="screenshots/mobile_portfolio.png" alt="Mobile Portfolio Screenshot">
+          <div class="screen-glare"></div>
+          <div class="home-bar"></div>
+        </div>
+      </div>
+
+      <div class="device-floor-reflection"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-bar">
+      <div class="features-list">
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          Full Responsive Multi-Page Setup
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          Dynamic Lightbox Gallery
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          Optimized WebP Image Assets
+        </div>
+      </div>
+
+      <div class="rating-badge">
+        <span class="stars">★★★★★</span>
+        <span class="rating-text">CLIENT SATISFACTION 100%</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
