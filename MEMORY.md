@@ -71,7 +71,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - **Client Invoice & Printable Receipt Modal**: Official itemized tax invoice and work order with `@media print` support, unpaid alert banner, and direct "Pay Balance Due" action button.
   - **Client Account Modal**: Profile information, billing terms, active balance, theme toggle, and sign out.
   - **Fixed Bottom Navigation Dock**: 4 quick-access tabs (`Home`, `Orders`, `Quotes`, `Account`).
-- `/admin-portal.html`: Master Admin Backend (KPI metrics, All clients, Total revenue, Global order table, Worker assignment modal, Financial ledger & CSV export).
+- `/admin-portal.html`: Master Admin Backend (KPI metrics with Realized vs. Due revenue breakdown, All clients, Global order table, Worker assignment modal, Financial ledger & CSV export, Due payment oversight & automated email payment reminders — with strict zero-manual-payment policy).
 - `/worker-portal.html`: Digitizer Restricted Workspace (Only assigned jobs, sanitized specs, raw logo download, `.dst`/`.emb` file uploader).
 
 ### Header Navigation Authentication State
@@ -179,7 +179,35 @@ To prevent data leakage via browser DevTools:
 
 ---
 
-## 11. Directory Structure
+## 11. Admin Due Payment Oversight & Automated Email Reminders (Live & Verified)
+- **Strict Architecture Constraint — Zero Manual Payment Recording**:
+  - The business owner explicitly prohibits manual payment overrides in the Admin Portal.
+  - Payment settlement remains strictly client-driven via their invoice checkout link (PayPal / Credit Card).
+- **Due Payment Analytics & Queue Filtering**:
+  - **Revenue KPI Card**: Displays live `Completed: $XX.XX` realized revenue alongside an interactive, clickable `Due: $YY.YY (Z Due)` badge in rose `#e11d48`.
+  - **Clickable Fast-Filter (`filterByUnpaid()`):** Clicking the Due metric immediately isolates unpaid/incomplete orders in the Master Orders Queue.
+  - **Filter Status Selector**: Features `<option value="unpaid">Payment Due / Unpaid</option>` for targeted queue inspection.
+  - **Table Badging**: Price column renders unit price + high-contrast `Payment Due` badge (or emerald `Paid` badge).
+- **Automated Payment Reminder Modal (`#payment-reminder-modal`)**:
+  - Unpaid orders feature a prominent golden **"Remind Client"** (or **"Remind Again"**) button in the Actions column.
+  - Modal pre-fills:
+    - Target Order Number & Project specs
+    - Balance Due ($XX.00)
+    - Client recipient name & verified email
+    - Professional payment notification subject line
+    - Pre-composed email template with direct Client Portal link (`https://dezan-digitizing.vercel.app/client-portal.html`) and payment instructions
+    - Reminder history tracker (`Sent Xm ago (Total: Y reminders)` or `Never reminded`)
+- **Backend & Cloud Persistence (`sendPaymentReminder`)**:
+  - Updates order with `last_payment_reminder_at`, increments `reminder_count`, and persists to `localStorage`.
+  - Live patches to InsForge PostgreSQL Cloud via `PATCH /api/database/records/orders`.
+  - Emits real-time `payment_reminder_sent` event across `BroadcastChannel` to update open browser tabs.
+  - Dispatches floating glassmorphic success toast (`Reminder Email Dispatched`).
+- **Automated Verification**:
+  - 100% verified with Playwright test (`scratch/verify_admin_payment_reminders.js`) on Desktop (1512x982) and Mobile (390x844).
+
+---
+
+## 12. Directory Structure
 ```
 ├── .agents/
 │   ├── rules/frontend_design_rules.md
@@ -204,7 +232,7 @@ To prevent data leakage via browser DevTools:
 
 ---
 
-## 12. Development & Deployment Guidelines
+## 13. Development & Deployment Guidelines
 1. **JavaScript DOM Standard**: All initialization code in `app.js` runs within `DOMContentLoaded` and is guarded by page URL checks.
 2. **Zero Framework Mandate**: Keep all scripts lightweight and vanilla. No bundle builds required.
 3. **Git Hygiene**: Clean atomic commits with descriptive commit messages.

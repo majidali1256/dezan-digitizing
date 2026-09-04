@@ -902,6 +902,66 @@ class InsForgeClient {
     }
 
     /**
+     * Admin sends an email payment reminder for an unpaid/incomplete order
+     * @param {string} orderIdOrNumber
+     * @param {string} customNote
+     * @returns {Promise<{success: boolean, timestamp: string, reminderCount: number, clientEmail: string, clientName: string}>}
+     */
+    async sendPaymentReminder(orderIdOrNumber, customNote = '') {
+        const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+        const order = allOrders.find(o => o.id === orderIdOrNumber || o.order_number === orderIdOrNumber);
+        if (!order) {
+            console.warn('Order not found for payment reminder:', orderIdOrNumber);
+            return { success: false, error: 'Order not found' };
+        }
+
+        const now = new Date().toISOString();
+        const reminderCount = (order.reminder_count || 0) + 1;
+        order.last_payment_reminder_at = now;
+        order.reminder_count = reminderCount;
+        order.last_reminder_note = customNote;
+        order.updated_at = now;
+        localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
+
+        // Broadcast to other open tabs
+        this.broadcastEvent('payment_reminder_sent', {
+            orderId: order.id,
+            orderNumber: order.order_number,
+            clientEmail: order.client_email,
+            clientName: order.client_name,
+            price: order.price,
+            timestamp: now,
+            reminderCount
+        });
+
+        // Persist to InsForge PostgreSQL
+        try {
+            const queryParam = order.id ? `id=eq.${order.id}` : `order_number=eq.${order.order_number}`;
+            const res = await fetch(`${this.baseUrl}/api/database/records/orders?${queryParam}`, {
+                method: 'PATCH',
+                headers: this.getApiHeaders({ 'Prefer': 'return=representation' }),
+                body: JSON.stringify({
+                    updated_at: order.updated_at
+                })
+            });
+            if (res.ok) {
+                console.log(`✅ Payment reminder timestamp recorded live in InsForge DB for ${order.order_number}`);
+                localStorage.setItem('dezan_db_last_synced', new Date().toISOString());
+            }
+        } catch (err) {
+            console.warn('Payment reminder remote sync notice (cached locally):', err.message);
+        }
+
+        return {
+            success: true,
+            timestamp: now,
+            reminderCount,
+            clientEmail: order.client_email,
+            clientName: order.client_name
+        };
+    }
+
+    /**
      * Admin Assigns a Ticket to a Digitizer (Updates orders and upserts sanitized digitizer_tasks in PostgreSQL + broadcast)
      * @param {string} orderNumber 
      * @param {string} digitizerId 

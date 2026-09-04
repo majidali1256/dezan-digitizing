@@ -117,7 +117,7 @@
                 <h3 class="text-3xl font-black text-slate-900 dark:text-white" id="stat-revenue">$0.00</h3>
                 <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-primary/10 text-[11px]">
                     <span class="text-emerald-700 dark:text-emerald-400 font-semibold" id="stat-revenue-completed">Completed: $0.00</span>
-                    <span class="text-amber-800 dark:text-amber-400 font-semibold" id="stat-revenue-pipeline">Pipeline: $0.00</span>
+                    <span class="font-bold cursor-pointer transition-colors" id="stat-revenue-unpaid" onclick="filterByUnpaid()" title="Click to filter orders with payment due">Due: $0.00 (0)</span>
                 </div>
             </div>
 
@@ -173,6 +173,7 @@
                     </button>
                     <select id="filter-status" onchange="renderAdminOrders()" class="px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white font-medium focus:ring-primary focus:border-primary">
                         <option value="all">All Statuses</option>
+                        <option value="unpaid">Payment Due / Unpaid</option>
                         <option value="pending_review">Pending Assignment</option>
                         <option value="assigned">Assigned</option>
                         <option value="in_progress">In Production</option>
@@ -239,6 +240,78 @@
                 <div class="pt-3 border-t border-slate-200 dark:border-primary/15 flex items-center justify-end gap-2">
                     <button type="button" onclick="closeAssignModal()" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-300 text-xs font-semibold transition-colors">Cancel</button>
                     <button type="submit" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 text-xs font-black shadow-md shadow-primary/20 transition-all">Assign & Dispatch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== SEND PAYMENT REMINDER MODAL ===== -->
+    <div id="payment-reminder-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-lg bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl p-6 relative text-slate-900 dark:text-slate-100">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-primary/15 mb-4">
+                <div>
+                    <span class="text-[10px] font-black uppercase text-rose-600 dark:text-rose-400 tracking-wider block">Accounts Receivable</span>
+                    <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-amber-700 dark:text-primary">forward_to_inbox</span> Send Payment Reminder
+                    </h3>
+                </div>
+                <button onclick="closePaymentReminderModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer">
+                    <span class="material-symbols-outlined text-base">close</span>
+                </button>
+            </div>
+
+            <form onsubmit="handleSendReminderSubmit(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="reminder-order-number" />
+
+                <!-- Order & Amount Due Header Card -->
+                <div class="p-3.5 rounded-xl bg-amber-50/50 dark:bg-slate-900/60 border border-amber-200/80 dark:border-primary/15 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase block">Client Order</span>
+                        <strong class="text-amber-900 dark:text-primary text-sm font-black" id="reminder-order-display">ORD-8842</strong>
+                        <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5" id="reminder-project-display">Falcon Mini Cap Logo</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase block">Balance Due</span>
+                        <span class="text-lg font-black text-rose-600 dark:text-rose-400" id="reminder-amount-display">$15.00</span>
+                    </div>
+                </div>
+
+                <!-- Recipient Info -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Recipient Email</label>
+                    <div class="flex items-center gap-2 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl font-mono text-slate-900 dark:text-white">
+                        <span class="material-symbols-outlined text-sm text-slate-400">mail</span>
+                        <span id="reminder-recipient-display">client@falconapparel.com</span>
+                    </div>
+                </div>
+
+                <!-- Subject Line -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Email Subject</label>
+                    <input type="text" id="reminder-subject" required class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:border-primary" />
+                </div>
+
+                <!-- Message Body -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Message Body</label>
+                    <textarea id="reminder-message" rows="5" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:border-primary font-mono leading-relaxed"></textarea>
+                </div>
+
+                <!-- Previous Reminder History -->
+                <div class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 flex items-center justify-between text-[11px] text-slate-500">
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-xs text-slate-400">history</span>
+                        <span>Reminder Status:</span>
+                    </span>
+                    <span id="reminder-history-status" class="font-semibold text-slate-700 dark:text-slate-300">Never reminded</span>
+                </div>
+
+                <div class="pt-3 border-t border-slate-200 dark:border-primary/15 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closePaymentReminderModal()" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-300 text-xs font-semibold cursor-pointer transition-colors">Cancel</button>
+                    <button type="submit" id="reminder-send-btn" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 text-xs font-black shadow-md shadow-primary/20 cursor-pointer flex items-center gap-1.5 transition-all">
+                        <span class="material-symbols-outlined text-sm">send</span>
+                        <span>Send Reminder Email</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -330,6 +403,16 @@
                         'success'
                     );
                     await renderAdminOrders();
+                } else if (type === 'order_paid') {
+                    window.insforgeClient.showToast(
+                        'Invoice Settled Live',
+                        `Order ${payload.orderNumber} ($${(payload.price || 0).toFixed(2)}) was settled via ${payload.paymentMethod}.`,
+                        'payments',
+                        'success'
+                    );
+                    await renderAdminOrders();
+                } else if (type === 'payment_reminder_sent') {
+                    await renderAdminOrders();
                 } else if (type === 'remote_db_change') {
                     await renderAdminOrders();
                 }
@@ -351,12 +434,17 @@
             }
 
             const filter = document.getElementById('filter-status').value;
-            const filtered = filter === 'all' ? allOrders : allOrders.filter(o => o.status === filter);
+            const filtered = filter === 'all' 
+                ? allOrders 
+                : filter === 'unpaid'
+                    ? allOrders.filter(o => o.payment_status === 'unpaid' || o.payment_status === 'pending')
+                    : allOrders.filter(o => o.status === filter);
 
             // Compute comprehensive statistics
             const totalRev = allOrders.reduce((sum, o) => sum + (o.price || 0), 0);
             const completedRev = allOrders.filter(o => o.status === 'completed').reduce((sum, o) => sum + (o.price || 0), 0);
-            const pipelineRev = allOrders.filter(o => o.status !== 'completed').reduce((sum, o) => sum + (o.price || 0), 0);
+            const unpaidOrders = allOrders.filter(o => o.payment_status === 'unpaid' || o.payment_status === 'pending');
+            const unpaidRev = unpaidOrders.reduce((sum, o) => sum + (o.price || 0), 0);
             const aov = allOrders.length > 0 ? (totalRev / allOrders.length) : 0;
             const unassigned = allOrders.filter(o => !o.assigned_digitizer_id).length;
 
@@ -364,8 +452,15 @@
             if (document.getElementById('stat-revenue-completed')) {
                 document.getElementById('stat-revenue-completed').textContent = `Completed: $${completedRev.toFixed(2)}`;
             }
-            if (document.getElementById('stat-revenue-pipeline')) {
-                document.getElementById('stat-revenue-pipeline').textContent = `Pipeline: $${pipelineRev.toFixed(2)}`;
+            const unpaidStat = document.getElementById('stat-revenue-unpaid');
+            if (unpaidStat) {
+                if (unpaidRev > 0) {
+                    unpaidStat.textContent = `Due: $${unpaidRev.toFixed(2)} (${unpaidOrders.length} Due)`;
+                    unpaidStat.className = 'font-bold text-rose-600 dark:text-rose-400 cursor-pointer hover:underline';
+                } else {
+                    unpaidStat.textContent = 'Due: $0.00 (Settled)';
+                    unpaidStat.className = 'font-bold text-emerald-700 dark:text-emerald-400 cursor-pointer hover:underline';
+                }
             }
             document.getElementById('stat-total-orders').textContent = allOrders.length;
             if (document.getElementById('stat-aov')) {
@@ -384,6 +479,7 @@
                 const assignedText = order.assigned_digitizer_name 
                     ? `<span class="text-slate-800 dark:text-slate-200 font-semibold">${order.assigned_digitizer_name}</span>`
                     : '<span class="text-amber-800 dark:text-amber-400 font-bold">Unassigned</span>';
+                const isPaid = order.payment_status === 'paid';
                 
                 return `
                     <tr class="hover:bg-amber-50/50 dark:hover:bg-slate-800/40 transition-colors">
@@ -412,11 +508,20 @@
                                 ` : ''}
                             </div>
                         </td>
-                        <td class="px-5 py-4 font-black text-slate-900 dark:text-slate-100 text-sm">$${order.price.toFixed(2)}</td>
+                        <td class="px-5 py-4">
+                            <span class="font-black text-slate-900 dark:text-slate-100 text-sm block">$${order.price.toFixed(2)}</span>
+                            <div class="mt-1">${getPaymentBadge(order.payment_status)}</div>
+                        </td>
                         <td class="px-5 py-4">${getStatusBadge(order.status)}</td>
                         <td class="px-5 py-4 text-xs">${assignedText}</td>
                         <td class="px-5 py-4 text-right">
-                            <div class="flex items-center justify-end gap-1.5">
+                            <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                                ${!isPaid ? `
+                                    <button onclick="openPaymentReminderModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/15 dark:hover:bg-rose-500/25 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs" title="Send email payment reminder to ${order.client_email}">
+                                        <span class="material-symbols-outlined text-xs">forward_to_inbox</span>
+                                        <span>${order.last_payment_reminder_at ? 'Remind Again' : 'Remind Client'}</span>
+                                    </button>
+                                ` : ''}
                                 <button onclick="openInvoiceModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1" title="View & Print Official Tax Invoice">
                                     <span class="material-symbols-outlined text-sm text-amber-700 dark:text-primary">receipt</span>
                                     <span>Invoice</span>
@@ -425,10 +530,44 @@
                                     ${order.assigned_digitizer_id ? 'Reassign' : 'Assign Worker'}
                                 </button>
                             </div>
+                            ${order.last_payment_reminder_at ? `
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-1 flex items-center justify-end gap-1">
+                                    <span class="material-symbols-outlined text-[11px] text-amber-600">mark_email_read</span>
+                                    <span>Reminder sent ${formatTimeAgo(order.last_payment_reminder_at)}</span>
+                                </div>
+                            ` : ''}
                         </td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        function getPaymentBadge(status) {
+            if (status === 'paid') {
+                return '<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold"><span class="material-symbols-outlined text-[11px]">check_circle</span> Paid</span>';
+            } else {
+                return '<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/15 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 text-[10px] font-black"><span class="material-symbols-outlined text-[11px]">schedule</span> Payment Due</span>';
+            }
+        }
+
+        function formatTimeAgo(isoString) {
+            if (!isoString) return '';
+            const diffMs = Date.now() - new Date(isoString).getTime();
+            const diffSec = Math.floor(diffMs / 1000);
+            if (diffSec < 60) return 'just now';
+            const diffMin = Math.floor(diffSec / 60);
+            if (diffMin < 60) return `${diffMin}m ago`;
+            const diffHr = Math.floor(diffMin / 60);
+            if (diffHr < 24) return `${diffHr}h ago`;
+            return new Date(isoString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function filterByUnpaid() {
+            const select = document.getElementById('filter-status');
+            if (select) {
+                select.value = 'unpaid';
+                renderAdminOrders();
+            }
         }
 
         function getStatusBadge(status) {
@@ -441,6 +580,97 @@
                     return '<span class="px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-500/15 text-purple-800 dark:text-purple-400 border border-purple-300 dark:border-purple-500/30 text-[11px] font-bold">Assigned</span>';
                 default:
                     return '<span class="px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/15 text-amber-900 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 text-[11px] font-bold">Needs Review</span>';
+            }
+        }
+
+        // ===== SEND PAYMENT REMINDER MODAL LOGIC =====
+        let currentReminderOrderNumber = null;
+
+        function openPaymentReminderModal(orderNumber) {
+            const allOrders = window.insforgeClient.getOrders();
+            const order = allOrders.find(o => o.order_number === orderNumber);
+            if (!order) return;
+
+            currentReminderOrderNumber = orderNumber;
+            document.getElementById('reminder-order-number').value = orderNumber;
+            document.getElementById('reminder-order-display').textContent = orderNumber;
+            document.getElementById('reminder-project-display').textContent = `${order.project_name} · ${order.placement || 'Standard'}`;
+            const price = (order.price || 15).toFixed(2);
+            document.getElementById('reminder-amount-display').textContent = `$${price}`;
+            document.getElementById('reminder-recipient-display').textContent = `${order.client_name} <${order.client_email}>`;
+
+            document.getElementById('reminder-subject').value = `Payment Reminder: Outstanding Invoice for Order #${orderNumber} - Dezan Digitizing`;
+            document.getElementById('reminder-message').value = 
+`Dear ${order.client_name},
+
+This is a friendly reminder from Dezan Digitizing regarding your pending invoice for Order #${orderNumber} (${order.project_name}) in the amount of $${price}.
+
+Your digitized stitch files are being prepped for production. Please log into your Dezan Client Portal to settle this invoice securely via PayPal or Credit Card:
+https://dezan-digitizing.vercel.app/client-portal.html
+
+Order Details:
+• Order Number: #${orderNumber}
+• Design Name: ${order.project_name}
+• Total Balance Due: $${price} USD
+
+If you have already submitted payment or have any questions regarding your stitch specs, please let us know.
+
+Warm regards,
+Faisal Dezan
+Master Digitizer & Founder, Dezan Digitizing
+Email: fdezan91@gmail.com`;
+
+            const historyEl = document.getElementById('reminder-history-status');
+            if (historyEl) {
+                if (order.last_payment_reminder_at) {
+                    historyEl.textContent = `Sent ${formatTimeAgo(order.last_payment_reminder_at)} (Total: ${order.reminder_count || 1} reminder${(order.reminder_count || 1) > 1 ? 's' : ''})`;
+                    historyEl.className = 'font-bold text-amber-700 dark:text-primary';
+                } else {
+                    historyEl.textContent = 'Never reminded';
+                    historyEl.className = 'font-semibold text-slate-500';
+                }
+            }
+
+            document.getElementById('payment-reminder-modal').classList.remove('hidden');
+        }
+
+        function closePaymentReminderModal() {
+            const modal = document.getElementById('payment-reminder-modal');
+            if (modal) modal.classList.add('hidden');
+            currentReminderOrderNumber = null;
+        }
+
+        async function handleSendReminderSubmit(e) {
+            e.preventDefault();
+            const sendBtn = document.getElementById('reminder-send-btn');
+            const originalText = sendBtn ? sendBtn.innerHTML : '';
+            if (sendBtn) {
+                sendBtn.disabled = true;
+                sendBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">sync</span> Sending Email...';
+            }
+
+            const orderNumber = document.getElementById('reminder-order-number').value;
+            const customNote = document.getElementById('reminder-message').value;
+
+            try {
+                const result = await window.insforgeClient.sendPaymentReminder(orderNumber, customNote);
+                closePaymentReminderModal();
+                await renderAdminOrders();
+
+                window.insforgeClient.showToast(
+                    'Reminder Email Dispatched',
+                    `Payment reminder sent to ${result.clientEmail} for ${orderNumber}.`,
+                    'mark_email_read',
+                    'success'
+                );
+            } catch (err) {
+                console.error('Reminder error:', err);
+                alert(`⚠️ Failed to send reminder: ${err.message}`);
+            } finally {
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = originalText;
+                }
             }
         }
 
