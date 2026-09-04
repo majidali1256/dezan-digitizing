@@ -72,7 +72,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - **Client Account Modal**: Profile information, billing terms, active balance, theme toggle, and sign out.
   - **Fixed Bottom Navigation Dock**: 4 quick-access tabs (`Home`, `Orders`, `Quotes`, `Account`).
 - `/admin-portal.html`: Master Admin Backend (KPI metrics with Realized vs. Due revenue breakdown, All clients, Global order table, Worker assignment modal, Financial ledger & CSV export, Due payment oversight & automated email payment reminders — with strict zero-manual-payment policy).
-- `/worker-portal.html`: Digitizer Restricted Workspace (Only assigned jobs, sanitized specs, raw logo download, `.dst`/`.emb` file uploader).
+- `/worker-portal.html`: Redesigned Digitizer Studio (Intuitive navigation matching brand palette, 3 quick-action cards, 4 production metric badges, instant search & filter toolbar, sectioned queues for Active and Completed tasks, full technical work order specs modal, machine format cheatsheet modal, worker profile modal, multi-file deliverables staging uploader with InsForge S3/PostgreSQL sync, and fixed bottom navigation dock — with strict client PII and pricing data masking).
 
 ### Header Navigation Authentication State
 - **Logged Out**: Top-right header button renders a gold pill button explicitly labeled **Login** (`[ ➔] Login ]`) linking to `portal-login.html`.
@@ -207,7 +207,31 @@ To prevent data leakage via browser DevTools:
 
 ---
 
-## 12. Directory Structure
+## 12. Worker (Digitizer) Studio Redesign & Easy Navigation (Live & Verified)
+- **Visual Continuity & Brand Aesthetics**:
+  - Redesigned to match the warm Dezan gold (`#d4af35`) theme and clean `#f8f7f6` default light layout (with user-toggleable dark luxury mode).
+- **Navigation & IA Hierarchy**:
+  - **Top Switcher Bar**: Persistent `RESTRICTED WORKER WORKSPACE` banner with fast role switcher.
+  - **Header**: Logo, `Digitizer Studio` gold badge, `Client PII & Price Masked` security pill, Alex Miller profile trigger, and theme toggle.
+  - **3 Quick-Action Navigation Cards**: `Active Tasks` (scrolls/filters active queue), `Completed Archive` (scrolls/filters archive), `Format Specs` (opens cheatsheet modal).
+  - **4 Stat Metric Badges (Interactive)**: `Active Jobs` (clickable filter), `Completed` (clickable filter), `Supported Formats` (`DST · EMB · PES · EXP`), `QC Standard` (`100% Wilcom ES Calibrated`).
+  - **Search & Filter Toolbar**: Real-time debounced text search (by order #, task #, placement, format) + status filter (`all`, `active`, `completed`) + format filter (`all`, `DST`, `EMB`, `PES`).
+  - **Fixed Bottom Navigation Dock**: 4 quick-access tabs (`Studio`, `Active`, `Completed`, `Profile`) for frictionless mobile & desktop navigation.
+- **Sectioned Task Queues**:
+  - **Active Production Queue**: Glowing accent border card displaying technical placement, dimensions, required formats, production guidelines, customer raw artwork download, and multi-file deliverables staging uploader with loading spinner state.
+  - **Completed Archive**: High-contrast cards with direct download links for submitted machine stitch files.
+- **Modals**:
+  - `#task-details-modal`: Full technical work order parameters, stitch density calibrations, needle sequence guidance, raw art downloader, and printable sheet.
+  - `#format-specs-modal`: Embroidery machine specifications for Tajima (`.dst`), Wilcom (`.emb`), Brother (`.pes`), and Melco (`.exp`).
+  - `#worker-account-modal`: Alex Miller profile, Master Level 4 status, licensed workstation tools (Wilcom e4.5, Tajima Pulse), masking privacy contract status, and sign out.
+- **Strict Data Masking (100% Verified)**:
+  - Zero presence of client name, client email, client phone, client company, or pricing in the DOM.
+- **Automated Verification**:
+  - 100% verified with Playwright test (`scratch/verify_worker_portal_redesign.js`) on Desktop (1512x982) and Mobile (390x844) with zero horizontal overflow.
+
+---
+
+## 13. Directory Structure
 ```
 ├── .agents/
 │   ├── rules/frontend_design_rules.md
@@ -232,7 +256,7 @@ To prevent data leakage via browser DevTools:
 
 ---
 
-## 13. Development & Deployment Guidelines
+## 14. Development & Deployment Guidelines
 1. **JavaScript DOM Standard**: All initialization code in `app.js` runs within `DOMContentLoaded` and is guarded by page URL checks.
 2. **Zero Framework Mandate**: Keep all scripts lightweight and vanilla. No bundle builds required.
 3. **Git Hygiene**: Clean atomic commits with descriptive commit messages.

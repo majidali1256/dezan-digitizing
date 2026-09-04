@@ -4,8 +4,8 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Digitizer Workspace | Dezan Digitizing</title>
-    <meta name="description" content="Digitizer Worker Workspace - Restricted technical design queue and file submission." />
+    <title>Digitizer Studio | Dezan Digitizing</title>
+    <meta name="description" content="Dezan Digitizing Worker Studio - Professional technical embroidery queue, stitch file generation, and deliverables uploader." />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -17,6 +17,7 @@
                     colors: {
                         primary: "#d4af35",
                         "primary-hover": "#e5c158",
+                        "primary-dark": "#8b6807",
                         "background-light": "#f8f7f6",
                         "background-dark": "#201d12",
                         "card-dark": "#16140c",
@@ -28,82 +29,497 @@
         }
     </script>
     <link rel="stylesheet" href="styles.css" />
+    <style>
+        html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #task-details-print-area, #task-details-print-area * {
+                visibility: visible;
+            }
+            #task-details-print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white !important;
+                color: black !important;
+                padding: 20px;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30">
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30 transition-colors duration-200">
 
     <!-- ===== ROLE DEMO SWITCHER BAR ===== -->
-    <div class="bg-slate-100 dark:bg-card-dark border-b border-slate-200 dark:border-primary/20 py-2 px-4 text-xs text-slate-700 dark:text-slate-300">
+    <div class="bg-slate-100/90 dark:bg-card-dark border-b border-slate-200 dark:border-primary/20 py-2.5 px-4 text-xs">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
-                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-500/10 text-purple-800 dark:text-purple-400 font-bold border border-purple-300 dark:border-purple-500/30 text-[10px]">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-500/10 text-purple-900 dark:text-purple-400 font-bold border border-purple-300 dark:border-purple-500/25 text-[10px]">
                     <span class="w-1.5 h-1.5 rounded-full bg-purple-600 dark:bg-purple-400 animate-pulse"></span> RESTRICTED WORKER WORKSPACE
                 </span>
-                <span class="text-slate-600 dark:text-slate-400 hidden sm:inline">Logged in as: <strong id="top-worker-name" class="text-slate-900 dark:text-white font-bold">Alex Miller</strong></span>
+                <span class="text-slate-700 dark:text-slate-400 font-medium hidden sm:inline">Logged in as: <strong id="top-worker-name" class="text-slate-900 dark:text-white font-bold">Alex Miller</strong></span>
             </div>
             <div class="flex items-center gap-2">
-                <span class="text-slate-500 text-[11px] hidden md:inline">Switch Workspace:</span>
-                <button onclick="window.insforgeClient.loginAsDemo('admin')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-800 dark:text-primary border border-slate-300 dark:border-primary/30 text-[10px] font-bold transition-colors">Admin</button>
-                <button onclick="window.insforgeClient.loginAsDemo('client')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-transparent text-[10px] font-semibold transition-colors">Client</button>
-                <button onclick="window.insforgeClient.signOut()" class="px-2.5 py-1 rounded-lg bg-red-100 dark:bg-red-500/10 hover:bg-red-200 dark:hover:bg-red-500/20 text-red-700 dark:text-red-400 border border-red-300 dark:border-red-500/20 text-[10px] font-bold ml-2 transition-colors">Sign Out</button>
+                <span class="text-slate-600 dark:text-slate-500 text-[11px] font-semibold hidden md:inline">Switch Workspace:</span>
+                <button onclick="window.insforgeClient.loginAsDemo('admin')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 text-amber-900 dark:text-primary border border-slate-300 dark:border-primary/30 text-[10px] font-bold shadow-xs cursor-pointer">Admin</button>
+                <button onclick="window.insforgeClient.loginAsDemo('client')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-[10px] font-bold shadow-xs cursor-pointer">Client</button>
+                <button onclick="window.insforgeClient.signOut()" class="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-[10px] font-bold ml-1 shadow-xs cursor-pointer">Sign Out</button>
             </div>
         </div>
     </div>
 
     <!-- ===== HEADER ===== -->
-    <header class="sticky top-0 z-40 bg-white/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-primary/20">
+    <header class="sticky top-0 z-40 bg-white/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-primary/20 transition-colors">
         <div class="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
             <a href="index.html" class="flex items-center gap-2">
-                <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover shadow-md shadow-primary/20">
-                <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN <span class="text-amber-800 dark:text-primary text-xs uppercase font-bold tracking-widest ml-1">Digitizer Hub</span></span>
+                <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover shadow-xs">
+                <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN <span class="text-amber-800 dark:text-primary text-xs uppercase font-bold tracking-widest ml-1">Digitizer Studio</span></span>
             </a>
 
-            <div class="flex items-center gap-3">
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/20 text-xs font-semibold">
-                    <span class="material-symbols-outlined text-xs">shield</span> Client PII & Price Masked
+            <div class="flex items-center gap-2.5">
+                <!-- Masking Security Pill -->
+                <div class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/25 text-xs font-bold" title="Customer personal identity and commercial pricing are strictly masked from this workspace">
+                    <span class="material-symbols-outlined text-sm text-emerald-700 dark:text-emerald-400">shield</span>
+                    <span>Client PII & Price Masked</span>
                 </div>
-                <button class="theme-toggle-btn p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors border border-slate-200 dark:border-primary/20" aria-label="Toggle theme">
+
+                <!-- Worker Account Button -->
+                <button onclick="openWorkerAccountModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all border border-slate-200 dark:border-primary/20 cursor-pointer" title="Worker Profile & Workstation Specs">
+                    <span class="material-symbols-outlined text-base text-amber-800 dark:text-primary">badge</span>
+                    <span class="hidden md:inline">Alex Miller</span>
+                </button>
+
+                <!-- Theme Toggle -->
+                <button class="theme-toggle-btn p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors border border-slate-200 dark:border-primary/20 cursor-pointer" aria-label="Toggle theme">
                     <span class="material-symbols-outlined theme-toggle-icon text-lg text-amber-800 dark:text-primary">dark_mode</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- ===== WORKER QUEUE CONTAINER ===== -->
-    <main class="flex-1 max-w-5xl mx-auto px-4 py-8 w-full">
+    <!-- ===== MAIN WORKSPACE ===== -->
+    <main class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full pb-28">
 
-        <!-- Welcome Banner -->
-        <div class="p-6 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 shadow-sm mb-8 flex flex-wrap items-center justify-between gap-4">
+        <!-- Header Title & Subtitle + Live DB Sync -->
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div>
-                <span class="text-xs font-bold text-amber-800 dark:text-primary tracking-widest uppercase mb-1 block">Production Queue</span>
-                <h2 class="text-2xl font-black text-slate-900 dark:text-white" id="worker-greeting">Assigned Work Tickets</h2>
-                <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-medium">Only technical embroidery specifications and raw artwork files assigned to your User ID</p>
+                <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white" id="worker-greeting">Digitizer Studio</h1>
+                <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">Technical production queue, machine embroidery files, and deliverables.</p>
             </div>
-            <div class="flex items-center gap-3">
-                <div id="worker-db-sync-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-[11px] shadow-sm">
+            <div class="flex items-center gap-2">
+                <div id="worker-db-sync-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-[11px] shadow-xs">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span id="worker-db-sync-text" class="text-emerald-800 dark:text-emerald-300 font-bold">InsForge DB Live</span>
                 </div>
-                <button onclick="renderWorkerTasks()" class="text-xs text-primary-dark dark:text-primary hover:underline flex items-center gap-1 font-bold cursor-pointer">
-                    <span class="material-symbols-outlined text-sm">refresh</span> Refresh
+                <button onclick="renderWorkerTasks()" class="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-primary/20 text-slate-600 dark:text-slate-300 hover:text-amber-800 dark:hover:text-primary transition-colors cursor-pointer" title="Refresh production tickets">
+                    <span class="material-symbols-outlined text-sm">refresh</span>
                 </button>
-                <div class="text-right ml-2">
-                    <span class="text-[11px] text-slate-600 dark:text-slate-400 uppercase font-bold block">Active Jobs</span>
-                    <span class="text-2xl font-black text-amber-800 dark:text-primary" id="worker-active-count">0</span>
+            </div>
+        </div>
+
+        <!-- 3 Quick Action Navigation Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6">
+            <!-- Jump to Active Queue -->
+            <button onclick="filterBySection('active')" class="flex items-center gap-3.5 p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-xs hover:shadow-md hover:border-amber-400 dark:hover:border-primary transition-all text-left group cursor-pointer">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-800 dark:text-primary flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0 border border-amber-500/20">
+                    <span class="material-symbols-outlined text-2xl">pending_actions</span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black text-slate-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">Active Tasks</h3>
+                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Focus in-progress tickets</p>
+                </div>
+            </button>
+
+            <!-- Jump to Completed Archive -->
+            <button onclick="filterBySection('completed')" class="flex items-center gap-3.5 p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-xs hover:shadow-md hover:border-amber-400 dark:hover:border-primary transition-all text-left group cursor-pointer">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0 border border-emerald-500/20">
+                    <span class="material-symbols-outlined text-2xl">task_alt</span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black text-slate-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">Completed Archive</h3>
+                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Review stitch deliverables</p>
+                </div>
+            </button>
+
+            <!-- Machine Formats Cheatsheet -->
+            <button onclick="openFormatSpecsModal()" class="flex items-center gap-3.5 p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-xs hover:shadow-md hover:border-amber-400 dark:hover:border-primary transition-all text-left group cursor-pointer">
+                <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-800 dark:text-blue-400 flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0 border border-blue-500/20">
+                    <span class="material-symbols-outlined text-2xl">precision_manufacturing</span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black text-slate-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">Format Specs</h3>
+                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">DST, EMB, PES & EXP guide</p>
+                </div>
+            </button>
+        </div>
+
+        <!-- 4 Production Stat Metric Badges -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            <!-- Active Jobs (Clickable Filter) -->
+            <div onclick="filterBySection('active')" class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs flex flex-col justify-between cursor-pointer hover:border-amber-400 dark:hover:border-primary transition-all group" title="Click to filter in-progress tasks">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Active Jobs</span>
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <span id="metric-worker-active" class="text-2xl sm:text-3xl font-black text-amber-800 dark:text-primary">0</span>
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Tickets</span>
+                </div>
+            </div>
+
+            <!-- Completed Jobs (Clickable Filter) -->
+            <div onclick="filterBySection('completed')" class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs flex flex-col justify-between cursor-pointer hover:border-emerald-400 dark:hover:border-emerald-500 transition-all group" title="Click to filter completed tasks">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Completed</span>
+                    <span class="material-symbols-outlined text-xs text-emerald-600 dark:text-emerald-400">check_circle</span>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <span id="metric-worker-completed" class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">0</span>
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Delivered</span>
+                </div>
+            </div>
+
+            <!-- Supported Machine Formats -->
+            <div onclick="openFormatSpecsModal()" class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs flex flex-col justify-between cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-all group" title="Click for Machine Formats Cheatsheet">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Formats</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-500/15 text-blue-800 dark:text-blue-400 font-bold border border-blue-200 dark:border-blue-500/30">4 Types</span>
+                </div>
+                <span class="text-sm sm:text-base font-black text-slate-900 dark:text-white font-mono tracking-tight">DST · EMB · PES</span>
+            </div>
+
+            <!-- Quality Benchmark -->
+            <div class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">QC Standard</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-500/30">100% Pass</span>
+                </div>
+                <span class="text-xs sm:text-sm font-black text-slate-900 dark:text-white">Wilcom ES Calibrated</span>
+            </div>
+        </div>
+
+        <!-- Search & Filter Navigation Bar -->
+        <div class="mb-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            <div class="relative flex-1">
+                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">search</span>
+                <input type="text" id="task-search-input" oninput="handleSearchFilter()" placeholder="Search by order #, task #, placement, or format..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 rounded-xl text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-primary shadow-xs transition-colors" />
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="relative flex-1 sm:flex-initial">
+                    <select id="task-status-filter" onchange="handleSearchFilter()" class="w-full sm:w-auto px-3.5 py-2.5 bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-primary shadow-xs cursor-pointer">
+                        <option value="all">All Tasks</option>
+                        <option value="active">Active Queue (In Progress)</option>
+                        <option value="completed">Completed Deliverables</option>
+                    </select>
+                </div>
+                <div class="relative flex-1 sm:flex-initial">
+                    <select id="task-format-filter" onchange="handleSearchFilter()" class="w-full sm:w-auto px-3.5 py-2.5 bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-primary shadow-xs cursor-pointer">
+                        <option value="all">All Formats</option>
+                        <option value="DST">DST Only</option>
+                        <option value="EMB">EMB Only</option>
+                        <option value="PES">PES Only</option>
+                    </select>
                 </div>
             </div>
         </div>
 
-        <!-- Task Cards Container -->
-        <div id="worker-tasks-container" class="space-y-6">
-            <!-- Rendered by JS -->
-        </div>
+        <!-- Section 1: Active Production Queue -->
+        <section id="section-active-tasks" class="mb-10">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-amber-700 dark:text-primary text-xl">pending_actions</span>
+                    <span>Active Production Queue</span>
+                    <span id="badge-active-count" class="text-xs px-2 py-0.5 rounded-full bg-amber-50 dark:bg-primary/10 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/20 font-bold">0</span>
+                </h2>
+                <button onclick="filterBySection('active')" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View active only</button>
+            </div>
+            <div id="active-tasks-container" class="space-y-4">
+                <!-- Rendered by JS -->
+            </div>
+        </section>
+
+        <!-- Section 2: Completed Deliverables Archive -->
+        <section id="section-completed-tasks" class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-emerald-700 dark:text-emerald-400 text-xl">task_alt</span>
+                    <span>Completed Deliverables Archive</span>
+                    <span id="badge-completed-count" class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 font-bold">0</span>
+                </h2>
+                <button onclick="filterBySection('completed')" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View archive only</button>
+            </div>
+            <div id="completed-tasks-container" class="space-y-4">
+                <!-- Rendered by JS -->
+            </div>
+        </section>
 
     </main>
 
+    <!-- ===== FIXED BOTTOM NAVIGATION DOCK ===== -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-slate-200 dark:border-primary/20 py-2 px-4 shadow-lg transition-colors no-print">
+        <div class="max-w-md mx-auto flex items-center justify-around">
+            <button onclick="scrollToTop()" class="flex flex-col items-center gap-0.5 text-amber-800 dark:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group" title="Studio Overview">
+                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">home</span>
+                <span class="text-[11px] font-bold">Studio</span>
+            </button>
+            <button onclick="scrollToSection('section-active-tasks')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group" title="Active Queue">
+                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">pending_actions</span>
+                <span class="text-[11px] font-bold">Active</span>
+            </button>
+            <button onclick="scrollToSection('section-completed-tasks')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group" title="Completed Files">
+                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">task_alt</span>
+                <span class="text-[11px] font-bold">Completed</span>
+            </button>
+            <button onclick="openWorkerAccountModal()" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group" title="Worker Profile & Workstation">
+                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">badge</span>
+                <span class="text-[11px] font-bold">Profile</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== TASK DETAILS MODAL ===== -->
+    <div id="task-details-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto relative text-slate-900 dark:text-slate-100">
+            
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-primary/15 mb-5">
+                <div>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-amber-800 dark:text-primary">construction</span>
+                        <span>Technical Work Order Specs</span>
+                    </h3>
+                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">Strictly sanitized engineering parameters & machine instructions</p>
+                </div>
+                <button onclick="closeTaskDetailsModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+                    <span class="material-symbols-outlined text-lg">close</span>
+                </button>
+            </div>
+
+            <div id="task-details-print-area">
+                <!-- Top Badge Row -->
+                <div class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20 mb-4">
+                    <div class="flex items-center gap-2.5">
+                        <span id="modal-order-number" class="px-3 py-1 rounded-lg bg-amber-100 dark:bg-primary/15 text-amber-900 dark:text-primary font-mono font-black text-xs border border-amber-300 dark:border-primary/30">#ORD-0000</span>
+                        <span id="modal-task-id" class="text-xs font-bold text-slate-600 dark:text-slate-400 font-mono">TSK-0000</span>
+                    </div>
+                    <div id="modal-status-badge">
+                        <!-- Injected -->
+                    </div>
+                </div>
+
+                <!-- Technical Parameter Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-primary/15">
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Placement Location</span>
+                        <strong id="modal-placement" class="text-xs text-slate-900 dark:text-white font-bold block">Left Chest</strong>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-primary/15">
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Dimensions & Sizing</span>
+                        <strong id="modal-sizing" class="text-xs text-slate-900 dark:text-white font-bold block">3.5" W x 2.2" H</strong>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-primary/15">
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Required Formats</span>
+                        <strong id="modal-formats" class="text-xs text-amber-800 dark:text-primary font-bold block">DST, EMB</strong>
+                    </div>
+                </div>
+
+                <!-- Recommended Machine Density & Needle Sequence -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-primary/15 mb-5">
+                    <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5 mb-2">
+                        <span class="material-symbols-outlined text-sm text-amber-700 dark:text-primary">settings_suggest</span>
+                        <span>Digitizing Recommendations & Calibrations</span>
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-700 dark:text-slate-300">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase block">Underlay Sequence:</span>
+                            <span class="font-medium">Center walk + Zigzag edge support</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase block">Stitch Density:</span>
+                            <span class="font-medium">0.40mm standard (Wilcom ES calibration)</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase block">Pull Compensation:</span>
+                            <span class="font-medium">0.17mm to 0.22mm on pique / twill</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase block">Needle Recommendation:</span>
+                            <span class="font-medium">75/11 Sharp (Caps) / Ballpoint (Knits)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Production Guidelines & Notes -->
+                <div class="p-4 rounded-xl bg-amber-50/60 dark:bg-slate-900/60 border border-amber-200 dark:border-primary/20 mb-5">
+                    <span class="text-[10px] font-bold text-amber-900 dark:text-primary uppercase tracking-wider block mb-1">Production Guidelines & Notes</span>
+                    <p id="modal-instructions" class="text-xs text-slate-800 dark:text-slate-300 leading-relaxed font-medium">Standard Wilcom stitch density.</p>
+                </div>
+
+                <!-- Raw Artwork Download -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-primary/15 mb-6">
+                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">Customer Artwork File</span>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-amber-700 dark:text-primary text-xl">image</span>
+                            <span id="modal-raw-filename" class="text-xs font-bold text-slate-900 dark:text-white">artwork.png</span>
+                        </div>
+                        <a id="modal-raw-download" href="#" target="_blank" download class="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-xs font-bold flex items-center gap-1.5 transition-colors border border-slate-200 dark:border-primary/20">
+                            <span class="material-symbols-outlined text-sm text-amber-800 dark:text-primary">download</span>
+                            <span>Download Artwork</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-primary/15 no-print">
+                <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-sm">print</span>
+                    <span>Print Technical Sheet</span>
+                </button>
+                <button onclick="closeTaskDetailsModal()" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs shadow-md shadow-primary/20 transition-all cursor-pointer">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FORMAT SPECIFICATIONS MODAL ===== -->
+    <div id="format-specs-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto relative text-slate-900 dark:text-slate-100">
+            
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-primary/15 mb-5">
+                <div>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">precision_manufacturing</span>
+                        <span>Machine Format Specifications</span>
+                    </h3>
+                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">Standardized formats supported by Dezan Digitizing</p>
+                </div>
+                <button onclick="closeFormatSpecsModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+                    <span class="material-symbols-outlined text-lg">close</span>
+                </button>
+            </div>
+
+            <div class="space-y-3.5 mb-6 text-xs">
+                <!-- Tajima DST -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-primary/20 text-amber-900 dark:text-primary font-mono font-bold text-xs">.DST</span>
+                            <strong class="text-slate-900 dark:text-white font-bold">Tajima Machine Stitch File</strong>
+                        </div>
+                        <span class="text-[10px] font-bold text-slate-500">Universal Commercial Standard</span>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed font-medium">Coordinate-based binary stitches. Supported by Tajima, Barudan, SWF, Melco, and Happy commercial multi-head embroidery machines.</p>
+                </div>
+
+                <!-- Wilcom EMB -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-500/20 text-purple-900 dark:text-purple-400 font-mono font-bold text-xs">.EMB</span>
+                            <strong class="text-slate-900 dark:text-white font-bold">Wilcom All-In-One Design File</strong>
+                        </div>
+                        <span class="text-[10px] font-bold text-purple-700 dark:text-purple-400">Master Source File</span>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed font-medium">Contains full editable object outlines, stitch angles, densities, pull compensation, underlays, and high-fidelity vector metadata.</p>
+                </div>
+
+                <!-- Brother PES -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-500/20 text-blue-900 dark:text-blue-400 font-mono font-bold text-xs">.PES</span>
+                            <strong class="text-slate-900 dark:text-white font-bold">Brother / Baby Lock File</strong>
+                        </div>
+                        <span class="text-[10px] font-bold text-blue-700 dark:text-blue-400">Prosumer & Multi-Needle</span>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed font-medium">Calibrated for Brother PR1055X, VR, and commercial 6-10 needle compact embroidery machines with embedded color palettes.</p>
+                </div>
+
+                <!-- Melco EXP -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-500/20 text-emerald-900 dark:text-emerald-400 font-mono font-bold text-xs">.EXP</span>
+                            <strong class="text-slate-900 dark:text-white font-bold">Melco & Bernina Commercial</strong>
+                        </div>
+                        <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">Expanded Stitches</span>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed font-medium">Optimized for high-speed Melco EMT16X multi-head equipment with active tensioning and rotary knife trimming.</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-4 border-t border-slate-200 dark:border-primary/15">
+                <button onclick="closeFormatSpecsModal()" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs shadow-md shadow-primary/20 transition-all cursor-pointer">
+                    Got it
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== WORKER ACCOUNT MODAL ===== -->
+    <div id="worker-account-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl p-6 sm:p-7 relative text-slate-900 dark:text-slate-100">
+            
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-primary/15 mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-primary flex items-center justify-center">
+                        <span class="material-symbols-outlined text-2xl">badge</span>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-slate-900 dark:text-white">Alex Miller</h3>
+                        <p class="text-xs font-semibold text-amber-800 dark:text-primary">Lead Embroidery Digitizer</p>
+                    </div>
+                </div>
+                <button onclick="closeWorkerAccountModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+                    <span class="material-symbols-outlined text-lg">close</span>
+                </button>
+            </div>
+
+            <!-- Profile & Workstation Details -->
+            <div class="space-y-3 mb-6 text-xs">
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-primary/15">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">Digitizer ID</span>
+                    <strong class="text-slate-900 dark:text-white font-mono font-bold">#DIG-8842 · Master Level 4</strong>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-primary/15">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">Licensed Software & Stations</span>
+                    <p class="text-slate-800 dark:text-slate-300 font-semibold">Wilcom EmbroideryStudio e4.5 · Tajima DG/ML Pulse v16</p>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/25">
+                    <div class="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-400 font-bold mb-1">
+                        <span class="material-symbols-outlined text-sm">verified_user</span>
+                        <span>Client PII & Price Masking Active</span>
+                    </div>
+                    <p class="text-[11px] text-emerald-700 dark:text-emerald-300/80 leading-relaxed">Client personal details, emails, phones, and pricing are strictly withheld by row-level access control.</p>
+                </div>
+            </div>
+
+            <!-- Modal Actions -->
+            <div class="space-y-2 pt-2 border-t border-slate-200 dark:border-primary/15">
+                <button onclick="window.insforgeClient.signOut()" class="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-400 font-bold text-xs border border-red-200 dark:border-red-500/25 transition-colors cursor-pointer flex items-center justify-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">logout</span>
+                    <span>Sign Out of Digitizer Studio</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== FOOTER ===== -->
-    <footer class="py-6 text-center text-xs text-slate-600 dark:text-slate-500 border-t border-slate-200 dark:border-primary/10">
-        © 2016-2026 Dezan Digitizing · Restricted Worker Operations
+    <footer class="py-6 text-center text-xs text-slate-600 dark:text-slate-500 border-t border-slate-200 dark:border-primary/10 no-print">
+        © 2016-2026 Dezan Digitizing · Restricted Digitizer Production Studio
     </footer>
 
     <!-- Scripts -->
@@ -139,10 +555,17 @@
             });
         }
 
+        // Global State
+        let allWorkerTasks = [];
+        const taskFilesState = {};
+
         document.addEventListener('DOMContentLoaded', () => {
             if (currentUser) {
-                document.getElementById('top-worker-name').textContent = currentUser.displayName;
-                document.getElementById('worker-greeting').textContent = `Hello, ${currentUser.displayName}`;
+                const name = currentUser.displayName || 'Alex Miller';
+                const topName = document.getElementById('top-worker-name');
+                if (topName) topName.textContent = name;
+                const greeting = document.getElementById('worker-greeting');
+                if (greeting) greeting.textContent = `Digitizer Studio · ${name}`;
             }
             renderWorkerTasks();
 
@@ -167,124 +590,235 @@
             });
         });
 
+        // Navigation scroll helpers
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function scrollToSection(sectionId) {
+            const el = document.getElementById(sectionId);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function filterBySection(sectionType) {
+            const statusFilter = document.getElementById('task-status-filter');
+            if (sectionType === 'active') {
+                if (statusFilter) statusFilter.value = 'active';
+                handleSearchFilter();
+                scrollToSection('section-active-tasks');
+            } else if (sectionType === 'completed') {
+                if (statusFilter) statusFilter.value = 'completed';
+                handleSearchFilter();
+                scrollToSection('section-completed-tasks');
+            }
+        }
+
         async function renderWorkerTasks() {
             const syncText = document.getElementById('worker-db-sync-text');
             if (syncText) syncText.textContent = 'Syncing...';
 
             // STRICT MASKING: queries sanitized digitizer tasks only!
-            const tasks = await window.insforgeClient.fetchDigitizerTasks();
+            allWorkerTasks = await window.insforgeClient.fetchDigitizerTasks();
 
             if (syncText) {
                 const status = window.insforgeClient.getDatabaseSyncStatus();
                 syncText.textContent = `InsForge DB Live (${status.lastSynced})`;
             }
 
-            const container = document.getElementById('worker-tasks-container');
+            // Update Metrics
+            const activeTasks = allWorkerTasks.filter(t => t.status !== 'completed');
+            const completedTasks = allWorkerTasks.filter(t => t.status === 'completed');
 
-            const activeTasks = tasks.filter(t => t.status !== 'completed');
-            document.getElementById('worker-active-count').textContent = activeTasks.length;
+            const activeMetric = document.getElementById('metric-worker-active');
+            if (activeMetric) activeMetric.textContent = activeTasks.length;
 
-            if (tasks.length === 0) {
-                container.innerHTML = `
-                    <div class="p-12 text-center rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/15 shadow-sm">
-                        <span class="material-symbols-outlined text-4xl text-slate-400 dark:text-slate-600 mb-2">assignment_turned_in</span>
-                        <h4 class="text-sm font-bold text-slate-800 dark:text-slate-400">No assigned tasks right now</h4>
-                        <p class="text-xs text-slate-600 dark:text-slate-500 mt-1">When the Admin assigns you an order ticket, it will appear here automatically.</p>
-                    </div>
-                `;
-                return;
-            }
+            const completedMetric = document.getElementById('metric-worker-completed');
+            if (completedMetric) completedMetric.textContent = completedTasks.length;
 
-            container.innerHTML = tasks.map(task => {
-                const isCompleted = task.status === 'completed';
-                const rawFile = task.rawArtworkFiles[0] || { name: 'raw_logo.png', url: 'logo.png' };
+            const activeBadge = document.getElementById('badge-active-count');
+            if (activeBadge) activeBadge.textContent = activeTasks.length;
 
-                return `
-                    <div class="p-6 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 shadow-sm transition-all ${isCompleted ? 'opacity-75' : 'hover:border-amber-400 dark:hover:border-primary/60'}">
-                        
-                        <!-- Task Header (SANITIZED) -->
-                        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-primary/15 mb-4">
-                            <div class="flex items-center gap-2.5">
-                                <span class="px-3 py-1 rounded-lg bg-amber-100 dark:bg-primary/15 border border-amber-300 dark:border-primary/30 font-mono font-black text-xs text-amber-900 dark:text-primary">
-                                    ${task.orderNumber}
-                                </span>
-                                <span class="text-xs font-bold text-slate-800 dark:text-slate-300">${task.serviceType}</span>
-                                <span class="text-[11px] text-slate-500 font-mono">(${task.taskId})</span>
-                            </div>
+            const completedBadge = document.getElementById('badge-completed-count');
+            if (completedBadge) completedBadge.textContent = completedTasks.length;
 
-                            <div>
-                                ${isCompleted 
-                                    ? '<span class="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-xs">check_circle</span> Completed</span>'
-                                    : '<span class="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-500/15 text-amber-900 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-xs">pending</span> Work In Progress</span>'
-                                }
-                            </div>
-                        </div>
-
-                        <!-- Technical Design Specifications (No Client Data, No Price) -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/15">
-                                <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-0.5">Placement Location</span>
-                                <strong class="text-xs text-slate-900 dark:text-white font-bold">${task.placement}</strong>
-                            </div>
-
-                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/15">
-                                <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-0.5">Dimensions / Size</span>
-                                <strong class="text-xs text-slate-900 dark:text-white font-bold">${task.sizing}</strong>
-                            </div>
-
-                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/15">
-                                <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-0.5">Required Formats</span>
-                                <strong class="text-xs text-amber-800 dark:text-primary font-bold">${task.fileFormat}</strong>
-                            </div>
-                        </div>
-
-                        <!-- Instructions -->
-                        <div class="p-4 rounded-xl bg-amber-50/50 dark:bg-slate-900/40 border border-amber-200 dark:border-primary/10 mb-5">
-                            <span class="text-[10px] font-bold text-amber-900 dark:text-primary uppercase tracking-wider block mb-1">Production Guidelines & Notes</span>
-                            <p class="text-xs text-slate-800 dark:text-slate-300 leading-relaxed font-medium">${task.instructions || 'Standard Wilcom stitch density.'}</p>
-                        </div>
-
-                        <!-- Raw Artwork Download & Upload Controls -->
-                        <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-200 dark:border-primary/15">
-                            
-                            <!-- Download Raw Logo Button -->
-                            <div>
-                                <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">Customer Raw Artwork</span>
-                                <a href="${rawFile.url}" target="_blank" download="${rawFile.name}" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white border border-slate-300 dark:border-primary/30 text-xs font-bold flex items-center gap-2 transition-all hover:scale-[1.02]">
-                                    <span class="material-symbols-outlined text-sm text-amber-800 dark:text-primary">cloud_download</span>
-                                    <span>Download ${rawFile.name}</span>
-                                </a>
-                            </div>
-
-                            <!-- Upload Deliverables Zone -->
-                            ${!isCompleted ? `
-                                <div class="flex items-center gap-3">
-                                    <input type="file" id="file-upload-${task.orderNumber}" multiple accept=".dst,.emb,.pes,.exp" class="hidden" onchange="handleDeliverableSelected('${task.orderNumber}', event)" />
-                                    <button id="btn-select-${task.orderNumber}" onclick="document.getElementById('file-upload-${task.orderNumber}').click()" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-primary/40 hover:border-amber-600 dark:hover:border-primary text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 transition-all cursor-pointer">
-                                        <span class="material-symbols-outlined text-sm text-amber-800 dark:text-primary">attach_file</span>
-                                        <span id="label-${task.orderNumber}">Select .DST & .EMB</span>
-                                    </button>
-                                    <button id="btn-submit-${task.orderNumber}" onclick="submitTaskDeliverables('${task.orderNumber}')" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs shadow-md shadow-primary/25 flex items-center gap-1.5 transition-all hover:scale-[1.02] cursor-pointer">
-                                        <span class="material-symbols-outlined text-sm">cloud_upload</span>
-                                        <span>Submit & Complete</span>
-                                    </button>
-                                </div>
-                            ` : `
-                                <div class="text-right">
-                                    <span class="text-xs text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1 justify-end">
-                                        <span class="material-symbols-outlined text-sm">check_circle</span> Files uploaded to InsForge Storage
-                                    </span>
-                                    <span class="text-[10px] text-slate-500 font-mono">Bucket: deliverables · Status: Delivered</span>
-                                </div>
-                            `}
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            renderTaskLists(allWorkerTasks);
         }
 
-        const taskFilesState = {};
+        function handleSearchFilter() {
+            const searchTerm = (document.getElementById('task-search-input')?.value || '').toLowerCase().trim();
+            const statusFilter = document.getElementById('task-status-filter')?.value || 'all';
+            const formatFilter = document.getElementById('task-format-filter')?.value || 'all';
 
+            const filtered = allWorkerTasks.filter(task => {
+                // Search term matching
+                const matchesSearch = !searchTerm ||
+                    (task.orderNumber && task.orderNumber.toLowerCase().includes(searchTerm)) ||
+                    (task.taskId && task.taskId.toLowerCase().includes(searchTerm)) ||
+                    (task.placement && task.placement.toLowerCase().includes(searchTerm)) ||
+                    (task.serviceType && task.serviceType.toLowerCase().includes(searchTerm)) ||
+                    (task.fileFormat && task.fileFormat.toLowerCase().includes(searchTerm));
+
+                // Status matching
+                const matchesStatus = statusFilter === 'all' ||
+                    (statusFilter === 'active' && task.status !== 'completed') ||
+                    (statusFilter === 'completed' && task.status === 'completed');
+
+                // Format matching
+                const matchesFormat = formatFilter === 'all' ||
+                    (task.fileFormat && task.fileFormat.toUpperCase().includes(formatFilter.toUpperCase()));
+
+                return matchesSearch && matchesStatus && matchesFormat;
+            });
+
+            renderTaskLists(filtered);
+        }
+
+        function renderTaskLists(tasks) {
+            const activeContainer = document.getElementById('active-tasks-container');
+            const completedContainer = document.getElementById('completed-tasks-container');
+
+            const activeList = tasks.filter(t => t.status !== 'completed');
+            const completedList = tasks.filter(t => t.status === 'completed');
+
+            // Render Active Tasks
+            if (activeList.length === 0) {
+                activeContainer.innerHTML = `
+                    <div class="p-8 text-center rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/15 shadow-xs">
+                        <span class="material-symbols-outlined text-4xl text-amber-600/60 dark:text-primary/60 mb-2">task_alt</span>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Active queue is clear</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">When an order is assigned to you, it will appear here in real time.</p>
+                    </div>
+                `;
+            } else {
+                activeContainer.innerHTML = activeList.map(task => renderTaskCard(task, false)).join('');
+            }
+
+            // Render Completed Tasks
+            if (completedList.length === 0) {
+                completedContainer.innerHTML = `
+                    <div class="p-8 text-center rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/15 shadow-xs">
+                        <span class="material-symbols-outlined text-4xl text-slate-400 dark:text-slate-600 mb-2">archive</span>
+                        <h4 class="text-sm font-bold text-slate-800 dark:text-slate-400">No completed tasks yet</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-500 mt-1">Finished tasks with uploaded deliverables will be archived here.</p>
+                    </div>
+                `;
+            } else {
+                completedContainer.innerHTML = completedList.map(task => renderTaskCard(task, true)).join('');
+            }
+        }
+
+        function renderTaskCard(task, isCompleted) {
+            const rawFile = (task.rawArtworkFiles && task.rawArtworkFiles[0]) ? task.rawArtworkFiles[0] : { name: 'artwork.png', url: 'logo.png' };
+            const stagedFiles = taskFilesState[task.orderNumber] || [];
+
+            return `
+                <div class="p-5 sm:p-6 rounded-2xl bg-white dark:bg-card-dark border ${isCompleted ? 'border-slate-200 dark:border-primary/20 opacity-90' : 'border-amber-400/60 dark:border-primary/50 shadow-sm'} transition-all hover:border-amber-400 dark:hover:border-primary">
+                    
+                    <!-- Task Header (SANITIZED: strictly no client name or price) -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-slate-200 dark:border-primary/15 mb-4">
+                        <div class="flex items-center gap-2.5">
+                            <span class="px-3 py-1 rounded-lg bg-amber-100 dark:bg-primary/15 border border-amber-300 dark:border-primary/30 font-mono font-black text-xs text-amber-900 dark:text-primary">
+                                ${task.orderNumber}
+                            </span>
+                            <span class="text-xs font-bold text-slate-800 dark:text-slate-200">${task.serviceType || 'Embroidery Digitizing'}</span>
+                            <span class="text-[11px] text-slate-500 font-mono">(${task.taskId || 'TSK-ACTIVE'})</span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            ${isCompleted 
+                                ? '<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 text-xs font-bold"><span class="material-symbols-outlined text-xs">check_circle</span> Completed</span>'
+                                : '<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-500/15 text-amber-900 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 text-xs font-bold"><span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span> Work In Progress</span>'
+                            }
+                            <button onclick="openTaskDetailsModal('${task.orderNumber}')" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-primary/20 transition-colors cursor-pointer flex items-center gap-1" title="View Technical Work Order">
+                                <span class="material-symbols-outlined text-sm text-amber-800 dark:text-primary">visibility</span>
+                                <span class="hidden sm:inline">View Specs</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Technical Specs Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/15">
+                            <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-0.5">Placement Location</span>
+                            <strong class="text-xs text-slate-900 dark:text-white font-bold">${task.placement || 'Standard Placement'}</strong>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/15">
+                            <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-0.5">Dimensions / Size</span>
+                            <strong class="text-xs text-slate-900 dark:text-white font-bold">${task.sizing || 'Standard Sizing'}</strong>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/15">
+                            <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-0.5">Required Formats</span>
+                            <strong class="text-xs text-amber-800 dark:text-primary font-bold">${task.fileFormat || 'DST, EMB'}</strong>
+                        </div>
+                    </div>
+
+                    <!-- Production Guidelines Box -->
+                    <div class="p-3.5 rounded-xl bg-amber-50/40 dark:bg-slate-900/40 border border-amber-200/80 dark:border-primary/15 mb-4">
+                        <div class="flex items-center gap-1.5 text-amber-900 dark:text-primary text-[10px] font-bold uppercase tracking-wider mb-1">
+                            <span class="material-symbols-outlined text-xs">note_alt</span>
+                            <span>Production Guidelines</span>
+                        </div>
+                        <p class="text-xs text-slate-800 dark:text-slate-300 leading-relaxed font-medium">
+                            ${task.instructions || 'Standard Wilcom stitch density (0.40mm), underlay tatted, trim commands applied.'}
+                        </p>
+                    </div>
+
+                    <!-- Deliverables Studio Controls (Bottom) -->
+                    <div class="flex flex-wrap items-center justify-between gap-4 pt-3.5 border-t border-slate-200 dark:border-primary/15">
+                        
+                        <!-- Customer Raw Artwork Download -->
+                        <div class="flex items-center gap-3">
+                            <a href="${rawFile.url}" target="_blank" download="${rawFile.name}" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white border border-slate-300 dark:border-primary/30 text-xs font-bold flex items-center gap-2 transition-all hover:scale-[1.02] cursor-pointer" title="Download raw customer artwork file">
+                                <span class="material-symbols-outlined text-sm text-amber-800 dark:text-primary">cloud_download</span>
+                                <span>Download ${rawFile.name}</span>
+                            </a>
+                        </div>
+
+                        <!-- Upload Zone or Completed Files -->
+                        ${!isCompleted ? `
+                            <div class="flex flex-wrap items-center gap-2">
+                                <input type="file" id="file-upload-${task.orderNumber}" multiple accept=".dst,.emb,.pes,.exp" class="hidden" onchange="handleDeliverableSelected('${task.orderNumber}', event)" />
+                                
+                                <button id="btn-select-${task.orderNumber}" onclick="document.getElementById('file-upload-${task.orderNumber}').click()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-primary/40 hover:border-amber-600 dark:hover:border-primary text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 transition-all cursor-pointer">
+                                    <span class="material-symbols-outlined text-sm text-amber-800 dark:text-primary">attach_file</span>
+                                    <span id="label-${task.orderNumber}">
+                                        ${stagedFiles.length > 0 ? `${stagedFiles.length} file(s) staged` : 'Select .DST & .EMB'}
+                                    </span>
+                                </button>
+
+                                <button id="btn-submit-${task.orderNumber}" onclick="submitTaskDeliverables('${task.orderNumber}')" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs shadow-md shadow-primary/25 flex items-center gap-1.5 transition-all hover:scale-[1.02] cursor-pointer">
+                                    <span class="material-symbols-outlined text-sm">cloud_upload</span>
+                                    <span>Submit Deliverables</span>
+                                </button>
+                            </div>
+                        ` : `
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="inline-flex items-center gap-1 text-xs text-emerald-700 dark:text-emerald-400 font-bold">
+                                    <span class="material-symbols-outlined text-sm">cloud_done</span>
+                                    <span>Uploaded to InsForge Storage</span>
+                                </span>
+                                ${(task.deliverables && task.deliverables.length > 0) ? `
+                                    <div class="flex items-center gap-1.5 ml-2">
+                                        ${task.deliverables.map(d => `
+                                            <a href="${d.url}" download="${d.name}" target="_blank" class="px-2 py-1 rounded-md bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/25 font-mono text-[10px] font-bold inline-flex items-center gap-0.5">
+                                                <span class="material-symbols-outlined text-[10px]">download</span>
+                                                <span>${d.name}</span>
+                                            </a>
+                                        `).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        // File selection handling
         function handleDeliverableSelected(orderNumber, e) {
             const files = e.target.files;
             if (!files || files.length === 0) return;
@@ -292,11 +826,12 @@
             taskFilesState[orderNumber] = Array.from(files);
             const label = document.getElementById(`label-${orderNumber}`);
             if (label) {
-                label.textContent = `${files.length} file(s) ready (${files[0].name})`;
+                label.textContent = `${files.length} file(s) staged (${files[0].name})`;
                 label.className = 'text-amber-800 dark:text-primary font-bold';
             }
         }
 
+        // Task submission to InsForge Storage & PostgreSQL DB
         async function submitTaskDeliverables(orderNumber) {
             const submitBtn = document.getElementById(`btn-submit-${orderNumber}`);
             const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
@@ -331,7 +866,7 @@
                         });
                     }
                 } else {
-                    // Generate and upload production-ready stitch files to InsForge Storage deliverables bucket
+                    // Default Tajima + Wilcom stitch deliverables generation
                     const dstBlob = new Blob([
                         `LA:${orderNumber}\r\nST:18450\r\nCO:04\r\n+X:420\r\n-X:420\r\n+Y:350\r\n-Y:350\r\n[TAJIMA EMBROIDERY STITCH STREAM]`
                     ], { type: 'application/octet-stream' });
@@ -352,8 +887,15 @@
                 }
 
                 await window.insforgeClient.completeDigitizerTask(orderNumber, deliverables);
+                delete taskFilesState[orderNumber];
                 await renderWorkerTasks();
-                alert(`🎉 Success! Deliverables for ${orderNumber} were uploaded to InsForge Storage and database updated. The client can now download the machine stitch files!`);
+
+                window.insforgeClient.showToast(
+                    'Deliverables Submitted!',
+                    `Order ${orderNumber} stitch files were uploaded to InsForge Storage and marked completed.`,
+                    'check_circle',
+                    'success'
+                );
             } catch (err) {
                 console.error('Worker deliverable upload failed:', err);
                 alert(`⚠️ Upload error: ${err.message}. Please check connection and try again.`);
@@ -364,6 +906,64 @@
                 }
             }
         }
+
+        // Modal Handlers
+        function openTaskDetailsModal(orderNumber) {
+            const task = allWorkerTasks.find(t => t.orderNumber === orderNumber);
+            if (!task) return;
+
+            document.getElementById('modal-order-number').textContent = `#${task.orderNumber}`;
+            document.getElementById('modal-task-id').textContent = task.taskId || 'TSK-ACTIVE';
+            document.getElementById('modal-placement').textContent = task.placement || 'Standard Placement';
+            document.getElementById('modal-sizing').textContent = task.sizing || 'Standard Sizing';
+            document.getElementById('modal-formats').textContent = task.fileFormat || 'DST, EMB';
+            document.getElementById('modal-instructions').textContent = task.instructions || 'Standard Wilcom stitch density (0.40mm), underlay tatted, trim commands applied.';
+
+            const rawFile = (task.rawArtworkFiles && task.rawArtworkFiles[0]) ? task.rawArtworkFiles[0] : { name: 'artwork.png', url: 'logo.png' };
+            document.getElementById('modal-raw-filename').textContent = rawFile.name;
+            const dl = document.getElementById('modal-raw-download');
+            dl.href = rawFile.url;
+            dl.download = rawFile.name;
+
+            const statusEl = document.getElementById('modal-status-badge');
+            if (task.status === 'completed') {
+                statusEl.innerHTML = '<span class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-400 font-bold text-xs border border-emerald-200 dark:border-emerald-500/30">Completed</span>';
+            } else {
+                statusEl.innerHTML = '<span class="px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-500/20 text-amber-900 dark:text-amber-400 font-bold text-xs border border-amber-200 dark:border-amber-500/30">In Progress</span>';
+            }
+
+            document.getElementById('task-details-modal').classList.remove('hidden');
+        }
+
+        function closeTaskDetailsModal() {
+            const modal = document.getElementById('task-details-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function openFormatSpecsModal() {
+            document.getElementById('format-specs-modal').classList.remove('hidden');
+        }
+
+        function closeFormatSpecsModal() {
+            document.getElementById('format-specs-modal').classList.add('hidden');
+        }
+
+        function openWorkerAccountModal() {
+            document.getElementById('worker-account-modal').classList.remove('hidden');
+        }
+
+        function closeWorkerAccountModal() {
+            document.getElementById('worker-account-modal').classList.add('hidden');
+        }
+
+        // Close modals on escape or backdrop click
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeTaskDetailsModal();
+                closeFormatSpecsModal();
+                closeWorkerAccountModal();
+            }
+        });
     </script>
 </body>
 
