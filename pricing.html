@@ -52,10 +52,12 @@
                 <button class="theme-toggle-btn p-2 rounded-lg hover:bg-primary/10 transition-colors"
                     aria-label="Toggle theme"><span
                         class="material-symbols-outlined theme-toggle-icon text-xl">light_mode</span></button>
-                <a href="portal-login.html" class="px-3 py-1.5 rounded-lg bg-primary/15 hover:bg-primary text-primary hover:text-background-dark border border-primary/30 text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
-                    <span class="material-symbols-outlined text-sm">lock_person</span>
-                    <span>Portal</span>
-                </a>
+                <div id="header-auth-slot" class="flex items-center">
+                    <a href="portal-login.html" class="header-login-btn px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 dark:hover:bg-primary text-amber-900 dark:text-primary hover:text-amber-950 dark:hover:text-background-dark border border-amber-300 dark:border-primary/30 text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
+                        <span class="material-symbols-outlined text-sm">login</span>
+                        <span>Login</span>
+                    </a>
+                </div>
             </div>
         </div>
     </header>

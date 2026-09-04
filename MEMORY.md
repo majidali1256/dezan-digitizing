@@ -58,6 +58,11 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 - `/admin-portal.html`: Master Admin Backend (KPI metrics, All clients, Total revenue, Global order table, Worker assignment modal).
 - `/worker-portal.html`: Digitizer Restricted Workspace (Only assigned jobs, sanitized specs, raw logo download, `.dst`/`.emb` file uploader).
 
+### Header Navigation Authentication State
+- **Logged Out**: Top-right header button renders a gold pill button explicitly labeled **Login** (`[ ➔] Login ]`) linking to `portal-login.html`.
+- **Logged In**: Top-right button automatically renders the previous user account icon (`account_circle`) with quick dashboard navigation and sign out.
+- **On Logout**: Instantly switches back to **Login** without page reload. Real-time multi-tab synchronization via `storage` event in `app.js`.
+
 ---
 
 ## 6. RBAC & Data Masking Architecture

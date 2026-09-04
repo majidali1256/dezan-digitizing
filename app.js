@@ -49,6 +49,104 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // ===== DYNAMIC HEADER AUTH STATE (LOGIN BUTTON vs PREVIOUS ACCOUNT ICON) =====
+    function initHeaderAuthState() {
+        const slots = document.querySelectorAll('#header-auth-slot, .header-auth-slot');
+        if (!slots.length) return;
+
+        let session = null;
+        try {
+            const raw = localStorage.getItem('dezan_session');
+            if (raw) session = JSON.parse(raw);
+        } catch (e) {
+            session = null;
+        }
+
+        slots.forEach(slot => {
+            if (session && session.role) {
+                // Logged in: show previous account_circle icon!
+                let dashboardUrl = 'client-portal.html';
+                if (session.role === 'admin') dashboardUrl = 'admin-portal.html';
+                else if (session.role === 'digitizer') dashboardUrl = 'worker-portal.html';
+
+                const displayName = session.displayName || session.name || 'Account';
+                const roleName = session.role === 'admin' ? 'Admin' : (session.role === 'digitizer' ? 'Worker' : 'Client');
+
+                slot.innerHTML = `
+                    <div class="relative" id="user-header-dropdown-container">
+                        <button type="button" id="user-header-menu-btn" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 text-amber-800 dark:text-primary transition-colors flex items-center focus:outline-none" title="${displayName} (${roleName})">
+                            <span class="material-symbols-outlined text-2xl">account_circle</span>
+                        </button>
+                        <!-- User Dropdown Menu -->
+                        <div id="user-header-menu" class="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 rounded-2xl shadow-xl py-2 px-2 hidden z-50 transition-all">
+                            <div class="px-3 py-2 border-b border-slate-100 dark:border-primary/15 mb-1.5">
+                                <span class="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Logged in as</span>
+                                <strong class="text-xs font-bold text-slate-900 dark:text-white block truncate">${displayName}</strong>
+                                <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-300 dark:border-primary/30 uppercase tracking-wider">${roleName}</span>
+                            </div>
+                            <a href="${dashboardUrl}" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-primary/10 hover:text-amber-900 dark:hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined text-sm text-amber-700 dark:text-primary">dashboard</span>
+                                <span>Go to Dashboard</span>
+                            </a>
+                            <button type="button" id="header-signout-btn" class="w-full text-left flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+                                <span class="material-symbols-outlined text-sm">logout</span>
+                                <span>Sign Out</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                const menuBtn = slot.querySelector('#user-header-menu-btn');
+                const menu = slot.querySelector('#user-header-menu');
+                const signOutBtn = slot.querySelector('#header-signout-btn');
+
+                if (menuBtn && menu) {
+                    menuBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        menu.classList.toggle('hidden');
+                    });
+                }
+
+                if (signOutBtn) {
+                    signOutBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        localStorage.removeItem('dezan_session');
+                        initHeaderAuthState();
+                        if (window.location.pathname.includes('-portal.html')) {
+                            window.location.href = 'portal-login.html';
+                        }
+                    });
+                }
+            } else {
+                // Logged out: show Login button!
+                slot.innerHTML = `
+                    <a href="portal-login.html" class="header-login-btn px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 dark:hover:bg-primary text-amber-900 dark:text-primary hover:text-amber-950 dark:hover:text-background-dark border border-amber-300 dark:border-primary/30 text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
+                        <span class="material-symbols-outlined text-sm">login</span>
+                        <span>Login</span>
+                    </a>
+                `;
+            }
+        });
+    }
+
+    // Close user dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        document.querySelectorAll('#user-header-menu').forEach(menu => {
+            if (!menu.contains(e.target) && !menu.previousElementSibling?.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+    });
+
+    // Listen for storage changes across tabs/windows
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'dezan_session') {
+            initHeaderAuthState();
+        }
+    });
+
+    initHeaderAuthState();
+
 
     // ===== SCROLL REVEAL ANIMATIONS =====
     const revealElements = document.querySelectorAll(".reveal");
