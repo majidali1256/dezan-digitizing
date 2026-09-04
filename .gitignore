@@ -1,0 +1,15 @@
+# Environment files (never commit API keys)
+.env
+.env.local
+.env*.local
+
+# Dependencies
+node_modules/
+
+# OS metadata
+.DS_Store
+
+# Temporary build archives
+scratch/
+dezan_website_*.zip
+skills-lock.json

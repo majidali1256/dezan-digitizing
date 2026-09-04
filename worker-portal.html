@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Digitizer Workspace | Dezan Digitizing</title>
+    <meta name="description" content="Digitizer Worker Workspace - Restricted technical design queue and file submission." />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#d4af35",
+                        "primary-hover": "#e5c158",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#201d12",
+                        "card-dark": "#16140c",
+                        "surface-dark": "#1a180f"
+                    },
+                    fontFamily: { display: ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30">
+
+    <!-- ===== ROLE DEMO SWITCHER BAR ===== -->
+    <div class="bg-card-dark border-b border-primary/20 py-2 px-4 text-xs">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 font-bold border border-purple-500/30 text-[10px]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></span> RESTRICTED WORKER WORKSPACE
+                </span>
+                <span class="text-slate-400 hidden sm:inline">Logged in as: <strong id="top-worker-name" class="text-white">Alex Miller</strong></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-slate-500 text-[11px] hidden md:inline">Switch Workspace:</span>
+                <button onclick="window.insforgeClient.loginAsDemo('admin')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-primary border border-primary/30 text-[10px] font-bold">Admin</button>
+                <button onclick="window.insforgeClient.loginAsDemo('client')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]">Client</button>
+                <button onclick="window.insforgeClient.signOut()" class="px-2 py-1 rounded bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-[10px] font-bold ml-2">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HEADER ===== -->
+    <header class="sticky top-0 z-40 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-primary/20">
+        <div class="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
+            <a href="index.html" class="flex items-center gap-2">
+                <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover shadow-md shadow-primary/20">
+                <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN <span class="text-primary text-xs uppercase font-bold tracking-widest ml-1">Digitizer Hub</span></span>
+            </a>
+
+            <div class="flex items-center gap-3">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
+                    <span class="material-symbols-outlined text-xs">shield</span> Client PII & Price Masked
+                </div>
+                <button class="theme-toggle-btn p-2 rounded-lg hover:bg-primary/10 transition-colors" aria-label="Toggle theme">
+                    <span class="material-symbols-outlined theme-toggle-icon text-lg text-primary">light_mode</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== WORKER QUEUE CONTAINER ===== -->
+    <main class="flex-1 max-w-5xl mx-auto px-4 py-8 w-full">
+
+        <!-- Welcome Banner -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-card-dark border border-primary/25 shadow-xl mb-8 flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <span class="text-xs font-bold text-primary tracking-widest uppercase mb-1 block">Production Queue</span>
+                <h2 class="text-2xl font-black text-slate-900 dark:text-white" id="worker-greeting">Assigned Work Tickets</h2>
+                <p class="text-xs text-slate-400 mt-1">Only technical embroidery specifications and raw artwork files assigned to your User ID</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right">
+                    <span class="text-[11px] text-slate-400 uppercase font-bold block">Active Jobs</span>
+                    <span class="text-2xl font-black text-primary" id="worker-active-count">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Cards Container -->
+        <div id="worker-tasks-container" class="space-y-6">
+            <!-- Rendered by JS -->
+        </div>
+
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="py-6 text-center text-xs text-slate-500 border-t border-primary/10">
+        © 2016-2026 Dezan Digitizing · Restricted Worker Operations
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/insforge-client.js"></script>
+    <script>
+        // Guard check: digitizer or admin role only
+        const currentUser = window.insforgeClient.requireAuth(['digitizer', 'admin']);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.documentElement.classList.add('dark');
+            if (currentUser) {
+                document.getElementById('top-worker-name').textContent = currentUser.displayName;
+                document.getElementById('worker-greeting').textContent = `Hello, ${currentUser.displayName}`;
+            }
+            renderWorkerTasks();
+        });
+
+        function renderWorkerTasks() {
+            // STRICT MASKING: queries sanitized digitizer tasks only!
+            const tasks = window.insforgeClient.getDigitizerTasks();
+            const container = document.getElementById('worker-tasks-container');
+
+            const activeTasks = tasks.filter(t => t.status !== 'completed');
+            document.getElementById('worker-active-count').textContent = activeTasks.length;
+
+            if (tasks.length === 0) {
+                container.innerHTML = `
+                    <div class="p-12 text-center rounded-2xl bg-card-dark border border-primary/15">
+                        <span class="material-symbols-outlined text-4xl text-slate-600 mb-2">assignment_turned_in</span>
+                        <h4 class="text-sm font-bold text-slate-400">No assigned tasks right now</h4>
+                        <p class="text-xs text-slate-500 mt-1">When the Admin assigns you an order ticket, it will appear here automatically.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = tasks.map(task => {
+                const isCompleted = task.status === 'completed';
+                const rawFile = task.rawArtworkFiles[0] || { name: 'raw_logo.png', url: 'logo.png' };
+
+                return `
+                    <div class="p-6 rounded-2xl bg-white dark:bg-card-dark border border-primary/25 shadow-xl transition-all ${isCompleted ? 'opacity-70' : 'hover:border-primary/60'}">
+                        
+                        <!-- Task Header (SANITIZED) -->
+                        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-primary/15 mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="px-3 py-1 rounded-lg bg-primary/15 border border-primary/30 font-mono font-black text-xs text-primary">
+                                    ${task.orderNumber}
+                                </span>
+                                <span class="text-xs font-bold text-slate-300">${task.serviceType}</span>
+                                <span class="text-[11px] text-slate-500 font-mono">(${task.taskId})</span>
+                            </div>
+
+                            <div>
+                                ${isCompleted 
+                                    ? '<span class="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-xs">check_circle</span> Completed</span>'
+                                    : '<span class="px-3 py-1 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-xs">pending</span> Work In Progress</span>'
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Technical Design Specifications (No Client Data, No Price) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                            <div class="p-3 rounded-xl bg-slate-900/60 border border-primary/15">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Placement Location</span>
+                                <strong class="text-xs text-white">${task.placement}</strong>
+                            </div>
+
+                            <div class="p-3 rounded-xl bg-slate-900/60 border border-primary/15">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Dimensions / Size</span>
+                                <strong class="text-xs text-white">${task.sizing}</strong>
+                            </div>
+
+                            <div class="p-3 rounded-xl bg-slate-900/60 border border-primary/15">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Required Formats</span>
+                                <strong class="text-xs text-primary">${task.fileFormat}</strong>
+                            </div>
+                        </div>
+
+                        <!-- Instructions -->
+                        <div class="p-4 rounded-xl bg-slate-900/40 border border-primary/10 mb-5">
+                            <span class="text-[10px] font-bold text-primary uppercase tracking-wider block mb-1">Production Guidelines & Notes</span>
+                            <p class="text-xs text-slate-300 leading-relaxed">${task.instructions || 'Standard Wilcom stitch density.'}</p>
+                        </div>
+
+                        <!-- Raw Artwork Download & Upload Controls -->
+                        <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-primary/15">
+                            
+                            <!-- Download Raw Logo Button -->
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Customer Raw Artwork</span>
+                                <a href="${rawFile.url}" download="${task.orderNumber}_raw_logo" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-primary/30 text-xs font-bold flex items-center gap-2 transition-all hover:scale-[1.02]">
+                                    <span class="material-symbols-outlined text-sm text-primary">download</span>
+                                    <span>Download ${rawFile.name}</span>
+                                </a>
+                            </div>
+
+                            <!-- Upload Deliverables Zone -->
+                            ${!isCompleted ? `
+                                <div class="flex items-center gap-3">
+                                    <input type="file" id="file-upload-${task.orderNumber}" multiple accept=".dst,.emb,.pes,.exp" class="hidden" onchange="handleDeliverableSelected('${task.orderNumber}', event)" />
+                                    <button onclick="document.getElementById('file-upload-${task.orderNumber}').click()" class="px-3.5 py-2 rounded-xl bg-slate-900 border border-primary/40 hover:border-primary text-xs font-bold text-slate-200 flex items-center gap-1.5 transition-all">
+                                        <span class="material-symbols-outlined text-sm text-primary">attach_file</span>
+                                        <span id="label-${task.orderNumber}">Select .DST & .EMB</span>
+                                    </button>
+                                    <button onclick="submitTaskDeliverables('${task.orderNumber}')" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs shadow-md shadow-primary/25 flex items-center gap-1.5 transition-all hover:scale-[1.02]">
+                                        <span class="material-symbols-outlined text-sm">cloud_done</span>
+                                        <span>Submit & Complete</span>
+                                    </button>
+                                </div>
+                            ` : `
+                                <div class="text-right">
+                                    <span class="text-xs text-emerald-400 font-bold flex items-center gap-1 justify-end">
+                                        <span class="material-symbols-outlined text-sm">check_circle</span> Files submitted to Client Portal
+                                    </span>
+                                    <span class="text-[10px] text-slate-500">Task marked as completed</span>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        const taskFilesState = {};
+
+        function handleDeliverableSelected(orderNumber, e) {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+
+            taskFilesState[orderNumber] = Array.from(files);
+            const label = document.getElementById(`label-${orderNumber}`);
+            if (label) {
+                label.textContent = `${files.length} file(s) ready (${files[0].name})`;
+                label.className = 'text-primary font-bold';
+            }
+        }
+
+        function submitTaskDeliverables(orderNumber) {
+            const files = taskFilesState[orderNumber];
+            
+            // Build deliverable array
+            const deliverables = files ? files.map(f => ({
+                format: f.name.split('.').pop().toUpperCase(),
+                name: f.name,
+                url: 'images/dezan-logo.png',
+                size: f.size
+            })) : [
+                { format: 'DST', name: `${orderNumber}_completed.dst`, url: 'images/dezan-logo.png', size: 24800 },
+                { format: 'EMB', name: `${orderNumber}_completed.emb`, url: 'images/dezan-logo.png', size: 112000 }
+            ];
+
+            window.insforgeClient.completeDigitizerTask(orderNumber, deliverables);
+            renderWorkerTasks();
+            alert(`🎉 Task for ${orderNumber} marked as Completed! The client can now download the finished files.`);
+        }
+
+        // Theme toggle
+        document.querySelector('.theme-toggle-btn').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+    </script>
+</body>
+
+</html>

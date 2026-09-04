@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Order Portal Sign In | Dezan Digitizing</title>
+    <meta name="description" content="Secure Role-Based Order Portal for Dezan Digitizing Clients, Admins, and Workers." />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#d4af35",
+                        "primary-hover": "#e5c158",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#201d12",
+                        "card-dark": "#16140c",
+                        "card-border": "rgba(212, 175, 53, 0.25)"
+                    },
+                    fontFamily: { display: ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col justify-between selection:bg-primary/30">
+
+    <!-- ===== TOP HEADER ===== -->
+    <header class="sticky top-0 z-50 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-primary/20">
+        <div class="flex items-center justify-between px-4 py-3 max-w-6xl mx-auto">
+            <a href="index.html" class="flex items-center gap-2">
+                <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover shadow-md shadow-primary/20">
+                <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN <span class="text-primary text-xs uppercase font-bold tracking-widest ml-1">Portal</span></span>
+            </a>
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="text-xs font-semibold text-slate-500 hover:text-primary transition-colors flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">arrow_back</span> Main Site
+                </a>
+                <button class="theme-toggle-btn p-2 rounded-lg hover:bg-primary/10 transition-colors" aria-label="Toggle theme">
+                    <span class="material-symbols-outlined theme-toggle-icon text-xl text-primary">light_mode</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== QUICK DEMO BAR (FOR IMMEDIATE ROLE TESTING) ===== -->
+    <div class="bg-gradient-to-r from-amber-500/10 via-primary/15 to-amber-500/10 border-b border-primary/30 py-3 px-4 text-center">
+        <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs">
+            <span class="font-bold flex items-center gap-1 text-primary">
+                <span class="material-symbols-outlined text-sm">bolt</span> 1-Click Role Testing:
+            </span>
+            <button onclick="window.insforgeClient.loginAsDemo('admin')" class="px-3 py-1.5 rounded-lg bg-card-dark text-primary border border-primary/40 hover:border-primary font-bold shadow-sm hover:scale-105 transition-all flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs">admin_panel_settings</span> Admin (Me)
+            </button>
+            <button onclick="window.insforgeClient.loginAsDemo('client')" class="px-3 py-1.5 rounded-lg bg-card-dark text-slate-200 border border-slate-700 hover:border-primary/60 font-semibold hover:scale-105 transition-all flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs">person</span> Client (John Falcon)
+            </button>
+            <button onclick="window.insforgeClient.loginAsDemo('digitizer')" class="px-3 py-1.5 rounded-lg bg-card-dark text-slate-200 border border-slate-700 hover:border-primary/60 font-semibold hover:scale-105 transition-all flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs">precision_manufacturing</span> Digitizer (Alex)
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== AUTH CARD CONTAINER ===== -->
+    <main class="flex-1 flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-md bg-white dark:bg-card-dark border border-primary/25 rounded-2xl p-6 sm:p-8 shadow-2xl shadow-black/30 backdrop-blur-xl relative overflow-hidden">
+            
+            <!-- Ambient Glow -->
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/15 rounded-full blur-3xl pointer-events-none"></div>
+
+            <!-- Portal Badge -->
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 border border-primary/30 text-primary mb-3 shadow-inner">
+                    <span class="material-symbols-outlined text-3xl">lock_person</span>
+                </div>
+                <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Order Portal Access</h1>
+                <p class="text-xs text-slate-500 mt-1">Role-Based Access Control powered by InsForge</p>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="grid grid-cols-2 p-1 bg-slate-100 dark:bg-slate-900/60 rounded-xl mb-6 border border-primary/10">
+                <button id="tab-signin-btn" onclick="switchAuthTab('signin')" class="py-2.5 text-xs font-bold rounded-lg transition-all bg-primary text-background-dark shadow-sm">
+                    Sign In
+                </button>
+                <button id="tab-signup-btn" onclick="switchAuthTab('signup')" class="py-2.5 text-xs font-bold rounded-lg transition-all text-slate-500 hover:text-slate-900 dark:hover:text-white">
+                    Create Account
+                </button>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="auth-error-banner" class="hidden mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 text-xs flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">error</span>
+                <span id="auth-error-msg">Error message</span>
+            </div>
+
+            <!-- ===== SIGN IN FORM ===== -->
+            <form id="signin-form" onsubmit="handleSignIn(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Email Address</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3.5 top-3.5 text-slate-400 text-lg">mail</span>
+                        <input type="email" id="signin-email" required placeholder="you@company.com" 
+                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900/80 border border-primary/20 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl text-sm transition-all" />
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Password</label>
+                        <a href="#" onclick="alert('Password reset link has been dispatched.'); return false;" class="text-[11px] text-primary hover:underline">Forgot?</a>
+                    </div>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3.5 top-3.5 text-slate-400 text-lg">key</span>
+                        <input type="password" id="signin-password" required placeholder="••••••••" 
+                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900/80 border border-primary/20 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl text-sm transition-all" />
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-primary hover:bg-primary-hover text-background-dark font-black rounded-xl text-sm shadow-lg shadow-primary/25 transition-all flex items-center justify-center gap-2 mt-2">
+                    <span>Enter Dashboard</span>
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </button>
+            </form>
+
+            <!-- ===== SIGN UP FORM ===== -->
+            <form id="signup-form" onsubmit="handleSignUp(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Full Name</label>
+                    <input type="text" id="signup-name" required placeholder="John Doe" 
+                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/80 border border-primary/20 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl text-sm transition-all" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Email Address</label>
+                    <input type="email" id="signup-email" required placeholder="you@company.com" 
+                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/80 border border-primary/20 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl text-sm transition-all" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Account Role</label>
+                    <select id="signup-role" onchange="toggleCompanyField()" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/80 border border-primary/20 focus:border-primary rounded-xl text-sm">
+                        <option value="client">Client (Place Orders & Download Files)</option>
+                        <option value="digitizer">Digitizer Worker (Restricted Task Queue)</option>
+                    </select>
+                </div>
+
+                <div id="company-field-wrap">
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Company Name (Optional)</label>
+                    <input type="text" id="signup-company" placeholder="e.g. Apex Apparel Co." 
+                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/80 border border-primary/20 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl text-sm transition-all" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Create Password</label>
+                    <input type="password" id="signup-password" required placeholder="At least 8 characters" 
+                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/80 border border-primary/20 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl text-sm transition-all" />
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-primary hover:bg-primary-hover text-background-dark font-black rounded-xl text-sm shadow-lg shadow-primary/25 transition-all flex items-center justify-center gap-2 mt-2">
+                    <span>Create Account</span>
+                    <span class="material-symbols-outlined text-sm">check_circle</span>
+                </button>
+            </form>
+
+            <!-- Data Masking Compliance Badge -->
+            <div class="mt-6 pt-5 border-t border-primary/10 text-center">
+                <span class="inline-flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
+                    <span class="material-symbols-outlined text-xs text-primary">verified_user</span>
+                    Zero-Leakage Worker Data Masking Active
+                </span>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="py-6 text-center text-xs text-slate-500 border-t border-primary/10">
+        © 2016-2026 Dezan Digitizing · Protected by InsForge RBAC
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/insforge-client.js"></script>
+    <script>
+        function switchAuthTab(tab) {
+            const signinBtn = document.getElementById('tab-signin-btn');
+            const signupBtn = document.getElementById('tab-signup-btn');
+            const signinForm = document.getElementById('signin-form');
+            const signupForm = document.getElementById('signup-form');
+            const errorBanner = document.getElementById('auth-error-banner');
+
+            errorBanner.classList.add('hidden');
+
+            if (tab === 'signin') {
+                signinBtn.className = 'py-2.5 text-xs font-bold rounded-lg transition-all bg-primary text-background-dark shadow-sm';
+                signupBtn.className = 'py-2.5 text-xs font-bold rounded-lg transition-all text-slate-500 hover:text-slate-900 dark:hover:text-white';
+                signinForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+            } else {
+                signupBtn.className = 'py-2.5 text-xs font-bold rounded-lg transition-all bg-primary text-background-dark shadow-sm';
+                signinBtn.className = 'py-2.5 text-xs font-bold rounded-lg transition-all text-slate-500 hover:text-slate-900 dark:hover:text-white';
+                signupForm.classList.remove('hidden');
+                signinForm.classList.add('hidden');
+            }
+        }
+
+        function toggleCompanyField() {
+            const role = document.getElementById('signup-role').value;
+            const wrap = document.getElementById('company-field-wrap');
+            wrap.style.display = role === 'digitizer' ? 'none' : 'block';
+        }
+
+        async function handleSignIn(e) {
+            e.preventDefault();
+            const email = document.getElementById('signin-email').value.trim();
+            const password = document.getElementById('signin-password').value;
+            const errorBanner = document.getElementById('auth-error-banner');
+            const errorMsg = document.getElementById('auth-error-msg');
+
+            const { user, error } = await window.insforgeClient.signIn(email, password);
+            if (error) {
+                errorBanner.classList.remove('hidden');
+                errorMsg.textContent = error;
+                return;
+            }
+
+            window.insforgeClient.redirectToDashboard(user.role);
+        }
+
+        async function handleSignUp(e) {
+            e.preventDefault();
+            const displayName = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const role = document.getElementById('signup-role').value;
+            const company = document.getElementById('signup-company').value.trim();
+            const password = document.getElementById('signup-password').value;
+
+            const { user, error } = await window.insforgeClient.signUp({
+                displayName,
+                email,
+                role,
+                company,
+                password
+            });
+
+            if (error) {
+                const errorBanner = document.getElementById('auth-error-banner');
+                const errorMsg = document.getElementById('auth-error-msg');
+                errorBanner.classList.remove('hidden');
+                errorMsg.textContent = error;
+                return;
+            }
+
+            window.insforgeClient.redirectToDashboard(user.role);
+        }
+
+        // Theme toggle support
+        const themeBtn = document.querySelector('.theme-toggle-btn');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+            });
+        }
+        // Auto default to dark theme matching Dezan Luxury archetype
+        document.documentElement.classList.add('dark');
+    </script>
+</body>
+
+</html>

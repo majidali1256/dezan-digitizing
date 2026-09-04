@@ -50,11 +50,11 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 - `/contact.html`: Contact form, email links, FAQ, and direct consultation options.
 - `/order-success.html`: Order confirmation receipt page with transaction lookup parameters.
 
-### Role-Based Order Portal (In Progress)
-- `/portal/login.html`: Unified authentication page (Login / Register / Forgot Password) with automatic role routing.
-- `/portal/client-dashboard.html`: Client Portal (Order tracking, New Order Wizard, Invoice payments, Completed file downloads).
-- `/portal/admin-dashboard.html`: Master Admin Backend (KPI metrics, All clients, Total revenue, Global order table, Worker assignment modal).
-- `/portal/worker-dashboard.html`: Digitizer Restricted Workspace (Only assigned jobs, sanitized specs, raw logo download, `.dst`/`.emb` file uploader).
+### Role-Based Order Portal (Implemented & Live)
+- `/portal-login.html`: Unified authentication page with automatic role routing and 1-click test switcher.
+- `/client-portal.html`: Client Portal (Order tracking, New Order Wizard, Completed file downloads).
+- `/admin-portal.html`: Master Admin Backend (KPI metrics, All clients, Total revenue, Global order table, Worker assignment modal).
+- `/worker-portal.html`: Digitizer Restricted Workspace (Only assigned jobs, sanitized specs, raw logo download, `.dst`/`.emb` file uploader).
 
 ---
 
