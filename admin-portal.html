@@ -118,7 +118,14 @@
                     <h3 class="text-lg font-black text-slate-900 dark:text-white">Master Orders Queue</h3>
                     <p class="text-xs text-slate-600 dark:text-slate-400">View client PII, assign workers, and track delivery</p>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-3">
+                    <div id="admin-db-sync-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-[11px] shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="admin-db-sync-text" class="text-emerald-800 dark:text-emerald-300 font-bold">InsForge DB Live</span>
+                    </div>
+                    <button onclick="renderAdminOrders()" class="text-xs text-primary-dark dark:text-primary hover:underline flex items-center gap-1 font-bold cursor-pointer">
+                        <span class="material-symbols-outlined text-sm">refresh</span> Refresh
+                    </button>
                     <select id="filter-status" onchange="renderAdminOrders()" class="px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white font-medium focus:ring-primary focus:border-primary">
                         <option value="all">All Statuses</option>
                         <option value="pending_review">Pending Assignment</option>
@@ -229,15 +236,26 @@
             renderAdminOrders();
         });
 
-        function renderAdminOrders() {
-            const allOrders = window.insforgeClient.getOrders();
+        async function renderAdminOrders() {
+            const syncText = document.getElementById('admin-db-sync-text');
+            if (syncText) syncText.textContent = 'Syncing...';
+
+            const [allOrders, digitizers] = await Promise.all([
+                window.insforgeClient.fetchOrders(),
+                window.insforgeClient.fetchDigitizers()
+            ]);
+
+            if (syncText) {
+                const status = window.insforgeClient.getDatabaseSyncStatus();
+                syncText.textContent = `InsForge DB Live (${status.lastSynced})`;
+            }
+
             const filter = document.getElementById('filter-status').value;
             const filtered = filter === 'all' ? allOrders : allOrders.filter(o => o.status === filter);
 
             // Compute statistics
             const totalRev = allOrders.reduce((sum, o) => sum + (o.price || 0), 0);
             const unassigned = allOrders.filter(o => !o.assigned_digitizer_id).length;
-            const digitizers = window.insforgeClient.getDigitizers();
 
             document.getElementById('stat-revenue').textContent = '$' + totalRev.toFixed(2);
             document.getElementById('stat-total-orders').textContent = allOrders.length;
@@ -333,18 +351,35 @@
             document.getElementById('assign-modal').classList.add('hidden');
         }
 
-        function handleAssignSubmit(e) {
+        async function handleAssignSubmit(e) {
             e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-xs">sync</span> Assigning...';
+            }
+
             const orderNumber = document.getElementById('assign-order-number').value;
             const select = document.getElementById('assign-worker-select');
             const selectedOpt = select.options[select.selectedIndex];
             const workerId = selectedOpt.value;
             const workerName = selectedOpt.getAttribute('data-name');
 
-            window.insforgeClient.assignDigitizer(orderNumber, workerId, workerName);
-            closeAssignModal();
-            renderAdminOrders();
-            alert(`✅ Order ${orderNumber} successfully assigned to ${workerName}!`);
+            try {
+                await window.insforgeClient.assignDigitizer(orderNumber, workerId, workerName);
+                closeAssignModal();
+                await renderAdminOrders();
+                alert(`✅ Order ${orderNumber} successfully assigned to ${workerName} in InsForge PostgreSQL!`);
+            } catch (err) {
+                console.error('Assignment error:', err);
+                alert(`⚠️ Error assigning worker: ${err.message}`);
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            }
         }
     </script>
 </body>

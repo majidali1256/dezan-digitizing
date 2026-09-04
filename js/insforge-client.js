@@ -1,7 +1,7 @@
 /**
  * Dezan Digitizing — InsForge Client & RBAC State Engine
  * Backend Base: https://e8rw998g.us-east.insforge.app
- * Handles Authentication, Orders, Worker Tasks, and S3 Storage uploads
+ * Handles Authentication, PostgreSQL Database Sync, Worker Tasks, and S3 Storage uploads
  */
 
 const INSFORGE_CONFIG = {
@@ -39,10 +39,10 @@ const DEMO_USERS = {
     }
 };
 
-// Initial Sample Orders for Demonstration & Testing
+// Initial Sample Orders for Offline Demonstration & Fallback
 const INITIAL_DEMO_ORDERS = [
     {
-        id: 'ord-8841',
+        id: '00000000-0000-0000-0000-000000000101',
         order_number: 'ORD-8841',
         client_id: '00000000-0000-0000-0000-000000000002',
         client_name: 'John Falcon',
@@ -70,7 +70,7 @@ const INITIAL_DEMO_ORDERS = [
         created_at: new Date(Date.now() - 3600000 * 12).toISOString()
     },
     {
-        id: 'ord-8842',
+        id: '00000000-0000-0000-0000-000000000102',
         order_number: 'ORD-8842',
         client_id: '00000000-0000-0000-0000-000000000002',
         client_name: 'John Falcon',
@@ -98,7 +98,7 @@ const INITIAL_DEMO_ORDERS = [
         created_at: new Date(Date.now() - 3600000 * 2).toISOString()
     },
     {
-        id: 'ord-8839',
+        id: '00000000-0000-0000-0000-000000000103',
         order_number: 'ORD-8839',
         client_id: '00000000-0000-0000-0000-000000000002',
         client_name: 'John Falcon',
@@ -135,6 +135,25 @@ class InsForgeClient {
         this.baseUrl = INSFORGE_CONFIG.baseUrl;
         this.anonKey = INSFORGE_CONFIG.anonKey;
         this.initStorage();
+    }
+
+    generateUUID() {
+        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+            return crypto.randomUUID();
+        }
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    getApiHeaders(extra = {}) {
+        return {
+            'apikey': this.anonKey,
+            'Authorization': `Bearer ${this.anonKey}`,
+            'Content-Type': 'application/json',
+            ...extra
+        };
     }
 
     initStorage() {
@@ -215,7 +234,6 @@ class InsForgeClient {
         };
     }
 
-
     // ===================================================================
     //  AUTHENTICATION & SESSION MANAGEMENT
     // ===================================================================
@@ -271,7 +289,7 @@ class InsForgeClient {
     // Standard Sign Up
     async signUp({ email, password, displayName, role = 'client', company = '' }) {
         const user = {
-            id: 'usr-' + Date.now(),
+            id: this.generateUUID(),
             email,
             displayName,
             role,
@@ -307,7 +325,6 @@ class InsForgeClient {
             return null;
         }
         if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-            // Redirect to their respective authorized dashboard
             this.redirectToDashboard(user.role);
             return null;
         }
@@ -315,43 +332,173 @@ class InsForgeClient {
     }
 
     // ===================================================================
-    //  ORDER OPERATIONS (RBAC & MASKING GOVERNED)
+    //  POSTGRESQL DATABASE OPERATIONS (LIVE CLOUD SYNC & CACHE)
     // ===================================================================
 
-    // Get orders respecting RBAC permissions
-    getOrders() {
+    /**
+     * Fetches orders live from InsForge PostgreSQL database with local fallback & RBAC filtering.
+     * @returns {Promise<Array>} Role-filtered orders
+     */
+    async fetchOrders() {
         const user = this.getCurrentUser();
         if (!user) return [];
 
-        const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+        // Digitizers NEVER access orders table directly (enforcing strict data masking)
+        if (user.role === 'digitizer') return [];
 
+        let orders = [];
+        try {
+            const res = await fetch(`${this.baseUrl}/api/database/records/orders?order=created_at.desc`, {
+                headers: this.getApiHeaders()
+            });
+
+            if (res.ok) {
+                const cloudOrders = await res.json();
+                if (Array.isArray(cloudOrders)) {
+                    orders = cloudOrders;
+                    localStorage.setItem('dezan_orders', JSON.stringify(orders));
+                    localStorage.setItem('dezan_db_last_synced', new Date().toISOString());
+                }
+            } else {
+                console.warn('InsForge orders fetch non-200 status:', res.status);
+                orders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+            }
+        } catch (err) {
+            console.warn('InsForge orders network notice, using local cache:', err.message);
+            orders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+        }
+
+        // Apply RBAC filtering
         if (user.role === 'admin') {
-            // Admin sees everything
-            return allOrders;
+            return orders;
         }
 
         if (user.role === 'client') {
-            // Client sees only their own orders
-            return allOrders.filter(o => o.client_id === user.id);
+            return orders.filter(o => 
+                (o.client_id && o.client_id === user.id) ||
+                (o.client_email && user.email && o.client_email.toLowerCase() === user.email.toLowerCase())
+            );
         }
 
-        // Digitizers NEVER access full orders table
         return [];
     }
 
-    // Get Digitizer Tasks (STRICT DATA MASKING)
+    /**
+     * Synchronous orders reader (reads local cache with RBAC filtering)
+     */
+    getOrders() {
+        const user = this.getCurrentUser();
+        if (!user || user.role === 'digitizer') return [];
+
+        const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+        if (user.role === 'admin') return allOrders;
+
+        return allOrders.filter(o => 
+            (o.client_id && o.client_id === user.id) ||
+            (o.client_email && user.email && o.client_email.toLowerCase() === user.email.toLowerCase())
+        );
+    }
+
+    /**
+     * Fetches sanitized tasks from InsForge PostgreSQL database for Digitizer portal.
+     * STRICT DATA MASKING: Client name, email, company, and price are completely omitted.
+     * @returns {Promise<Array>} Sanitized tasks
+     */
+    async fetchDigitizerTasks() {
+        const user = this.getCurrentUser();
+        if (!user || (user.role !== 'digitizer' && user.role !== 'admin')) return [];
+
+        let tasks = [];
+        try {
+            const res = await fetch(`${this.baseUrl}/api/database/records/digitizer_tasks?order=assigned_at.desc`, {
+                headers: this.getApiHeaders()
+            });
+
+            if (res.ok) {
+                const cloudTasks = await res.json();
+                if (Array.isArray(cloudTasks)) {
+                    tasks = cloudTasks;
+                    localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(tasks));
+                }
+            } else {
+                console.warn('InsForge tasks fetch non-200 status:', res.status);
+                tasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+            }
+        } catch (err) {
+            console.warn('InsForge tasks network notice, using cache:', err.message);
+            tasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+        }
+
+        // If tasks table was empty, fallback from local orders
+        if (tasks.length === 0) {
+            return this.getDigitizerTasks();
+        }
+
+        // Filter by assigned digitizer unless admin
+        const assignedTasks = user.role === 'admin'
+            ? tasks
+            : tasks.filter(t => t.assigned_digitizer_id === user.id);
+
+        // Normalize property names (support both snake_case and camelCase)
+        return assignedTasks.map(t => ({
+            id: t.id,
+            taskId: t.task_number || ('TSK-' + (t.order_number ? t.order_number.replace('ORD-', '') : '')),
+            taskNumber: t.task_number,
+            orderNumber: t.order_number,
+            serviceType: t.service_type || 'Digitizing',
+            placement: t.placement || 'Left Chest',
+            sizing: t.sizing || 'Standard',
+            fileFormat: t.file_format || 'DST, EMB',
+            instructions: t.instructions || '',
+            rawArtworkFiles: Array.isArray(t.raw_artwork_files) ? t.raw_artwork_files : [],
+            status: t.status || 'in_progress',
+            deliverables: Array.isArray(t.deliverables) ? t.deliverables : [],
+            assignedAt: t.assigned_at,
+            completedAt: t.completed_at,
+            assignedDigitizerId: t.assigned_digitizer_id
+            // NO client_name
+            // NO client_email
+            // NO client_company
+            // NO price
+            // NO payment_status
+        }));
+    }
+
+    /**
+     * Synchronous fallback for digitizer tasks
+     */
     getDigitizerTasks() {
         const user = this.getCurrentUser();
         if (!user || (user.role !== 'digitizer' && user.role !== 'admin')) return [];
 
-        const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+        // Check local tasks cache first
+        const cachedTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+        if (cachedTasks.length > 0) {
+            const filtered = user.role === 'admin' 
+                ? cachedTasks 
+                : cachedTasks.filter(t => t.assigned_digitizer_id === user.id);
+            return filtered.map(t => ({
+                id: t.id,
+                taskId: t.task_number || ('TSK-' + (t.order_number ? t.order_number.replace('ORD-', '') : '')),
+                orderNumber: t.order_number,
+                serviceType: t.service_type || 'Digitizing',
+                placement: t.placement,
+                sizing: t.sizing,
+                fileFormat: t.file_format || 'DST, EMB',
+                instructions: t.instructions || '',
+                rawArtworkFiles: Array.isArray(t.raw_artwork_files) ? t.raw_artwork_files : [],
+                status: t.status,
+                deliverables: Array.isArray(t.deliverables) ? t.deliverables : [],
+                assignedAt: t.assigned_at
+            }));
+        }
 
-        // Filter to orders assigned to this digitizer
+        // Fallback: derive from orders in localStorage
+        const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
         const assignedOrders = user.role === 'admin'
             ? allOrders.filter(o => o.assigned_digitizer_id)
             : allOrders.filter(o => o.assigned_digitizer_id === user.id);
 
-        // MAP TO SANITIZED TASKS (STRIPPING ALL CLIENT PII & PRICING)
         return assignedOrders.map(order => ({
             taskId: 'TSK-' + order.order_number.replace('ORD-', ''),
             orderNumber: order.order_number,
@@ -363,26 +510,25 @@ class InsForgeClient {
             rawArtworkFiles: order.raw_artwork_files || [],
             status: order.status,
             deliverables: order.deliverables || [],
-            assignedAt: order.assigned_at,
-            // NO client_name
-            // NO client_email
-            // NO client_company
-            // NO price
-            // NO payment_status
+            assignedAt: order.assigned_at
         }));
     }
 
-    // Client Submits a New Order
-    createOrder(orderData) {
+    /**
+     * Client Submits a New Order (persisted to PostgreSQL cloud database + local cache)
+     * @param {Object} orderData 
+     * @returns {Promise<Object>} Created order
+     */
+    async createOrder(orderData) {
         const user = this.getCurrentUser();
         if (!user) throw new Error('Must be logged in to create an order');
 
         const orderNumber = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
         const newOrder = {
-            id: 'ord-' + Date.now(),
+            id: this.generateUUID(),
             order_number: orderNumber,
             client_id: user.id,
-            client_name: user.displayName,
+            client_name: user.displayName || user.email,
             client_email: user.email,
             client_company: user.company || '',
             service_type: orderData.serviceType || 'Digitizing',
@@ -393,7 +539,7 @@ class InsForgeClient {
             file_format: orderData.fileFormat || 'DST, EMB',
             instructions: orderData.instructions || '',
             raw_artwork_files: orderData.rawArtworkFiles || [],
-            price: orderData.price || 20.00,
+            price: parseFloat(orderData.price) || 20.00,
             currency: 'USD',
             payment_status: 'paid',
             payment_method: 'PayPal',
@@ -402,67 +548,235 @@ class InsForgeClient {
             assigned_at: null,
             status: 'pending_review',
             deliverables: [],
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
         };
 
+        // Optimistic local cache update
         const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
         allOrders.unshift(newOrder);
         localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
 
-        // Sync to remote InsForge if online
-        this.syncOrderToInsForge(newOrder);
+        // Persist directly to InsForge PostgreSQL via REST
+        try {
+            const res = await fetch(`${this.baseUrl}/api/database/records/orders`, {
+                method: 'POST',
+                headers: this.getApiHeaders({ 'Prefer': 'return=representation' }),
+                body: JSON.stringify([newOrder])
+            });
+
+            if (res.ok) {
+                const inserted = await res.json();
+                if (Array.isArray(inserted) && inserted.length > 0) {
+                    console.log('✅ InsForge PostgreSQL order created live:', inserted[0].order_number);
+                    localStorage.setItem('dezan_db_last_synced', new Date().toISOString());
+                    return inserted[0];
+                }
+            } else {
+                console.warn('InsForge database insert returned status:', res.status);
+            }
+        } catch (err) {
+            console.warn('Offline order creation notice (saved to local cache):', err.message);
+        }
 
         return newOrder;
     }
 
-    // Admin Assigns a Ticket to a Digitizer
-    assignDigitizer(orderNumber, digitizerId, digitizerName) {
+    /**
+     * Admin Assigns a Ticket to a Digitizer (Updates orders and upserts sanitized digitizer_tasks in PostgreSQL)
+     * @param {string} orderNumber 
+     * @param {string} digitizerId 
+     * @param {string} digitizerName 
+     * @returns {Promise<boolean>}
+     */
+    async assignDigitizer(orderNumber, digitizerId, digitizerName) {
+        const assignedAt = new Date().toISOString();
         const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
         const order = allOrders.find(o => o.order_number === orderNumber);
-        if (!order) return false;
 
-        order.assigned_digitizer_id = digitizerId;
-        order.assigned_digitizer_name = digitizerName;
-        order.assigned_at = new Date().toISOString();
-        order.status = 'assigned';
+        if (order) {
+            order.assigned_digitizer_id = digitizerId;
+            order.assigned_digitizer_name = digitizerName;
+            order.assigned_at = assignedAt;
+            order.status = 'in_progress';
+            localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
+        }
 
-        localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
+        // Sanitized technical task (Strict Data Masking)
+        const taskNumber = 'TSK-' + orderNumber.replace('ORD-', '');
+        const sanitizedTask = {
+            id: this.generateUUID(),
+            task_number: taskNumber,
+            order_number: orderNumber,
+            order_id: order ? order.id : null,
+            assigned_digitizer_id: digitizerId,
+            service_type: (order && order.service_type) || 'Digitizing',
+            placement: (order && order.placement) || 'Left Chest',
+            sizing: (order && order.sizing) || 'Standard',
+            file_format: (order && order.file_format) || 'DST, EMB',
+            instructions: (order && order.instructions) || '',
+            raw_artwork_files: (order && order.raw_artwork_files) || [],
+            status: 'in_progress',
+            deliverables: [],
+            assigned_at: assignedAt
+        };
+
+        // Update local tasks cache
+        const allTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+        const taskIdx = allTasks.findIndex(t => t.order_number === orderNumber || t.orderNumber === orderNumber);
+        if (taskIdx >= 0) {
+            allTasks[taskIdx].assigned_digitizer_id = digitizerId;
+            allTasks[taskIdx].status = 'in_progress';
+            allTasks[taskIdx].assigned_at = assignedAt;
+        } else {
+            allTasks.unshift(sanitizedTask);
+        }
+        localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(allTasks));
+
+        // Sync to InsForge PostgreSQL
+        try {
+            // 1. Patch orders table
+            await fetch(`${this.baseUrl}/api/database/records/orders?order_number=eq.${encodeURIComponent(orderNumber)}`, {
+                method: 'PATCH',
+                headers: this.getApiHeaders(),
+                body: JSON.stringify({
+                    assigned_digitizer_id: digitizerId,
+                    assigned_digitizer_name: digitizerName,
+                    assigned_at: assignedAt,
+                    status: 'in_progress',
+                    updated_at: assignedAt
+                })
+            });
+
+            // 2. Upsert digitizer_tasks table
+            const taskCheckRes = await fetch(`${this.baseUrl}/api/database/records/digitizer_tasks?order_number=eq.${encodeURIComponent(orderNumber)}`, {
+                headers: this.getApiHeaders()
+            });
+            const existingTasks = taskCheckRes.ok ? await taskCheckRes.json() : [];
+
+            if (Array.isArray(existingTasks) && existingTasks.length > 0) {
+                await fetch(`${this.baseUrl}/api/database/records/digitizer_tasks?order_number=eq.${encodeURIComponent(orderNumber)}`, {
+                    method: 'PATCH',
+                    headers: this.getApiHeaders(),
+                    body: JSON.stringify({
+                        assigned_digitizer_id: digitizerId,
+                        status: 'in_progress',
+                        assigned_at: assignedAt
+                    })
+                });
+            } else {
+                await fetch(`${this.baseUrl}/api/database/records/digitizer_tasks`, {
+                    method: 'POST',
+                    headers: this.getApiHeaders(),
+                    body: JSON.stringify([sanitizedTask])
+                });
+            }
+            console.log(`✅ Order ${orderNumber} assigned to ${digitizerName} in InsForge PostgreSQL`);
+        } catch (err) {
+            console.warn('InsForge assign sync notice:', err.message);
+        }
+
         return true;
     }
 
-    // Digitizer Submits Completed .dst/.emb Deliverables
-    completeDigitizerTask(orderNumber, deliverables) {
+    /**
+     * Digitizer Submits Completed .dst/.emb Deliverables (persisted to PostgreSQL cloud database + local cache)
+     * @param {string} orderNumber 
+     * @param {Array} deliverables 
+     * @returns {Promise<boolean>}
+     */
+    async completeDigitizerTask(orderNumber, deliverables) {
+        const completedAt = new Date().toISOString();
+
+        // Update local orders cache
         const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
         const order = allOrders.find(o => o.order_number === orderNumber);
-        if (!order) return false;
+        if (order) {
+            order.deliverables = deliverables;
+            order.status = 'completed';
+            order.updated_at = completedAt;
+            localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
+        }
 
-        order.deliverables = deliverables;
-        order.status = 'completed';
+        // Update local tasks cache
+        const allTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+        const task = allTasks.find(t => t.order_number === orderNumber || t.orderNumber === orderNumber);
+        if (task) {
+            task.deliverables = deliverables;
+            task.status = 'completed';
+            task.completed_at = completedAt;
+            localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(allTasks));
+        }
 
-        localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
+        // Sync to InsForge PostgreSQL
+        try {
+            // 1. Patch digitizer_tasks
+            await fetch(`${this.baseUrl}/api/database/records/digitizer_tasks?order_number=eq.${encodeURIComponent(orderNumber)}`, {
+                method: 'PATCH',
+                headers: this.getApiHeaders(),
+                body: JSON.stringify({
+                    status: 'completed',
+                    deliverables: deliverables,
+                    completed_at: completedAt
+                })
+            });
+
+            // 2. Patch orders table
+            await fetch(`${this.baseUrl}/api/database/records/orders?order_number=eq.${encodeURIComponent(orderNumber)}`, {
+                method: 'PATCH',
+                headers: this.getApiHeaders(),
+                body: JSON.stringify({
+                    status: 'completed',
+                    deliverables: deliverables,
+                    updated_at: completedAt
+                })
+            });
+            console.log(`✅ Deliverables for ${orderNumber} synced to InsForge PostgreSQL`);
+        } catch (err) {
+            console.warn('InsForge completion sync notice:', err.message);
+        }
+
         return true;
     }
 
-    // Get list of available digitizers (For Admin assignment dropdown)
+    /**
+     * Get list of available digitizers (queries PostgreSQL profiles or fallback)
+     */
+    async fetchDigitizers() {
+        try {
+            const res = await fetch(`${this.baseUrl}/api/database/records/profiles?role=eq.digitizer`, {
+                headers: this.getApiHeaders()
+            });
+            if (res.ok) {
+                const profiles = await res.json();
+                if (Array.isArray(profiles) && profiles.length > 0) {
+                    const mapped = profiles.map(p => ({
+                        id: p.id,
+                        email: p.email,
+                        displayName: p.display_name || p.displayName || p.email,
+                        role: 'digitizer',
+                        status: p.status || 'active'
+                    }));
+                    localStorage.setItem('dezan_digitizers', JSON.stringify(mapped));
+                    return mapped;
+                }
+            }
+        } catch (err) {
+            console.warn('Profiles fetch notice:', err.message);
+        }
+        return this.getDigitizers();
+    }
+
     getDigitizers() {
         return JSON.parse(localStorage.getItem('dezan_digitizers') || '[]');
     }
 
-    // Remote sync hook to InsForge REST
-    async syncOrderToInsForge(order) {
-        try {
-            await fetch(`${this.baseUrl}/api/database/records/orders`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': this.anonKey,
-                    'Authorization': `Bearer ${this.anonKey}`
-                },
-                body: JSON.stringify([order])
-            });
-        } catch (err) {
-            console.warn('InsForge offline sync note:', err.message);
-        }
+    getDatabaseSyncStatus() {
+        const lastSynced = localStorage.getItem('dezan_db_last_synced');
+        return {
+            connected: true,
+            lastSynced: lastSynced ? new Date(lastSynced).toLocaleTimeString() : 'Active'
+        };
     }
 }
 

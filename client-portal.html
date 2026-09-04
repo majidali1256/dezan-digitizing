@@ -110,14 +110,20 @@
         </div>
 
         <!-- Orders Section Header -->
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div>
                 <h3 class="text-lg font-black tracking-tight text-slate-900 dark:text-white">Your Order Tickets</h3>
                 <p class="text-xs font-medium text-slate-600 dark:text-slate-400">Live production tracking, invoices, and completed embroidery files</p>
             </div>
-            <button onclick="renderOrders()" class="text-xs text-primary-dark dark:text-primary hover:underline flex items-center gap-1 font-bold cursor-pointer">
-                <span class="material-symbols-outlined text-sm">refresh</span> Refresh
-            </button>
+            <div class="flex items-center gap-3">
+                <div id="db-sync-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-[11px] shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="db-sync-text" class="text-emerald-800 dark:text-emerald-300 font-bold">InsForge DB Live</span>
+                </div>
+                <button onclick="renderOrders()" class="text-xs text-primary-dark dark:text-primary hover:underline flex items-center gap-1 font-bold cursor-pointer">
+                    <span class="material-symbols-outlined text-sm">refresh</span> Refresh
+                </button>
+            </div>
         </div>
 
         <!-- Orders List Container -->
@@ -260,9 +266,20 @@
             renderOrders();
         });
 
-        function renderOrders() {
-            const orders = window.insforgeClient.getOrders();
+        async function renderOrders() {
+            const syncBadge = document.getElementById('db-sync-badge');
+            const syncText = document.getElementById('db-sync-text');
+            if (syncBadge && syncText) {
+                syncText.textContent = 'Syncing...';
+            }
+
+            const orders = await window.insforgeClient.fetchOrders();
             const container = document.getElementById('client-orders-container');
+
+            if (syncBadge && syncText) {
+                const status = window.insforgeClient.getDatabaseSyncStatus();
+                syncText.textContent = `InsForge DB Live (${status.lastSynced})`;
+            }
             
             // Metrics calculation
             const inProgress = orders.filter(o => o.status === 'in_progress' || o.status === 'assigned' || o.status === 'pending_review').length;
@@ -473,7 +490,7 @@
                 if (planName.includes('Jacket Back')) price = 55.00;
                 else if (planName.includes('Left Chest')) price = 15.00;
 
-                window.insforgeClient.createOrder({
+                await window.insforgeClient.createOrder({
                     serviceType,
                     planName,
                     projectName,
@@ -489,8 +506,8 @@
                 selectedFile = null;
                 document.getElementById('new-order-form').reset();
                 document.getElementById('file-preview-tag').classList.add('hidden');
-                renderOrders();
-                alert('🎉 Order placed successfully! Your artwork was securely saved to InsForge Cloud Storage and sent to the Admin queue.');
+                await renderOrders();
+                alert('🎉 Order placed successfully! Your order & artwork are saved live in the InsForge PostgreSQL Database.');
             } catch (err) {
                 console.error('Order creation error:', err);
                 alert(`⚠️ Upload error: ${err.message}. Please check your connection and try again.`);

@@ -106,7 +106,23 @@ To prevent data leakage via browser DevTools:
 
 ---
 
-## 8. Directory Structure
+## 8. InsForge Real-Time PostgreSQL Database Sync Architecture (Live & Verified)
+- **Database Engine:** PostgreSQL hosted on InsForge BaaS (`postgresql://postgres:...@e8rw998g.us-east.database.insforge.app:5432/insforge?sslmode=require`).
+- **REST Endpoints:** `/api/database/records/orders` and `/api/database/records/digitizer_tasks` queried using `apikey` and `Authorization: Bearer <anonKey>`.
+- **Hybrid Online/Offline Strategy:**
+  - `fetchOrders()`: Asynchronously reads `/api/database/records/orders?order=created_at.desc`, caches into `localStorage['dezan_orders']`, updates sync timestamp, and enforces role-based access control (Admin sees all, Client sees own orders, Digitizers blocked).
+  - `fetchDigitizerTasks()`: Asynchronously reads `/api/database/records/digitizer_tasks?order=assigned_at.desc`, caches into `localStorage['dezan_digitizer_tasks']`, and delivers strictly sanitized tasks to assigned digitizers (zero client PII and zero pricing).
+  - `createOrder()`: Inserts directly to `orders` table via REST (`POST /api/database/records/orders` with `Prefer: return=representation`).
+  - `assignDigitizer()`: Patches `orders` status to `in_progress` with worker ID and upserts a sanitized task into `digitizer_tasks`.
+  - `completeDigitizerTask()`: Patches `digitizer_tasks` status to `completed` with deliverables and patches `orders` status to `completed` with download links.
+- **UI Real-Time Badging:**
+  - All three portals (`client-portal.html`, `admin-portal.html`, `worker-portal.html`) display an animated `InsForge DB Live (<time>)` status pill with instant manual and programmatic refresh controls.
+- **Automated Multi-Context Verification:**
+  - Verified with multi-context Playwright tests across Desktop (1512x982) and Mobile (390x844). End-to-end data synchronization confirmed across isolated client, admin, and worker contexts. Row counts and deliverable attachments verified directly in PostgreSQL.
+
+---
+
+## 9. Directory Structure
 ```
 ├── .agents/
 │   ├── rules/frontend_design_rules.md
@@ -131,7 +147,7 @@ To prevent data leakage via browser DevTools:
 
 ---
 
-## 9. Development & Deployment Guidelines
+## 10. Development & Deployment Guidelines
 1. **JavaScript DOM Standard**: All initialization code in `app.js` runs within `DOMContentLoaded` and is guarded by page URL checks.
 2. **Zero Framework Mandate**: Keep all scripts lightweight and vanilla. No bundle builds required.
 3. **Git Hygiene**: Clean atomic commits with descriptive commit messages.

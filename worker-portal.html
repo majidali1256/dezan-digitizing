@@ -80,7 +80,14 @@
                 <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-medium">Only technical embroidery specifications and raw artwork files assigned to your User ID</p>
             </div>
             <div class="flex items-center gap-3">
-                <div class="text-right">
+                <div id="worker-db-sync-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-[11px] shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="worker-db-sync-text" class="text-emerald-800 dark:text-emerald-300 font-bold">InsForge DB Live</span>
+                </div>
+                <button onclick="renderWorkerTasks()" class="text-xs text-primary-dark dark:text-primary hover:underline flex items-center gap-1 font-bold cursor-pointer">
+                    <span class="material-symbols-outlined text-sm">refresh</span> Refresh
+                </button>
+                <div class="text-right ml-2">
                     <span class="text-[11px] text-slate-600 dark:text-slate-400 uppercase font-bold block">Active Jobs</span>
                     <span class="text-2xl font-black text-amber-800 dark:text-primary" id="worker-active-count">0</span>
                 </div>
@@ -140,9 +147,18 @@
             renderWorkerTasks();
         });
 
-        function renderWorkerTasks() {
+        async function renderWorkerTasks() {
+            const syncText = document.getElementById('worker-db-sync-text');
+            if (syncText) syncText.textContent = 'Syncing...';
+
             // STRICT MASKING: queries sanitized digitizer tasks only!
-            const tasks = window.insforgeClient.getDigitizerTasks();
+            const tasks = await window.insforgeClient.fetchDigitizerTasks();
+
+            if (syncText) {
+                const status = window.insforgeClient.getDatabaseSyncStatus();
+                syncText.textContent = `InsForge DB Live (${status.lastSynced})`;
+            }
+
             const container = document.getElementById('worker-tasks-container');
 
             const activeTasks = tasks.filter(t => t.status !== 'completed');
@@ -315,9 +331,9 @@
                     ];
                 }
 
-                window.insforgeClient.completeDigitizerTask(orderNumber, deliverables);
-                renderWorkerTasks();
-                alert(`🎉 Success! Deliverables for ${orderNumber} were uploaded to InsForge Storage. The client can now download the machine stitch files!`);
+                await window.insforgeClient.completeDigitizerTask(orderNumber, deliverables);
+                await renderWorkerTasks();
+                alert(`🎉 Success! Deliverables for ${orderNumber} were uploaded to InsForge Storage and database updated. The client can now download the machine stitch files!`);
             } catch (err) {
                 console.error('Worker deliverable upload failed:', err);
                 alert(`⚠️ Upload error: ${err.message}. Please check connection and try again.`);
