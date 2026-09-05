@@ -90,28 +90,21 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - **Revised Deliverables Submission**: Primary action button changes to `Submit Revised Deliverables` to upload version 2 stitch files with InsForge Storage and database sync.
   - **Strict Data Masking (Zero-Leakage Compliance)**: Customer personal identity (`client_name`, `client_email`, `client_company`) and pricing/payment status are 100% masked from workers at both the UI and database levels.
   - **Studio Controls**: 3 quick-action cards, 4 production metric badges, instant search & filter toolbar (with `⚠️ Revision Requested` filter), technical work order specs modal, machine format cheatsheet modal, worker profile modal, and mobile bottom navigation dock.
-- `/admin-portal.html`: Master Admin Executive Control Center (Continuous Unified Scroll & Workspace Integration):
-  - **Unified Continuous Flow (Zero Section Hiding)**: Following the proven layout pattern of the Client and Worker portals, all 5 core sections are laid out sequentially on a continuous scrollable canvas by default. Clicking any tab or quick action card smoothly scrolls to the target anchor without hiding any other sections.
-  - **Sticky Executive Command Bar (`#admin-sticky-nav`)**: Frosted glass backdrop (`backdrop-blur-md`) with 5 segmented primary tabs with live reactive counter badges:
-    1. **Master Orders** (`#master-orders-section`)
-    2. **Clients & History** (`#clients-directory-section`)
-    3. **Design Catalog** (`#design-catalog-section`)
-    4. **Digitizer Team** (`#digitizer-team-section`)
-    5. **Client & Worker Portals** (`#workspaces-section`)
-    Plus direct header launch buttons for `[ 👤 Client Portal ↗ ]` and `[ 🪡 Worker Studio ↗ ]`, density toggles (Bento Cards vs. Table), and CSV export.
+- `/admin-portal.html`: Master Admin Executive Control Center (Continuous Unified Scroll Architecture):
+  - **Unified Continuous Flow (Zero Section Hiding)**: Following the proven layout pattern of the Client and Worker portals, all 4 core admin sections are laid out sequentially on a continuous scrollable canvas by default. Clicking any tab or quick action card smoothly scrolls to the target anchor without hiding other sections:
+    1. **Master Orders Queue** (`#master-orders-section`)
+    2. **Clients Directory & History** (`#clients-directory-section`)
+    3. **Design & Stitch Catalog** (`#design-catalog-section`)
+    4. **Digitizer Team Production Hub** (`#digitizer-team-section`)
+  - **Sticky Executive Command Bar (`#admin-sticky-nav`)**: Frosted glass backdrop (`backdrop-blur-md`) with 4 segmented primary tabs with live reactive counter badges (`Orders`, `Clients`, `Catalog`, `Team`), fast search hotkey badge (`/` or `Cmd/Ctrl+K`), CSV ledger export, and dual layout density toggles (Bento Cards vs. Table).
   - **ScrollSpy Indicator Sync**: Integrated `IntersectionObserver` automatically highlights the corresponding sticky navigation tab and mobile dock button as the admin scrolls down the page.
-  - **6 Quick Action Navigation Cards**: Responsive grid linking directly to:
+  - **4 Quick Action Navigation Cards**: Responsive 4-column grid linking directly to:
     1. **Master Orders** (Queue & triage)
     2. **Clients & CRM** (Dossiers & LTV)
     3. **Design Catalog** (Stitch archive)
     4. **Digitizer Team** (Capacity & status)
-    5. **Client Portal** (Direct link to `client-portal.html` with customer badge)
-    6. **Worker Studio** (Direct link to `worker-portal.html` with worker badge)
-  - **Section 5: Connected Portals & Live Workspaces (`#workspaces-section`)**: Dedicated dashboard section allowing admins to directly inspect and experience the customer and technician workspaces:
-    - **Client Portal & Order Wizard Card**: Details order submission, PayPal checkout, sew-out revisions, DST deliverables, with direct launch button and demo login simulator.
-    - **Digitizer Worker Studio Card**: Details zero-PII data masking, physical sew-out defect zoom, DST/EMB deliverable uploads, with direct launch button and demo login simulator.
   - **Client Order History Dossier Modal (`#client-history-modal`)**: 1-click historical dossier showing a client's complete chronological order timeline, placement/fabric specifications, artwork attachments, versioned machine file deliverables (`.DST`, `.EMB`, `.AI`), and direct tax invoices.
-  - **Fixed 6-Item Mobile Bottom Navigation Dock**: Persistent mobile dock (`Overview`, `Orders`, `Clients`, `Catalog`, `Team`, `Portals`) providing one-thumb executive control on mobile devices with high-contrast active tab indicators.
+  - **Fixed 5-Item Mobile Bottom Navigation Dock**: Persistent mobile dock (`Overview`, `Orders`, `Clients`, `Catalog`, `Team`) providing one-thumb executive control on mobile devices with high-contrast active tab indicators.
   - **Financial Analytics & Export**: KPI metrics with Realized vs. Due revenue breakdown, full itemized tax invoice modal, financial ledger CSV export, and 1-click automated payment reminder dispatching.
 
 ### Header Navigation Authentication State
