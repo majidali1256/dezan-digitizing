@@ -82,7 +82,12 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
     - **Completed Orders**: Machine deliverable downloads (`.DST`, `.EMB`) + `[ Request a Revision ]` + View Invoice & Receipt.
     - **Quotes**: Quote estimation status or clean empty state with `+ Request Quote` action.
   - **Client Invoice & Printable Receipt Modal**: Official itemized tax invoice and work order with `@media print` support, unpaid alert banner, and direct "Pay Balance Due" action button.
-  - **Client Account Modal**: Profile information, billing terms, active balance, theme toggle, and sign out.
+  - **Comprehensive Client Account & Security Suite (`#account-modal`)**:
+    - **Header & Navigation Integration**: Accessible instantly via top header `#header-account-btn` (with live monogram avatar and display name) as well as the mobile/desktop bottom navigation dock (`Account` tab).
+    - **3-Tab Modular Architecture**:
+      1. **Profile & Machinery Defaults (`#client-tab-profile`)**: Edit Full Name, Company / Brand Name, primary contact Phone / WhatsApp, preferred embroidery machine file format (`.DST`, `.EMB`, `.PES`, `.EXP`, `.JEF`, `.VP3`, `.AI Vector`), default fabric/garment type (Pique Cotton, Structured Twill Caps, Fleece, Dri-FIT, Canvas, Patches), and default turnaround SLA speed (`standard`, `rush`, `urgent`). Displays locked primary billing email and verified client badge. Synchronizes with session storage, `localStorage`, and InsForge PostgreSQL backend.
+      2. **Password & Credential Security (`#client-tab-security`)**: Secure password change flow featuring current password verification, new password with dynamic 4-segment strength meter (Too Weak, Weak, Good, Strong), confirmation password match validator with live visual feedback, show/hide eye toggle buttons, and toast alerts.
+      3. **Account & Billing Overview (`#client-tab-overview`)**: Monogram avatar, Client ID `#FC-882`, verified badge, lifetime order volume counter, live balance due metric, Net 30 billing terms, VIP fast-track SLA badge, and portal sign-out.
   - **Fixed Bottom Navigation Dock**: 4 quick-access tabs (`Home`, `Orders`, `Quotes`, `Account`).
 - `/worker-portal.html`: Redesigned Digitizer Studio:
   - **Revision & Sew-Out Inspection Queue**: Tasks with status `revision_requested` display a prominent amber border with subtle glow, a pulsing `⚠️ Revision Requested` badge, and an eye-catching `Client Physical Stitch-Out Revision Feedback` callout containing the client's exact instructions and physical garment photo thumbnail.

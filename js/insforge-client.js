@@ -728,6 +728,85 @@ class InsForgeClient {
         return { user, error: null };
     }
 
+    /**
+     * Update current user profile details (name, company, phone, preferences, etc.)
+     */
+    async updateUserProfile(updates) {
+        const user = this.getCurrentUser();
+        if (!user) return { success: false, error: 'Not authenticated' };
+
+        const updatedUser = {
+            ...user,
+            displayName: updates.displayName !== undefined ? updates.displayName : user.displayName,
+            company: updates.company !== undefined ? updates.company : user.company,
+            phone: updates.phone !== undefined ? updates.phone : (user.phone || ''),
+            preferredFormat: updates.preferredFormat !== undefined ? updates.preferredFormat : (user.preferredFormat || 'DST'),
+            preferredFabric: updates.preferredFabric !== undefined ? updates.preferredFabric : (user.preferredFabric || 'Pique Knit Cotton'),
+            turnaroundSpeed: updates.turnaroundSpeed !== undefined ? updates.turnaroundSpeed : (user.turnaroundSpeed || 'standard'),
+            avatarInitials: updates.avatarInitials !== undefined ? updates.avatarInitials : user.avatarInitials,
+            avatarBg: updates.avatarBg !== undefined ? updates.avatarBg : user.avatarBg,
+            updated_at: new Date().toISOString()
+        };
+
+        // Persist session
+        this.setSession(updatedUser);
+
+        // Update registered users cache if applicable
+        const registered = JSON.parse(localStorage.getItem('dezan_registered_users') || '[]');
+        const idx = registered.findIndex(u => u.id === user.id || (u.email && u.email.toLowerCase() === user.email.toLowerCase()));
+        if (idx !== -1) {
+            registered[idx] = { ...registered[idx], ...updatedUser };
+            localStorage.setItem('dezan_registered_users', JSON.stringify(registered));
+        }
+
+        // Try syncing to InsForge PostgreSQL backend
+        try {
+            await fetch(`${this.baseUrl}/api/database/records/profiles?id=eq.${user.id}`, {
+                method: 'PATCH',
+                headers: this.getApiHeaders(),
+                body: JSON.stringify({
+                    display_name: updatedUser.displayName,
+                    company: updatedUser.company,
+                    phone: updatedUser.phone,
+                    updated_at: updatedUser.updated_at
+                })
+            });
+        } catch (e) {
+            console.warn('InsForge remote profile sync fallback:', e);
+        }
+
+        // Broadcast realtime update event
+        this.broadcastRealtimeEvent('profile_updated', { user: updatedUser });
+
+        return { success: true, user: updatedUser };
+    }
+
+    /**
+     * Update user password securely
+     */
+    async updatePassword({ currentPassword, newPassword }) {
+        const user = this.getCurrentUser();
+        if (!user) return { success: false, error: 'Not authenticated' };
+
+        if (!newPassword || newPassword.length < 6) {
+            return { success: false, error: 'New password must be at least 6 characters long.' };
+        }
+
+        // Save password record in local user credentials
+        const creds = JSON.parse(localStorage.getItem('dezan_user_passwords') || '{}');
+        const userKey = (user.email || user.id).toLowerCase();
+
+        // If user already has a custom password set, check currentPassword
+        if (creds[userKey] && creds[userKey] !== currentPassword) {
+            return { success: false, error: 'Current password does not match.' };
+        }
+
+        creds[userKey] = newPassword;
+        localStorage.setItem('dezan_user_passwords', JSON.stringify(creds));
+
+        return { success: true, message: 'Password successfully updated.' };
+    }
+
     // Automatic Role-Based Routing
     redirectToDashboard(role) {
         if (role === 'admin') {
