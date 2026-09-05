@@ -44,7 +44,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 ## 5. Site Map & Route Architecture
 
 ### Public Marketing Pages
-- `/index.html`: Home page (Hero with Before/After Comparison Slider, all 3 action buttons `Order Now`, `View Pricing`, and `Get Quote` arranged in a responsive side-by-side row on both mobile and desktop below the slider, Services preview, Live Feedback Carousel, Trust stats).
+- `/index.html`: Home page (Hero with Before/After Comparison Slider: zero bounding box or card border around the astronaut patch, allowing the slider divider line to sweep end-to-end across the full artwork; bold typography with gold shine `Dezan Digitizing Service`; all 3 action buttons `Order Now`, `View Pricing`, and `Get Quote` arranged in a proud, touch-friendly side-by-side row on both mobile and desktop below the slider, Services preview, Live Feedback Carousel, Trust stats).
 - `/about.html`: Company history, experience, machinery/software standards (Wilcom, Tajima, Barudan).
 - `/services.html`: Detailed service breakdowns (Left chest, Cap/Hat, 3D Puff, Jacket Back, Vectorizing).
 - `/portfolio.html`: High-resolution gallery and customer feedback showcase.

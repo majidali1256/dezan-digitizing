@@ -621,8 +621,11 @@ function initCompareSlider() {
     const beforeImg = beforeDiv.querySelector('img');
     if (!slider || !beforeDiv || !divider) return;
 
-    // Keep the before image sized to the full container width
+    // Keep the before image sized to the full container width and height
     function syncBeforeImageWidth() {
+        if (!slider || !beforeImg) return;
+        beforeImg.style.width = slider.offsetWidth + 'px';
+        beforeImg.style.height = slider.offsetHeight + 'px';
         beforeImg.style.minWidth = slider.offsetWidth + 'px';
     }
     syncBeforeImageWidth();
