@@ -202,14 +202,6 @@
             <!-- Dark wrapper matching site theme -->
             <div class="bg-slate-900 dark:bg-slate-950 relative overflow-hidden rounded-2xl shadow-sm">
 
-                <!-- Background watermark logo -->
-                <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06] select-none rounded-2xl">
-                    <div class="text-center">
-                        <div class="text-[180px] md:text-[250px] font-black text-white leading-none tracking-tighter">D</div>
-                        <div class="text-3xl md:text-4xl font-bold tracking-[0.3em] text-white -mt-6">DEZAN</div>
-                        <div class="text-xs md:text-sm tracking-[0.5em] text-white mt-1">DIGITIZERS</div>
-                    </div>
-                </div>
 
                 <!-- Padding spacer for top of slider -->
                 <div class="relative z-10 pt-4"></div>
@@ -434,25 +426,27 @@
         <!-- Services Section -->
         <section class="px-4 py-8 reveal max-w-6xl mx-auto">
             <h3 class="text-xl font-bold mb-6 border-l-4 border-primary pl-3">Our Services</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3 md:gap-4">
                 <a href="services.html"
-                    class="bg-primary/5 dark:bg-primary/10 p-6 rounded-xl border border-primary/20 flex gap-4 items-start service-card-zoom shadow-sm">
-                    <div class="bg-primary p-3 rounded-lg text-background-dark shrink-0">
-                        <span class="material-symbols-outlined text-2xl">architecture</span>
+                    class="bg-primary/5 dark:bg-primary/10 p-4 sm:p-6 rounded-xl border border-primary/20 flex flex-col gap-3 items-start service-card-zoom shadow-sm">
+                    <div class="bg-primary p-2.5 sm:p-3 rounded-lg text-background-dark shrink-0">
+                        <span class="material-symbols-outlined text-xl sm:text-2xl">architecture</span>
                     </div>
                     <div>
-                        <h4 class="font-bold text-lg mb-1">Embroidery Digitizing</h4>
-                        <p class="text-sm text-slate-600 dark:text-slate-400">We manually digitize every design, carefully mapping out stitch direction, underlay, and pull compensation so your machines run smoothly and your 3D puff, left chest logos, and jacket backs look incredibly crisp.</p>
+                        <h4 class="font-bold text-sm sm:text-lg mb-1">Embroidery Digitizing</h4>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 hidden sm:block">We manually digitize every design, carefully mapping out stitch direction, underlay, and pull compensation so your machines run smoothly.</p>
+                        <p class="text-[11px] text-slate-600 dark:text-slate-400 sm:hidden">Manual stitch mapping. 3D puff, left chest &amp; jacket backs.</p>
                     </div>
                 </a>
                 <a href="services.html"
-                    class="bg-primary/5 dark:bg-primary/10 p-6 rounded-xl border border-primary/20 flex gap-4 items-start service-card-zoom shadow-sm">
-                    <div class="bg-primary p-3 rounded-lg text-background-dark shrink-0">
-                        <span class="material-symbols-outlined text-2xl">draw</span>
+                    class="bg-primary/5 dark:bg-primary/10 p-4 sm:p-6 rounded-xl border border-primary/20 flex flex-col gap-3 items-start service-card-zoom shadow-sm">
+                    <div class="bg-primary p-2.5 sm:p-3 rounded-lg text-background-dark shrink-0">
+                        <span class="material-symbols-outlined text-xl sm:text-2xl">draw</span>
                     </div>
                     <div>
-                        <h4 class="font-bold text-lg mb-1">Vector Art Conversion</h4>
-                        <p class="text-sm text-slate-600 dark:text-slate-400">We convert low-resolution images into high-quality vector art (AI, EPS, SVG), giving you perfect flexibility for screenprinting, vinyl cutting, and laser engraving.</p>
+                        <h4 class="font-bold text-sm sm:text-lg mb-1">Vector Art Conversion</h4>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 hidden sm:block">We convert low-resolution images into high-quality vector art (AI, EPS, SVG), perfect for screenprinting and laser engraving.</p>
+                        <p class="text-[11px] text-slate-600 dark:text-slate-400 sm:hidden">AI, EPS, SVG. Screenprint &amp; laser engraving ready.</p>
                     </div>
                 </a>
             </div>
