@@ -809,6 +809,41 @@ class InsForgeClient {
 
     // Automatic Role-Based Routing
     redirectToDashboard(role) {
+        // Check for redirect query params (e.g. from Order Now button)
+        let redirectTarget = null;
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectParam = urlParams.get('redirect');
+            const serviceParam = urlParams.get('service');
+            const planParam = urlParams.get('plan');
+
+            if (redirectParam === 'new_order' || redirectParam === 'order') {
+                if (role === 'digitizer') {
+                    redirectTarget = 'worker-portal.html';
+                } else {
+                    let target = 'client-portal.html?action=new_order';
+                    if (serviceParam) target += `&service=${encodeURIComponent(serviceParam)}`;
+                    if (planParam) target += `&plan=${encodeURIComponent(planParam)}`;
+                    redirectTarget = target;
+                }
+            } else if (redirectParam === 'request_quote' || redirectParam === 'quote') {
+                if (role === 'digitizer') {
+                    redirectTarget = 'worker-portal.html';
+                } else {
+                    let target = 'client-portal.html?action=request_quote';
+                    if (serviceParam) target += `&service=${encodeURIComponent(serviceParam)}`;
+                    redirectTarget = target;
+                }
+            }
+        } catch (e) {
+            redirectTarget = null;
+        }
+
+        if (redirectTarget) {
+            window.location.href = redirectTarget;
+            return;
+        }
+
         if (role === 'admin') {
             window.location.href = 'admin-portal.html';
         } else if (role === 'digitizer') {
@@ -856,7 +891,9 @@ class InsForgeClient {
             if (res.ok) {
                 const cloudOrders = await res.json();
                 if (Array.isArray(cloudOrders)) {
-                    orders = cloudOrders;
+                    const localOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+                    const localOnly = localOrders.filter(l => !cloudOrders.some(c => c.order_number === l.order_number || c.id === l.id));
+                    orders = [...localOnly, ...cloudOrders];
                     localStorage.setItem('dezan_orders', JSON.stringify(orders));
                     localStorage.setItem('dezan_db_last_synced', new Date().toISOString());
                 }
@@ -1226,7 +1263,8 @@ class InsForgeClient {
         const user = this.getCurrentUser();
         if (!user) throw new Error('Must be logged in to create an order');
 
-        const orderNumber = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+        const isQuote = (orderData.isQuote === true) || (orderData.status === 'quote_requested');
+        const orderNumber = (isQuote ? 'QUO-' : 'ORD-') + Math.floor(1000 + Math.random() * 9000);
         const newOrder = {
             id: this.generateUUID(),
             order_number: orderNumber,
@@ -1235,7 +1273,7 @@ class InsForgeClient {
             client_email: user.email,
             client_company: user.company || '',
             service_type: orderData.serviceType || 'Digitizing',
-            plan_name: orderData.planName || 'Custom Order',
+            plan_name: orderData.planName || (isQuote ? 'Custom Quote' : 'Custom Order'),
             project_name: orderData.projectName,
             placement: orderData.placement || 'Standard',
             fabric_type: orderData.fabricType || '',
@@ -1245,14 +1283,15 @@ class InsForgeClient {
             turnaround_speed: orderData.turnaroundSpeed || 'standard',
             instructions: orderData.instructions || '',
             raw_artwork_files: orderData.rawArtworkFiles || [],
-            price: parseFloat(orderData.price) || 20.00,
+            price: isQuote ? (orderData.price ? parseFloat(orderData.price) : 0.00) : (parseFloat(orderData.price) || 15.00),
             currency: 'USD',
-            payment_status: orderData.paymentStatus || 'unpaid',
-            payment_method: orderData.paymentMethod || (orderData.paymentStatus === 'paid' ? 'PayPal' : 'Pending Invoice'),
+            payment_status: isQuote ? 'unpaid' : (orderData.paymentStatus || 'unpaid'),
+            payment_method: orderData.paymentMethod || (isQuote ? 'Pending Quote Review' : (orderData.paymentStatus === 'paid' ? 'PayPal' : 'Pending Invoice')),
             assigned_digitizer_id: null,
             assigned_digitizer_name: null,
             assigned_at: null,
-            status: 'pending_review',
+            status: isQuote ? 'quote_requested' : 'pending_review',
+            is_quote: isQuote,
             deliverables: [],
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
@@ -1270,7 +1309,8 @@ class InsForgeClient {
             projectName: newOrder.project_name,
             serviceType: newOrder.service_type,
             price: newOrder.price,
-            paymentStatus: newOrder.payment_status
+            paymentStatus: newOrder.payment_status,
+            isQuote: newOrder.is_quote
         });
 
         // Persist directly to InsForge PostgreSQL via REST
@@ -1289,13 +1329,65 @@ class InsForgeClient {
                     return inserted[0];
                 }
             } else {
-                console.warn('InsForge database insert returned status:', res.status);
+                const errText = await res.text();
+                console.warn('InsForge database insert returned status:', res.status, errText);
             }
         } catch (err) {
             console.warn('Offline order creation notice (saved to local cache):', err.message);
         }
 
         return newOrder;
+    }
+
+    /**
+     * Admin gives/sets price on a requested quote
+     * @param {string} orderIdOrNumber 
+     * @param {number} price 
+     * @param {string} adminNotes 
+     * @returns {Promise<boolean>}
+     */
+    async updateQuotePrice(orderIdOrNumber, price, adminNotes = '') {
+        const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+        const order = allOrders.find(o => o.id === orderIdOrNumber || o.order_number === orderIdOrNumber);
+        if (!order) {
+            console.warn('Quote not found for price update:', orderIdOrNumber);
+            return false;
+        }
+
+        order.price = parseFloat(price);
+        order.status = 'quote_ready';
+        order.quote_admin_notes = adminNotes;
+        order.quote_priced_at = new Date().toISOString();
+        order.updated_at = new Date().toISOString();
+        localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
+
+        // Broadcast to other tabs
+        this.broadcastEvent('quote_priced', {
+            orderId: order.id,
+            orderNumber: order.order_number,
+            clientEmail: order.client_email,
+            price: order.price,
+            adminNotes
+        });
+
+        // Persist to InsForge DB
+        try {
+            const queryParam = order.id ? `id=eq.${order.id}` : `order_number=eq.${order.order_number}`;
+            await fetch(`${this.baseUrl}/api/database/records/orders?${queryParam}`, {
+                method: 'PATCH',
+                headers: this.getApiHeaders({ 'Prefer': 'return=representation' }),
+                body: JSON.stringify({
+                    price: order.price,
+                    status: 'quote_ready',
+                    quote_admin_notes: adminNotes,
+                    updated_at: order.updated_at
+                })
+            });
+        } catch (err) {
+            console.warn('InsForge database patch quote price notice:', err.message);
+        }
+
+        return true;
     }
 
     /**
@@ -1315,6 +1407,14 @@ class InsForgeClient {
 
         order.payment_status = paymentStatus;
         order.payment_method = paymentMethod;
+
+        // If this was a quote, paying converts it directly into an active production order
+        if (order.is_quote || order.status === 'quote_ready' || order.status === 'quote_requested') {
+            order.is_quote = false;
+            order.was_quote = true;
+            order.status = 'pending_review';
+        }
+
         order.updated_at = new Date().toISOString();
         localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
 
@@ -1336,6 +1436,8 @@ class InsForgeClient {
                 body: JSON.stringify({
                     payment_status: paymentStatus,
                     payment_method: paymentMethod,
+                    status: order.status,
+                    is_quote: order.is_quote,
                     updated_at: order.updated_at
                 })
             });

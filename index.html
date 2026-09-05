@@ -56,7 +56,7 @@
                     data-nav="services.html">Services</a>
                 <a href="portfolio.html" class="nav-link-gold transition-colors"
                     data-nav="portfolio.html">Feedbacks</a>
-                <a href="pricing.html" class="nav-link-gold transition-colors" data-nav="pricing.html">Order and Pricing</a>
+                <a href="pricing.html" class="nav-link-gold transition-colors" data-nav="pricing.html">Pricing</a>
                 <a href="contact.html" class="nav-link-gold transition-colors" data-nav="contact.html">Contact</a>
             </nav>
             <div class="flex items-center gap-2">
@@ -89,14 +89,16 @@
                 Embroidery Digitizing &amp; Vector Art — Fast turnaround, premium quality.
               </p>
               <div class="mt-12 sm:mt-16 flex flex-col sm:flex-row gap-4 items-center justify-center md:justify-start w-full">
-                <a href="pricing.html#order-section" class="w-full sm:w-auto py-3 px-8 bg-primary text-background-dark rounded-lg font-bold text-center hover:brightness-110 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                  Place Order
+                <a href="portal-login.html?redirect=new_order" data-action="order-now" onclick="window.handleOrderClick(event)" class="w-full sm:w-auto py-3 px-8 bg-primary text-background-dark rounded-lg font-bold text-center hover:brightness-110 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-1.5 cursor-pointer">
+                  <span>Order Now</span>
+                  <span class="material-symbols-outlined text-base">arrow_forward</span>
                 </a>
                 <a href="pricing.html" class="w-full sm:w-auto py-3 px-8 border border-primary/20 hover:border-primary/50 text-slate-900 dark:text-slate-100 rounded-lg font-bold text-center transition-all bg-primary/5 hover:bg-primary/10">
                   View Pricing
                 </a>
-                <a href="contact.html#custom-quote-section" class="w-full sm:w-auto py-3 px-8 border border-primary/20 hover:border-primary/50 text-slate-900 dark:text-slate-100 rounded-lg font-bold text-center transition-all bg-primary/5 hover:bg-primary/10">
-                  Get Quote
+                <a href="contact.html#custom-quote-section" data-action="request-quote" onclick="window.handleQuoteClick(event)" class="w-full sm:w-auto py-3 px-8 border border-primary/20 hover:border-primary/50 text-slate-900 dark:text-slate-100 rounded-lg font-bold text-center transition-all bg-primary/5 hover:bg-primary/10 flex items-center justify-center gap-1.5 cursor-pointer">
+                  <span>Get Quote</span>
+                  <span class="material-symbols-outlined text-base">request_quote</span>
                 </a>
               </div>
             </div>
@@ -547,7 +549,7 @@
             <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="pricing.html"
                 data-page="pricing.html">
                 <span class="material-symbols-outlined text-xl">payments</span>
-                <span class="text-[10px] font-semibold">Price/Order</span>
+                <span class="text-[10px] font-semibold">Pricing</span>
             </a>
             <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="contact.html"
                 data-page="contact.html">

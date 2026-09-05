@@ -4,9 +4,9 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Pricing & Order | Dezan Digitizing</title>
+    <title>Pricing | Dezan Digitizing</title>
     <meta name="description"
-        content="Embroidery Digitizing from $10. Left Chest/Hat, Jacket Back, Pet Portraits. Vector Art from $10. Fast turnaround." />
+        content="Transparent embroidery digitizing from $10. Left Chest/Hat, Jacket Back, Pet Portraits. Vector Art from $10. Fast 12-24h turnaround." />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet" />
@@ -17,7 +17,7 @@
             darkMode: "class",
             theme: {
                 extend: {
-                    colors: { "primary": "#d4af35", "background-light": "#f8f7f6", "background-dark": "#201d12" },
+                    colors: { "primary": "#d4af35", "background-light": "#f8f7f6", "background-dark": "#201d12", "card-dark": "#16140c" },
                     fontFamily: { "display": ["Inter", "sans-serif"] },
                 },
             },
@@ -45,7 +45,7 @@
                     data-nav="services.html">Services</a>
                 <a href="portfolio.html" class="nav-link-gold transition-colors"
                     data-nav="portfolio.html">Feedbacks</a>
-                <a href="pricing.html" class="nav-link-gold transition-colors" data-nav="pricing.html">Order and Pricing</a>
+                <a href="pricing.html" class="nav-link-gold transition-colors" data-nav="pricing.html">Pricing</a>
                 <a href="contact.html" class="nav-link-gold transition-colors" data-nav="contact.html">Contact</a>
             </nav>
             <div class="flex items-center gap-2">
@@ -63,283 +63,507 @@
     </header>
 
     <!-- ===== MAIN CONTENT ===== -->
-    <main class="pb-20 max-w-4xl mx-auto">
+    <main class="pb-24 max-w-4xl mx-auto px-4 pt-4 sm:pt-8">
 
-
-        <!-- Order Form -->
-        <section id="order-section" class="px-4 py-10 reveal scroll-mt-24">
-            <div class="bg-primary/5 dark:bg-primary/10 rounded-2xl p-6 md:p-8 border border-primary/20">
-
-                <!-- Selected Plan Banner -->
-                <div id="selected-plan-banner"
-                    class="hidden mb-6 p-4 bg-primary/10 dark:bg-primary/20 border border-primary/30 rounded-xl flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-primary text-2xl filled-icon">check_circle</span>
-                        <div>
-                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Selected Plan</p>
-                            <p class="font-black text-lg" id="selected-plan-name">—</p>
-                        </div>
-                    </div>
-                    <span class="text-2xl font-black text-primary" id="selected-plan-price">$0</span>
-                </div>
-
-                <h2 class="text-2xl font-black tracking-tight mb-1">Order Details</h2>
-                <p class="text-slate-500 text-sm mb-2">Fill in your details and upload your artwork to place an order.
-                </p>
-                <p class="text-slate-500 text-sm mb-8">For queries or multiple orders email us directly: <a
-                        href="mailto:fdezan91@gmail.com"
-                        class="text-primary font-semibold hover:underline">fdezan91@gmail.com</a></p>
-
-                <form id="order-form" class="flex flex-col gap-6" action="process_form.php" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="access_key" value="50403232-c15e-4646-974b-272e18a54015">
-                    <input type="hidden" name="subject" value="New Order from Dezan Website">
-                    <input type="hidden" name="redirect" value="order-success.html">
-                    <!-- Plan/Package Selection -->
-                    <div class="flex flex-col gap-2">
-                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Plan / Package Name <span
-                                class="text-red-400">*</span></label>
-                        <input id="order-plan" name="order_plan" required
-                            class="w-full h-14 bg-white dark:bg-background-dark border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-5"
-                            placeholder="e.g. Left Chest / Hat, Jacket Back, Complex Vector, etc." type="text" />
-                        <input type="hidden" id="order-amount" value="0" />
-                    </div>
-
-                    <!-- Customer Info -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Your Name <span
-                                    class="text-red-400">*</span></label>
-                            <input id="customer-name" name="customer_name" required
-                                class="w-full h-14 bg-white dark:bg-background-dark border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-5"
-                                placeholder="John Doe" type="text" />
-                        </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Your Email <span
-                                    class="text-red-400">*</span></label>
-                            <input id="customer-email" name="customer_email" required
-                                class="w-full h-14 bg-white dark:bg-background-dark border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-5"
-                                placeholder="john@example.com" type="email" />
-                        </div>
-                    </div>
-
-                    <!-- Project Name -->
-                    <div class="flex flex-col gap-2">
-                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Project Name <span
-                                class="text-red-400">*</span></label>
-                            <input id="project-name" name="project_name" required
-                            class="w-full h-14 bg-white dark:bg-background-dark border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-5"
-                            placeholder="e.g. Logo" type="text" />
-                    </div>
-
-                    <!-- Service & Placement -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Service Type</label>
-                            <select id="service-type" name="service_type"
-                                class="w-full h-14 bg-white dark:bg-background-dark border border-primary/30 focus:border-primary rounded-xl px-5 text-sm">
-                                <option value="Digitizing">Digitizing</option>
-                                <option value="Vectorizing">Vectorizing</option>
-                            </select>
-                        </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Placement / Location <span
-                                    class="text-red-400">*</span></label>
-                            <input id="design-placement" name="design_placement"
-                                class="w-full h-14 bg-white dark:bg-background-dark border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-5"
-                                placeholder="Left Chest / Hat / Jacket Back etc" type="text" required />
-                        </div>
-                    </div>
-
-                    <!-- Sizing & File Format -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Sizing <span
-                                    class="text-red-400">*</span></label>
-                            <input id="design-sizing" name="design_sizing"
-                                class="w-full h-14 bg-white dark:bg-background-dark border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-5"
-                                placeholder="e.g. 3.5 x 2.5 inches" type="text" required />
-                        </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">File Format <span
-                                    class="text-red-400">*</span></label>
-                            <input id="file-format" name="file_format"
-                                class="w-full h-14 bg-white dark:bg-background-dark border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-5"
-                                placeholder="DST, OFM, EXP, PES etc" type="text" required />
-                        </div>
-                    </div>
-
-                    <!-- Upload Artwork -->
-                    <div class="flex flex-col gap-2" id="order-upload-container">
-                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Artwork Files</label>
-                        <div class="upload-zone w-full border-2 border-dashed border-primary/30 hover:border-primary/80 dark:hover:border-primary/80 rounded-xl flex flex-col items-center justify-center bg-white/50 dark:bg-background-dark/50 p-5 text-center cursor-pointer transition-all hover:scale-[1.005]">
-                            <span class="material-symbols-outlined text-primary text-4xl mb-2">cloud_upload</span>
-                            <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Drag &amp; Drop artwork files here or <span class="text-primary font-bold">Browse</span></p>
-                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Upload up to 5 files (Max 10MB each)</p>
-                            <p class="text-[10px] text-slate-400 dark:text-slate-500">Formats: DST, PES, EXP, JPG, PNG, PDF, ZIP, etc.</p>
-                            <input type="file" class="raw-file-input hidden" multiple accept=".dst,.pes,.exp,.ofm,.jef,.hus,.vip,.vp3,.xxx,.pdf,.png,.jpg,.jpeg,.gif,.zip,.rar,.ai,.eps,.svg,.cdr">
-                        </div>
-                        <div class="file-list mt-3 space-y-2 hidden"></div>
-                    </div>
-
-                    <!-- Additional Notes -->
-                    <div class="flex flex-col gap-2">
-                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Additional Notes</label>
-                        <textarea id="order-notes" name="additional_notes"
-                            class="w-full bg-white dark:bg-background-dark border border-primary/30 focus:border-primary rounded-xl px-5 py-4"
-                            placeholder="Specific colors, thread types, fabric details, rush delivery..."
-                            rows="3"></textarea>
-                    </div>
-
-                    <!-- Order Summary -->
-                    <div id="order-summary"
-                        class="hidden p-5 bg-white dark:bg-slate-800 rounded-xl border border-primary/20">
-                        <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary text-lg">receipt_long</span>
-                            Order Summary
-                        </h3>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-slate-500">Plan</span>
-                                <span class="font-semibold" id="summary-plan">—</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-500">Service</span>
-                                <span class="font-semibold" id="summary-service">—</span>
-                            </div>
-                            <div class="flex justify-between border-t border-primary/10 pt-2 mt-2">
-                                <span class="font-bold">Total</span>
-                                <span class="font-black text-primary text-lg" id="summary-total">$0</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit"
-                        class="w-full h-14 bg-primary text-background-dark rounded-xl font-black text-lg shadow-xl shadow-primary/20 flex items-center justify-center gap-2 btn-hover-effect">
-                        <span class="material-symbols-outlined">send</span> Send Order Details
-                    </button>
-                    
-                    <p class="text-center text-xs text-slate-600 dark:text-slate-400 text-balance font-medium">
-                        No payment required now. We will review your files and send an invoice later.
+        <!-- ===== HERO SECTION (INSPIRATION FROM IMAGE) ===== -->
+        <section class="pb-8">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+                <!-- Left Column: Typography & Value Points -->
+                <div class="md:col-span-7 space-y-4 text-left">
+                    <span class="text-xs font-black tracking-[0.2em] text-amber-800 dark:text-primary uppercase block">
+                        QUALITY DIGITIZING. REAL PEOPLE.
+                    </span>
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.08]">
+                        Simple Flat-Rate <br class="hidden sm:inline" />
+                        <span class="text-primary">Pricing</span>
+                    </h1>
+                    <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed max-w-lg">
+                        Professional embroidery digitizing with clean, honest pricing.
                     </p>
-                </form>
-            </div>
-        </section>
 
-        <!-- Title -->
-        <section class="px-4 pt-8 pb-6 text-center reveal">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 dark:bg-primary/10 text-amber-900 dark:text-primary font-bold text-xs mb-4 border border-amber-300 dark:border-primary/20"><span class="material-symbols-outlined text-[14px]">local_offer</span> Clear &amp; Simple</div>
-            <h1 class="text-3xl font-black tracking-tight text-gradient-gold inline-block">Price List</h1>
-            <p class="text-slate-600 dark:text-slate-400 text-sm max-w-lg mx-auto mt-3 font-medium">Professional quality digitizing at competitive rates. Choose your service, upload your artwork, and get it done fast.</p>
-        </section>
-
-        <!-- Pricing Cards -->
-        <section class="px-4 py-4 space-y-8">
-
-            <!-- DIGITIZING -->
-            <div class="reveal">
-                <h2 class="text-lg font-black text-primary uppercase tracking-widest mb-4">Digitizing</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                    <!-- Left Chest / Hat -->
-                    <div
-                        class="flex flex-col gap-4 rounded-xl border border-primary/20 bg-white dark:bg-slate-800/50 p-6 pricing-card">
-                        <div class="flex flex-col gap-1">
-                            <h3 class="text-base font-bold uppercase tracking-wider">Left Chest / Hat</h3>
-                            <p class="text-xs text-slate-500">Size up to 6" inches</p>
-                            <div class="flex items-baseline gap-1 text-primary mt-1">
-                                <span class="text-4xl font-black">$10</span>
-                                <span class="text-sm font-semibold opacity-80">/design</span>
+                    <!-- 3 Circular Icon Feature Bullets -->
+                    <div class="pt-2 space-y-3.5">
+                        <div class="flex items-center gap-3.5 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200">
+                            <div class="w-10 h-10 rounded-full bg-amber-500/10 dark:bg-primary/20 text-amber-800 dark:text-primary flex items-center justify-center flex-shrink-0 shadow-xs border border-amber-400/30 dark:border-primary/25">
+                                <span class="material-symbols-outlined text-lg fill-1">bolt</span>
                             </div>
+                            <span>Next Day Turnaround</span>
                         </div>
 
-                        <ul class="flex flex-col gap-3">
-                            <li class="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300"><span
-                                    class="material-symbols-outlined text-primary text-lg">schedule</span> Same Day Delivery</li>
-                            <li class="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300"><span
-                                    class="material-symbols-outlined text-primary text-lg">check_circle</span> Flat rate
-                                for max 5"</li>
-                        </ul>
+                        <div class="flex items-center gap-3.5 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200">
+                            <div class="w-10 h-10 rounded-full bg-amber-500/10 dark:bg-primary/20 text-amber-800 dark:text-primary flex items-center justify-center flex-shrink-0 shadow-xs border border-amber-400/30 dark:border-primary/25">
+                                <span class="material-symbols-outlined text-lg fill-1">edit</span>
+                            </div>
+                            <span>Digitized by hand - no auto conversion</span>
+                        </div>
+
+                        <div class="flex items-center gap-3.5 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200">
+                            <div class="w-10 h-10 rounded-full bg-amber-500/10 dark:bg-primary/20 text-amber-800 dark:text-primary flex items-center justify-center flex-shrink-0 shadow-xs border border-amber-400/30 dark:border-primary/25">
+                                <span class="material-symbols-outlined text-lg fill-1">cloud_download</span>
+                            </div>
+                            <span>Order history and online downloads</span>
+                        </div>
                     </div>
+                </div>
 
-                    <!-- Jacket Back (Popular) -->
-                    <div
-                        class="relative flex flex-col gap-4 rounded-xl border-2 border-primary bg-primary/5 dark:bg-primary/10 p-6 pricing-card">
-                        <div
-                            class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-background-dark px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                            Most Popular</div>
-                        <div class="flex flex-col gap-1">
-                            <h3 class="text-base font-bold uppercase tracking-wider">Jacket Back</h3>
-                            <p class="text-xs text-slate-500">Size larger than 6" inches</p>
-                            <div class="flex items-baseline gap-1 text-primary mt-1">
-                                <span class="text-4xl font-black">$15</span>
-                                <span class="text-sm font-semibold opacity-80">– $25</span>
-                            </div>
+                <!-- Right Column: Real Embroidered Patch Visual -->
+                <div class="md:col-span-5 flex justify-center">
+                    <div class="relative rounded-3xl overflow-hidden border-2 border-primary/30 bg-white dark:bg-slate-900/60 p-5 sm:p-6 shadow-xl w-full max-w-[320px]">
+                        <img src="Hero Page/Embroidery.png" alt="Dezan high-precision embroidery stitches" class="w-full object-contain rounded-2xl drop-shadow-md transform hover:scale-105 transition-transform duration-500 pointer-events-none" draggable="false">
+                        <div class="absolute bottom-4 right-4 bg-white/95 dark:bg-background-dark/95 backdrop-blur-md px-3 py-1 rounded-full border border-primary/30 text-[10px] font-black uppercase tracking-wider text-primary shadow-sm flex items-center gap-1">
+                            <span class="material-symbols-outlined text-xs fill-1">verified</span> Real Stitch Proof
                         </div>
-
-                        <ul class="flex flex-col gap-3">
-                            <li class="flex items-center gap-3 text-sm font-medium"><span
-                                    class="material-symbols-outlined text-primary text-lg filled-icon">schedule</span>
-                                Same Day Delivery</li>
-                            <li class="flex items-center gap-3 text-sm font-medium"><span
-                                    class="material-symbols-outlined text-primary text-lg filled-icon">check_circle</span>
-                                All source files included</li>
-                        </ul>
-                    </div>
-
-                    <!-- Pet Portrait -->
-                    <div
-                        class="flex flex-col gap-4 rounded-xl border border-primary/20 bg-white dark:bg-slate-800/50 p-6 pricing-card">
-                        <div class="flex flex-col gap-1">
-                            <h3 class="text-base font-bold uppercase tracking-wider">Pet Portrait</h3>
-                            <p class="text-xs text-slate-500">Realistic images & pet portraits</p>
-                            <div class="flex items-baseline gap-1 text-primary mt-1">
-                                <span class="text-4xl font-black">$25</span>
-                                <span class="text-sm font-semibold opacity-80">– $50</span>
-                            </div>
-                        </div>
-
-                        <ul class="flex flex-col gap-3">
-                            <li class="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300"><span
-                                    class="material-symbols-outlined text-primary text-lg">schedule</span> 2 - 3 Days</li>
-                            <li class="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300"><span
-                                    class="material-symbols-outlined text-primary text-lg">check_circle</span> High
-                                detail stitch work</li>
-                        </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- VECTOR ART -->
-            <div class="reveal">
-                <h2 class="text-lg font-black text-primary uppercase tracking-widest mb-4">Vector Art</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Dynamic Client Authentication Banners -->
+            <div class="mt-8 max-w-2xl mx-auto">
+                <!-- Unauthenticated banner -->
+                <div id="pricing-login-prompt" class="p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
+                    <div class="flex items-center gap-2.5 text-xs sm:text-sm text-amber-900 dark:text-amber-200">
+                        <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">lock</span>
+                        <span>Orders are placed securely inside your <strong>Client Portal</strong>. Sign in or register to submit artwork.</span>
+                    </div>
+                    <a href="portal-login.html" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm flex-shrink-0">
+                        <span>Sign In to Order</span>
+                        <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                    </a>
+                </div>
 
-                    <!-- Simple Vector -->
-                    <div
-                        class="flex flex-col gap-4 rounded-xl border border-primary/20 bg-white dark:bg-slate-800/50 p-6 pricing-card">
-                        <div class="flex flex-col gap-1">
-                            <h3 class="text-base font-bold uppercase tracking-wider">Simple Vector</h3>
-                            <div class="flex items-baseline gap-1 text-primary mt-1">
-                                <span class="text-4xl font-black">$10</span>
-                                <span class="text-sm font-semibold opacity-80">/design</span>
+                <!-- Authenticated client banner -->
+                <div id="pricing-client-banner" class="hidden p-3.5 sm:p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
+                    <div class="flex items-center gap-2.5 text-xs sm:text-sm text-emerald-900 dark:text-emerald-200">
+                        <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-xl flex-shrink-0">verified_user</span>
+                        <span>Signed in as <strong id="pricing-client-name" class="text-emerald-600 dark:text-emerald-300">Client</strong>. Click any card below to place an order.</span>
+                    </div>
+                    <a href="client-portal.html?action=new_order" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm flex-shrink-0">
+                        <span>New Order</span>
+                        <span class="material-symbols-outlined text-xs">add</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SECTION 1: DIGITIZING PRICING (GRID STYLE) ===== -->
+        <section class="pt-8 pb-12">
+            <div class="text-center mb-8">
+                <span class="text-xs font-black tracking-[0.2em] text-amber-800 dark:text-primary uppercase block mb-1">OUR PRICING</span>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Digitizing Pricing</h2>
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">High-quality digitizing. One simple price.</p>
+            </div>
+
+            <!-- Responsive 2-Column Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+                <!-- Card 1: Hat / Left Chest Logos ($15) -->
+                <div onclick="window.handleOrderClick(event, 'Digitizing', 'Hat / Left Chest Logos')" data-action="order-now" data-service="Digitizing" data-plan="Hat / Left Chest Logos" class="group relative flex flex-col justify-between p-6 sm:p-7 rounded-3xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-xl hover:border-primary dark:hover:border-primary transition-all duration-300 cursor-pointer transform hover:-translate-y-1">
+                    <div>
+                        <!-- Card Header: Pill Badge & Bespoke High-Res Icon -->
+                        <div class="flex items-center justify-between gap-3 mb-5">
+                            <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-900 dark:text-primary border border-amber-400/30">
+                                Most Popular · Up to 5.5"
+                            </span>
+                            <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-gradient-to-br from-amber-500/15 via-primary/20 to-amber-600/10 dark:from-primary/25 dark:to-primary/10 border border-amber-400/40 dark:border-primary/35 flex items-center justify-center text-amber-800 dark:text-primary group-hover:scale-105 group-hover:border-primary group-hover:shadow-md transition-all duration-300 flex-shrink-0 shadow-xs">
+                                <!-- High Quality Bespoke SVG: Baseball Cap & Left Chest Polo Shirt -->
+                                <svg class="w-11 h-11 sm:w-12 sm:h-12" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Baseball Cap (Left) -->
+                                    <g class="transition-transform group-hover:scale-105">
+                                        <!-- Cap Visor / Curved Bill -->
+                                        <path d="M4 31C3 31 2 32 2 33.5C2 35.5 5 36.5 11 36.5C18 36.5 26 34 30 31H4Z" fill="currentColor" fill-opacity="0.85"/>
+                                        <path d="M4 31C3 31 2 32 2 33.5C2 35.5 5 36.5 11 36.5C18 36.5 26 34 30 31H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                        <!-- Cap Crown Dome -->
+                                        <path d="M7 31C7 20 14 11 23 10C27 10 30 12 32 14.5C29 17 28 21 28 26V31H7Z" fill="currentColor" fill-opacity="0.2"/>
+                                        <path d="M7 31C7 20 14 11 23 10C27 10 30 12 32 14.5C29 17 28 21 28 26V31" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <!-- Panel Seam Line -->
+                                        <path d="M16 12C18 16 19 22 19 31" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2 1.5"/>
+                                        <!-- Eyelet Vent -->
+                                        <circle cx="14" cy="20" r="1.2" fill="currentColor"/>
+                                        <!-- Crown Button -->
+                                        <circle cx="23" cy="9.5" r="1.8" fill="currentColor"/>
+                                        <!-- Front Embroidered Star Crest -->
+                                        <path d="M17 22L18.2 24.6L21 24.9L19 26.8L19.5 29.5L17 28.1L14.5 29.5L15 26.8L13 24.9L15.8 24.6L17 22Z" fill="currentColor"/>
+                                    </g>
+                                    <!-- Collared Polo Shirt (Right) with Left-Chest Crest -->
+                                    <g class="transition-transform group-hover:scale-105">
+                                        <!-- Shirt Body -->
+                                        <path d="M31 24L38 18L51 22L47 30L43 28.5V46C43 47.1 42.1 48 41 48H30C28.9 48 28 47.1 28 46V30L26 31" fill="currentColor" fill-opacity="0.15"/>
+                                        <path d="M31 24L38 18L51 22L47 30L43 28.5V46C43 47.1 42.1 48 41 48H30C28.9 48 28 47.1 28 46V30" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <!-- Polo Collar -->
+                                        <path d="M33 21L38 27L43 21L38 18L33 21Z" fill="currentColor" fill-opacity="0.35" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                        <!-- Placket with Buttons -->
+                                        <path d="M38 27V34" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                        <circle cx="38" cy="29.5" r="0.9" fill="currentColor"/>
+                                        <circle cx="38" cy="32.5" r="0.9" fill="currentColor"/>
+                                        <!-- Left Chest Embroidered Badge -->
+                                        <rect x="30.5" y="28" width="5" height="5.5" rx="1.2" fill="currentColor"/>
+                                        <path d="M32 30.2H34M32 31.8H33.5" stroke="white" stroke-width="0.8" stroke-linecap="round"/>
+                                    </g>
+                                </svg>
                             </div>
                         </div>
 
+                        <!-- Plan Title & Subtitle -->
+                        <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">
+                            Hat / Left Chest Logos
+                        </h3>
+                        <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">
+                            Up to 5.5 inches (Caps, beanies &amp; polo shirts)
+                        </p>
+
+                        <!-- Big Price Display -->
+                        <div class="my-5 pb-5 border-b border-slate-100 dark:border-primary/15 flex items-baseline gap-2">
+                            <span class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight">$15</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Flat Rate / Design</span>
+                        </div>
+
+                        <!-- Features Checklist -->
+                        <ul class="space-y-2.5 mb-6 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>Structured caps, beanies &amp; polo left chest</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>Optimized 3D puff &amp; tight curved stitch pathing</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>All machine formats: DST, EMB, PES, EXP, JEF + PDF</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>Next-day turnaround with free minor revisions</span>
+                            </li>
+                        </ul>
                     </div>
 
-                    <!-- Complex Vector -->
-                    <div
-                        class="flex flex-col gap-4 rounded-xl border border-primary/20 bg-white dark:bg-slate-800/50 p-6 pricing-card">
-                        <div class="flex flex-col gap-1">
-                            <h3 class="text-base font-bold uppercase tracking-wider">Complex Vector</h3>
-                            <div class="flex items-baseline gap-1 text-primary mt-1">
-                                <span class="text-4xl font-black">$20</span>
-                                <span class="text-sm font-semibold opacity-80">/design</span>
+                    <!-- Action Button -->
+                    <div class="pt-2">
+                        <button class="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-sm group-hover:shadow-md group-hover:scale-[1.01]">
+                            <span>Order Left Chest / Hat</span>
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card 2: Larger Designs ($25) -->
+                <div onclick="window.handleOrderClick(event, 'Digitizing', 'Larger Designs')" data-action="order-now" data-service="Digitizing" data-plan="Larger Designs" class="group relative flex flex-col justify-between p-6 sm:p-7 rounded-3xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-xl hover:border-primary dark:hover:border-primary transition-all duration-300 cursor-pointer transform hover:-translate-y-1">
+                    <div>
+                        <!-- Card Header: Pill Badge & Bespoke High-Res Icon -->
+                        <div class="flex items-center justify-between gap-3 mb-5">
+                            <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                                Jacket Back &amp; Oversized
+                            </span>
+                            <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-gradient-to-br from-amber-500/15 via-primary/20 to-amber-600/10 dark:from-primary/25 dark:to-primary/10 border border-amber-400/40 dark:border-primary/35 flex items-center justify-center text-amber-800 dark:text-primary group-hover:scale-105 group-hover:border-primary group-hover:shadow-md transition-all duration-300 flex-shrink-0 shadow-xs">
+                                <!-- High Quality Bespoke SVG: Varsity / Bomber Apparel Jacket with Embroidered Back Crest -->
+                                <svg class="w-11 h-11 sm:w-12 sm:h-12" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Outer Jacket Silhouette -->
+                                    <path d="M15 14L28 8L41 14L52 20L46 32L40 30V47C40 48.1 39.1 49 38 49H18C16.9 49 16 48.1 16 47V30L10 32L4 20L15 14Z" fill="currentColor" fill-opacity="0.16"/>
+                                    <path d="M15 14L28 8L41 14L52 20L46 32L40 30V47C40 48.1 39.1 49 38 49H18C16.9 49 16 48.1 16 47V30L10 32L4 20L15 14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <!-- Ribbed Collar -->
+                                    <path d="M22 11C24.5 14 31.5 14 34 11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                                    <!-- Center Front Zipper Track -->
+                                    <path d="M28 13.5V49" stroke="currentColor" stroke-width="1.8" stroke-dasharray="2.5 2"/>
+                                    <!-- Ribbed Waist Band -->
+                                    <path d="M18 45H38" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    <!-- Ribbed Cuffs -->
+                                    <path d="M4.5 20.5L9.5 28.5M51.5 20.5L46.5 28.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    <!-- Oversized Embroidered Back / Chest Emblem -->
+                                    <g fill="currentColor">
+                                        <!-- Shield Contour -->
+                                        <path d="M28 18C21.5 18 20 22 20 28C20 34.5 26.5 39.5 28 41C29.5 39.5 36 34.5 36 28C36 22 34.5 18 28 18Z" fill-opacity="0.3" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                        <!-- Star Motif -->
+                                        <path d="M28 23L29.5 26.5L33 26.9L30.5 29.3L31.2 32.8L28 31.1L24.8 32.8L25.5 29.3L23 26.9L26.5 26.5L28 23Z"/>
+                                        <!-- Stitch Wing Rays -->
+                                        <path d="M18 27H20M36 27H38M17 32H19M37 32H39" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                    </g>
+                                </svg>
                             </div>
                         </div>
 
+                        <!-- Plan Title & Subtitle -->
+                        <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">
+                            Larger Designs
+                        </h3>
+                        <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">
+                            Over 5.5 inches (Jacket backs, hoodies &amp; blankets)
+                        </p>
+
+                        <!-- Big Price Display -->
+                        <div class="my-5 pb-5 border-b border-slate-100 dark:border-primary/15 flex items-baseline gap-2">
+                            <span class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight">$25</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Flat Rate / Design</span>
+                        </div>
+
+                        <!-- Features Checklist -->
+                        <ul class="space-y-2.5 mb-6 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>Jacket backs, large hoodies &amp; banner apparel</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>Complex stitch density &amp; fabric pull compensation</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>All machine formats: DST, EMB, PES, EXP, JEF + PDF</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>Thread run sheet, color stops &amp; simulation preview</span>
+                            </li>
+                        </ul>
                     </div>
+
+                    <!-- Action Button -->
+                    <div class="pt-2">
+                        <button class="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-sm group-hover:shadow-md group-hover:scale-[1.01]">
+                            <span>Order Larger Design</span>
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trust Bar in Dezan Brand Colors -->
+            <div class="mt-6 p-4 sm:p-5 rounded-2xl bg-amber-500/10 dark:bg-primary/10 border border-amber-500/25 dark:border-primary/25 flex items-center justify-center gap-3 text-center shadow-xs">
+                <span class="material-symbols-outlined text-amber-800 dark:text-primary text-2xl fill-1">verified_user</span>
+                <span class="text-xs sm:text-sm font-black text-amber-950 dark:text-amber-200">
+                    Flat rate pricing you can depend on. Zero hidden stitch-count charges.
+                </span>
+            </div>
+        </section>
+
+        <!-- ===== SECTION 2: VECTOR ART PRICING (GRID STYLE) ===== -->
+        <section class="py-10">
+            <div class="text-center mb-8">
+                <span class="text-xs font-black tracking-[0.2em] text-amber-800 dark:text-primary uppercase block mb-1">OUR PRICING</span>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Vector Art Pricing</h2>
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">High-precision vectorization. Clean, camera-ready files for screenprint &amp; engraving.</p>
+            </div>
+
+            <!-- Responsive 2-Column Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+                <!-- Card 1: Simple Vector ($15) -->
+                <div onclick="window.handleOrderClick(event, 'Vectorizing', 'Simple Vector')" data-action="order-now" data-service="Vectorizing" data-plan="Simple Vector" class="group relative flex flex-col justify-between p-6 sm:p-7 rounded-3xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-xl hover:border-primary dark:hover:border-primary transition-all duration-300 cursor-pointer transform hover:-translate-y-1">
+                    <div>
+                        <!-- Card Header: Pill Badge & Bespoke High-Res Icon -->
+                        <div class="flex items-center justify-between gap-3 mb-5">
+                            <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-900 dark:text-primary border border-amber-400/30">
+                                Standard Redraw
+                            </span>
+                            <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-gradient-to-br from-amber-500/15 via-primary/20 to-amber-600/10 dark:from-primary/25 dark:to-primary/10 border border-amber-400/40 dark:border-primary/35 flex items-center justify-center text-amber-800 dark:text-primary group-hover:scale-105 group-hover:border-primary group-hover:shadow-md transition-all duration-300 flex-shrink-0 shadow-xs">
+                                <!-- High Quality Bespoke SVG: Vector Bezier Pen Tool & Node Curves -->
+                                <svg class="w-11 h-11 sm:w-12 sm:h-12" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Smooth Bezier Vector Curve -->
+                                    <path d="M9 44C16 30 23 20 40 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                                    <!-- Handle Tangent Lines -->
+                                    <line x1="9" y1="44" x2="19" y2="34" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.5 2.5" opacity="0.6"/>
+                                    <line x1="40" y1="13" x2="30" y2="21" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.5 2.5" opacity="0.6"/>
+                                    <!-- Circular Control Handles -->
+                                    <circle cx="19" cy="34" r="3" fill="currentColor" fill-opacity="0.35" stroke="currentColor" stroke-width="1.8"/>
+                                    <circle cx="30" cy="21" r="3" fill="currentColor" fill-opacity="0.35" stroke="currentColor" stroke-width="1.8"/>
+                                    <!-- Vector Corner Anchor Nodes -->
+                                    <rect x="6" y="41" width="6" height="6" rx="1.2" fill="currentColor" stroke="currentColor" stroke-width="1.8"/>
+                                    <rect x="37" y="10" width="6" height="6" rx="1.2" fill="currentColor" stroke="currentColor" stroke-width="1.8"/>
+                                    <!-- Precision Pen Tool Nib -->
+                                    <g class="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                                        <path d="M40 13L49 22L39 32L33 30L32 24L40 13Z" fill="currentColor" fill-opacity="0.25" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                        <circle cx="39" cy="23" r="1.8" fill="currentColor"/>
+                                        <path d="M40 13L37 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Plan Title & Subtitle -->
+                        <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">
+                            Simple Vector Redraw
+                        </h3>
+                        <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">
+                            Clean redraw, standard logos &amp; 1-2 spot colors
+                        </p>
+
+                        <!-- Big Price Display -->
+                        <div class="my-5 pb-5 border-b border-slate-100 dark:border-primary/15 flex items-baseline gap-2">
+                            <span class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight">$15</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Flat Rate / Artwork</span>
+                        </div>
+
+                        <!-- Features Checklist -->
+                        <ul class="space-y-2.5 mb-6 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>Clean vector paths &amp; geometric node alignment</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>Color separated spot &amp; Pantone (PMS) matching</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>AI, EPS, SVG, print-ready PDF &amp; high-res PNG</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>12-24h delivery with crisp infinitely scalable curves</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Action Button -->
+                    <div class="pt-2">
+                        <button class="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-sm group-hover:shadow-md group-hover:scale-[1.01]">
+                            <span>Order Simple Vector</span>
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card 2: Complex Vector ($25) -->
+                <div onclick="window.handleOrderClick(event, 'Vectorizing', 'Complex Vector')" data-action="order-now" data-service="Vectorizing" data-plan="Complex Vector" class="group relative flex flex-col justify-between p-6 sm:p-7 rounded-3xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-xl hover:border-primary dark:hover:border-primary transition-all duration-300 cursor-pointer transform hover:-translate-y-1">
+                    <div>
+                        <!-- Card Header: Pill Badge & Bespoke High-Res Icon -->
+                        <div class="flex items-center justify-between gap-3 mb-5">
+                            <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                                Detailed Art &amp; Mascots
+                            </span>
+                            <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-gradient-to-br from-amber-500/15 via-primary/20 to-amber-600/10 dark:from-primary/25 dark:to-primary/10 border border-amber-400/40 dark:border-primary/35 flex items-center justify-center text-amber-800 dark:text-primary group-hover:scale-105 group-hover:border-primary group-hover:shadow-md transition-all duration-300 flex-shrink-0 shadow-xs">
+                                <!-- High Quality Bespoke SVG: Multilayer Mascot Shield & Vector Nodes -->
+                                <svg class="w-11 h-11 sm:w-12 sm:h-12" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Outer Shield Crest -->
+                                    <path d="M28 6L45 15V29C45 39 34 47 28 50C22 47 11 39 11 29V15L28 6Z" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+                                    <!-- Inner Inset Shield -->
+                                    <path d="M28 12L39 19V29C39 36 31 42 28 44C25 42 17 36 17 29V19L28 12Z" fill="currentColor" fill-opacity="0.28" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                    <!-- Dynamic Mascot / Eagle Eyes & Beak Facets -->
+                                    <path d="M22 23L27 27L22 29L19.5 25.5L22 23Z" fill="currentColor"/>
+                                    <path d="M34 23L29 27L34 29L36.5 25.5L34 23Z" fill="currentColor"/>
+                                    <path d="M28 20L31 27L28 30L25 27L28 20Z" fill="currentColor"/>
+                                    <!-- Vector Alignment Anchor Nodes on Vertices -->
+                                    <rect x="25.5" y="4" width="5" height="5" rx="1" fill="currentColor"/>
+                                    <rect x="42.5" y="13" width="5" height="5" rx="1" fill="currentColor"/>
+                                    <rect x="8.5" y="13" width="5" height="5" rx="1" fill="currentColor"/>
+                                    <rect x="25.5" y="47.5" width="5" height="5" rx="1" fill="currentColor"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Plan Title & Subtitle -->
+                        <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">
+                            Complex Vector Redraw
+                        </h3>
+                        <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">
+                            Mascots, gradients, detailed crests &amp; multi-color art
+                        </p>
+
+                        <!-- Big Price Display -->
+                        <div class="my-5 pb-5 border-b border-slate-100 dark:border-primary/15 flex items-baseline gap-2">
+                            <span class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight">$25</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Flat Rate / Artwork</span>
+                        </div>
+
+                        <!-- Features Checklist -->
+                        <ul class="space-y-2.5 mb-6 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>Complex gradient meshes &amp; hand-traced contours</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>Multilayer color separations for screenprinting</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>AI, EPS, SVG, print-ready PDF &amp; 300 DPI transparent PNG</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-base text-primary fill-1">check_circle</span>
+                                <span>Free minor touch-ups &amp; format conversion</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Action Button -->
+                    <div class="pt-2">
+                        <button class="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-sm group-hover:shadow-md group-hover:scale-[1.01]">
+                            <span>Order Complex Vector</span>
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trust Bar in Dezan Brand Colors -->
+            <div class="mt-6 p-4 sm:p-5 rounded-2xl bg-amber-500/10 dark:bg-primary/10 border border-amber-500/25 dark:border-primary/25 flex items-center justify-center gap-3 text-center shadow-xs">
+                <span class="material-symbols-outlined text-amber-800 dark:text-primary text-2xl fill-1">polyline</span>
+                <span class="text-xs sm:text-sm font-black text-amber-950 dark:text-amber-200">
+                    Mathematical precision in AI, EPS, SVG &amp; print-ready vector PDF.
+                </span>
+            </div>
+        </section>
+
+        <!-- ===== SECTION 3: WHAT'S INCLUDED (BRANDS LOOK BETTER HERE) ===== -->
+        <section class="py-10">
+            <div class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900/60 border border-primary/20 max-w-4xl mx-auto shadow-sm">
+                <div class="text-center mb-6">
+                    <span class="text-xs font-black tracking-widest text-primary uppercase block mb-1">BRANDS LOOK BETTER HERE</span>
+                    <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Included With Every Design</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Everything you need for seamless commercial embroidery &amp; print production.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary text-lg flex-shrink-0 mt-0.5">folder_zip</span>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white">All Machine Formats</h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">EMB, DST, PES, EXP, JEF, CND, VP3 + AI, EPS, SVG</p>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary text-lg flex-shrink-0 mt-0.5">picture_as_pdf</span>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white">Color Run Sheet PDF</h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Exact stitch counts, dimensions &amp; thread order</p>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary text-lg flex-shrink-0 mt-0.5">autorenew</span>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white">Free Minor Revisions</h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Zero-hassle density tweaks &amp; slight size adjustments</p>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary text-lg flex-shrink-0 mt-0.5">layers</span>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white">Cap &amp; 3D Puff Optimized</h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Center-out sequencing &amp; density for foam</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SECTION 4: CLEAN ORDER & QUOTE DISPATCH ACTION ===== -->
+        <section class="py-6 text-center max-w-4xl mx-auto">
+            <div class="p-6 rounded-3xl bg-gradient-to-r from-amber-500/15 via-primary/15 to-amber-600/15 border border-primary/25 space-y-3">
+                <h3 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">Ready to Place Your Design?</h3>
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-md mx-auto">
+                    Log in to your private Client Portal to upload artwork, specify fabric details, and download completed files.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                    <button type="button" onclick="window.handleOrderClick(event)" data-action="order-now" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs transition-all flex items-center justify-center gap-1.5 shadow-md cursor-pointer">
+                        <span class="material-symbols-outlined text-base">login</span>
+                        <span>Log In to Order</span>
+                    </button>
+                    <button type="button" onclick="window.handleQuoteClick(event)" data-action="request-quote" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs border border-slate-200 dark:border-slate-700 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span class="material-symbols-outlined text-base">request_quote</span>
+                        <span>Request Custom Quote</span>
+                    </button>
                 </div>
             </div>
         </section>
@@ -431,7 +655,7 @@
                     class="text-[10px] font-semibold">Feedbacks</span></a>
             <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="pricing.html"
                 data-page="pricing.html"><span class="material-symbols-outlined text-xl">payments</span><span
-                    class="text-[10px] font-semibold">Price/Order</span></a>
+                    class="text-[10px] font-semibold">Pricing</span></a>
             <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="contact.html"
                 data-page="contact.html"><span class="material-symbols-outlined text-xl">mail</span><span
                     class="text-[10px] font-semibold">Contact</span></a>

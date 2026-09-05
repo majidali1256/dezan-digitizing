@@ -142,6 +142,109 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initHeaderAuthState();
 
+    // ===== GLOBAL AUTHENTICATED ORDER & QUOTE DISPATCHER =====
+    // Directs unauthenticated users to portal-login.html before ordering or requesting quotes.
+    // Directs authenticated clients directly to client-portal.html?action=new_order or action=request_quote
+    window.handleOrderClick = function(e, service = null, plan = null) {
+        if (e && e.preventDefault) e.preventDefault();
+
+        let session = null;
+        try {
+            const raw = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('dezan_session') : null) || 
+                        (typeof localStorage !== 'undefined' ? localStorage.getItem('dezan_session') : null);
+            if (raw) session = JSON.parse(raw);
+        } catch (err) {
+            session = null;
+        }
+
+        if (session && session.role) {
+            // User is already logged in
+            if (session.role === 'client') {
+                let url = 'client-portal.html?action=new_order';
+                if (service) url += `&service=${encodeURIComponent(service)}`;
+                if (plan) url += `&plan=${encodeURIComponent(plan)}`;
+                window.location.href = url;
+            } else if (session.role === 'admin') {
+                window.location.href = 'admin-portal.html';
+            } else if (session.role === 'digitizer') {
+                window.location.href = 'worker-portal.html';
+            }
+        } else {
+            // User is NOT logged in: redirect to login page so they log in before ordering
+            let url = 'portal-login.html?redirect=new_order';
+            if (service) url += `&service=${encodeURIComponent(service)}`;
+            if (plan) url += `&plan=${encodeURIComponent(plan)}`;
+            window.location.href = url;
+        }
+    };
+
+    window.handleQuoteClick = function(e, service = null) {
+        if (e && e.preventDefault) e.preventDefault();
+
+        let session = null;
+        try {
+            const raw = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('dezan_session') : null) || 
+                        (typeof localStorage !== 'undefined' ? localStorage.getItem('dezan_session') : null);
+            if (raw) session = JSON.parse(raw);
+        } catch (err) {
+            session = null;
+        }
+
+        if (session && session.role) {
+            if (session.role === 'client') {
+                let url = 'client-portal.html?action=request_quote';
+                if (service) url += `&service=${encodeURIComponent(service)}`;
+                window.location.href = url;
+            } else if (session.role === 'admin') {
+                window.location.href = 'admin-portal.html';
+            } else if (session.role === 'digitizer') {
+                window.location.href = 'worker-portal.html';
+            }
+        } else {
+            let url = 'portal-login.html?redirect=request_quote';
+            if (service) url += `&service=${encodeURIComponent(service)}`;
+            window.location.href = url;
+        }
+    };
+
+    // Global click listener to intercept any "Order Now" / "Place Order" or Quote links
+    document.addEventListener('click', (e) => {
+        const target = e.target.closest('a, button');
+        if (!target) return;
+
+        // Elements explicitly tagged with data-action="order-now"
+        if (target.getAttribute('data-action') === 'order-now') {
+            e.preventDefault();
+            const service = target.getAttribute('data-service');
+            const plan = target.getAttribute('data-plan');
+            window.handleOrderClick(e, service, plan);
+            return;
+        }
+
+        // Elements explicitly tagged with data-action="request-quote"
+        if (target.getAttribute('data-action') === 'request-quote') {
+            e.preventDefault();
+            const service = target.getAttribute('data-service');
+            window.handleQuoteClick(e, service);
+            return;
+        }
+
+        // Links leading to pricing.html#order-section
+        const href = target.getAttribute('href');
+        if (href && (href === 'pricing.html#order-section' || href.endsWith('/pricing.html#order-section'))) {
+            e.preventDefault();
+            window.handleOrderClick(e);
+            return;
+        }
+
+        // Links leading to contact.html#custom-quote-section or #custom-quote-section
+        if (href && (href === 'contact.html#custom-quote-section' || href.endsWith('/contact.html#custom-quote-section') || href === '#custom-quote-section')) {
+            e.preventDefault();
+            window.handleQuoteClick(e);
+            return;
+        }
+    });
+
 
     // ===== SCROLL REVEAL ANIMATIONS =====
     const revealElements = document.querySelectorAll(".reveal");
@@ -629,6 +732,39 @@ function initLightbox() {
 //  GLOBAL — Plan Selection (called from onclick in pricing.html)
 // ===================================================================
 function selectPlan(planName, price) {
+    let session = null;
+    try {
+        const raw = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('dezan_session') : null) || 
+                    (typeof localStorage !== 'undefined' ? localStorage.getItem('dezan_session') : null);
+        if (raw) session = JSON.parse(raw);
+    } catch (err) {
+        session = null;
+    }
+
+    const service = planName.toLowerCase().includes('vector') ? 'Vectorizing' : 'Digitizing';
+
+    // If client is not logged in, route to login page first
+    if (!session || !session.role) {
+        window.location.href = `portal-login.html?redirect=new_order&service=${encodeURIComponent(service)}&plan=${encodeURIComponent(planName)}`;
+        return;
+    }
+
+    // If logged in as client, route directly to Client Portal with adaptive modal opened
+    if (session.role === 'client') {
+        window.location.href = `client-portal.html?action=new_order&service=${encodeURIComponent(service)}&plan=${encodeURIComponent(planName)}`;
+        return;
+    }
+
+    // Admin / Worker fallback
+    if (session.role === 'admin') {
+        window.location.href = 'admin-portal.html';
+        return;
+    }
+    if (session.role === 'digitizer') {
+        window.location.href = 'worker-portal.html';
+        return;
+    }
+
     const planInput = document.getElementById("order-plan");
     const amountInput = document.getElementById("order-amount");
     const banner = document.getElementById("selected-plan-banner");
@@ -638,33 +774,31 @@ function selectPlan(planName, price) {
     const summaryPlan = document.getElementById("summary-plan");
     const summaryTotal = document.getElementById("summary-total");
 
-    // Set hidden values
-    planInput.value = planName;
-    amountInput.value = price;
+    if (planInput) planInput.value = planName;
+    if (amountInput) amountInput.value = price;
 
-    // Show banner
-    banner.classList.remove("hidden");
-    nameEl.textContent = planName;
-    priceEl.textContent = "$" + price;
+    if (banner) {
+        banner.classList.remove("hidden");
+        if (nameEl) nameEl.textContent = planName;
+        if (priceEl) priceEl.textContent = "$" + price;
+    }
 
-    // Update summary
-    summary.classList.remove("hidden");
-    summaryPlan.textContent = planName + " ($" + price + ")";
-    summaryTotal.textContent = "$" + price;
+    if (summary) {
+        summary.classList.remove("hidden");
+        if (summaryPlan) summaryPlan.textContent = planName + " ($" + price + ")";
+        if (summaryTotal) summaryTotal.textContent = "$" + price;
+    }
 
-    // Update service in summary
     const serviceType = document.getElementById("service-type");
-    if (serviceType) {
+    if (serviceType && document.getElementById("summary-service")) {
         document.getElementById("summary-service").textContent = serviceType.value;
     }
 
-    // Scroll to order form
     const orderSection = document.getElementById("order-section");
     if (orderSection) {
         orderSection.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
-    // Clear any error
     hideFormError();
 }
 
@@ -673,9 +807,70 @@ function selectPlan(planName, price) {
 //  ORDER SYSTEM INIT
 // ===================================================================
 function initOrderSystem() {
+    let session = null;
+    try {
+        const raw = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('dezan_session') : null) || 
+                    (typeof localStorage !== 'undefined' ? localStorage.getItem('dezan_session') : null);
+        if (raw) session = JSON.parse(raw);
+    } catch (err) {
+        session = null;
+    }
+
+    const loginPromptBanner = document.getElementById('pricing-login-prompt');
+    const clientLoggedBanner = document.getElementById('pricing-client-banner');
+    const quotePromptBanner = document.getElementById('quote-login-prompt');
+    const quoteClientBanner = document.getElementById('quote-client-banner');
+    const orderForm = document.getElementById('order-form');
+
+    if (session && session.role) {
+        if (loginPromptBanner) loginPromptBanner.classList.add('hidden');
+        if (clientLoggedBanner) {
+            clientLoggedBanner.classList.remove('hidden');
+            const nameEl = document.getElementById('pricing-client-name');
+            if (nameEl) nameEl.textContent = session.displayName || session.email;
+        }
+        if (quotePromptBanner) quotePromptBanner.classList.add('hidden');
+        if (quoteClientBanner) {
+            quoteClientBanner.classList.remove('hidden');
+            const quoteNameEl = document.getElementById('quote-client-name');
+            if (quoteNameEl) quoteNameEl.textContent = session.displayName || session.email;
+        }
+        const nameInput = document.getElementById('customer-name');
+        const emailInput = document.getElementById('customer-email');
+        if (nameInput && !nameInput.value) nameInput.value = session.displayName || '';
+        if (emailInput && !emailInput.value) emailInput.value = session.email || '';
+    } else {
+        if (loginPromptBanner) loginPromptBanner.classList.remove('hidden');
+        if (clientLoggedBanner) clientLoggedBanner.classList.add('hidden');
+        if (quotePromptBanner) quotePromptBanner.classList.remove('hidden');
+        if (quoteClientBanner) quoteClientBanner.classList.add('hidden');
+    }
+
+    // Intercept form submission if user is not logged in
+    if (orderForm) {
+        orderForm.addEventListener('submit', (e) => {
+            let currentSession = null;
+            try {
+                const raw = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('dezan_session') : null) || 
+                            (typeof localStorage !== 'undefined' ? localStorage.getItem('dezan_session') : null);
+                if (raw) currentSession = JSON.parse(raw);
+            } catch (err) {
+                currentSession = null;
+            }
+
+            if (!currentSession || !currentSession.role) {
+                e.preventDefault();
+                e.stopPropagation();
+                const plan = document.getElementById('order-plan')?.value || '';
+                const service = document.getElementById('service-type')?.value || '';
+                alert('Please sign in or create an account before placing an order.');
+                window.location.href = `portal-login.html?redirect=new_order&service=${encodeURIComponent(service)}&plan=${encodeURIComponent(plan)}`;
+                return false;
+            }
+        });
+    }
 
     // ----- EmailJS Init -----
-    // *** REPLACE with your EmailJS public key ***
     if (typeof emailjs !== "undefined") {
         emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");
     }

@@ -93,17 +93,14 @@
                 <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN <span class="text-primary-dark dark:text-primary text-xs uppercase font-bold tracking-widest ml-1">Client Portal</span></span>
             </a>
 
-            <div class="flex items-center gap-2.5">
-                <button id="open-new-order-btn" onclick="openNewOrderModal()" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs shadow-md shadow-primary/20 transition-all flex items-center gap-1.5 cursor-pointer">
+            <div class="flex items-center gap-2 sm:gap-2.5">
+                <button id="open-new-order-btn" onclick="openNewOrderModal()" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs shadow-md shadow-primary/20 transition-all flex items-center gap-1.5 cursor-pointer" title="Place a new embroidery or vector order">
                     <span class="material-symbols-outlined text-sm">add_circle</span>
-                    <span class="hidden sm:inline">New Order</span>
+                    <span>New Order</span>
                 </button>
-                <button id="header-account-btn" onclick="openAccountModal('profile')" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-primary/30 bg-slate-50/80 hover:bg-slate-100 dark:bg-card-dark dark:hover:bg-primary/10 transition-all text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer shadow-sm group" title="Account & Security Settings">
-                    <div id="header-account-avatar" class="w-6 h-6 rounded-full bg-amber-500/10 text-amber-800 dark:text-primary font-black text-[10px] flex items-center justify-center border border-amber-500/20 group-hover:scale-105 transition-transform">
-                        JF
-                    </div>
-                    <span id="header-account-name" class="hidden md:inline font-bold">Client Account</span>
-                    <span class="material-symbols-outlined text-sm text-slate-400 group-hover:text-primary transition-colors">tune</span>
+                <button id="open-new-quote-btn" onclick="openNewQuoteModal()" class="px-3.5 py-2 rounded-xl border border-primary/40 dark:border-primary/40 bg-amber-500/10 hover:bg-primary text-amber-950 hover:text-background-dark dark:text-primary dark:hover:text-background-dark font-black text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer group" title="Request a custom price quote">
+                    <span class="material-symbols-outlined text-sm text-amber-800 dark:text-primary group-hover:text-background-dark transition-colors">request_quote</span>
+                    <span>Quote</span>
                 </button>
                 <button class="theme-toggle-btn p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors border border-slate-200 dark:border-primary/20" aria-label="Toggle theme">
                     <span class="material-symbols-outlined theme-toggle-icon text-lg text-primary-dark dark:text-primary">dark_mode</span>
@@ -146,7 +143,7 @@
             </button>
 
             <!-- Request Quote -->
-            <button onclick="openRequestQuoteModal()" class="flex items-center gap-3.5 p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-md hover:border-primary dark:hover:border-primary transition-all text-left group cursor-pointer">
+            <button onclick="openNewQuoteModal()" class="flex items-center gap-3.5 p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-md hover:border-primary dark:hover:border-primary transition-all text-left group cursor-pointer">
                 <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-800 dark:text-primary flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0 border border-amber-500/20">
                     <span class="material-symbols-outlined text-2xl">request_quote</span>
                 </div>
@@ -185,73 +182,88 @@
                 <span id="metric-quotes-count" class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">0</span>
             </div>
 
-            <div onclick="filterBySection('due')" class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs flex flex-col justify-between cursor-pointer hover:border-amber-400 dark:hover:border-primary transition-all group" title="Click to filter orders with payment due">
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Balance Due</span>
-                    <span id="badge-due-count" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold group-hover:bg-amber-100 dark:group-hover:bg-primary/20 transition-colors">0 Due</span>
-                </div>
+            <div class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs flex flex-col justify-between">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Balance Due</span>
                 <span id="metric-balance-due" class="text-2xl sm:text-3xl font-black text-amber-800 dark:text-primary">$0.00</span>
             </div>
         </div>
 
-        <!-- Search & Filter Bar -->
-        <div class="mb-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-            <div class="relative flex-1">
-                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">search</span>
-                <input type="text" id="order-search-input" oninput="handleSearchFilter()" placeholder="Search by order # or job name..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 rounded-xl text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-primary shadow-xs transition-colors" />
+        <!-- Controls Bar: Filter Tabs & Search -->
+        <div class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0" id="filter-tabs">
+                <button onclick="setFilter('all')" class="filter-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary text-background-dark shadow-xs transition-all cursor-pointer">
+                    All Activity
+                </button>
+                <button onclick="setFilter('in_progress')" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer">
+                    In Production
+                </button>
+                <button onclick="setFilter('completed')" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer">
+                    Delivered
+                </button>
+                <button onclick="setFilter('quotes')" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer">
+                    Quotes
+                </button>
+                <button onclick="setFilter('unpaid')" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer flex items-center gap-1">
+                    <span>Payment Due</span>
+                    <span id="badge-due-count" class="w-2 h-2 rounded-full bg-rose-500 hidden"></span>
+                </button>
             </div>
+
+            <!-- Search and Filter Dropdown -->
             <div class="flex items-center gap-2">
-                <div class="relative flex-1 sm:flex-initial">
-                    <select id="status-filter-select" onchange="handleSearchFilter()" class="w-full sm:w-auto px-3.5 py-2.5 bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-primary shadow-xs cursor-pointer">
-                        <option value="all">All Statuses</option>
-                        <option value="due">Payment Due / Incomplete</option>
-                        <option value="open">Open Orders</option>
-                        <option value="completed">Completed Orders</option>
-                        <option value="quotes">Quotes Only</option>
-                    </select>
+                <div class="relative flex-1 md:w-64">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                    <input type="text" id="order-search-input" onkeyup="handleOrderSearch(event)" placeholder="Search order #, job name..." class="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary" />
                 </div>
+                <select id="mobile-filter-select" onchange="handleSelectFilter(event)" class="md:hidden px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:border-primary">
+                    <option value="all">All Items</option>
+                    <option value="in_progress">In Production</option>
+                    <option value="completed">Delivered</option>
+                    <option value="quotes">Quotes Only</option>
+                    <option value="unpaid">Payment Due</option>
+                </select>
             </div>
         </div>
 
-        <!-- Section: Open Orders -->
+        <!-- Section: Open Active Orders -->
         <section id="section-open-orders" class="mb-8">
             <div class="flex items-center justify-between mb-3.5">
-                <h2 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <span>Open Orders</span>
-                    <span id="badge-open-count" class="text-xs px-2 py-0.5 rounded-full bg-amber-50 dark:bg-primary/10 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/20 font-bold">0</span>
+                <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                    <span>In Production &amp; Active Jobs</span>
+                    <span id="badge-active-count" class="text-xs px-2 py-0.5 rounded-full bg-amber-50 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30 font-bold">0</span>
                 </h2>
-                <button onclick="filterBySection('open')" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</button>
+                <button onclick="filterBySection('in_progress')" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</button>
             </div>
-            <div id="open-orders-container" class="space-y-3.5">
-                <!-- Rendered by JS -->
+            <div id="active-orders-container" class="space-y-3.5">
+                <!-- Populated by JS -->
             </div>
         </section>
 
-        <!-- Section: Completed Orders -->
+        <!-- Section: Completed Deliverables -->
         <section id="section-completed-orders" class="mb-8">
             <div class="flex items-center justify-between mb-3.5">
-                <h2 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <span>Completed Orders</span>
+                <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                    <span>Completed &amp; Download Deliverables</span>
                     <span id="badge-completed-count" class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 font-bold">0</span>
                 </h2>
                 <button onclick="filterBySection('completed')" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</button>
             </div>
             <div id="completed-orders-container" class="space-y-3.5">
-                <!-- Rendered by JS -->
+                <!-- Populated by JS -->
             </div>
         </section>
 
         <!-- Section: Quotes -->
         <section id="section-quotes" class="mb-8">
             <div class="flex items-center justify-between mb-3.5">
-                <h2 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                     <span>Quotes</span>
                     <span id="badge-quotes-count" class="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 font-bold">0</span>
                 </h2>
                 <button onclick="filterBySection('quotes')" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</button>
             </div>
             <div id="quotes-container" class="space-y-3.5">
-                <!-- Rendered by JS -->
+                <!-- Populated by JS -->
             </div>
         </section>
 
@@ -272,25 +284,28 @@
                 <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">request_quote</span>
                 <span class="text-[11px] font-bold">Quotes</span>
             </button>
-            <button onclick="openAccountModal()" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group">
-                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">account_circle</span>
-                <span class="text-[11px] font-bold">Account</span>
+            <button id="bottom-nav-settings-btn" onclick="openAccountModal('profile')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group" title="Account & Security Settings">
+                <div class="w-6 h-6 rounded-full bg-amber-500/15 text-amber-800 dark:text-primary font-black text-[10px] flex items-center justify-center border border-amber-500/25 group-hover:scale-105 transition-transform" id="bottom-nav-avatar">
+                    JF
+                </div>
+                <span class="text-[11px] font-bold">Settings</span>
             </button>
         </div>
     </nav>
 
-    <!-- ===== ADAPTIVE PLACE ORDER MODAL (2-STAGE SELECTION) ===== -->
+    <!-- ===== ADAPTIVE PLACE ORDER & REQUEST QUOTE MODAL (2-STAGE SELECTION) ===== -->
     <div id="new-order-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
         <div class="w-full max-w-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl p-5 sm:p-7 max-h-[92vh] overflow-y-auto relative text-slate-900 dark:text-slate-100 my-auto">
             
             <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-primary/15 mb-4">
                 <div>
                     <h3 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2" id="order-modal-header-title">
-                        <span class="material-symbols-outlined text-amber-800 dark:text-primary">add_shopping_cart</span> Place an Order
+                        <span class="material-symbols-outlined text-amber-800 dark:text-primary" id="order-modal-header-icon">add_shopping_cart</span>
+                        <span id="order-modal-header-text">Place an Order</span>
                     </h3>
-                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Tailored technical specifications for machine embroidery and vectors</p>
+                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400" id="order-modal-header-desc">Tailored technical specifications for machine embroidery and vectors</p>
                 </div>
-                <button onclick="closeNewOrderModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer">
+                <button onclick="closeNewOrderModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:white cursor-pointer">
                     <span class="material-symbols-outlined text-lg">close</span>
                 </button>
             </div>
@@ -299,8 +314,8 @@
             <div id="order-service-selection-view" class="space-y-4">
                 <div class="text-center py-2">
                     <span class="text-[10px] font-black uppercase text-amber-800 dark:text-primary tracking-widest block mb-1">Step 1 of 2</span>
-                    <h4 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">What type of work do you need?</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">Select a service below to open the specific order requirements. No confusing or unnecessary fields.</p>
+                    <h4 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white" id="order-step1-title">What type of work do you need?</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto" id="order-step1-desc">Select a service below to open the specific order requirements. No confusing or unnecessary fields.</p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
@@ -545,8 +560,8 @@
                     </div>
                 </div>
 
-                <!-- Price Summary Bar -->
-                <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-primary/20 flex items-center justify-between">
+                <!-- Price Summary Bar (Hidden in Quote Mode) -->
+                <div id="order-price-summary-box" class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-primary/20 flex items-center justify-between">
                     <div>
                         <span class="text-[10px] font-bold text-slate-500 uppercase block">Estimated Price</span>
                         <span class="text-xs font-semibold text-slate-600 dark:text-slate-400" id="order-price-breakdown">Standard Digitizing</span>
@@ -557,24 +572,35 @@
                     </div>
                 </div>
 
-                <!-- Payment Preference Choice -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">Payment Terms</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <label class="flex items-start gap-2.5 p-3 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 cursor-pointer">
-                            <input type="radio" name="order-payment-terms" value="unpaid" checked class="text-primary focus:ring-primary h-4 w-4 mt-0.5" />
-                            <div>
-                                <span class="text-xs font-bold text-slate-900 dark:text-white block">Pay on Invoice (Due Later)</span>
-                                <span class="text-[10px] text-slate-600 dark:text-slate-400">Created with payment due upon completion (Net 30)</span>
-                            </div>
-                        </label>
-                        <label class="flex items-start gap-2.5 p-3 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 cursor-pointer hover:border-primary">
-                            <input type="radio" name="order-payment-terms" value="paid" class="text-primary focus:ring-primary h-4 w-4 mt-0.5" />
-                            <div>
-                                <span class="text-xs font-bold text-slate-900 dark:text-white block">Pay Upfront Now</span>
-                                <span class="text-[10px] text-slate-600 dark:text-slate-400">Instant PayPal / Card checkout</span>
-                            </div>
-                        </label>
+                <!-- Order Payment Notice (Hidden in Quote Mode) -->
+                <div id="order-payment-terms-box" class="p-3.5 rounded-xl bg-amber-500/10 dark:bg-primary/10 border border-amber-400/30 dark:border-primary/25 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-primary/20 text-amber-900 dark:text-primary flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-lg">credit_card</span>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-900 dark:text-white block">Payment Required to Start Production</span>
+                            <span class="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-400">All standard orders require payment upfront. Secure instant checkout via Credit Card or PayPal.</span>
+                        </div>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-1.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 flex-shrink-0">
+                        <span class="material-symbols-outlined text-sm text-emerald-600 dark:text-emerald-400">lock</span>
+                        <span>256-Bit SSL</span>
+                    </div>
+                </div>
+
+                <!-- Quote Mode Notice (Visible ONLY in Quote Mode) -->
+                <div id="quote-mode-info-box" class="hidden p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-500/30 text-xs text-blue-950 dark:text-blue-200">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-800 dark:text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-blue-500/25">
+                            <span class="material-symbols-outlined text-lg">request_quote</span>
+                        </div>
+                        <div>
+                            <strong class="text-xs font-black block text-blue-950 dark:text-blue-200">No Upfront Payment Required for Quotes</strong>
+                            <p class="text-[11px] text-blue-900/80 dark:text-blue-300/80 mt-1 leading-relaxed">
+                                Submit your design specs and artwork for free. Our senior digitizer will inspect stitch density, small text complexity, and fabric compatibility to give you an exact price. Once the price is set, you can review and pay to start production.
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -586,8 +612,8 @@
                     <div class="flex items-center gap-2">
                         <button type="button" onclick="closeNewOrderModal()" class="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-800 dark:text-slate-300 text-xs font-semibold cursor-pointer">Cancel</button>
                         <button type="submit" id="adaptive-order-submit-btn" class="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-sm">lock</span>
-                            <span>Continue to Payment / Place Order</span>
+                            <span class="material-symbols-outlined text-sm" id="order-submit-btn-icon">lock</span>
+                            <span id="order-submit-btn-text">Pay & Place Order ($15.00)</span>
                         </button>
                     </div>
                 </div>
@@ -1141,6 +1167,42 @@
             }
             renderOrders();
 
+            // Auto-open Place Order or Request Quote modal if redirected with action=new_order or action=request_quote
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const actionParam = urlParams.get('action');
+                const isOrder = actionParam === 'new_order' || urlParams.get('order') === '1';
+                const isQuote = actionParam === 'request_quote' || urlParams.get('quote') === '1';
+
+                if (isOrder || isQuote) {
+                    const serviceParam = urlParams.get('service');
+                    const planParam = urlParams.get('plan');
+                    setTimeout(() => {
+                        if (isQuote) {
+                            openRequestQuoteModal();
+                        } else {
+                            openNewOrderModal();
+                        }
+                        if (serviceParam) {
+                            selectOrderService(serviceParam);
+                        }
+                        if (planParam) {
+                            if (serviceParam === 'Vectorizing') {
+                                const vecInput = document.getElementById('vec-job-name');
+                                if (vecInput && !vecInput.value) vecInput.value = planParam;
+                            } else {
+                                const digInput = document.getElementById('dig-job-name');
+                                if (digInput && !digInput.value) digInput.value = planParam;
+                            }
+                        }
+                        // Clean up URL without reload
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }, 250);
+                }
+            } catch (e) {
+                console.warn('Error handling order/quote redirect:', e);
+            }
+
             // Register Realtime Listener for Instant Updates
             window.insforgeClient.onRealtimeEvent(async ({ type, payload, isLocal }) => {
                 if (isLocal) return;
@@ -1168,6 +1230,14 @@
                         `Order ${payload.orderNumber} payment confirmed ($${payload.price}). Balance updated.`,
                         'payments',
                         'success'
+                    );
+                    await renderOrders();
+                } else if (type === 'quote_priced') {
+                    window.insforgeClient.showToast(
+                        'Quote Price Ready!',
+                        `Admin set a price of $${Number(payload.price).toFixed(2)} for Quote #${payload.orderNumber}. You can now review and pay to start order.`,
+                        'request_quote',
+                        'info'
                     );
                     await renderOrders();
                 } else if (type === 'remote_db_change') {
@@ -1198,25 +1268,31 @@
             renderSectionsWithFilter();
         }
 
+        function isQuoteRecord(o) {
+            if (!o) return false;
+            return o.is_quote === true ||
+                   (o.order_number && o.order_number.startsWith('QUO-')) ||
+                   o.status === 'quote_requested' ||
+                   o.status === 'quote_ready' ||
+                   (o.plan_name && o.plan_name.toLowerCase().includes('quote')) ||
+                   (o.service_type && o.service_type.toLowerCase().includes('quote'));
+        }
+
         function updateMetrics(orders) {
-            // Open orders: pending_review, assigned, in_progress (excluding quotes)
+            // Open orders: pending_review, assigned, in_progress, revision (excluding quotes)
             const openOrders = orders.filter(o => 
-                (o.status === 'in_progress' || o.status === 'assigned' || o.status === 'pending_review') &&
-                !(o.plan_name && o.plan_name.includes('Custom Quote')) &&
-                !(o.service_type && o.service_type.toLowerCase().includes('quote'))
+                (o.status === 'in_progress' || o.status === 'assigned' || o.status === 'pending_review' || o.status === 'revision_requested') &&
+                !isQuoteRecord(o)
             );
 
             // Completed orders
             const completedOrders = orders.filter(o => o.status === 'completed');
 
-            // Quotes: items with Custom Quote plan or quote in service type
-            const quotes = orders.filter(o => 
-                (o.plan_name && o.plan_name.includes('Custom Quote')) ||
-                (o.service_type && o.service_type.toLowerCase().includes('quote'))
-            );
+            // Quotes: all requested, ready, or marked quotes
+            const quotes = orders.filter(o => isQuoteRecord(o));
 
-            // Calculate unpaid orders & active balance due
-            const unpaidOrders = orders.filter(o => o.payment_status === 'unpaid' || o.payment_status === 'pending');
+            // Calculate unpaid orders & active balance due (exclude unpriced quotes)
+            const unpaidOrders = orders.filter(o => !isQuoteRecord(o) && (o.payment_status === 'unpaid' || o.payment_status === 'pending'));
             const balanceDue = unpaidOrders.reduce((sum, o) => sum + (parseFloat(o.price) || 0), 0);
 
             // Metrics badges
@@ -1264,13 +1340,44 @@
             populateClientAccountModal();
         }
 
+        let activeFilterType = 'all';
+
+        function setFilter(type) {
+            activeFilterType = type;
+            const filterSelect = document.getElementById('status-filter-select');
+            if (filterSelect) filterSelect.value = type;
+            const mobileSelect = document.getElementById('mobile-filter-select');
+            if (mobileSelect) mobileSelect.value = type;
+
+            // Update tab button styles
+            document.querySelectorAll('#filter-tabs .filter-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-primary', 'text-background-dark', 'shadow-xs');
+                btn.classList.add('bg-slate-100', 'dark:bg-slate-800/80', 'text-slate-700', 'dark:text-slate-300');
+            });
+            const activeBtn = Array.from(document.querySelectorAll('#filter-tabs .filter-btn')).find(b => b.getAttribute('onclick')?.includes(`'${type}'`));
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'bg-primary', 'text-background-dark', 'shadow-xs');
+                activeBtn.classList.remove('bg-slate-100', 'dark:bg-slate-800/80', 'text-slate-700', 'dark:text-slate-300');
+            }
+
+            renderSectionsWithFilter();
+        }
+
+        function handleOrderSearch(e) {
+            renderSectionsWithFilter();
+        }
+
+        function handleSelectFilter(e) {
+            setFilter(e.target.value);
+        }
+
         function handleSearchFilter() {
             renderSectionsWithFilter();
         }
 
         function renderSectionsWithFilter() {
             const query = (document.getElementById('order-search-input')?.value || '').trim().toLowerCase();
-            const filterType = document.getElementById('status-filter-select')?.value || 'all';
+            const filterType = activeFilterType || document.getElementById('status-filter-select')?.value || 'all';
 
             // Filter base orders
             let filtered = cachedOrders.filter(order => {
@@ -1283,29 +1390,25 @@
 
             // If filterType is 'due', filter only unpaid/pending orders
             if (filterType === 'due') {
-                filtered = filtered.filter(o => o.payment_status === 'unpaid' || o.payment_status === 'pending');
+                filtered = filtered.filter(o => !isQuoteRecord(o) && (o.payment_status === 'unpaid' || o.payment_status === 'pending'));
             }
 
             // Categorize
             const openOrders = filtered.filter(o => 
                 (o.status === 'in_progress' || o.status === 'assigned' || o.status === 'pending_review' || o.status === 'revision_requested') &&
-                !(o.plan_name && o.plan_name.includes('Custom Quote')) &&
-                !(o.service_type && o.service_type.toLowerCase().includes('quote'))
+                !isQuoteRecord(o)
             );
 
             const completedOrders = filtered.filter(o => o.status === 'completed');
 
-            const quotes = filtered.filter(o => 
-                (o.plan_name && o.plan_name.includes('Custom Quote')) ||
-                (o.service_type && o.service_type.toLowerCase().includes('quote'))
-            );
+            const quotes = filtered.filter(o => isQuoteRecord(o));
 
             // Section elements
             const sectionOpen = document.getElementById('section-open-orders');
             const sectionComp = document.getElementById('section-completed-orders');
             const sectionQuotes = document.getElementById('section-quotes');
 
-            if (filterType === 'open') {
+            if (filterType === 'open' || filterType === 'in_progress') {
                 sectionOpen.classList.remove('hidden');
                 sectionComp.classList.add('hidden');
                 sectionQuotes.classList.add('hidden');
@@ -1483,36 +1586,67 @@
 
         function renderQuoteCard(order) {
             const dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Sep 4, 2026';
-            const priceFormatted = order.price ? `$${order.price.toFixed(2)}` : 'Quote in Review';
+            const isPriced = order.price && Number(order.price) > 0;
+            const priceFormatted = isPriced ? `$${Number(order.price).toFixed(2)}` : 'Awaiting Quote Price';
 
             return `
-                <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-md transition-all">
+                <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border ${isPriced ? 'border-amber-400 dark:border-primary/50 shadow-md ring-2 ring-primary/20' : 'border-slate-200/90 dark:border-primary/25 shadow-sm'} hover:shadow-md transition-all">
+                    <!-- Top Bar: Quote # & Date -->
                     <div class="flex items-center justify-between gap-2 mb-2">
-                        <span class="text-xs font-black text-blue-900 dark:text-blue-400">Quote #${order.order_number}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black text-blue-900 dark:text-blue-400">Quote #${order.order_number}</span>
+                            ${isPriced ? `
+                                <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30 text-[11px] font-black flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Price Ready: $${Number(order.price).toFixed(2)}
+                                </span>
+                            ` : `
+                                <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/30 text-[11px] font-bold flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[12px]">schedule</span> Under Admin Review
+                                </span>
+                            `}
+                        </div>
                         <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Requested ${dateStr}</span>
                     </div>
 
+                    <!-- Middle: Job Name & Details -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 my-2">
                         <div>
                             <h3 class="text-base font-black text-slate-900 dark:text-white">${order.project_name}</h3>
                             <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-0.5">
-                                ${order.service_type || 'Custom Quote'} · ${order.placement || 'Custom'} ${order.sizing ? `(${order.sizing})` : ''}
+                                ${order.service_type || 'Custom Quote'} · ${order.placement || 'Custom'} ${order.sizing ? `(${order.sizing})` : ''} ${order.fabric_type ? `· ${order.fabric_type}` : ''}
                             </p>
+                            ${order.quote_admin_notes ? `
+                                <div class="mt-2.5 p-2.5 rounded-xl bg-amber-50/80 dark:bg-primary/10 border border-amber-300/70 dark:border-primary/25 text-xs">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900 dark:text-primary flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[13px]">forum</span> Admin Pricing Note:
+                                    </span>
+                                    <p class="text-slate-800 dark:text-slate-200 text-[11px] font-medium mt-0.5 leading-relaxed">"${order.quote_admin_notes}"</p>
+                                </div>
+                            ` : ''}
                         </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-lg font-black text-slate-900 dark:text-white">${priceFormatted}</span>
-                            <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/30 text-xs font-bold">
-                                Quote Review
-                            </span>
+                        <div class="flex sm:flex-col items-end gap-1">
+                            <span class="text-xl font-black ${isPriced ? 'text-amber-900 dark:text-primary' : 'text-slate-500 italic text-sm'}">${priceFormatted}</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">${isPriced ? 'Approved Price (USD)' : 'Pending estimation'}</span>
                         </div>
                     </div>
 
-                    <div class="pt-3 mt-3 border-t border-slate-100 dark:border-primary/15 flex items-center justify-between">
-                        <span class="text-[11px] font-semibold text-slate-500">Awaiting master digitizer estimation</span>
-                        <button onclick="openClientInvoiceModal('${order.id}')" class="inline-flex items-center gap-1 text-xs font-black text-amber-800 dark:text-primary hover:underline cursor-pointer">
-                            <span>View Quote Specs</span>
-                            <span class="material-symbols-outlined text-xs">arrow_forward</span>
-                        </button>
+                    <!-- Bottom Action Bar -->
+                    <div class="pt-3 mt-3 border-t border-slate-100 dark:border-primary/15 flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-[11px] font-semibold text-slate-500">
+                            ${isPriced ? 'Price approved! Pay now to convert this quote into an active production order.' : 'Awaiting master digitizer complexity and stitch density estimation.'}
+                        </span>
+                        <div class="flex items-center gap-2">
+                            ${isPriced ? `
+                                <button onclick="openCheckoutModal('${order.id}')" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs shadow-md shadow-primary/20 flex items-center gap-1.5 transition-all hover:scale-105 cursor-pointer">
+                                    <span class="material-symbols-outlined text-sm">credit_card</span>
+                                    <span>Pay $${Number(order.price).toFixed(2)} & Start Order</span>
+                                </button>
+                            ` : ''}
+                            <button onclick="openClientInvoiceModal('${order.id}')" class="inline-flex items-center gap-1 text-xs font-black text-amber-800 dark:text-primary hover:underline cursor-pointer">
+                                <span>View Quote Specs</span>
+                                <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1566,14 +1700,77 @@
         }
 
         // ==========================================
-        //  ADAPTIVE 2-STAGE ORDER MODAL CONTROLLER
+        //  ADAPTIVE 2-STAGE ORDER & QUOTE MODAL CONTROLLER
         // ==========================================
         let selectedArtworkFiles = [];
+        let currentModalMode = 'order'; // 'order' or 'quote'
+
+        function updateModalModeUI() {
+            const isQuote = currentModalMode === 'quote';
+
+            // Modal Header
+            const iconEl = document.getElementById('order-modal-header-icon');
+            const textEl = document.getElementById('order-modal-header-text');
+            const descEl = document.getElementById('order-modal-header-desc');
+            const step1Title = document.getElementById('order-step1-title');
+            const step1Desc = document.getElementById('order-step1-desc');
+
+            if (iconEl) iconEl.textContent = isQuote ? 'request_quote' : 'add_shopping_cart';
+            if (textEl) textEl.textContent = isQuote ? 'Request a Free Quote' : 'Place an Order';
+            if (descEl) descEl.textContent = isQuote 
+                ? 'Send artwork & specifications to admin for accurate price estimation' 
+                : 'Tailored technical specifications for machine embroidery and vectors';
+            if (step1Title) step1Title.textContent = isQuote 
+                ? 'What type of work do you need a quote for?' 
+                : 'What type of work do you need?';
+            if (step1Desc) step1Desc.textContent = isQuote 
+                ? 'Select a service below to provide design specs. No upfront payment required.' 
+                : 'Select a service below to open the specific order requirements. No confusing or unnecessary fields.';
+
+            // Price Summary and Payment Terms visibility
+            const priceBox = document.getElementById('order-price-summary-box');
+            const termsBox = document.getElementById('order-payment-terms-box');
+            const quoteBox = document.getElementById('quote-mode-info-box');
+
+            if (priceBox) {
+                if (isQuote) priceBox.classList.add('hidden');
+                else priceBox.classList.remove('hidden');
+            }
+            if (termsBox) {
+                if (isQuote) termsBox.classList.add('hidden');
+                else termsBox.classList.remove('hidden');
+            }
+            if (quoteBox) {
+                if (isQuote) quoteBox.classList.remove('hidden');
+                else quoteBox.classList.add('hidden');
+            }
+
+            // Submit Button
+            const submitBtnIcon = document.getElementById('order-submit-btn-icon');
+            const submitBtnText = document.getElementById('order-submit-btn-text');
+            if (submitBtnIcon) submitBtnIcon.textContent = isQuote ? 'send' : 'lock';
+            if (submitBtnText) {
+                const currentPrice = calculateAdaptivePrice();
+                submitBtnText.textContent = isQuote ? 'Send Quote to Admin (Free)' : `Pay & Place Order ($${currentPrice.toFixed(2)})`;
+            }
+        }
 
         function openNewOrderModal() {
+            currentModalMode = 'order';
+            updateModalModeUI();
             const modal = document.getElementById('new-order-modal');
             if (!modal) return;
-            // Always reset to Step 1 clean choice
+            switchOrderServiceChoice();
+            selectedArtworkFiles = [];
+            renderArtworkFileChips();
+            modal.classList.remove('hidden');
+        }
+
+        function openNewQuoteModal() {
+            currentModalMode = 'quote';
+            updateModalModeUI();
+            const modal = document.getElementById('new-order-modal');
+            if (!modal) return;
             switchOrderServiceChoice();
             selectedArtworkFiles = [];
             renderArtworkFileChips();
@@ -1581,7 +1778,7 @@
         }
 
         function openRequestQuoteModal() {
-            openNewOrderModal();
+            openNewQuoteModal();
         }
 
         function closeNewOrderModal() {
@@ -1665,6 +1862,11 @@
 
             if (priceDisplay) priceDisplay.textContent = `$${basePrice.toFixed(2)}`;
             if (priceBreakdown) priceBreakdown.textContent = breakdownText;
+
+            const submitBtnText = document.getElementById('order-submit-btn-text');
+            if (submitBtnText && currentModalMode !== 'quote') {
+                submitBtnText.textContent = `Pay & Place Order ($${basePrice.toFixed(2)})`;
+            }
 
             return basePrice;
         }
@@ -1795,18 +1997,20 @@
 
             const instructions = document.getElementById('order-notes')?.value.trim() || '';
             const turnaroundSpeed = document.querySelector('input[name="order-turnaround"]:checked')?.value || 'standard';
-            const price = calculateAdaptivePrice();
+            const isQuote = (currentModalMode === 'quote');
+            const price = isQuote ? null : calculateAdaptivePrice();
 
-            const paymentChoice = document.querySelector('input[name="order-payment-terms"]:checked')?.value || 'unpaid';
-            const paymentStatus = paymentChoice === 'paid' ? 'paid' : 'unpaid';
-            const paymentMethod = paymentChoice === 'paid' ? 'Credit Card / Upfront' : 'Pending Invoice';
+            const paymentStatus = 'unpaid';
+            const paymentMethod = isQuote ? 'Pending Admin Price Quote' : 'Pending Upfront Payment';
 
             let rawArtworkFiles = [];
 
             try {
                 if (submitBtn) {
                     submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">sync</span> Uploading Artworks & Placing Order...';
+                    submitBtn.innerHTML = isQuote 
+                        ? '<span class="material-symbols-outlined animate-spin text-sm">sync</span> Uploading Artwork & Submitting Quote...'
+                        : '<span class="material-symbols-outlined animate-spin text-sm">sync</span> Uploading Artworks & Placing Order...';
                 }
 
                 if (selectedArtworkFiles.length > 0) {
@@ -1829,8 +2033,11 @@
                 }
 
                 const createdOrder = await window.insforgeClient.createOrder({
+                    isQuote: isQuote,
                     serviceType: serviceType === 'Digitizing' ? 'Digitizing' : 'Vectorizing',
-                    planName: `${serviceType === 'Digitizing' ? 'Embroidery' : 'Vector'} - ${placement}`,
+                    planName: isQuote 
+                        ? `${serviceType === 'Digitizing' ? 'Digitizing' : 'Vector'} Quote - ${placement}`
+                        : `${serviceType === 'Digitizing' ? 'Embroidery' : 'Vector'} - ${placement}`,
                     projectName,
                     placement,
                     fabricType,
@@ -1842,7 +2049,8 @@
                     rawArtworkFiles,
                     price,
                     paymentStatus,
-                    paymentMethod
+                    paymentMethod,
+                    status: isQuote ? 'quote_requested' : 'pending_review'
                 });
 
                 closeNewOrderModal();
@@ -1851,15 +2059,28 @@
                 document.getElementById('adaptive-order-form')?.reset();
                 await renderOrders();
 
-                window.insforgeClient.showToast(
-                    'Order Placed Successfully',
-                    `Order #${createdOrder.order_number} has been created and synced live.`,
-                    'check_circle',
-                    'success'
-                );
+                if (isQuote) {
+                    window.insforgeClient.showToast(
+                        'Quote Submitted Successfully',
+                        `Quote #${createdOrder.order_number} has been submitted. Admin will review and provide custom pricing.`,
+                        'request_quote',
+                        'success'
+                    );
+                    scrollToSection('section-quotes');
+                } else {
+                    window.insforgeClient.showToast(
+                        'Order Placed - Payment Required',
+                        `Order #${createdOrder.order_number} created. Complete payment below to begin production.`,
+                        'lock',
+                        'info'
+                    );
+                    setTimeout(() => {
+                        openCheckoutModal(createdOrder.id);
+                    }, 350);
+                }
             } catch (err) {
                 console.error('Order creation error:', err);
-                alert(`⚠️ Error placing order: ${err.message}. Please try again.`);
+                alert(`⚠️ Error submitting ${isQuote ? 'quote' : 'order'}: ${err.message}. Please try again.`);
             } finally {
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -2013,11 +2234,13 @@
             const companyName = user.company || 'Falcon Apparel Co.';
             const initials = user.avatarInitials || displayName.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2) || 'CL';
 
-            // Top header button
+            // Top header & bottom nav buttons
             const headerName = document.getElementById('header-account-name');
             if (headerName) headerName.textContent = displayName;
             const headerAvatar = document.getElementById('header-account-avatar');
             if (headerAvatar) headerAvatar.textContent = initials;
+            const bottomAvatar = document.getElementById('bottom-nav-avatar');
+            if (bottomAvatar) bottomAvatar.textContent = initials;
 
             // Top demo role bar
             const topUserName = document.getElementById('top-user-name');

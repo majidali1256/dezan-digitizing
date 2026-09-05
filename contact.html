@@ -43,7 +43,7 @@
                     data-nav="services.html">Services</a>
                 <a href="portfolio.html" class="nav-link-gold transition-colors"
                     data-nav="portfolio.html">Feedbacks</a>
-                <a href="pricing.html" class="nav-link-gold transition-colors" data-nav="pricing.html">Order and Pricing</a>
+                <a href="pricing.html" class="nav-link-gold transition-colors" data-nav="pricing.html">Pricing</a>
                 <a href="contact.html" class="nav-link-gold transition-colors" data-nav="contact.html">Contact</a>
             </nav>
             <div class="flex items-center gap-2">
@@ -140,74 +140,75 @@
             </div>
         </section>
 
-        <!-- Get Quote Form -->
-        <section id="custom-quote-section" class="px-4 pb-12 pt-4">
-            <div class="bg-primary/5 dark:bg-primary/10 rounded-2xl p-6 md:p-8 border border-primary/20 shadow-sm relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-48 h-48 bg-primary/20 rounded-bl-full -z-10 blur-3xl"></div>
-                <h2 class="text-2xl font-black mb-2 tracking-tight">Request a Custom Quote</h2>
-                <p class="text-slate-500 text-sm mb-6 max-w-2xl">Have a special project, bulk order, or complex vector artwork requirement? Fill out the details below and we'll get back to you with a comprehensive quote within 24 hours.</p>
-                <form action="process_form.php" method="POST" id="quote-form" class="space-y-6" enctype="multipart/form-data">
-                <input type="hidden" name="access_key" value="50403232-c15e-4646-974b-272e18a54015">
-                <input type="hidden" name="subject" value="New Quote Request from Dezan Website">
-                <input type="hidden" name="redirect" value="order-success.html">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Your Name <span class="text-red-400">*</span></label>
-                            <input name="name"
-                                class="h-12 bg-white dark:bg-slate-800 border border-primary/20 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4"
-                                placeholder="Jane Doe" type="text" required />
+        <!-- Custom Quote Section (Authentication Required) -->
+        <section id="custom-quote-section" class="px-4 pb-12 pt-4 reveal">
+            <div class="bg-gradient-to-br from-primary/10 via-primary/5 to-slate-900/40 rounded-3xl p-6 md:p-10 border border-primary/25 shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-primary/15 rounded-bl-full -z-10 blur-3xl pointer-events-none"></div>
+                
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-100 dark:bg-primary/15 text-amber-900 dark:text-primary font-bold text-xs mb-4 border border-amber-300 dark:border-primary/25 shadow-xs">
+                    <span class="material-symbols-outlined text-sm">request_quote</span> Free Estimation • 12-24h Response
+                </div>
+                
+                <h2 class="text-2xl sm:text-3xl font-black mb-3 tracking-tight text-slate-900 dark:text-white">Request a Custom Quote</h2>
+                <p class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm mb-6 max-w-2xl leading-relaxed">
+                    Have a special embroidery project, bulk batch, complex jacket back, or vector redraw requirement? All quote requests, design specs, and artwork files are managed securely inside your dedicated <strong>Client Portal</strong> so you can track digitizer estimations, discuss thread specs, and approve production with a single click.
+                </p>
+
+                <!-- Dynamic Authentication Banners -->
+                <div class="mb-8">
+                    <!-- Logged-out state -->
+                    <div id="quote-login-prompt" class="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row items-center justify-between gap-4 text-left shadow-sm">
+                        <div class="flex items-center gap-3 text-xs sm:text-sm text-amber-900 dark:text-amber-200">
+                            <div class="w-10 h-10 rounded-xl bg-primary/20 text-primary flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-xl">lock</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-amber-950 dark:text-amber-100">Sign in to Submit Your Quote Request</h4>
+                                <p class="text-xs opacity-90 mt-0.5">Registration takes 30 seconds. Upload unlimited artwork files and receive an itemized quote within 24 hours.</p>
+                            </div>
                         </div>
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Email Address <span class="text-red-400">*</span></label>
-                            <input name="email"
-                                class="h-12 bg-white dark:bg-slate-800 border border-primary/20 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4"
-                                placeholder="jane@company.com" type="email" required />
-                        </div>
+                        <button type="button" onclick="window.handleQuoteClick(event)" data-action="request-quote" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs transition-all flex items-center justify-center gap-2 shadow-md flex-shrink-0 cursor-pointer">
+                            <span>Sign In to Request Quote</span>
+                            <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </button>
                     </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Service Type</label>
-                            <select name="service_type"
-                                class="h-12 bg-white dark:bg-slate-800 border border-primary/20 focus:border-primary rounded-xl px-4 text-sm text-slate-700 dark:text-slate-200 cursor-pointer">
-                                <option>Embroidery Digitizing</option>
-                                <option>Vector Art Conversion</option>
-                                <option>Combined / Other</option>
-                            </select>
+
+                    <!-- Logged-in state -->
+                    <div id="quote-client-banner" class="hidden p-4 sm:p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex flex-col sm:flex-row items-center justify-between gap-4 text-left shadow-sm">
+                        <div class="flex items-center gap-3 text-xs sm:text-sm text-emerald-900 dark:text-emerald-200">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-xl">verified_user</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-emerald-950 dark:text-emerald-100">Welcome, <span id="quote-client-name" class="text-emerald-700 dark:text-emerald-300">Client</span></h4>
+                                <p class="text-xs opacity-90 mt-0.5">Click below to open your interactive quote builder with multi-file artwork upload.</p>
+                            </div>
                         </div>
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Number of Designs / Quantity</label>
-                            <input name="quantity"
-                                class="h-12 bg-white dark:bg-slate-800 border border-primary/20 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4"
-                                placeholder="e.g., 5 unique logos" type="text" />
-                        </div>
+                        <button type="button" onclick="window.handleQuoteClick(event)" data-action="request-quote" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition-all flex items-center justify-center gap-2 shadow-md flex-shrink-0 cursor-pointer">
+                            <span>Open Quote Builder</span>
+                            <span class="material-symbols-outlined text-xs">add</span>
+                        </button>
                     </div>
-                    
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Project Details &amp; Requirements</label>
-                        <textarea name="requirements"
-                            class="bg-white dark:bg-slate-800 border border-primary/20 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-3"
-                            rows="4" placeholder="Please describe the size, fabric type, preferred machine formats (DST, PES, EPS), and turnaround expectations..."></textarea>
+                </div>
+
+                <!-- 3 Steps Feature Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-primary/15">
+                    <div class="p-4 rounded-xl bg-white/60 dark:bg-slate-800/50 border border-primary/10">
+                        <span class="text-primary font-black text-xs block mb-1">STEP 01</span>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Submit Design Specs</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Specify size, fabric type (cap, pique, jacket), and drop artwork files.</p>
                     </div>
-                    
-                    <div class="flex flex-col gap-1.5" id="quote-upload-container">
-                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Artwork Files</label>
-                        <div class="upload-zone w-full border-2 border-dashed border-primary/30 hover:border-primary/80 dark:hover:border-primary/80 rounded-xl flex flex-col items-center justify-center bg-white/60 dark:bg-slate-800/60 p-5 text-center cursor-pointer transition-all hover:scale-[1.005]">
-                            <span class="material-symbols-outlined text-primary text-4xl mb-2">cloud_upload</span>
-                            <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Drag &amp; Drop artwork files here or <span class="text-primary font-bold">Browse</span></p>
-                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Upload up to 5 files (Max 10MB each)</p>
-                            <p class="text-[10px] text-slate-400 dark:text-slate-500">Formats: DST, PES, EXP, JPG, PNG, PDF, ZIP, etc.</p>
-                            <input type="file" class="raw-file-input hidden" multiple accept=".dst,.pes,.exp,.ofm,.jef,.hus,.vip,.vp3,.xxx,.pdf,.png,.jpg,.jpeg,.gif,.zip,.rar,.ai,.eps,.svg,.cdr">
-                        </div>
-                        <div class="file-list mt-3 space-y-2 hidden"></div>
+                    <div class="p-4 rounded-xl bg-white/60 dark:bg-slate-800/50 border border-primary/10">
+                        <span class="text-primary font-black text-xs block mb-1">STEP 02</span>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Master Digitizer Review</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">We calculate exact stitch counts, thread color sequence, and deliver flat pricing in 12-24h.</p>
                     </div>
-                    
-                    <button
-                        class="w-full h-14 mt-2 bg-primary text-background-dark rounded-xl font-black text-lg shadow-xl shadow-primary/20 flex items-center justify-center gap-2 btn-hover-effect hover:-translate-y-0.5 transition-all"
-                        type="submit">
-                        Get Your Free Quote <span class="material-symbols-outlined font-bold">request_quote</span>
-                    </button>
-                </form>
+                    <div class="p-4 rounded-xl bg-white/60 dark:bg-slate-800/50 border border-primary/10">
+                        <span class="text-primary font-black text-xs block mb-1">STEP 03</span>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">1-Click Production</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Approve the quote in your portal to immediately begin digitizing.</p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -309,7 +310,7 @@
                     class="text-[10px] font-semibold">Feedbacks</span></a>
             <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="pricing.html"
                 data-page="pricing.html"><span class="material-symbols-outlined text-xl">payments</span><span
-                    class="text-[10px] font-semibold">Price/Order</span></a>
+                    class="text-[10px] font-semibold">Pricing</span></a>
             <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="contact.html"
                 data-page="contact.html"><span class="material-symbols-outlined text-xl">mail</span><span
                     class="text-[10px] font-semibold">Contact</span></a>

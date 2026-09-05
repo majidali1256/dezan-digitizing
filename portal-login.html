@@ -94,6 +94,17 @@
                 </button>
             </div>
 
+            <!-- Order Context Notice Banner (Shown when redirected from Order Now) -->
+            <div id="order-intent-banner" class="hidden mb-5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-800 dark:text-primary flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-lg">shopping_cart_checkout</span>
+                </div>
+                <div>
+                    <p class="font-black text-slate-900 dark:text-white" id="order-intent-title">Sign In to Place Your Order</p>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5" id="order-intent-desc">Please log in or create an account to start your order and track live machine deliverables.</p>
+                </div>
+            </div>
+
             <!-- Error Banner -->
             <div id="auth-error-banner" class="hidden mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-400 text-xs flex items-center gap-2">
                 <span class="material-symbols-outlined text-sm">error</span>
@@ -225,6 +236,43 @@
             }
         }
         updateThemeIcon();
+
+        // Check for order redirect context
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectParam = urlParams.get('redirect');
+            if (redirectParam === 'new_order' || redirectParam === 'order') {
+                const intentBanner = document.getElementById('order-intent-banner');
+                const intentTitle = document.getElementById('order-intent-title');
+                const intentDesc = document.getElementById('order-intent-desc');
+                const serviceParam = urlParams.get('service');
+                const planParam = urlParams.get('plan');
+
+                if (intentBanner) {
+                    intentBanner.classList.remove('hidden');
+                    if (planParam) {
+                        if (intentTitle) intentTitle.textContent = `Sign In to Order: ${planParam}`;
+                        if (intentDesc) intentDesc.textContent = `Log in or create an account to customize your ${planParam} order specs and files.`;
+                    } else if (serviceParam) {
+                        if (intentTitle) intentTitle.textContent = `Sign In to Order ${serviceParam}`;
+                        if (intentDesc) intentDesc.textContent = `Log in or create an account to submit your ${serviceParam} specs and artwork.`;
+                    }
+                }
+            } else if (redirectParam === 'request_quote' || redirectParam === 'quote') {
+                const intentBanner = document.getElementById('order-intent-banner');
+                const intentTitle = document.getElementById('order-intent-title');
+                const intentDesc = document.getElementById('order-intent-desc');
+                const serviceParam = urlParams.get('service');
+
+                if (intentBanner) {
+                    intentBanner.classList.remove('hidden');
+                    if (intentTitle) intentTitle.textContent = serviceParam ? `Sign In to Request a ${serviceParam} Quote` : `Sign In to Request a Custom Quote`;
+                    if (intentDesc) intentDesc.textContent = 'Log in or register to submit project specs, upload artwork, and track quotes in your client dashboard.';
+                }
+            }
+        } catch (e) {
+            console.warn('URL param parse error:', e);
+        }
 
         // Theme toggle button
         const themeBtn = document.querySelector('.theme-toggle-btn');

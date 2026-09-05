@@ -48,12 +48,35 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 - `/about.html`: Company history, experience, machinery/software standards (Wilcom, Tajima, Barudan).
 - `/services.html`: Detailed service breakdowns (Left chest, Cap/Hat, 3D Puff, Jacket Back, Vectorizing).
 - `/portfolio.html`: High-resolution gallery and customer feedback showcase.
-- `/pricing.html`: Transparent price list ($10 Left chest, $25 Jacket Back, $10 Vector) and initial order submission form.
-- `/contact.html`: Contact form, email links, FAQ, and direct consultation options.
+- `/pricing.html`: Dedicated flat-rate Pricing showcase in responsive 2-column grid layout, strictly adhering to Dezan's brand color scheme (Dezan Gold `#d4af35`, Dark Luxury `#201d12`, Card Dark `#16140c`, Warm Canvas `#f8f7f6`):
+  - **Hero**: "QUALITY DIGITIZING. REAL PEOPLE.", "Simple Flat-Rate Pricing", subtitle "Professional embroidery digitizing with clean, honest pricing.", 3 circular icon badges (Next Day Turnaround, Digitized by hand - no auto conversion, Order history and online downloads), and real stitch proof embroidery patch visual.
+  - **Digitizing 2-Column Grid**: Side-by-side cards on desktop/tablet, responsive stack on mobile:
+    - Card 1: **$15 Hat / Left Chest Logos** (Up to 5.5 inches) with high-precision bespoke SVG icon featuring a structured 6-panel baseball cap with curved visor & star crest paired with a collared polo shirt with left-chest embroidery emblem.
+    - Card 2: **$25 Larger Designs** (Over 5.5 inches) with high-precision bespoke SVG icon featuring a varsity/bomber apparel jacket with ribbed collar, center zipper, and oversized back embroidery shield emblem.
+    - Full-width Trust Bar: "Flat rate pricing you can depend on. Zero hidden stitch-count charges."
+  - **Vector Art 2-Column Grid**: Side-by-side cards on desktop/tablet, responsive stack on mobile:
+    - Card 1: **$15 Simple Vector Redraw** with high-precision bespoke SVG icon featuring bezier vector pen tool, tangent handles, and corner anchor nodes.
+    - Card 2: **$25 Complex Vector Redraw** with high-precision bespoke SVG icon featuring multi-layer mascot crest shield with faceted geometry and guide vertices.
+    - Full-width Trust Bar: "Mathematical precision in AI, EPS, SVG & print-ready vector PDF."
+  - **"BRANDS LOOK BETTER HERE" Grid**: All machine formats (DST, EMB, PES, etc.), Color Run Sheet PDF, Free Minor Revisions, Cap & 3D Puff optimization.
+  - **Strictly Pricing Only**: Zero embedded order forms or quote submission inputs. Authenticated client banners and action buttons route to `client-portal.html` (for logged-in clients) or `portal-login.html?redirect=...` (for unauthenticated visitors).
+  - **Instant Visibility & Zero CLS**: Removed `.reveal` opacity blocking so all cards and sections render immediately across all devices, with full light/dark mode contrast parity verified via Playwright visual verification across Desktop (1440x900), Tablet (834x1112), and Mobile (390x844).
+- `/contact.html`: Contact form for general inquiries, and authenticated "Request a Custom Quote" portal showcase. Legacy unauthenticated quote submission forms have been removed.
 - `/order-success.html`: Order confirmation receipt page with transaction lookup parameters.
 
+### Client Authentication Gate & Order / Quote Dispatcher (Implemented)
+- **Universal Order & Quote Authentication Gates (`window.handleOrderClick`, `window.handleQuoteClick`)**:
+  - Both **orders** and **quotes** can strictly only be submitted after client authentication.
+  - All "Order Now" CTAs across the site (`index.html` Hero, `services.html` service cards, `pricing.html` price cards, and `profile.html`) verify client session state before ordering.
+  - All "Get Quote" / "Request a Quote" CTAs (`index.html`, `about.html`, `portfolio.html`, `pricing.html`, `contact.html`) verify client session state before requesting quotes.
+  - **Logged-Out Behavior**: Redirects directly to `portal-login.html?redirect=new_order` or `portal-login.html?redirect=request_quote` with optional `&service=...` and `&plan=...` parameters.
+  - **Contextual Notice on Login**: `portal-login.html` presents a dedicated `#order-intent-banner` dynamically tailored to whether the user is signing in to place an order or request a custom quote.
+  - **Seamless Post-Login Handoff**: Once authenticated (via email/password, new registration, or 1-click demo client), `window.insforgeClient.redirectToDashboard` routes directly to `client-portal.html?action=new_order` or `client-portal.html?action=request_quote`.
+  - **Automatic Modal Launch**: `client-portal.html` detects `action=new_order` or `action=request_quote`, automatically launches the interactive wizard pre-selected to the requested service/plan, and cleans the URL query parameters.
+  - **Logged-In Fast-Track**: If the client is already authenticated, clicking "Order Now" or "Get Quote" on any marketing page bypasses login and goes straight to the portal with the respective wizard open.
+
 ### Role-Based Order Portal (Implemented & Live)
-- `/portal-login.html`: Unified authentication page with automatic role routing and 1-click test switcher.
+- `/portal-login.html`: Unified authentication page with automatic role routing, order intent banners, and 1-click test switcher.
 - `/client-portal.html`: Redesigned Client Portal (Matching user's reference mockup with warm Dezan gold theme):
   - **Header**: Bold title + "Track orders, pay invoices, and request quotes easily."
   - **3 Quick-Action Cards**: Place Order, Request Quote, Track Order.
@@ -82,13 +105,21 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
     - **Completed Orders**: Machine deliverable downloads (`.DST`, `.EMB`) + `[ Request a Revision ]` + View Invoice & Receipt.
     - **Quotes**: Quote estimation status or clean empty state with `+ Request Quote` action.
   - **Client Invoice & Printable Receipt Modal**: Official itemized tax invoice and work order with `@media print` support, unpaid alert banner, and direct "Pay Balance Due" action button.
+  - **Header & Navigation Refinement (Implemented)**:
+    - **Header**: Features side-by-side action buttons: Primary Gold `[ + New Order ]` (`#open-new-order-btn`) and Secondary Outline `[ 📄 Quote ]` (`#open-new-quote-btn`) with dark mode toggle. The profile/settings section was relocated to the bottom navigation bar as requested.
+    - **Fixed Bottom Navigation Dock**: 4 quick-access tabs (`Home`, `Orders`, `Quotes`, `Settings` with live client avatar initials `JF` and tune icon). Clicking `Settings` opens the comprehensive Account & Security modal (`#account-modal`).
+  - **Distinct Quote vs. Order Architecture**:
+    - **Shared Unified Technical Specs**: Both Quote and Order modes share the exact same comprehensive technical specifications (Embroidery Digitizing vs. Vector Art, placement, garment fabric, dimensions, file formats, 3D puff, turnaround speed, and artwork upload dropzone).
+    - **Order Flow (Mandatory Upfront Payment)**: Price summary and turnaround options are active. Dual payment term radios were removed; orders strictly require upfront payment to initiate production (`status: 'pending_review'`), launching the secure checkout modal immediately upon placement.
+    - **Quote Flow (Zero Upfront Payment & Admin Price Appraisal)**: Custom/personalized pieces use the Quote vehicle where no upfront payment is charged. Price breakdown is hidden and reassurance banner confirms free appraisal. Quotes are created with prefix `QUO-XXXX`, `is_quote: true`, and `status: 'quote_requested'`.
+    - **Admin Pricing Workflow (`admin-portal.html`)**: Stage 3 ("Incomplete Bookings, Payment Due & Quotes") features an amber `[ Give Price ]` action button for quotes, opening `#set-quote-price-modal`. The admin specifies approved USD price and notes (e.g., stitch density breakdown). Submitting patches InsForge PostgreSQL, updates status to `quote_ready`, and broadcasts `quote_priced`.
+    - **Client Quote Conversion Flow (`client-portal.html`)**: Real-time listeners detect quote pricing, displaying a pulsing `• Price Ready: $XX.XX` badge, Admin Pricing Note callout, and a prominent `[ Pay $XX.XX & Start Order ]` CTA. Paying via `#checkout-payment-modal` automatically converts the quote into an active production order (`is_quote: false`, `status: 'pending_review'`).
   - **Comprehensive Client Account & Security Suite (`#account-modal`)**:
-    - **Header & Navigation Integration**: Accessible instantly via top header `#header-account-btn` (with live monogram avatar and display name) as well as the mobile/desktop bottom navigation dock (`Account` tab).
+    - **Dock Integration**: Accessible directly from the bottom dock `Settings` tab.
     - **3-Tab Modular Architecture**:
       1. **Profile & Machinery Defaults (`#client-tab-profile`)**: Edit Full Name, Company / Brand Name, primary contact Phone / WhatsApp, preferred embroidery machine file format (`.DST`, `.EMB`, `.PES`, `.EXP`, `.JEF`, `.VP3`, `.AI Vector`), default fabric/garment type (Pique Cotton, Structured Twill Caps, Fleece, Dri-FIT, Canvas, Patches), and default turnaround SLA speed (`standard`, `rush`, `urgent`). Displays locked primary billing email and verified client badge. Synchronizes with session storage, `localStorage`, and InsForge PostgreSQL backend.
       2. **Password & Credential Security (`#client-tab-security`)**: Secure password change flow featuring current password verification, new password with dynamic 4-segment strength meter (Too Weak, Weak, Good, Strong), confirmation password match validator with live visual feedback, show/hide eye toggle buttons, and toast alerts.
       3. **Account & Billing Overview (`#client-tab-overview`)**: Monogram avatar, Client ID `#FC-882`, verified badge, lifetime order volume counter, live balance due metric, Net 30 billing terms, VIP fast-track SLA badge, and portal sign-out.
-  - **Fixed Bottom Navigation Dock**: 4 quick-access tabs (`Home`, `Orders`, `Quotes`, `Account`).
 - `/worker-portal.html`: Redesigned Digitizer Studio:
   - **Revision & Sew-Out Inspection Queue**: Tasks with status `revision_requested` display a prominent amber border with subtle glow, a pulsing `⚠️ Revision Requested` badge, and an eye-catching `Client Physical Stitch-Out Revision Feedback` callout containing the client's exact instructions and physical garment photo thumbnail.
   - **Click-to-Zoom Modal (`#stitch-out-zoom-modal`)**: Digitizers can click any sew-out photo to inspect embroidery defects at maximum resolution.

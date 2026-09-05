@@ -43,7 +43,7 @@
                     data-nav="services.html">Services</a>
                 <a href="portfolio.html" class="nav-link-gold transition-colors"
                     data-nav="portfolio.html">Feedbacks</a>
-                <a href="pricing.html" class="nav-link-gold transition-colors" data-nav="pricing.html">Order and Pricing</a>
+                <a href="pricing.html" class="nav-link-gold transition-colors" data-nav="pricing.html">Pricing</a>
                 <a href="contact.html" class="nav-link-gold transition-colors" data-nav="contact.html">Contact</a>
             </nav>
             <div class="flex items-center gap-2">
@@ -80,8 +80,8 @@
                     <p class="text-slate-300 text-sm md:text-base">Experience precision and quality with our expert
                         digitizing services. Fast 12-24h turnaround and unmatched detail.</p>
                     <div class="flex flex-col sm:flex-row gap-3 mt-4 justify-center">
-                        <a href="pricing.html"
-                            class="bg-primary text-background-dark font-bold py-3 px-8 rounded-lg btn-hover-effect text-center">Get
+                        <a href="portal-login.html?redirect=new_order" data-action="order-now" onclick="window.handleOrderClick(event)"
+                            class="bg-primary text-background-dark font-bold py-3 px-8 rounded-lg btn-hover-effect text-center cursor-pointer">Get
                             Started Now</a>
                         <a href="#portfolio"
                             class="bg-white/10 backdrop-blur-sm text-white border border-white/20 font-bold py-3 px-8 rounded-lg btn-hover-effect text-center">View
@@ -103,7 +103,7 @@
                     <div class="p-5">
                         <h4 class="font-bold text-lg mb-2">Embroidery Digitizing</h4>
                         <p class="text-slate-500 text-sm mb-4">We manually digitize every design, carefully mapping out stitch direction, underlay, and pull compensation so your machines run smoothly and your 3D puff, left chest logos, and jacket backs look incredibly crisp.</p>
-                        <a href="pricing.html" class="text-primary font-bold text-sm flex items-center gap-1">Order Now
+                        <a href="portal-login.html?redirect=new_order&service=Digitizing" data-action="order-now" data-service="Digitizing" onclick="window.handleOrderClick(event, 'Digitizing')" class="text-primary font-bold text-sm flex items-center gap-1 cursor-pointer">Order Now
                             <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
                     </div>
                 </div>
@@ -115,7 +115,7 @@
                     <div class="p-5">
                         <h4 class="font-bold text-lg mb-2">Vector Art Conversion</h4>
                         <p class="text-slate-500 text-sm mb-4">Convert low-res images into scalable AI, EPS, SVG, and PDF formats, perfect for screenprinting, vinyl, and laser engraving.</p>
-                        <a href="pricing.html" class="text-primary font-bold text-sm flex items-center gap-1">Order Now
+                        <a href="portal-login.html?redirect=new_order&service=Vectorizing" data-action="order-now" data-service="Vectorizing" onclick="window.handleOrderClick(event, 'Vectorizing')" class="text-primary font-bold text-sm flex items-center gap-1 cursor-pointer">Order Now
                             <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
                     </div>
                 </div>
@@ -334,7 +334,7 @@
                     class="text-[10px] font-semibold">Feedbacks</span></a>
             <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="pricing.html"
                 data-page="pricing.html"><span class="material-symbols-outlined text-xl">payments</span><span
-                    class="text-[10px] font-semibold">Price/Order</span></a>
+                    class="text-[10px] font-semibold">Pricing</span></a>
             <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="contact.html"
                 data-page="contact.html"><span class="material-symbols-outlined text-xl">mail</span><span
                     class="text-[10px] font-semibold">Contact</span></a>
