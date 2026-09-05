@@ -91,6 +91,28 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - **Strict Data Masking (Zero-Leakage Compliance)**: Customer personal identity (`client_name`, `client_email`, `client_company`) and pricing/payment status are 100% masked from workers at both the UI and database levels.
   - **Studio Controls**: 3 quick-action cards, 4 production metric badges, instant search & filter toolbar (with `⚠️ Revision Requested` filter), technical work order specs modal, machine format cheatsheet modal, worker profile modal, and mobile bottom navigation dock.
 - `/admin-portal.html`: Master Admin Executive Control Center (Continuous Unified Scroll Architecture):
+  - **4-Stage Operational Orders Pipeline Architecture (`#master-orders-section`)**:
+    Instead of dumping orders into a single list or grid, orders are organized into 4 dedicated, clearly demarcated operational stage subsections, each with its own contextual color theme, icon, live count badge, responsive visual bento cards grid, and toggleable structured table view:
+    1. **Stage 1: Action Required (Needs Assignment & Revisions)** (`#stage-unassigned-sub`):
+       - Amber/Orange gradient header with `assignment_late` icon.
+       - Focuses on unassigned customer orders awaiting digitizer dispatch and active client stitch-out revision requests.
+       - Highlights revision feedback specs with 1-click review modal and instant worker dispatch.
+    2. **Stage 2: Active Pipeline (In Production)** (`#stage-in-progress-sub`):
+       - Blue/Indigo gradient header with `precision_manufacturing` icon.
+       - Displays orders actively in digitization, stitch simulation, and quality review by assigned digitizers.
+       - Worker assignment badge with avatar, artwork preview link, and reassignment controls.
+    3. **Stage 3: Incomplete Bookings, Payment Due & Quotes** (`#stage-incomplete-sub`):
+       - Rose/Crimson gradient header with `credit_card_off` icon.
+       - Triage queue for bookings placed without completed checkout, outstanding invoices, and custom quote inquiries.
+       - Prominent **Outstanding Balance Alert Banner** with 1-click **Send Payment Reminder** modal (`#payment-reminder-modal`) to dispatch email payment alerts directly to customers.
+    4. **Stage 4: Completed Production Archive** (`#stage-completed-sub`):
+       - Emerald/Green gradient header with `verified` icon.
+       - Archive of finished embroidery machine deliverables (`.DST`, `.EMB`, `.PES`), stitch simulation previews, client history dossier access, and official tax invoices.
+  - **Stage Quick-Jump Navigation Toolbar**:
+    - Instant Stage Jumper pills (`All Stages`, `🚨 Needs Worker`, `⚡ In Production`, `💳 Incomplete & Unpaid`, `✅ Completed`) that smoothly scroll directly to the corresponding stage anchor with subtle pulse highlight.
+    - Global multi-stage instant search (`#admin-search-input`) with keyboard shortcuts (`/` or `Cmd/Ctrl+K`) that searches across all 4 stages simultaneously in real-time, displaying tailored empty states for non-matching stages.
+    - Stage Scope selector dropdown allowing admins to view all 4 continuous stages (default) or isolate a single stage.
+    - View Mode Switcher: Seamlessly toggles all 4 stages between Responsive Bento Cards and Compact Structured Tables.
   - **Unified Continuous Flow (Zero Section Hiding)**: Following the proven layout pattern of the Client and Worker portals, all 4 core admin sections are laid out sequentially on a continuous scrollable canvas by default. Clicking any tab or quick action card smoothly scrolls to the target anchor without hiding other sections:
     1. **Master Orders Queue** (`#master-orders-section`)
     2. **Clients Directory & History** (`#clients-directory-section`)

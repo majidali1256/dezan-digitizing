@@ -301,19 +301,32 @@
 
         <!-- =================================================================== -->
         <section id="master-orders-section" class="bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 rounded-2xl shadow-xs overflow-hidden mb-10 transition-all scroll-mt-28">
+            <!-- Master Orders Header Bar -->
             <div class="p-5 border-b border-slate-200 dark:border-primary/15 flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h3 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2" id="orders-section-heading">
                         <span class="material-symbols-outlined text-amber-700 dark:text-primary">receipt_long</span>
-                        <span id="orders-section-title">Master Orders Queue</span>
+                        <span id="orders-section-title">Production Orders Pipeline</span>
                     </h3>
-                    <p class="text-xs text-slate-600 dark:text-slate-400" id="orders-section-subtitle">Triage orders, dispatch digitizers, inspect stitch-outs, and review client dossiers</p>
+                    <p class="text-xs text-slate-600 dark:text-slate-400" id="orders-section-subtitle">Dedicated operational stages: Needs Assignment & Revisions, Active Production, Incomplete & Unpaid, and Completed Archive</p>
                 </div>
                 <div class="flex items-center gap-2">
+                    <!-- Scope selector: All 4 stages or isolate specific stage -->
+                    <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-primary/20">
+                        <span class="material-symbols-outlined text-xs text-slate-400">filter_alt</span>
+                        <select id="stage-scope-select" onchange="setStageScope(this.value)" class="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer">
+                            <option value="all">View All 4 Stages</option>
+                            <option value="stage-unassigned-sub">1. Action Required (Needs Worker / Revisions)</option>
+                            <option value="stage-in-progress-sub">2. Active Pipeline (In Production)</option>
+                            <option value="stage-incomplete-sub">3. Incomplete Bookings & Unpaid</option>
+                            <option value="stage-completed-sub">4. Completed Production Archive</option>
+                        </select>
+                    </div>
+
                     <button onclick="renderAdminOrders()" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs text-slate-700 dark:text-slate-300 font-bold flex items-center gap-1 cursor-pointer transition-all">
                         <span class="material-symbols-outlined text-sm">refresh</span> Refresh
                     </button>
-                    <!-- Hidden filter select for programmatic sync -->
+                    <!-- Hidden filter select for backward compatibility -->
                     <select id="filter-status" onchange="renderAdminOrders()" class="hidden">
                         <option value="all">All</option>
                         <option value="pending_review">Pending Assignment</option>
@@ -325,65 +338,230 @@
                 </div>
             </div>
 
-            <!-- Instant Search Bar & Filter Tab Pills -->
+            <!-- Instant Search Bar & Stage Jumper Anchors -->
             <div class="p-4 bg-slate-50/70 dark:bg-slate-900/40 border-b border-slate-200 dark:border-primary/15 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
                 <!-- Search Input with Clear Button -->
                 <div class="relative flex-1 max-w-md">
                     <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base pointer-events-none">search</span>
-                    <input type="text" id="admin-search-input" oninput="handleSearchInput()" placeholder="Search order #, client name, email, company, project..." class="w-full pl-9 pr-8 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-primary/30 rounded-xl text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-primary shadow-xs" />
+                    <input type="text" id="admin-search-input" oninput="handleSearchInput()" placeholder="Search across all 4 stages: order #, client, email, digitizer..." class="w-full pl-9 pr-8 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-primary/30 rounded-xl text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-primary shadow-xs" />
                     <button id="admin-search-clear-btn" onclick="clearAdminSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer" title="Clear search">
                         <span class="material-symbols-outlined text-sm">close</span>
                     </button>
                 </div>
 
-                <!-- Filter Tab Pills -->
-                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none" id="filter-pills-container">
-                    <button onclick="setFilter('all')" data-filter="all" class="filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 shadow-xs cursor-pointer whitespace-nowrap transition-all">
-                        All (<span id="pill-count-all">0</span>)
+                <!-- Stage Quick-Jump Pills (Clicking smoothly jumps to that dedicated stage) -->
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none" id="stage-jumper-pills">
+                    <button onclick="setStageScope('all')" data-stage-target="all" class="stage-jump-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 shadow-xs cursor-pointer whitespace-nowrap transition-all flex items-center gap-1">
+                        <span>All Stages</span>
+                        <span class="px-1.5 py-0.2 rounded-full bg-black/20 text-[10px]" id="pill-count-all">0</span>
                     </button>
-                    <button onclick="setFilter('pending_review')" data-filter="pending_review" class="filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 cursor-pointer whitespace-nowrap transition-all">
-                        Needs Worker (<span id="pill-count-unassigned">0</span>)
+                    <button onclick="jumpToStage('stage-unassigned-sub')" data-stage-target="stage-unassigned-sub" class="stage-jump-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 hover:border-amber-500 cursor-pointer whitespace-nowrap transition-all flex items-center gap-1">
+                        <span>🚨 Needs Worker</span>
+                        <span class="px-1.5 py-0.2 rounded-full bg-amber-100 dark:bg-amber-500/20 text-[10px]" id="pill-count-unassigned">0</span>
                     </button>
-                    <button onclick="setFilter('revision_requested')" data-filter="revision_requested" class="filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 cursor-pointer whitespace-nowrap transition-all">
-                        ⚠️ Revisions (<span id="pill-count-revisions">0</span>)
+                    <button onclick="jumpToStage('stage-in-progress-sub')" data-stage-target="stage-in-progress-sub" class="stage-jump-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-blue-800 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30 hover:border-blue-500 cursor-pointer whitespace-nowrap transition-all flex items-center gap-1">
+                        <span>⚡ In Production</span>
+                        <span class="px-1.5 py-0.2 rounded-full bg-blue-100 dark:bg-blue-500/20 text-[10px]" id="pill-count-in-progress">0</span>
                     </button>
-                    <button onclick="setFilter('unpaid')" data-filter="unpaid" class="filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 cursor-pointer whitespace-nowrap transition-all">
-                        Payment Due (<span id="pill-count-unpaid">0</span>)
+                    <button onclick="jumpToStage('stage-incomplete-sub')" data-stage-target="stage-incomplete-sub" class="stage-jump-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 hover:border-rose-500 cursor-pointer whitespace-nowrap transition-all flex items-center gap-1">
+                        <span>💳 Incomplete & Unpaid</span>
+                        <span class="px-1.5 py-0.2 rounded-full bg-rose-100 dark:bg-rose-500/20 text-[10px]" id="pill-count-unpaid">0</span>
                     </button>
-                    <button onclick="setFilter('in_progress')" data-filter="in_progress" class="filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 cursor-pointer whitespace-nowrap transition-all">
-                        In Production (<span id="pill-count-in-progress">0</span>)
+                    <button onclick="jumpToStage('stage-completed-sub')" data-stage-target="stage-completed-sub" class="stage-jump-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 hover:border-emerald-500 cursor-pointer whitespace-nowrap transition-all flex items-center gap-1">
+                        <span>✅ Completed</span>
+                        <span class="px-1.5 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-[10px]" id="pill-count-completed">0</span>
                     </button>
-                    <button onclick="setFilter('completed')" data-filter="completed" class="filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 cursor-pointer whitespace-nowrap transition-all">
-                        Completed (<span id="pill-count-completed">0</span>)
-                    </button>
+                    <!-- Legacy hidden span for pill-count-revisions if referenced -->
+                    <span id="pill-count-revisions" class="hidden">0</span>
                 </div>
             </div>
 
-            <!-- Mode 1: Responsive Bento Visual Card Grid (DEFAULT VIEW) -->
-            <div id="admin-cards-container" class="p-5 bg-slate-50/50 dark:bg-slate-950/20">
-                <div id="admin-cards-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <!-- =============================================================== -->
+            <!-- STAGE 1: ACTION REQUIRED / NEEDS WORKER & ACTIVE REVISIONS      -->
+            <!-- =============================================================== -->
+            <div id="stage-unassigned-sub" class="stage-sub-section border-b border-slate-200 dark:border-primary/15 transition-all scroll-mt-36">
+                <div class="px-5 py-3.5 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-b border-amber-500/15 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-800 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-base">assignment_late</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="text-sm font-black text-slate-900 dark:text-white">1. Action Required: Needs Assignment & Revisions</h4>
+                                <span id="badge-stage-unassigned" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/30">0 Orders</span>
+                            </div>
+                            <p class="text-[11px] text-slate-600 dark:text-slate-400">Incoming bookings awaiting digitizer dispatch and active client revision requests.</p>
+                        </div>
+                    </div>
+                    <button onclick="jumpToStage('stage-unassigned-sub')" class="text-xs text-amber-800 dark:text-amber-400 font-bold hover:underline flex items-center gap-0.5 cursor-pointer">
+                        <span>Jump to Stage 1</span>
+                        <span class="material-symbols-outlined text-xs">south</span>
+                    </button>
+                </div>
+                <!-- Cards Container -->
+                <div id="stage-unassigned-cards" class="stage-cards-container p-5 bg-amber-50/20 dark:bg-amber-950/10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     <!-- Rendered by JS -->
                 </div>
+                <!-- Table Container -->
+                <div id="stage-unassigned-table" class="stage-table-container hidden overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-primary/10 z-10">
+                            <tr>
+                                <th class="px-5 py-3">Order ID</th>
+                                <th class="px-5 py-3">Client & Company</th>
+                                <th class="px-5 py-3">Design Specs</th>
+                                <th class="px-5 py-3">Price & Payment</th>
+                                <th class="px-5 py-3">Status</th>
+                                <th class="px-5 py-3">Worker Dispatch</th>
+                                <th class="px-5 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stage-unassigned-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <!-- Mode 2: Responsive Desktop Table (Toggleable) -->
-            <div id="admin-table-container" class="hidden overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead class="sticky top-0 bg-slate-100 dark:bg-slate-950/80 backdrop-blur-xs text-slate-700 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-primary/10 z-10">
-                        <tr>
-                            <th class="px-5 py-3.5">Order ID</th>
-                            <th class="px-5 py-3.5">Client & Company</th>
-                            <th class="px-5 py-3.5">Design Specs</th>
-                            <th class="px-5 py-3.5">Price</th>
-                            <th class="px-5 py-3.5">Status</th>
-                            <th class="px-5 py-3.5">Assigned Digitizer</th>
-                            <th class="px-5 py-3.5 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-orders-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
-                        <!-- Rendered by JS -->
-                    </tbody>
-                </table>
+            <!-- =============================================================== -->
+            <!-- STAGE 2: ACTIVE PIPELINE / IN PRODUCTION                       -->
+            <!-- =============================================================== -->
+            <div id="stage-in-progress-sub" class="stage-sub-section border-b border-slate-200 dark:border-primary/15 transition-all scroll-mt-36">
+                <div class="px-5 py-3.5 bg-gradient-to-r from-blue-500/10 via-blue-500/5 to-transparent border-b border-blue-500/15 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-800 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-base">precision_manufacturing</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="text-sm font-black text-slate-900 dark:text-white">2. Active Pipeline: In Production</h4>
+                                <span id="badge-stage-in-progress" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-blue-500/20 text-blue-900 dark:text-blue-300 border border-blue-500/30">0 Orders</span>
+                            </div>
+                            <p class="text-[11px] text-slate-600 dark:text-slate-400">Orders actively being digitized, undergoing stitch simulation, and in QA review.</p>
+                        </div>
+                    </div>
+                    <button onclick="jumpToStage('stage-in-progress-sub')" class="text-xs text-blue-800 dark:text-blue-400 font-bold hover:underline flex items-center gap-0.5 cursor-pointer">
+                        <span>Jump to Stage 2</span>
+                        <span class="material-symbols-outlined text-xs">south</span>
+                    </button>
+                </div>
+                <!-- Cards Container -->
+                <div id="stage-in-progress-cards" class="stage-cards-container p-5 bg-blue-50/20 dark:bg-blue-950/10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <!-- Rendered by JS -->
+                </div>
+                <!-- Table Container -->
+                <div id="stage-in-progress-table" class="stage-table-container hidden overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-primary/10 z-10">
+                            <tr>
+                                <th class="px-5 py-3">Order ID</th>
+                                <th class="px-5 py-3">Client & Company</th>
+                                <th class="px-5 py-3">Design Specs</th>
+                                <th class="px-5 py-3">Price & Payment</th>
+                                <th class="px-5 py-3">Status</th>
+                                <th class="px-5 py-3">Assigned Digitizer</th>
+                                <th class="px-5 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stage-in-progress-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- =============================================================== -->
+            <!-- STAGE 3: INCOMPLETE BOOKINGS, PAYMENT DUE & QUOTES              -->
+            <!-- =============================================================== -->
+            <div id="stage-incomplete-sub" class="stage-sub-section border-b border-slate-200 dark:border-primary/15 transition-all scroll-mt-36">
+                <div class="px-5 py-3.5 bg-gradient-to-r from-rose-500/10 via-rose-500/5 to-transparent border-b border-rose-500/15 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-800 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-base">credit_card_off</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="text-sm font-black text-slate-900 dark:text-white">3. Incomplete Bookings, Payment Due & Quotes</h4>
+                                <span id="badge-stage-incomplete" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-rose-500/20 text-rose-900 dark:text-rose-300 border border-rose-500/30">0 Orders</span>
+                            </div>
+                            <p class="text-[11px] text-slate-600 dark:text-slate-400">Bookings placed without completed checkout, pending balances, and quote estimates awaiting client clearance.</p>
+                        </div>
+                    </div>
+                    <button onclick="jumpToStage('stage-incomplete-sub')" class="text-xs text-rose-800 dark:text-rose-400 font-bold hover:underline flex items-center gap-0.5 cursor-pointer">
+                        <span>Jump to Stage 3</span>
+                        <span class="material-symbols-outlined text-xs">south</span>
+                    </button>
+                </div>
+                <!-- Cards Container -->
+                <div id="stage-incomplete-cards" class="stage-cards-container p-5 bg-rose-50/20 dark:bg-rose-950/10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <!-- Rendered by JS -->
+                </div>
+                <!-- Table Container -->
+                <div id="stage-incomplete-table" class="stage-table-container hidden overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-primary/10 z-10">
+                            <tr>
+                                <th class="px-5 py-3">Order ID</th>
+                                <th class="px-5 py-3">Client & Company</th>
+                                <th class="px-5 py-3">Design Specs</th>
+                                <th class="px-5 py-3">Outstanding Balance</th>
+                                <th class="px-5 py-3">Payment Status</th>
+                                <th class="px-5 py-3">Digitizer</th>
+                                <th class="px-5 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stage-incomplete-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- =============================================================== -->
+            <!-- STAGE 4: COMPLETED PRODUCTION ARCHIVE                           -->
+            <!-- =============================================================== -->
+            <div id="stage-completed-sub" class="stage-sub-section transition-all scroll-mt-36">
+                <div class="px-5 py-3.5 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border-b border-emerald-500/15 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-800 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-base">verified</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="text-sm font-black text-slate-900 dark:text-white">4. Completed Production Archive</h4>
+                                <span id="badge-stage-completed" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-500/20 text-emerald-900 dark:text-emerald-300 border border-emerald-500/30">0 Orders</span>
+                            </div>
+                            <p class="text-[11px] text-slate-600 dark:text-slate-400">Delivered embroidery files (.DST, .EMB, .PES, etc.), verified stitch-outs, and downloadable tax invoices.</p>
+                        </div>
+                    </div>
+                    <button onclick="jumpToStage('stage-completed-sub')" class="text-xs text-emerald-800 dark:text-emerald-400 font-bold hover:underline flex items-center gap-0.5 cursor-pointer">
+                        <span>Jump to Stage 4</span>
+                        <span class="material-symbols-outlined text-xs">south</span>
+                    </button>
+                </div>
+                <!-- Cards Container -->
+                <div id="stage-completed-cards" class="stage-cards-container p-5 bg-emerald-50/20 dark:bg-emerald-950/10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <!-- Rendered by JS -->
+                </div>
+                <!-- Table Container -->
+                <div id="stage-completed-table" class="stage-table-container hidden overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-primary/10 z-10">
+                            <tr>
+                                <th class="px-5 py-3">Order ID</th>
+                                <th class="px-5 py-3">Client & Company</th>
+                                <th class="px-5 py-3">Design Specs</th>
+                                <th class="px-5 py-3">Total Paid</th>
+                                <th class="px-5 py-3">Status</th>
+                                <th class="px-5 py-3">Completed By</th>
+                                <th class="px-5 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stage-completed-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -1020,30 +1198,95 @@
             });
         }
 
+        let currentStageScope = 'all';
+
+        /**
+         * Smoothly jump directly to one of the 4 operational stage subsections
+         */
+        function jumpToStage(stageSubId) {
+            setStageScope('all');
+            
+            setTimeout(() => {
+                const el = document.getElementById(stageSubId);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Highlight pulse
+                    el.classList.add('ring-2', 'ring-amber-500/80');
+                    setTimeout(() => {
+                        el.classList.remove('ring-2', 'ring-amber-500/80');
+                    }, 1400);
+                }
+            }, 60);
+        }
+
+        /**
+         * Filter / isolate a specific stage or view all 4 continuous stages
+         */
+        function setStageScope(scopeKey) {
+            currentStageScope = scopeKey;
+            const stageIds = ['stage-unassigned-sub', 'stage-in-progress-sub', 'stage-incomplete-sub', 'stage-completed-sub'];
+
+            stageIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (scopeKey === 'all' || scopeKey === id) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+
+            // Update stage jump pills styling
+            document.querySelectorAll('.stage-jump-pill').forEach(btn => {
+                const target = btn.getAttribute('data-stage-target');
+                if (scopeKey === 'all' && target === 'all') {
+                    btn.className = 'stage-jump-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 shadow-xs cursor-pointer whitespace-nowrap transition-all flex items-center gap-1 ring-2 ring-amber-500';
+                } else if (target === scopeKey) {
+                    btn.className = 'stage-jump-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 shadow-xs cursor-pointer whitespace-nowrap transition-all flex items-center gap-1 ring-2 ring-amber-500';
+                } else {
+                    const baseStyles = {
+                        'all': 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400',
+                        'stage-unassigned-sub': 'bg-white dark:bg-slate-800 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 hover:border-amber-500',
+                        'stage-in-progress-sub': 'bg-white dark:bg-slate-800 text-blue-800 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30 hover:border-blue-500',
+                        'stage-incomplete-sub': 'bg-white dark:bg-slate-800 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 hover:border-rose-500',
+                        'stage-completed-sub': 'bg-white dark:bg-slate-800 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 hover:border-emerald-500'
+                    };
+                    btn.className = `stage-jump-pill px-3 py-1.5 rounded-xl text-xs font-bold ${baseStyles[target] || 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200'} cursor-pointer whitespace-nowrap transition-all flex items-center gap-1`;
+                }
+            });
+
+            const select = document.getElementById('stage-scope-select');
+            if (select && select.value !== scopeKey) select.value = scopeKey;
+        }
+
         function setFilter(filterName) {
             activeAdminFilter = filterName;
             const select = document.getElementById('filter-status');
             if (select) select.value = filterName;
 
-            // Update pill styling
-            document.querySelectorAll('.filter-pill').forEach(btn => {
-                if (btn.getAttribute('data-filter') === filterName) {
-                    btn.className = 'filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 shadow-xs cursor-pointer whitespace-nowrap transition-all';
-                } else {
-                    btn.className = 'filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 cursor-pointer whitespace-nowrap transition-all';
-                }
-            });
+            if (filterName === 'pending_review' || filterName === 'revision_requested') {
+                jumpToStage('stage-unassigned-sub');
+            } else if (filterName === 'in_progress') {
+                jumpToStage('stage-in-progress-sub');
+            } else if (filterName === 'unpaid') {
+                jumpToStage('stage-incomplete-sub');
+            } else if (filterName === 'completed') {
+                jumpToStage('stage-completed-sub');
+            } else {
+                setStageScope('all');
+            }
 
             renderAdminOrders();
         }
 
         function setFilterAndScroll(filterName) {
-            switchAdminView(filterName);
+            switchAdminView('orders');
+            setFilter(filterName);
         }
 
         function filterByUnpaid() {
             switchAdminView('orders');
-            setFilter('unpaid');
+            jumpToStage('stage-incomplete-sub');
         }
 
         function setAdminLayout(mode) {
@@ -1052,12 +1295,12 @@
 
             const tableBtn = document.getElementById('layout-toggle-table');
             const gridBtn = document.getElementById('layout-toggle-grid');
-            const tableContainer = document.getElementById('admin-table-container');
-            const cardsContainer = document.getElementById('admin-cards-container');
+            const cardContainers = document.querySelectorAll('.stage-cards-container');
+            const tableContainers = document.querySelectorAll('.stage-table-container');
 
             if (mode === 'grid') {
-                if (tableContainer) tableContainer.classList.add('hidden');
-                if (cardsContainer) cardsContainer.classList.remove('hidden');
+                tableContainers.forEach(el => el.classList.add('hidden'));
+                cardContainers.forEach(el => el.classList.remove('hidden'));
                 if (gridBtn) {
                     gridBtn.className = 'px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs cursor-pointer';
                 }
@@ -1065,8 +1308,8 @@
                     tableBtn.className = 'px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer';
                 }
             } else {
-                if (tableContainer) tableContainer.classList.remove('hidden');
-                if (cardsContainer) cardsContainer.classList.add('hidden');
+                tableContainers.forEach(el => el.classList.remove('hidden'));
+                cardContainers.forEach(el => el.classList.add('hidden'));
                 if (tableBtn) {
                     tableBtn.className = 'px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs cursor-pointer';
                 }
@@ -1281,240 +1524,339 @@
         }
 
         /**
-         * Render Master Orders Queue (Cards or Table)
+         * Render Master Production Orders Pipeline across 4 dedicated operational stages
          */
         function renderAdminOrders() {
             const allOrders = window.insforgeClient.getOrders();
-            const digitizers = window.insforgeClient.getDigitizers();
-
-            // Compute counts for filter pills
-            const totalCount = allOrders.length;
-            const unassignedCount = allOrders.filter(o => !o.assigned_digitizer_id || o.status === 'pending_review').length;
-            const revisionsCount = allOrders.filter(o => o.status === 'revision_requested').length;
-            const unpaidCount = allOrders.filter(o => o.payment_status === 'unpaid' || o.payment_status === 'pending').length;
-            const inProgressCount = allOrders.filter(o => o.status === 'in_progress' || o.status === 'assigned').length;
-            const completedCount = allOrders.filter(o => o.status === 'completed').length;
-
-            if (document.getElementById('pill-count-all')) document.getElementById('pill-count-all').textContent = totalCount;
-            if (document.getElementById('pill-count-unassigned')) document.getElementById('pill-count-unassigned').textContent = unassignedCount;
-            if (document.getElementById('pill-count-revisions')) document.getElementById('pill-count-revisions').textContent = revisionsCount;
-            if (document.getElementById('pill-count-unpaid')) document.getElementById('pill-count-unpaid').textContent = unpaidCount;
-            if (document.getElementById('pill-count-in-progress')) document.getElementById('pill-count-in-progress').textContent = inProgressCount;
-            if (document.getElementById('pill-count-completed')) document.getElementById('pill-count-completed').textContent = completedCount;
-
             const searchInput = (document.getElementById('admin-search-input')?.value || '').toLowerCase().trim();
 
-            const filtered = allOrders.filter(o => {
-                let matchesFilter = true;
-                if (activeAdminFilter === 'pending_review') {
-                    matchesFilter = !o.assigned_digitizer_id || o.status === 'pending_review';
-                } else if (activeAdminFilter === 'revision_requested') {
-                    matchesFilter = o.status === 'revision_requested';
-                } else if (activeAdminFilter === 'unpaid') {
-                    matchesFilter = o.payment_status === 'unpaid' || o.payment_status === 'pending';
-                } else if (activeAdminFilter === 'in_progress') {
-                    matchesFilter = o.status === 'in_progress' || o.status === 'assigned';
-                } else if (activeAdminFilter === 'completed') {
-                    matchesFilter = o.status === 'completed';
-                }
+            // 1. Stage 1: Action Required / Needs Assignment & Revisions
+            // Criteria: Unassigned non-completed orders, pending_review, or revision_requested
+            const stage1Orders = allOrders.filter(o => {
+                const isNeedsWorker = (!o.assigned_digitizer_id && o.status !== 'completed' && o.status !== 'cancelled') || o.status === 'pending_review';
+                const isRevision = o.status === 'revision_requested';
+                return isNeedsWorker || isRevision;
+            });
 
-                let matchesSearch = true;
-                if (searchInput) {
-                    matchesSearch = (o.order_number && o.order_number.toLowerCase().includes(searchInput)) ||
+            // 2. Stage 2: Active Pipeline / In Production
+            // Criteria: Active assigned production work (in_progress, assigned, qa_review) and not a revision request
+            const stage2Orders = allOrders.filter(o => {
+                const isInProd = o.status === 'in_progress' || o.status === 'assigned' || o.status === 'qa_review';
+                const isRevision = o.status === 'revision_requested';
+                return isInProd && !isRevision;
+            });
+
+            // 3. Stage 3: Incomplete Bookings, Payment Due & Quotes
+            // Criteria: Unpaid or pending checkout, or quotes
+            const stage3Orders = allOrders.filter(o => {
+                return o.payment_status === 'unpaid' || o.payment_status === 'pending' || o.is_quote === true || o.status === 'quote_requested';
+            });
+
+            // 4. Stage 4: Completed Production Archive
+            // Criteria: completed status
+            const stage4Orders = allOrders.filter(o => o.status === 'completed');
+
+            // Update Header & Pill Counts
+            const totalCount = allOrders.length;
+            if (document.getElementById('pill-count-all')) document.getElementById('pill-count-all').textContent = totalCount;
+            if (document.getElementById('pill-count-unassigned')) document.getElementById('pill-count-unassigned').textContent = stage1Orders.length;
+            if (document.getElementById('pill-count-in-progress')) document.getElementById('pill-count-in-progress').textContent = stage2Orders.length;
+            if (document.getElementById('pill-count-unpaid')) document.getElementById('pill-count-unpaid').textContent = stage3Orders.length;
+            if (document.getElementById('pill-count-completed')) document.getElementById('pill-count-completed').textContent = stage4Orders.length;
+            if (document.getElementById('quick-badge-orders')) document.getElementById('quick-badge-orders').textContent = totalCount;
+
+            if (document.getElementById('badge-stage-unassigned')) document.getElementById('badge-stage-unassigned').textContent = `${stage1Orders.length} Orders`;
+            if (document.getElementById('badge-stage-in-progress')) document.getElementById('badge-stage-in-progress').textContent = `${stage2Orders.length} In Progress`;
+            if (document.getElementById('badge-stage-incomplete')) document.getElementById('badge-stage-incomplete').textContent = `${stage3Orders.length} Pending Payment`;
+            if (document.getElementById('badge-stage-completed')) document.getElementById('badge-stage-completed').textContent = `${stage4Orders.length} Completed`;
+
+            // Instant Search Filtering across all 4 stages
+            const filterBySearch = (orders) => {
+                if (!searchInput) return orders;
+                return orders.filter(o => {
+                    return (o.order_number && o.order_number.toLowerCase().includes(searchInput)) ||
                         (o.client_name && o.client_name.toLowerCase().includes(searchInput)) ||
                         (o.client_email && o.client_email.toLowerCase().includes(searchInput)) ||
                         (o.client_company && o.client_company.toLowerCase().includes(searchInput)) ||
                         (o.project_name && o.project_name.toLowerCase().includes(searchInput)) ||
                         (o.assigned_digitizer_name && o.assigned_digitizer_name.toLowerCase().includes(searchInput));
+                });
+            };
+
+            // Render each stage independently with custom empty states
+            renderStageSection('unassigned', filterBySearch(stage1Orders), searchInput, 'All incoming orders have assigned digitizers, with no active revision requests pending.');
+            renderStageSection('in-progress', filterBySearch(stage2Orders), searchInput, 'No orders actively in production undergoing digitization at this moment.');
+            renderStageSection('incomplete', filterBySearch(stage3Orders), searchInput, 'All client balances and invoices are settled. No incomplete bookings or unpaid quotes.');
+            renderStageSection('completed', filterBySearch(stage4Orders), searchInput, 'No completed production orders archived yet.');
+
+            // Compatibility Bridge for Legacy Selectors (#admin-orders-tbody)
+            const legacyTbody = document.getElementById('admin-orders-tbody');
+            if (legacyTbody) {
+                const combined = filterBySearch(allOrders);
+                if (combined.length === 0) {
+                    legacyTbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-500 dark:text-slate-400 font-medium">No matching orders found.</td></tr>`;
+                } else {
+                    legacyTbody.innerHTML = combined.map(o => renderAdminOrderTableRow(o, 'all')).join('');
                 }
+            }
+        }
 
-                return matchesFilter && matchesSearch;
-            });
+        /**
+         * Render a specific Stage Subsection (Cards and Table)
+         */
+        function renderStageSection(stageKey, orders, searchInput, emptyMessage) {
+            const cardsContainer = document.getElementById(`stage-${stageKey}-cards`);
+            const tbody = document.getElementById(`stage-${stageKey}-tbody`);
 
-            // Render 1: Desktop Table
-            const tbody = document.getElementById('admin-orders-tbody');
+            // Render Bento Visual Cards
+            if (cardsContainer) {
+                if (orders.length === 0) {
+                    const msg = searchInput 
+                        ? `No orders matching "${searchInput}" in this stage.` 
+                        : emptyMessage;
+                    cardsContainer.innerHTML = `
+                        <div class="col-span-full text-center py-8 px-4 rounded-xl border border-dashed border-slate-300 dark:border-primary/20 bg-white/60 dark:bg-card-dark/60 text-slate-500 dark:text-slate-400 text-xs">
+                            <span class="material-symbols-outlined text-2xl text-slate-400 dark:text-slate-500 block mb-1">info</span>
+                            <span class="font-medium">${msg}</span>
+                        </div>
+                    `;
+                } else {
+                    cardsContainer.innerHTML = orders.map(o => renderAdminOrderCard(o, stageKey)).join('');
+                }
+            }
+
+            // Render Table Rows
             if (tbody) {
-                if (filtered.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-slate-500 dark:text-slate-400 font-medium">No orders matching "${searchInput || activeAdminFilter}".</td></tr>`;
+                if (orders.length === 0) {
+                    const msg = searchInput 
+                        ? `No orders matching "${searchInput}" in this stage.` 
+                        : emptyMessage;
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center py-8 text-slate-500 dark:text-slate-400 font-medium text-xs">
+                                ${msg}
+                            </td>
+                        </tr>
+                    `;
                 } else {
-                    tbody.innerHTML = filtered.map(order => {
-                        const assignedText = order.assigned_digitizer_name 
-                            ? `<span class="text-slate-800 dark:text-slate-200 font-semibold">${order.assigned_digitizer_name}</span>`
-                            : '<span class="text-amber-800 dark:text-amber-400 font-bold">Unassigned</span>';
-                        const isPaid = order.payment_status === 'paid';
-                        const isRevision = order.status === 'revision_requested';
-                        
-                        return `
-                            <tr class="hover:bg-amber-50/50 dark:hover:bg-slate-800/40 transition-colors ${isRevision ? 'bg-amber-50/30 dark:bg-amber-950/20' : ''}">
-                                <td class="px-5 py-4 font-mono font-bold text-amber-800 dark:text-primary">${order.order_number}</td>
-                                <td class="px-5 py-4">
-                                    <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="group/client flex items-center gap-1.5 text-left cursor-pointer hover:text-amber-700 dark:hover:text-primary transition-colors">
-                                        <strong class="text-slate-900 dark:text-white font-bold group-hover/client:text-amber-700 dark:group-hover/client:text-primary">${order.client_name}</strong>
-                                        <span class="material-symbols-outlined text-[13px] text-amber-700 dark:text-primary opacity-70 group-hover/client:opacity-100">history</span>
-                                    </button>
-                                    <span class="text-slate-600 dark:text-slate-400 text-[11px] font-medium block mt-0.5">${order.client_company || 'Independent'} · ${order.client_email}</span>
-                                </td>
-                                <td class="px-5 py-4">
-                                    <span class="text-slate-900 dark:text-white font-semibold block">${order.project_name}</span>
-                                    <span class="text-slate-600 dark:text-slate-400 text-[11px] font-medium block mb-1">${order.placement || 'Standard'} (${order.sizing || 'Default'})</span>
-                                    <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                                        ${order.raw_artwork_files && order.raw_artwork_files.length > 0 ? `
-                                            <a href="${order.raw_artwork_files[0].url}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 dark:bg-primary/10 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/20 text-[10px] font-bold hover:bg-amber-100">
-                                                <span class="material-symbols-outlined text-[12px]">attach_file</span> Artwork
-                                            </a>
-                                        ` : ''}
-                                        ${order.deliverables && order.deliverables.length > 0 ? order.deliverables.map(d => `
-                                            <a href="${d.url}" target="_blank" class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold hover:bg-emerald-100">
-                                                <span class="material-symbols-outlined text-[11px]">download</span> ${d.format}
-                                            </a>
-                                        `).join('') : ''}
-                                    </div>
-                                </td>
-                                <td class="px-5 py-4">
-                                    <span class="font-black text-slate-900 dark:text-slate-100 text-sm block">$${Number(order.price || 0).toFixed(2)}</span>
-                                    <div class="mt-1">${getPaymentBadge(order.payment_status)}</div>
-                                </td>
-                                <td class="px-5 py-4">${getStatusBadge(order.status)}</td>
-                                <td class="px-5 py-4 text-xs">${assignedText}</td>
-                                <td class="px-5 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-1.5 flex-wrap">
-                                        <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs" title="View complete lifetime client order history">
-                                            <span class="material-symbols-outlined text-xs">history</span>
-                                            <span>History</span>
-                                        </button>
-                                        ${isRevision ? `
-                                            <button onclick="openAdminRevisionModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-orange-100 hover:bg-orange-200 dark:bg-orange-500/20 dark:hover:bg-orange-500/30 text-orange-950 dark:text-orange-300 border border-orange-300 dark:border-orange-500/40 font-black text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs">
-                                                <span class="material-symbols-outlined text-xs text-orange-600 dark:text-orange-400">rate_review</span>
-                                                <span>Specs</span>
-                                            </button>
-                                        ` : ''}
-                                        ${!isPaid ? `
-                                            <button onclick="openPaymentReminderModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/15 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs">
-                                                <span class="material-symbols-outlined text-xs">forward_to_inbox</span>
-                                                <span>Remind</span>
-                                            </button>
-                                        ` : ''}
-                                        <button onclick="openInvoiceModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1">
-                                            <span class="material-symbols-outlined text-sm text-amber-700 dark:text-primary">receipt</span>
-                                            <span>Invoice</span>
-                                        </button>
-                                        <button onclick="openAssignModal('${order.order_number}')" class="px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 dark:hover:bg-primary text-amber-900 dark:text-primary hover:text-amber-950 dark:hover:text-background-dark border border-amber-300 dark:border-primary/30 font-bold text-[11px] transition-all cursor-pointer">
-                                            ${order.assigned_digitizer_id ? 'Reassign' : 'Assign'}
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                    }).join('');
+                    tbody.innerHTML = orders.map(o => renderAdminOrderTableRow(o, stageKey)).join('');
                 }
             }
+        }
 
-            // Render 2: Responsive Bento Visual Cards Grid (Default)
-            const cardsGrid = document.getElementById('admin-cards-grid');
-            if (cardsGrid) {
-                if (filtered.length === 0) {
-                    cardsGrid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 dark:text-slate-400 bg-white dark:bg-card-dark rounded-2xl border border-dashed border-slate-300 dark:border-primary/20">No orders matching "${searchInput || activeAdminFilter}".</div>`;
-                } else {
-                    cardsGrid.innerHTML = filtered.map(order => {
-                        const isPaid = order.payment_status === 'paid';
-                        const isRevision = order.status === 'revision_requested';
-                        const assignedText = order.assigned_digitizer_name 
-                            ? `<span class="inline-flex items-center gap-1 font-semibold text-slate-800 dark:text-slate-200"><span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">badge</span> ${order.assigned_digitizer_name}</span>`
-                            : '<span class="inline-flex items-center gap-1 font-bold text-amber-800 dark:text-amber-400"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Unassigned</span>';
+        /**
+         * Modular Visual Bento Card Renderer
+         */
+        function renderAdminOrderCard(order, stageKey) {
+            const isPaid = order.payment_status === 'paid';
+            const isRevision = order.status === 'revision_requested';
+            const isUnassigned = !order.assigned_digitizer_id;
 
-                        return `
-                            <div class="p-5 rounded-2xl bg-white dark:bg-card-dark border ${isRevision ? 'border-amber-400 dark:border-amber-500/40 bg-amber-50/20 dark:bg-amber-950/10' : 'border-slate-200/90 dark:border-primary/20'} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
-                                <div>
-                                    <div class="flex items-start justify-between gap-2 mb-3">
-                                        <div>
-                                            <span class="font-mono text-xs font-black text-amber-800 dark:text-primary tracking-wide">${order.order_number}</span>
-                                            <span class="text-[11px] text-slate-500 block font-medium">${order.created_at ? formatTimeAgo(order.created_at) : 'Recent'}</span>
-                                        </div>
-                                        <div class="flex flex-col items-end gap-1.5">
-                                            ${getStatusBadge(order.status)}
-                                            ${getPaymentBadge(order.payment_status)}
-                                        </div>
-                                    </div>
+            const assignedText = order.assigned_digitizer_name 
+                ? `<span class="inline-flex items-center gap-1 font-semibold text-slate-800 dark:text-slate-200"><span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">badge</span> ${order.assigned_digitizer_name}</span>`
+                : '<span class="inline-flex items-center gap-1 font-bold text-amber-800 dark:text-amber-400"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Unassigned</span>';
 
-                                    <div class="mb-3">
-                                        <h4 class="font-black text-slate-900 dark:text-white text-sm group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">${order.project_name}</h4>
-                                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">${order.placement || 'Standard'} · ${order.sizing || 'Default Size'}</p>
-                                        ${order.fabric_type ? `<span class="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Fabric: ${order.fabric_type}</span>` : ''}
-                                    </div>
+            // Border styling based on stage context
+            let borderStyle = 'border-slate-200/90 dark:border-primary/20 bg-white dark:bg-card-dark';
+            if (isRevision) {
+                borderStyle = 'border-orange-300 dark:border-orange-500/40 bg-orange-50/20 dark:bg-orange-950/15 ring-1 ring-orange-400/40';
+            } else if (stageKey === 'incomplete' || !isPaid) {
+                borderStyle = 'border-rose-300/80 dark:border-rose-500/30 bg-rose-50/15 dark:bg-rose-950/10';
+            }
 
-                                    <!-- Interactive Client Box (Click to open full history dossier) -->
-                                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/10 mb-3 text-xs">
-                                        <div class="flex items-center justify-between">
-                                            <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white hover:text-amber-700 dark:hover:text-primary transition-colors cursor-pointer text-left group/c">
-                                                <span class="material-symbols-outlined text-sm text-slate-400 group-hover/c:text-amber-700 dark:group-hover/c:text-primary">person</span>
-                                                <span class="underline decoration-dotted underline-offset-2">${order.client_name}</span>
-                                            </button>
-                                            <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="text-[10px] font-bold text-amber-700 dark:text-primary flex items-center gap-0.5 hover:underline cursor-pointer">
-                                                <span>History</span>
-                                                <span class="material-symbols-outlined text-[12px]">history</span>
-                                            </button>
-                                        </div>
-                                        <p class="text-[11px] text-slate-500 ml-5 mt-0.5">${order.client_company || 'Independent'} · ${order.client_email}</p>
-                                    </div>
-
-                                    <!-- Worker Assignment Chip -->
-                                    <div class="mb-3 flex items-center justify-between text-xs px-1">
-                                        <span class="text-[10px] font-bold uppercase text-slate-400">Worker:</span>
-                                        <div>${assignedText}</div>
-                                    </div>
-
-                                    <!-- Attachments & Deliverables -->
-                                    <div class="flex flex-wrap items-center gap-1.5 mb-4">
-                                        ${order.raw_artwork_files && order.raw_artwork_files.length > 0 ? `
-                                            <a href="${order.raw_artwork_files[0].url}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-50 dark:bg-primary/10 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/20 text-[10px] font-bold hover:bg-amber-100">
-                                                <span class="material-symbols-outlined text-xs">attach_file</span> Artwork
-                                            </a>
-                                        ` : ''}
-                                        ${order.deliverables && order.deliverables.length > 0 ? order.deliverables.map(d => `
-                                            <a href="${d.url}" target="_blank" class="inline-flex items-center gap-0.5 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold hover:bg-emerald-100">
-                                                <span class="material-symbols-outlined text-xs">download</span> ${d.format}
-                                            </a>
-                                        `).join('') : ''}
-                                    </div>
-                                </div>
-
-                                <!-- Actions Toolbar -->
-                                <div class="pt-3 border-t border-slate-200 dark:border-primary/15 flex flex-wrap items-center justify-between gap-2">
-                                    <div>
-                                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Total</span>
-                                        <span class="text-base font-black text-slate-900 dark:text-white">$${Number(order.price || 0).toFixed(2)}</span>
-                                    </div>
-                                    <div class="flex items-center gap-1.5 flex-wrap">
-                                        <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 font-bold text-[11px] cursor-pointer inline-flex items-center gap-1 shadow-xs" title="View client's complete historical dossier">
-                                            <span class="material-symbols-outlined text-xs">history</span>
-                                            <span>History</span>
-                                        </button>
-                                        ${isRevision ? `
-                                            <button onclick="openAdminRevisionModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-orange-100 hover:bg-orange-200 dark:bg-orange-500/20 text-orange-950 dark:text-orange-300 border border-orange-300 dark:border-orange-500/40 font-black text-[11px] cursor-pointer inline-flex items-center gap-1 shadow-xs">
-                                                <span class="material-symbols-outlined text-xs">rate_review</span>
-                                                <span>Specs</span>
-                                            </button>
-                                        ` : ''}
-                                        ${!isPaid ? `
-                                            <button onclick="openPaymentReminderModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/15 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 font-bold text-[11px] cursor-pointer inline-flex items-center gap-1 shadow-xs">
-                                                <span class="material-symbols-outlined text-xs">forward_to_inbox</span>
-                                                <span>Remind</span>
-                                            </button>
-                                        ` : ''}
-                                        <button onclick="openInvoiceModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 font-bold text-[11px] cursor-pointer inline-flex items-center gap-1">
-                                            <span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">receipt</span>
-                                            <span>Invoice</span>
-                                        </button>
-                                        <button onclick="openAssignModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 text-amber-900 dark:text-primary font-bold text-[11px] border border-amber-300 dark:border-primary/30 cursor-pointer">
-                                            ${order.assigned_digitizer_id ? 'Reassign' : 'Assign'}
-                                        </button>
-                                    </div>
-                                </div>
+            return `
+                <div class="p-5 rounded-2xl ${borderStyle} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
+                    <div>
+                        <!-- Header Bar: ID, Date, Status & Payment Badges -->
+                        <div class="flex items-start justify-between gap-2 mb-3">
+                            <div>
+                                <span class="font-mono text-xs font-black text-amber-800 dark:text-primary tracking-wide">${order.order_number}</span>
+                                <span class="text-[11px] text-slate-500 block font-medium">${order.created_at ? formatTimeAgo(order.created_at) : 'Recent'}</span>
                             </div>
-                        `;
-                    }).join('');
-                }
-            }
+                            <div class="flex flex-col items-end gap-1.5">
+                                ${getStatusBadge(order.status)}
+                                ${getPaymentBadge(order.payment_status)}
+                            </div>
+                        </div>
+
+                        <!-- Project Information -->
+                        <div class="mb-3">
+                            <h4 class="font-black text-slate-900 dark:text-white text-sm group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">${order.project_name}</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">${order.placement || 'Standard'} · ${order.sizing || 'Default Size'}</p>
+                            ${order.fabric_type ? `<span class="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Fabric: ${order.fabric_type}</span>` : ''}
+                        </div>
+
+                        <!-- STAGE 3 SPECIAL: Outstanding Payment / Quote Alert Box -->
+                        ${(!isPaid || order.is_quote) ? `
+                            <div class="p-2.5 rounded-xl bg-rose-50/90 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/30 mb-3 flex items-center justify-between text-xs">
+                                <div>
+                                    <span class="text-[10px] font-black uppercase tracking-wider text-rose-800 dark:text-rose-400 block">${order.is_quote ? 'Pending Quote Review' : 'Checkout Unsettled'}</span>
+                                    <span class="font-black text-rose-950 dark:text-rose-200">$${Number(order.price || 0).toFixed(2)} due (${order.payment_method || 'Invoice'})</span>
+                                </div>
+                                <button onclick="openPaymentReminderModal('${order.order_number}')" class="px-2 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] flex items-center gap-1 shadow-xs cursor-pointer" title="Send 1-Click Payment Reminder Email">
+                                    <span class="material-symbols-outlined text-xs">forward_to_inbox</span>
+                                    <span>Remind</span>
+                                </button>
+                            </div>
+                        ` : ''}
+
+                        <!-- STAGE 1 SPECIAL: Active Revision Request Specs Banner -->
+                        ${isRevision ? `
+                            <div class="p-2.5 rounded-xl bg-orange-50/90 dark:bg-orange-950/40 border border-orange-300 dark:border-orange-500/40 mb-3 flex items-center justify-between text-xs">
+                                <div>
+                                    <span class="text-[10px] font-black uppercase text-orange-900 dark:text-orange-300 block">Stitch-Out Revision</span>
+                                    <span class="font-semibold text-slate-700 dark:text-slate-300 text-[11px]">Client requested adjustment</span>
+                                </div>
+                                <button onclick="openAdminRevisionModal('${order.order_number}')" class="px-2 py-1 rounded-lg bg-orange-500 hover:bg-orange-600 text-slate-950 font-black text-[11px] flex items-center gap-1 shadow-xs cursor-pointer">
+                                    <span class="material-symbols-outlined text-xs">rate_review</span>
+                                    <span>Specs</span>
+                                </button>
+                            </div>
+                        ` : ''}
+
+                        <!-- Interactive Client Box (Click to open full historical dossier) -->
+                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/10 mb-3 text-xs">
+                            <div class="flex items-center justify-between">
+                                <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white hover:text-amber-700 dark:hover:text-primary transition-colors cursor-pointer text-left group/c">
+                                    <span class="material-symbols-outlined text-sm text-slate-400 group-hover/c:text-amber-700 dark:group-hover/c:text-primary">person</span>
+                                    <span class="underline decoration-dotted underline-offset-2">${order.client_name}</span>
+                                </button>
+                                <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="text-[10px] font-bold text-amber-700 dark:text-primary flex items-center gap-0.5 hover:underline cursor-pointer">
+                                    <span>History</span>
+                                    <span class="material-symbols-outlined text-[12px]">history</span>
+                                </button>
+                            </div>
+                            <p class="text-[11px] text-slate-500 ml-5 mt-0.5">${order.client_company || 'Independent'} · ${order.client_email}</p>
+                        </div>
+
+                        <!-- Worker Assignment Chip -->
+                        <div class="mb-3 flex items-center justify-between text-xs px-1">
+                            <span class="text-[10px] font-bold uppercase text-slate-400">Worker:</span>
+                            <div>${assignedText}</div>
+                        </div>
+
+                        <!-- Attachments & Deliverables -->
+                        <div class="flex flex-wrap items-center gap-1.5 mb-4">
+                            ${order.raw_artwork_files && order.raw_artwork_files.length > 0 ? `
+                                <a href="${order.raw_artwork_files[0].url}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-50 dark:bg-primary/10 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/20 text-[10px] font-bold hover:bg-amber-100">
+                                    <span class="material-symbols-outlined text-xs">attach_file</span> Artwork
+                                </a>
+                            ` : ''}
+                            ${order.deliverables && order.deliverables.length > 0 ? order.deliverables.map(d => `
+                                <a href="${d.url}" target="_blank" class="inline-flex items-center gap-0.5 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold hover:bg-emerald-100">
+                                    <span class="material-symbols-outlined text-xs">download</span> ${d.format}
+                                </a>
+                            `).join('') : ''}
+                        </div>
+                    </div>
+
+                    <!-- Actions Toolbar -->
+                    <div class="pt-3 border-t border-slate-200 dark:border-primary/15 flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block">Total</span>
+                            <span class="text-base font-black text-slate-900 dark:text-white">$${Number(order.price || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 font-bold text-[11px] cursor-pointer inline-flex items-center gap-1 shadow-xs" title="View client's complete historical dossier">
+                                <span class="material-symbols-outlined text-xs">history</span>
+                                <span>History</span>
+                            </button>
+                            ${isRevision ? `
+                                <button onclick="openAdminRevisionModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-orange-100 hover:bg-orange-200 dark:bg-orange-500/20 text-orange-950 dark:text-orange-300 border border-orange-300 dark:border-orange-500/40 font-black text-[11px] cursor-pointer inline-flex items-center gap-1 shadow-xs">
+                                    <span class="material-symbols-outlined text-xs">rate_review</span>
+                                    <span>Specs</span>
+                                </button>
+                            ` : ''}
+                            ${!isPaid ? `
+                                <button onclick="openPaymentReminderModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/15 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 font-bold text-[11px] cursor-pointer inline-flex items-center gap-1 shadow-xs">
+                                    <span class="material-symbols-outlined text-xs">forward_to_inbox</span>
+                                    <span>Remind</span>
+                                </button>
+                            ` : ''}
+                            <button onclick="openInvoiceModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 font-bold text-[11px] cursor-pointer inline-flex items-center gap-1">
+                                <span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">receipt</span>
+                                <span>Invoice</span>
+                            </button>
+                            <button onclick="openAssignModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 text-amber-900 dark:text-primary font-bold text-[11px] border border-amber-300 dark:border-primary/30 cursor-pointer">
+                                ${order.assigned_digitizer_id ? 'Reassign' : 'Assign'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * Modular Table Row Renderer
+         */
+        function renderAdminOrderTableRow(order, stageKey) {
+            const isPaid = order.payment_status === 'paid';
+            const isRevision = order.status === 'revision_requested';
+            const assignedText = order.assigned_digitizer_name 
+                ? `<span class="text-slate-800 dark:text-slate-200 font-semibold">${order.assigned_digitizer_name}</span>`
+                : '<span class="text-amber-800 dark:text-amber-400 font-bold">Unassigned</span>';
+
+            return `
+                <tr class="hover:bg-amber-50/50 dark:hover:bg-slate-800/40 transition-colors ${isRevision ? 'bg-amber-50/30 dark:bg-amber-950/20' : ''}">
+                    <td class="px-5 py-4 font-mono font-bold text-amber-800 dark:text-primary">${order.order_number}</td>
+                    <td class="px-5 py-4">
+                        <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="group/client flex items-center gap-1.5 text-left cursor-pointer hover:text-amber-700 dark:hover:text-primary transition-colors">
+                            <strong class="text-slate-900 dark:text-white font-bold group-hover/client:text-amber-700 dark:group-hover/client:text-primary">${order.client_name}</strong>
+                            <span class="material-symbols-outlined text-[13px] text-amber-700 dark:text-primary opacity-70 group-hover/client:opacity-100">history</span>
+                        </button>
+                        <span class="text-slate-600 dark:text-slate-400 text-[11px] font-medium block mt-0.5">${order.client_company || 'Independent'} · ${order.client_email}</span>
+                    </td>
+                    <td class="px-5 py-4">
+                        <span class="text-slate-900 dark:text-white font-semibold block">${order.project_name}</span>
+                        <span class="text-slate-600 dark:text-slate-400 text-[11px] font-medium block mb-1">${order.placement || 'Standard'} (${order.sizing || 'Default'})</span>
+                        <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                            ${order.raw_artwork_files && order.raw_artwork_files.length > 0 ? `
+                                <a href="${order.raw_artwork_files[0].url}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 dark:bg-primary/10 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/20 text-[10px] font-bold hover:bg-amber-100">
+                                    <span class="material-symbols-outlined text-[12px]">attach_file</span> Artwork
+                                </a>
+                            ` : ''}
+                            ${order.deliverables && order.deliverables.length > 0 ? order.deliverables.map(d => `
+                                <a href="${d.url}" target="_blank" class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold hover:bg-emerald-100">
+                                    <span class="material-symbols-outlined text-[11px]">download</span> ${d.format}
+                                </a>
+                            `).join('') : ''}
+                        </div>
+                    </td>
+                    <td class="px-5 py-4">
+                        <span class="font-black text-slate-900 dark:text-slate-100 text-sm block">$${Number(order.price || 0).toFixed(2)}</span>
+                        <div class="mt-1">${getPaymentBadge(order.payment_status)}</div>
+                    </td>
+                    <td class="px-5 py-4">${getStatusBadge(order.status)}</td>
+                    <td class="px-5 py-4 text-xs">${assignedText}</td>
+                    <td class="px-5 py-4 text-right">
+                        <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                            <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs" title="View complete lifetime client order history">
+                                <span class="material-symbols-outlined text-xs">history</span>
+                                <span>History</span>
+                            </button>
+                            ${isRevision ? `
+                                <button onclick="openAdminRevisionModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-orange-100 hover:bg-orange-200 dark:bg-orange-500/20 dark:hover:bg-orange-500/30 text-orange-950 dark:text-orange-300 border border-orange-300 dark:border-orange-500/40 font-black text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs">
+                                    <span class="material-symbols-outlined text-xs text-orange-600 dark:text-orange-400">rate_review</span>
+                                    <span>Specs</span>
+                                </button>
+                            ` : ''}
+                            ${!isPaid ? `
+                                <button onclick="openPaymentReminderModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/15 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs">
+                                    <span class="material-symbols-outlined text-xs">forward_to_inbox</span>
+                                    <span>Remind</span>
+                                </button>
+                            ` : ''}
+                            <button onclick="openInvoiceModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm text-amber-700 dark:text-primary">receipt</span>
+                                <span>Invoice</span>
+                            </button>
+                            <button onclick="openAssignModal('${order.order_number}')" class="px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 dark:hover:bg-primary text-amber-900 dark:text-primary hover:text-amber-950 dark:hover:text-background-dark border border-amber-300 dark:border-primary/30 font-bold text-[11px] transition-all cursor-pointer">
+                                ${order.assigned_digitizer_id ? 'Reassign' : 'Assign'}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
         }
 
         /**
