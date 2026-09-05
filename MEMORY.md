@@ -50,13 +50,13 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 - `/portfolio.html`: High-resolution gallery and customer feedback showcase.
 - `/pricing.html`: Dedicated flat-rate Pricing showcase in responsive 2-column grid layout, strictly adhering to Dezan's brand color scheme (Dezan Gold `#d4af35`, Dark Luxury `#201d12`, Card Dark `#16140c`, Warm Canvas `#f8f7f6`):
   - **Hero**: "QUALITY DIGITIZING. REAL PEOPLE.", "Simple Flat-Rate Pricing", subtitle "Professional embroidery digitizing with clean, honest pricing.", 3 circular icon badges (Next Day Turnaround, Digitized by hand - no auto conversion, Order history and online downloads), and real stitch proof embroidery patch visual.
-  - **Digitizing 2-Column Grid**: Side-by-side cards on desktop/tablet, responsive stack on mobile:
-    - Card 1: **$15 Hat / Left Chest Logos** (Up to 5.5 inches) with high-precision bespoke SVG icon featuring a structured 6-panel baseball cap with curved visor & star crest paired with a collared polo shirt with left-chest embroidery emblem.
-    - Card 2: **$25 Larger Designs** (Over 5.5 inches) with high-precision bespoke SVG icon featuring a varsity/bomber apparel jacket with ribbed collar, center zipper, and oversized back embroidery shield emblem.
+  - **Digitizing 2-Column Grid (Compact & Centered)**: Centered `max-w-2xl mx-auto` container with refined proportions (20px padding, 44px icon badges, 32-36px pricing typography) preventing wide/bloated cards:
+    - Card 1: **$15 Hat / Left Chest Logos** (Up to 5.5 inches) with compact bespoke SVG icon featuring baseball cap and collared polo shirt.
+    - Card 2: **$25 Larger Designs** (Over 5.5 inches) with compact bespoke SVG icon featuring varsity/bomber jacket and back embroidery emblem.
     - Full-width Trust Bar: "Flat rate pricing you can depend on. Zero hidden stitch-count charges."
-  - **Vector Art 2-Column Grid**: Side-by-side cards on desktop/tablet, responsive stack on mobile:
-    - Card 1: **$15 Simple Vector Redraw** with high-precision bespoke SVG icon featuring bezier vector pen tool, tangent handles, and corner anchor nodes.
-    - Card 2: **$25 Complex Vector Redraw** with high-precision bespoke SVG icon featuring multi-layer mascot crest shield with faceted geometry and guide vertices.
+  - **Vector Art 2-Column Grid (Compact & Centered)**: Centered `max-w-2xl mx-auto` container:
+    - Card 1: **$15 Simple Vector Redraw** with bespoke SVG bezier pen tool icon.
+    - Card 2: **$25 Complex Vector Redraw** with bespoke SVG multilayer mascot shield icon.
     - Full-width Trust Bar: "Mathematical precision in AI, EPS, SVG & print-ready vector PDF."
   - **"BRANDS LOOK BETTER HERE" Grid**: All machine formats (DST, EMB, PES, etc.), Color Run Sheet PDF, Free Minor Revisions, Cap & 3D Puff optimization.
   - **Strictly Pricing Only**: Zero embedded order forms or quote submission inputs. Authenticated client banners and action buttons route to `client-portal.html` (for logged-in clients) or `portal-login.html?redirect=...` (for unauthenticated visitors).
