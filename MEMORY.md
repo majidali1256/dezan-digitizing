@@ -57,8 +57,12 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - **Vector Art 2-Column Grid (Compact & Centered)**: Centered `max-w-2xl mx-auto` container:
     - Card 1: **$15 Simple Vector Redraw** with bespoke SVG bezier pen tool icon.
     - Card 2: **$25 Complex Vector Redraw** with bespoke SVG multilayer mascot shield icon.
-    - Full-width Trust Bar: "Mathematical precision in AI, EPS, SVG & print-ready vector PDF."
-  - **"BRANDS LOOK BETTER HERE" Grid**: All machine formats (DST, EMB, PES, etc.), Color Run Sheet PDF, Free Minor Revisions, Cap & 3D Puff optimization.
+  - **Responsive Hero & Above-The-Fold Pricing**:
+    - **Mobile First-Screen Parity (`media_1788643251172.png`)**:
+      - Hero layout on mobile is side-by-side (`grid grid-cols-12`): Left column (`col-span-7`) hosts typography and 3 compact circular feature bullets (Next Day Turnaround, Digitized by hand, Order history); Right column (`col-span-5`) hosts the real embroidery stitch patch with `Real Stitch` badge.
+      - Immediately below the hero, the "OUR PRICING / Digitizing Pricing" header and both pricing cards (`Hat / Left Chest Logos $15` and `Larger Designs $25`) display as sleek, horizontal pill rows (`flex items-center justify-between`) followed by the compact trust bar ("Flat rate pricing you can depend on.") and subtle tagline ("BRANDS LOOK BETTER HERE").
+      - Zero vertical scrolling required to view prices on mobile viewports (e.g. 390x844).
+    - **Desktop Grid Parity**: Larger screens (`md:`) seamlessly render the full 2-column feature checklist cards with action buttons and spacious trust bars.
   - **Strictly Pricing Only**: Zero embedded order forms or quote submission inputs. Authenticated client banners and action buttons route to `client-portal.html` (for logged-in clients) or `portal-login.html?redirect=...` (for unauthenticated visitors).
   - **Instant Visibility & Zero CLS**: Removed `.reveal` opacity blocking so all cards and sections render immediately across all devices, with full light/dark mode contrast parity verified via Playwright visual verification across Desktop (1440x900), Tablet (834x1112), and Mobile (390x844).
 - `/contact.html`: Contact form for general inquiries, and authenticated "Request a Custom Quote" portal showcase. Legacy unauthenticated quote submission forms have been removed.
