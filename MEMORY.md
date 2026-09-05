@@ -58,21 +58,61 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - **Header**: Bold title + "Track orders, pay invoices, and request quotes easily."
   - **3 Quick-Action Cards**: Place Order, Request Quote, Track Order.
   - **4 Stat Metric Badges**: Open Orders, Completed, Quotes, **Balance Due** (Dynamically calculates total outstanding balance for unpaid/pending orders; displays rose badge with count `X Due` when > $0, or emerald `All settled` when $0.00; clickable to instantly filter by due payments).
-  - **Live Search & Filter Bar**: Real-time filtering by order # or job name + status dropdown (including `Payment Due / Incomplete` filter).
+  - **Adaptive 2-Stage Place Order Flow**:
+    - **Step 1 (Clean Choice)**: Modal opens showing *only* "What type of work do you need?" with two large cards: **Embroidery Digitizing** and **Vector Art Conversion**. All detailed form inputs stay completely hidden until a card is selected.
+    - **Step 2 (Tailored Form)**:
+      - **Digitizing Specific Controls**: Job Name/Reference, Target Placement, Fabric/Garment Material (Cotton/Pique, 6-Panel Structured Cap, Beanie, Fleece, Denim, Leather), Target Size ($W \times H$ in/cm), Required Machine File Formats (DST, EMB, PES, EXP, CND, JEF), Special Technical Options (3D Puff $+ \$5$, Applique, Match Sample, Flame Specs), Drag-and-drop artwork uploader, Production Notes, and Turnaround Speed (Standard vs. Rush $+ \$10$).
+      - **Vector Specific Controls**: Job Name, Intended Vector Usage, Formats (AI, EPS, SVG, PDF, CDR, PNG), Drag-and-drop uploader, Production Notes.
+      - **Dynamic Price Engine**: Updates price and itemized breakdown live as options and turnaround speeds change.
+      - **Service Switcher Banner**: Sticky top banner allowing clients to switch service type instantly without page reload.
+  - **Foolproof Revision & Physical Stitch-Out Feedback Engine**:
+    - Completed orders render side-by-side action buttons: Primary `[ Download Files / DST ]` and Secondary `[ Request a Revision ]`.
+    - Clicking `[ Request a Revision ]` opens `#revision-request-modal`:
+      - Specific feedback note textarea (e.g. pull compensation, lettering density, cap seam curvature).
+      - Picture submission dropzone specifically for uploading a physical garment/cap sew-out defect photo with live thumbnail preview.
+      - 1-click submit updating order status to `revision_requested`, broadcasting event, and auto-routing to assigned digitizer.
+      - Order card immediately updates with pulsing amber `Revision In Progress` badge and client feedback callout.
   - **Due Payment & Incomplete Order Flow**:
     - Orders created with deferred payment or incomplete checkouts have `payment_status: 'unpaid'`.
     - Unpaid order cards feature a glowing rose accent border, a `Payment Due` badge, and an amber `Pay Now ($XX.00)` button.
     - **1-Click Checkout Modal (`#checkout-payment-modal`)**: Tabbed payment interface supporting PayPal and Credit Card with instant 256-bit encrypted simulated gateway, toast alert notifications, and real-time InsForge PostgreSQL patch updates.
     - **New Order Wizard**: Allows clients to select payment preference ("Pay on Invoice (Due Later)" vs. "Pay Upfront Now").
   - **Sectioned Layout**:
-    - **Open Orders**: Dynamic cards with Order #, Date, Job Name, Price, Status Badge, Pay Now button (if unpaid), and View Details.
-    - **Completed Orders**: Machine deliverable downloads (`.DST`, `.EMB`) + View Invoice & Receipt.
+    - **Open Orders**: Dynamic cards with Order #, Date, Job Name, Price, Status Badge, Pay Now button (if unpaid), Revision in Progress badge, and View Details.
+    - **Completed Orders**: Machine deliverable downloads (`.DST`, `.EMB`) + `[ Request a Revision ]` + View Invoice & Receipt.
     - **Quotes**: Quote estimation status or clean empty state with `+ Request Quote` action.
   - **Client Invoice & Printable Receipt Modal**: Official itemized tax invoice and work order with `@media print` support, unpaid alert banner, and direct "Pay Balance Due" action button.
   - **Client Account Modal**: Profile information, billing terms, active balance, theme toggle, and sign out.
   - **Fixed Bottom Navigation Dock**: 4 quick-access tabs (`Home`, `Orders`, `Quotes`, `Account`).
-- `/admin-portal.html`: Master Admin Backend (KPI metrics with Realized vs. Due revenue breakdown, All clients, Global order table, Worker assignment modal, Financial ledger & CSV export, Due payment oversight & automated email payment reminders — with strict zero-manual-payment policy).
-- `/worker-portal.html`: Redesigned Digitizer Studio (Intuitive navigation matching brand palette, 3 quick-action cards, 4 production metric badges, instant search & filter toolbar, sectioned queues for Active and Completed tasks, full technical work order specs modal, machine format cheatsheet modal, worker profile modal, multi-file deliverables staging uploader with InsForge S3/PostgreSQL sync, and fixed bottom navigation dock — with strict client PII and pricing data masking).
+- `/worker-portal.html`: Redesigned Digitizer Studio:
+  - **Revision & Sew-Out Inspection Queue**: Tasks with status `revision_requested` display a prominent amber border with subtle glow, a pulsing `⚠️ Revision Requested` badge, and an eye-catching `Client Physical Stitch-Out Revision Feedback` callout containing the client's exact instructions and physical garment photo thumbnail.
+  - **Click-to-Zoom Modal (`#stitch-out-zoom-modal`)**: Digitizers can click any sew-out photo to inspect embroidery defects at maximum resolution.
+  - **Revised Deliverables Submission**: Primary action button changes to `Submit Revised Deliverables` to upload version 2 stitch files with InsForge Storage and database sync.
+  - **Strict Data Masking (Zero-Leakage Compliance)**: Customer personal identity (`client_name`, `client_email`, `client_company`) and pricing/payment status are 100% masked from workers at both the UI and database levels.
+  - **Studio Controls**: 3 quick-action cards, 4 production metric badges, instant search & filter toolbar (with `⚠️ Revision Requested` filter), technical work order specs modal, machine format cheatsheet modal, worker profile modal, and mobile bottom navigation dock.
+- `/admin-portal.html`: Master Admin Executive Control Center (Continuous Unified Scroll & Workspace Integration):
+  - **Unified Continuous Flow (Zero Section Hiding)**: Following the proven layout pattern of the Client and Worker portals, all 5 core sections are laid out sequentially on a continuous scrollable canvas by default. Clicking any tab or quick action card smoothly scrolls to the target anchor without hiding any other sections.
+  - **Sticky Executive Command Bar (`#admin-sticky-nav`)**: Frosted glass backdrop (`backdrop-blur-md`) with 5 segmented primary tabs with live reactive counter badges:
+    1. **Master Orders** (`#master-orders-section`)
+    2. **Clients & History** (`#clients-directory-section`)
+    3. **Design Catalog** (`#design-catalog-section`)
+    4. **Digitizer Team** (`#digitizer-team-section`)
+    5. **Client & Worker Portals** (`#workspaces-section`)
+    Plus direct header launch buttons for `[ 👤 Client Portal ↗ ]` and `[ 🪡 Worker Studio ↗ ]`, density toggles (Bento Cards vs. Table), and CSV export.
+  - **ScrollSpy Indicator Sync**: Integrated `IntersectionObserver` automatically highlights the corresponding sticky navigation tab and mobile dock button as the admin scrolls down the page.
+  - **6 Quick Action Navigation Cards**: Responsive grid linking directly to:
+    1. **Master Orders** (Queue & triage)
+    2. **Clients & CRM** (Dossiers & LTV)
+    3. **Design Catalog** (Stitch archive)
+    4. **Digitizer Team** (Capacity & status)
+    5. **Client Portal** (Direct link to `client-portal.html` with customer badge)
+    6. **Worker Studio** (Direct link to `worker-portal.html` with worker badge)
+  - **Section 5: Connected Portals & Live Workspaces (`#workspaces-section`)**: Dedicated dashboard section allowing admins to directly inspect and experience the customer and technician workspaces:
+    - **Client Portal & Order Wizard Card**: Details order submission, PayPal checkout, sew-out revisions, DST deliverables, with direct launch button and demo login simulator.
+    - **Digitizer Worker Studio Card**: Details zero-PII data masking, physical sew-out defect zoom, DST/EMB deliverable uploads, with direct launch button and demo login simulator.
+  - **Client Order History Dossier Modal (`#client-history-modal`)**: 1-click historical dossier showing a client's complete chronological order timeline, placement/fabric specifications, artwork attachments, versioned machine file deliverables (`.DST`, `.EMB`, `.AI`), and direct tax invoices.
+  - **Fixed 6-Item Mobile Bottom Navigation Dock**: Persistent mobile dock (`Overview`, `Orders`, `Clients`, `Catalog`, `Team`, `Portals`) providing one-thumb executive control on mobile devices with high-contrast active tab indicators.
+  - **Financial Analytics & Export**: KPI metrics with Realized vs. Due revenue breakdown, full itemized tax invoice modal, financial ledger CSV export, and 1-click automated payment reminder dispatching.
 
 ### Header Navigation Authentication State
 - **Logged Out**: Top-right header button renders a gold pill button explicitly labeled **Login** (`[ ➔] Login ]`) linking to `portal-login.html`.
@@ -81,7 +121,15 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 
 ---
 
-## 6. RBAC & Data Masking Architecture
+## 6. InsForge PostgreSQL Database Schema (Live Cloud Backend)
+- **Host**: `https://e8rw998g.us-east.insforge.app`
+- **Tables**:
+  - `public.profiles`: User RBAC profiles with roles (`client`, `admin`, `digitizer`).
+  - `public.orders`: Master commercial order records with columns `fabric_type`, `revision_notes`, `stitch_out_photos`, `revision_requested_at`, `revision_count`, `price`, `payment_status`, `assigned_digitizer_id`, `deliverables`, `status` (`pending_review`, `assigned`, `in_progress`, `qa_review`, `completed`, `revision`, `revision_requested`, `cancelled`).
+  - `public.digitizer_tasks`: Sanitized worker tasks with columns `fabric_type`, `revision_notes`, `stitch_out_photos`, `revision_requested_at`, `deliverables`, `updated_at`, `status` (`assigned`, `in_progress`, `completed`, `revision`, `revision_requested`). Zero client PII or price columns exist on this table.
+- **Migrations Applied**:
+  - `migrations/20260904110456_init-rbac-tables.sql`: Base tables and RLS policies.
+  - `migrations/20260905033000_revision_and_adaptive_schema.sql`: Revision workflow, stitch-out photo support, adaptive order parameters, and client revision submission RLS policies.
 
 ### The 3 Distinct Roles
 1. **Client Role**:
@@ -231,7 +279,37 @@ To prevent data leakage via browser DevTools:
 
 ---
 
-## 13. Directory Structure
+## 13. Admin Control Panel Navigation & Executive Workspace Redesign (Live & Verified)
+- **Problem Solved**:
+  - The business owner needed the Master Admin Control Panel (`admin-portal.html`) to be effortless to navigate, with quick triage across unassigned orders, urgent revisions, unpaid tickets, and worker workloads without getting lost in nested menus or long scroll views.
+- **Key Navigation Innovations**:
+  - **Sticky Executive Command Sub-Nav (`#admin-sticky-nav`)**:
+    - Remains pinned directly below the master header as the admin scrolls.
+    - Features frosted glassmorphic backdrop (`backdrop-blur-md bg-white/90`) with gold bottom boundary.
+    - 5 segmented operational pills (`Master Queue`, `Needs Worker`, `⚠️ Revision Queue`, `Payment Due`, `Digitizer Team`) with reactive badge counters.
+    - Layout density toggle buttons (`#layout-toggle-table` and `#layout-toggle-grid`).
+    - Quick CSV ledger export and keyboard search hint badge (`/` or `Cmd/Ctrl+K`).
+  - **Dual Layout Density Engine**:
+    - **Table Mode (`#admin-orders-table-container`)**: Compact, high-density layout with sticky `<thead>`, explicit columns (Order #, Date, Client Info, Service/Specs, Price/Status, Assigned Worker, Actions), and crisp borders.
+    - **Bento Card Grid Mode (`#admin-orders-cards-container`)**: Visual 3-column bento card grid with direct artwork thumbnail previews, deliverable download chips, technical tag badges, client contact pills, and full-width action bars.
+    - Automatically persists active user mode in `localStorage['dezan_admin_layout']`.
+  - **Digitizer Team Hub (`#digitizer-team-section`)**:
+    - Visual team performance and workload oversight cards for **Alex Miller**, **Sam Chen**, and **Maria Garcia**.
+    - Displays active assignment counts, completed project totals, and core technical proficiencies.
+    - Interactive **"View Assigned Orders"** button instantly isolates orders assigned to that specific worker in the main queue.
+  - **Interactive 1-Click Metric Cards**:
+    - All master KPI summary cards (`Total Orders`, `Needs Worker`, `Revision Queue`, `Realized Revenue`, `Balance Due`) feature click listeners with glowing golden active ring states that activate the corresponding queue tab and auto-scroll smoothly.
+  - **Instant Live Search & Keyboard Shortcuts**:
+    - Real-time debounced search bar with dedicated clear button (`✕`) that appears dynamically when text is present.
+    - Global hotkey listener: Pressing `/` or `Cmd/Ctrl+K` focuses the search bar; pressing `Escape` clears text and blurs the input.
+  - **Synchronized 5-Tab Mobile Bottom Navigation Dock**:
+    - Persistent bottom dock on smartphone screens (`Overview`, `Orders`, `Revisions`, `Team`, `Profile`) wired to `switchAdminView(...)`.
+- **Automated Verification**:
+  - 100% verified with Playwright test (`scratch/verify_admin_navigation_ux.js`) across Desktop (1512x982) and Mobile (390x844). Verified sticky nav, filter tabs, table/grid toggling, team filtering, search keyboard shortcuts, and mobile dock switching with 0 console errors.
+
+---
+
+## 14. Directory Structure
 ```
 ├── .agents/
 │   ├── rules/frontend_design_rules.md
@@ -256,7 +334,7 @@ To prevent data leakage via browser DevTools:
 
 ---
 
-## 14. Development & Deployment Guidelines
+## 15. Development & Deployment Guidelines
 1. **JavaScript DOM Standard**: All initialization code in `app.js` runs within `DOMContentLoaded` and is guarded by page URL checks.
 2. **Zero Framework Mandate**: Keep all scripts lightweight and vanilla. No bundle builds required.
 3. **Git Hygiene**: Clean atomic commits with descriptive commit messages.

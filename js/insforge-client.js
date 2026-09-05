@@ -53,6 +53,7 @@ const INITIAL_DEMO_ORDERS = [
         project_name: 'Falcon Wings Crest',
         placement: 'Jacket Back',
         sizing: '11.5" W x 8.0" H',
+        fabric_type: 'Heavy Denim Jacket',
         file_format: 'DST, EMB',
         instructions: 'High density stitch, 3D puff on the letter F, fabric is heavy denim. Keep color changes to max 5 stops.',
         raw_artwork_files: [
@@ -65,8 +66,11 @@ const INITIAL_DEMO_ORDERS = [
         assigned_digitizer_id: '00000000-0000-0000-0000-000000000003',
         assigned_digitizer_name: 'Alex Miller (Lead Digitizer)',
         assigned_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-        status: 'in_progress',
-        deliverables: [],
+        status: 'completed',
+        deliverables: [
+            { format: 'DST', name: 'Falcon_Wings_Back.dst', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.dst', size: 54000 },
+            { format: 'EMB', name: 'Falcon_Wings_Back.emb', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.emb', size: 220000 }
+        ],
         created_at: new Date(Date.now() - 3600000 * 12).toISOString()
     },
     {
@@ -81,6 +85,7 @@ const INITIAL_DEMO_ORDERS = [
         project_name: 'Falcon Mini Cap Logo',
         placement: 'Cap Front / Hat',
         sizing: '2.5" W x 2.2" H',
+        fabric_type: '6-Panel Structured Cap',
         file_format: 'DST, EMB',
         instructions: 'Center-out sequencing for structured 6-panel baseball cap. Needle 75/11.',
         raw_artwork_files: [
@@ -109,6 +114,7 @@ const INITIAL_DEMO_ORDERS = [
         project_name: 'Falcon Corporate Polo',
         placement: 'Left Chest',
         sizing: '3.5" W x 1.8" H',
+        fabric_type: 'Pique Knit Cotton',
         file_format: 'DST, EMB',
         instructions: 'Pique knit fabric, underlay tatami with satin border.',
         raw_artwork_files: [
@@ -123,10 +129,167 @@ const INITIAL_DEMO_ORDERS = [
         assigned_at: new Date(Date.now() - 3600000 * 48).toISOString(),
         status: 'completed',
         deliverables: [
-            { format: 'DST', name: 'Falcon_Polo_LeftChest.dst', url: '#', size: 28400 },
-            { format: 'EMB', name: 'Falcon_Polo_LeftChest.emb', url: '#', size: 148200 }
+            { format: 'DST', name: 'Falcon_Polo_LeftChest.dst', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.dst', size: 28400 },
+            { format: 'EMB', name: 'Falcon_Polo_LeftChest.emb', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.emb', size: 148200 }
         ],
         created_at: new Date(Date.now() - 3600000 * 54).toISOString()
+    },
+    {
+        id: '00000000-0000-0000-0000-000000000104',
+        order_number: 'ORD-8835',
+        client_id: '00000000-0000-0000-0000-000000000006',
+        client_name: 'Marcus Vance',
+        client_email: 'vance@vanceathletics.com',
+        client_company: 'Vance Athletics',
+        service_type: 'Digitizing',
+        plan_name: 'Left Chest',
+        project_name: 'Vance Tigers Varsity Crest',
+        placement: 'Left Chest',
+        sizing: '3.8" W x 3.2" H',
+        fabric_type: 'Fleece / Sweatshirt',
+        file_format: 'DST, EMB',
+        instructions: 'Underlay grid for heavy fleece, gold and navy thread colors.',
+        raw_artwork_files: [
+            { name: 'vance_tigers.png', url: 'logo.png', size: 120000 }
+        ],
+        price: 25.00,
+        currency: 'USD',
+        payment_status: 'paid',
+        payment_method: 'PayPal',
+        assigned_digitizer_id: '00000000-0000-0000-0000-000000000003',
+        assigned_digitizer_name: 'Alex Miller (Lead Digitizer)',
+        assigned_at: new Date(Date.now() - 3600000 * 68).toISOString(),
+        status: 'completed',
+        deliverables: [
+            { format: 'DST', name: 'Vance_Tigers_Varsity.dst', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.dst', size: 34200 },
+            { format: 'EMB', name: 'Vance_Tigers_Varsity.emb', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.emb', size: 165000 }
+        ],
+        created_at: new Date(Date.now() - 3600000 * 72).toISOString()
+    },
+    {
+        id: '00000000-0000-0000-0000-000000000105',
+        order_number: 'ORD-8838',
+        client_id: '00000000-0000-0000-0000-000000000006',
+        client_name: 'Marcus Vance',
+        client_email: 'vance@vanceathletics.com',
+        client_company: 'Vance Athletics',
+        service_type: 'Digitizing',
+        plan_name: 'Cap / Hat',
+        project_name: 'Vance Track & Field 3D Cap',
+        placement: 'Cap Front / Hat',
+        sizing: '2.4" W x 2.0" H',
+        fabric_type: '6-Panel Structured Cap',
+        file_format: 'DST, EMB',
+        instructions: '3D foam puff on letter V. Center-out sewing sequence for high-profile cap.',
+        raw_artwork_files: [
+            { name: 'vance_track_badge.png', url: 'logo.png', size: 140000 }
+        ],
+        price: 30.00,
+        currency: 'USD',
+        payment_status: 'paid',
+        payment_method: 'Credit Card',
+        assigned_digitizer_id: '00000000-0000-0000-0000-000000000005',
+        assigned_digitizer_name: 'Maria Garcia (3D Puff Master)',
+        assigned_at: new Date(Date.now() - 3600000 * 30).toISOString(),
+        status: 'completed',
+        deliverables: [
+            { format: 'DST', name: 'Vance_Track_3D_Cap.dst', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_cap.dst', size: 41000 },
+            { format: 'EMB', name: 'Vance_Track_3D_Cap.emb', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_cap.emb', size: 182000 }
+        ],
+        created_at: new Date(Date.now() - 3600000 * 36).toISOString()
+    },
+    {
+        id: '00000000-0000-0000-0000-000000000106',
+        order_number: 'ORD-8832',
+        client_id: '00000000-0000-0000-0000-000000000007',
+        client_name: 'Sarah Jenkins',
+        client_email: 'sarah@apexuniforms.com',
+        client_company: 'Apex Workwear & Uniforms',
+        service_type: 'Digitizing',
+        plan_name: 'Left Chest',
+        project_name: 'Apex Shield Uniform Badge',
+        placement: 'Left Chest',
+        sizing: '3.2" W x 3.5" H',
+        fabric_type: 'Cotton / Oxford Pique',
+        file_format: 'DST, PES, EMB',
+        instructions: 'Gold metallic accent thread border. High stitch density tatami fill.',
+        raw_artwork_files: [
+            { name: 'apex_shield_vector.png', url: 'logo.png', size: 115000 }
+        ],
+        price: 20.00,
+        currency: 'USD',
+        payment_status: 'paid',
+        payment_method: 'PayPal',
+        assigned_digitizer_id: '00000000-0000-0000-0000-000000000003',
+        assigned_digitizer_name: 'Alex Miller (Lead Digitizer)',
+        assigned_at: new Date(Date.now() - 3600000 * 110).toISOString(),
+        status: 'completed',
+        deliverables: [
+            { format: 'DST', name: 'Apex_Shield_Badge.dst', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.dst', size: 29000 },
+            { format: 'PES', name: 'Apex_Shield_Badge.pes', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.pes', size: 31000 }
+        ],
+        created_at: new Date(Date.now() - 3600000 * 120).toISOString()
+    },
+    {
+        id: '00000000-0000-0000-0000-000000000107',
+        order_number: 'ORD-8836',
+        client_id: '00000000-0000-0000-0000-000000000007',
+        client_name: 'Sarah Jenkins',
+        client_email: 'sarah@apexuniforms.com',
+        client_company: 'Apex Workwear & Uniforms',
+        service_type: 'Digitizing',
+        plan_name: 'Jacket Back',
+        project_name: 'Apex Industrial Back Emblem',
+        placement: 'Jacket Back',
+        sizing: '11.0" W x 9.5" H',
+        fabric_type: 'Heavy Canvas / Twill',
+        file_format: 'DST, EMB',
+        instructions: 'Large format embroidery for work jackets. Underlay compensation for canvas.',
+        raw_artwork_files: [
+            { name: 'apex_back_emblem.svg', url: 'logo.png', size: 210000 }
+        ],
+        price: 50.00,
+        currency: 'USD',
+        payment_status: 'unpaid',
+        payment_method: 'Pending Invoice',
+        assigned_digitizer_id: '00000000-0000-0000-0000-000000000003',
+        assigned_digitizer_name: 'Alex Miller (Lead Digitizer)',
+        assigned_at: new Date(Date.now() - 3600000 * 14).toISOString(),
+        status: 'in_progress',
+        deliverables: [],
+        created_at: new Date(Date.now() - 3600000 * 18).toISOString()
+    },
+    {
+        id: '00000000-0000-0000-0000-000000000108',
+        order_number: 'ORD-8828',
+        client_id: '00000000-0000-0000-0000-000000000008',
+        client_name: 'Elena Rostova',
+        client_email: 'elena@summitheadwear.com',
+        client_company: 'Summit Headwear & Outerwear',
+        service_type: 'Vector Art',
+        plan_name: 'Vector Conversion',
+        project_name: 'Summit Alpine Peak Emblem',
+        placement: 'Vector Graphic / Print',
+        sizing: 'Scalable Vector',
+        fabric_type: 'Vector Graphic',
+        file_format: 'AI, EPS, SVG, PDF',
+        instructions: 'Clean pantone color separation for screen printing and vinyl cutting.',
+        raw_artwork_files: [
+            { name: 'summit_sketch.jpg', url: 'logo.png', size: 180000 }
+        ],
+        price: 25.00,
+        currency: 'USD',
+        payment_status: 'paid',
+        payment_method: 'PayPal',
+        assigned_digitizer_id: '00000000-0000-0000-0000-000000000004',
+        assigned_digitizer_name: 'Sam Chen (Vector Specialist)',
+        assigned_at: new Date(Date.now() - 3600000 * 140).toISOString(),
+        status: 'completed',
+        deliverables: [
+            { format: 'AI', name: 'Summit_Alpine_Vector.ai', url: 'logo.png', size: 450000 },
+            { format: 'SVG', name: 'Summit_Alpine_Vector.svg', url: 'logo.png', size: 85000 }
+        ],
+        created_at: new Date(Date.now() - 3600000 * 150).toISOString()
     }
 ];
 
@@ -659,6 +822,191 @@ class InsForgeClient {
     }
 
     /**
+     * Fetches and aggregates all unique clients from PostgreSQL orders & profiles (Admin only)
+     * Calculates lifetime value (LTV), total order count, outstanding balance, and full order history.
+     */
+    async fetchClients() {
+        const user = this.getCurrentUser();
+        if (!user || user.role !== 'admin') return [];
+
+        const orders = await this.fetchOrders();
+        const clientsMap = new Map();
+
+        // Query profiles for any additional registered clients
+        try {
+            const res = await fetch(`${this.baseUrl}/api/database/records/profiles?role=eq.client`, {
+                headers: this.getApiHeaders()
+            });
+            if (res.ok) {
+                const profiles = await res.json();
+                if (Array.isArray(profiles)) {
+                    profiles.forEach(p => {
+                        const key = (p.email || p.id).toLowerCase();
+                        clientsMap.set(key, {
+                            clientId: p.id,
+                            clientName: p.display_name || p.displayName || 'Client',
+                            clientEmail: p.email,
+                            clientCompany: p.company || 'Direct Client',
+                            clientAvatar: p.avatar_url || null,
+                            totalOrders: 0,
+                            completedOrders: 0,
+                            activeOrders: 0,
+                            revisionOrders: 0,
+                            totalSpent: 0,
+                            balanceDue: 0,
+                            firstOrderDate: p.created_at || null,
+                            lastOrderDate: p.created_at || null,
+                            orders: []
+                        });
+                    });
+                }
+            }
+        } catch (_) {}
+
+        const clientList = this._compileClientsFromOrders(orders, clientsMap);
+        localStorage.setItem('dezan_clients', JSON.stringify(clientList));
+        return clientList;
+    }
+
+    /**
+     * Helper to compile client CRM records from orders
+     */
+    _compileClientsFromOrders(orders, baseMap = new Map()) {
+        const clientsMap = baseMap;
+        orders.forEach(o => {
+            const emailKey = (o.client_email || '').toLowerCase().trim();
+            const idKey = (o.client_id || '').toLowerCase().trim();
+            const nameKey = (o.client_name || '').toLowerCase().trim();
+            const key = emailKey || idKey || nameKey || 'unknown_client';
+
+            let client = clientsMap.get(key);
+            if (!client) {
+                client = {
+                    clientId: o.client_id || this.generateUUID(),
+                    clientName: o.client_name || 'Valued Client',
+                    clientEmail: o.client_email || 'client@dezan.com',
+                    clientCompany: o.client_company || 'Independent Business',
+                    clientAvatar: null,
+                    totalOrders: 0,
+                    completedOrders: 0,
+                    activeOrders: 0,
+                    revisionOrders: 0,
+                    totalSpent: 0,
+                    balanceDue: 0,
+                    firstOrderDate: o.created_at || new Date().toISOString(),
+                    lastOrderDate: o.created_at || new Date().toISOString(),
+                    orders: []
+                };
+                clientsMap.set(key, client);
+            }
+
+            client.orders.push(o);
+            client.totalOrders++;
+            const price = Number(o.price) || 0;
+
+            if (o.status === 'completed') {
+                client.completedOrders++;
+            }
+            if (o.status === 'in_progress' || o.status === 'assigned' || o.status === 'pending_review') {
+                client.activeOrders++;
+            }
+            if (o.status === 'revision_requested') {
+                client.revisionOrders++;
+            }
+
+            if (o.payment_status === 'paid') {
+                client.totalSpent += price;
+            } else if (o.payment_status === 'unpaid' || o.payment_status === 'pending') {
+                client.balanceDue += price;
+            }
+
+            if (o.created_at) {
+                if (!client.firstOrderDate || new Date(o.created_at) < new Date(client.firstOrderDate)) {
+                    client.firstOrderDate = o.created_at;
+                }
+                if (!client.lastOrderDate || new Date(o.created_at) > new Date(client.lastOrderDate)) {
+                    client.lastOrderDate = o.created_at;
+                }
+            }
+        });
+
+        clientsMap.forEach(client => {
+            client.orders.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        });
+
+        const clientList = Array.from(clientsMap.values());
+        clientList.sort((a, b) => b.totalSpent - a.totalSpent);
+        return clientList;
+    }
+
+    /**
+     * Read cached clients synchronously (fallback to compiling from orders if needed)
+     */
+    getClients() {
+        let clients = JSON.parse(localStorage.getItem('dezan_clients') || '[]');
+        if (clients.length === 0) {
+            const orders = this.getOrders();
+            if (orders && orders.length > 0) {
+                clients = this._compileClientsFromOrders(orders);
+                try {
+                    localStorage.setItem('dezan_clients', JSON.stringify(clients));
+                } catch (_) {}
+            }
+        }
+        return clients;
+    }
+
+    /**
+     * Retrieve complete chronological history for a specific client
+     */
+    getClientHistory(clientIdOrEmail) {
+        const clients = this.getClients();
+        const key = (clientIdOrEmail || '').toLowerCase().trim();
+        return clients.find(c => 
+            (c.clientId && c.clientId.toLowerCase() === key) ||
+            (c.clientEmail && c.clientEmail.toLowerCase() === key) ||
+            (c.clientName && c.clientName.toLowerCase() === key)
+        ) || null;
+    }
+
+    /**
+     * Get visual catalog of all digitized embroidery & vector designs
+     */
+    getCatalogDesigns() {
+        const orders = this.getOrders();
+        // Return orders formatted for catalog showcase
+        return orders.map(o => {
+            const hasDeliverables = o.deliverables && o.deliverables.length > 0;
+            const hasArtwork = o.raw_artwork_files && o.raw_artwork_files.length > 0;
+            const previewUrl = hasArtwork ? o.raw_artwork_files[0].url : 'logo.png';
+
+            return {
+                id: o.id,
+                orderNumber: o.order_number,
+                projectName: o.project_name,
+                serviceType: o.service_type || 'Digitizing',
+                placement: o.placement || 'Standard',
+                sizing: o.sizing || 'Default Size',
+                fabricType: o.fabric_type || 'Standard Garment',
+                fileFormat: o.file_format || 'DST, EMB',
+                instructions: o.instructions || '',
+                previewUrl: previewUrl,
+                artworkName: hasArtwork ? o.raw_artwork_files[0].name : 'Artwork',
+                deliverables: o.deliverables || [],
+                clientName: o.client_name || 'Client',
+                clientCompany: o.client_company || 'Independent',
+                clientEmail: o.client_email,
+                clientId: o.client_id,
+                price: o.price || 0,
+                status: o.status,
+                paymentStatus: o.payment_status || 'paid',
+                stitchOutPhotos: o.stitch_out_photos || [],
+                createdAt: o.created_at
+            };
+        });
+    }
+
+    /**
      * Fetches sanitized tasks from InsForge PostgreSQL database for Digitizer portal.
      * STRICT DATA MASKING: Client name, email, company, and price are completely omitted.
      * @returns {Promise<Array>} Sanitized tasks
@@ -706,6 +1054,8 @@ class InsForgeClient {
             orderNumber: t.order_number,
             serviceType: t.service_type || 'Digitizing',
             placement: t.placement || 'Left Chest',
+            fabric_type: t.fabric_type || t.fabricType || '',
+            fabricType: t.fabric_type || t.fabricType || '',
             sizing: t.sizing || 'Standard',
             fileFormat: t.file_format || 'DST, EMB',
             instructions: t.instructions || '',
@@ -714,7 +1064,11 @@ class InsForgeClient {
             deliverables: Array.isArray(t.deliverables) ? t.deliverables : [],
             assignedAt: t.assigned_at,
             completedAt: t.completed_at,
-            assignedDigitizerId: t.assigned_digitizer_id
+            assignedDigitizerId: t.assigned_digitizer_id,
+            revision_notes: t.revision_notes || t.revisionNotes || '',
+            revisionNotes: t.revision_notes || t.revisionNotes || '',
+            stitch_out_photos: Array.isArray(t.stitch_out_photos) ? t.stitch_out_photos : (Array.isArray(t.stitchOutPhotos) ? t.stitchOutPhotos : []),
+            stitchOutPhotos: Array.isArray(t.stitch_out_photos) ? t.stitch_out_photos : (Array.isArray(t.stitchOutPhotos) ? t.stitchOutPhotos : [])
             // NO client_name
             // NO client_email
             // NO client_company
@@ -741,13 +1095,19 @@ class InsForgeClient {
                 orderNumber: t.order_number,
                 serviceType: t.service_type || 'Digitizing',
                 placement: t.placement,
+                fabric_type: t.fabric_type || t.fabricType || '',
+                fabricType: t.fabric_type || t.fabricType || '',
                 sizing: t.sizing,
                 fileFormat: t.file_format || 'DST, EMB',
                 instructions: t.instructions || '',
                 rawArtworkFiles: Array.isArray(t.raw_artwork_files) ? t.raw_artwork_files : [],
                 status: t.status,
                 deliverables: Array.isArray(t.deliverables) ? t.deliverables : [],
-                assignedAt: t.assigned_at
+                assignedAt: t.assigned_at,
+                revision_notes: t.revision_notes || t.revisionNotes || '',
+                revisionNotes: t.revision_notes || t.revisionNotes || '',
+                stitch_out_photos: Array.isArray(t.stitch_out_photos) ? t.stitch_out_photos : (Array.isArray(t.stitchOutPhotos) ? t.stitchOutPhotos : []),
+                stitchOutPhotos: Array.isArray(t.stitch_out_photos) ? t.stitch_out_photos : (Array.isArray(t.stitchOutPhotos) ? t.stitchOutPhotos : [])
             }));
         }
 
@@ -762,13 +1122,19 @@ class InsForgeClient {
             orderNumber: order.order_number,
             serviceType: order.service_type,
             placement: order.placement,
+            fabric_type: order.fabric_type || '',
+            fabricType: order.fabric_type || '',
             sizing: order.sizing,
             fileFormat: order.file_format,
             instructions: order.instructions,
             rawArtworkFiles: order.raw_artwork_files || [],
             status: order.status,
             deliverables: order.deliverables || [],
-            assignedAt: order.assigned_at
+            assignedAt: order.assigned_at,
+            revision_notes: order.revision_notes || '',
+            revisionNotes: order.revision_notes || '',
+            stitch_out_photos: Array.isArray(order.stitch_out_photos) ? order.stitch_out_photos : [],
+            stitchOutPhotos: Array.isArray(order.stitch_out_photos) ? order.stitch_out_photos : []
         }));
     }
 
@@ -792,9 +1158,12 @@ class InsForgeClient {
             service_type: orderData.serviceType || 'Digitizing',
             plan_name: orderData.planName || 'Custom Order',
             project_name: orderData.projectName,
-            placement: orderData.placement,
-            sizing: orderData.sizing,
+            placement: orderData.placement || 'Standard',
+            fabric_type: orderData.fabricType || '',
+            sizing: orderData.sizing || 'Standard',
             file_format: orderData.fileFormat || 'DST, EMB',
+            special_options: orderData.specialOptions || [],
+            turnaround_speed: orderData.turnaroundSpeed || 'standard',
             instructions: orderData.instructions || '',
             raw_artwork_files: orderData.rawArtworkFiles || [],
             price: parseFloat(orderData.price) || 20.00,
@@ -820,6 +1189,7 @@ class InsForgeClient {
             orderNumber: newOrder.order_number,
             clientName: newOrder.client_name,
             projectName: newOrder.project_name,
+            serviceType: newOrder.service_type,
             price: newOrder.price,
             paymentStatus: newOrder.payment_status
         });
@@ -1067,7 +1437,129 @@ class InsForgeClient {
     }
 
     /**
+     * Client Requests a Revision on a Completed Order with Specific Feedback & Physical Stitch-Out Photos
+     * Automatically routes straight to the assigned digitizer's dashboard (strict technical data masking: no client PII/price)
+     * @param {string} orderNumber 
+     * @param {string} revisionNotes 
+     * @param {Array} stitchOutPhotos - [{ name, url, size }]
+     * @returns {Promise<{order: Object, task: Object}>}
+     */
+    async submitOrderRevision(orderNumber, revisionNotes, stitchOutPhotos = []) {
+        const requestedAt = new Date().toISOString();
+        const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+        const order = allOrders.find(o => o.order_number === orderNumber || o.id === orderNumber);
+
+        if (!order) {
+            throw new Error(`Order #${orderNumber} not found.`);
+        }
+
+        order.status = 'revision_requested';
+        order.revision_notes = revisionNotes;
+        order.stitch_out_photos = stitchOutPhotos;
+        order.revision_requested_at = requestedAt;
+        order.revision_count = (order.revision_count || 0) + 1;
+        order.updated_at = requestedAt;
+        localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
+
+        // Ensure task exists in digitizer_tasks for the assigned digitizer (or default Alex Miller)
+        const allTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+        let task = allTasks.find(t => t.order_number === order.order_number || t.orderNumber === order.order_number);
+
+        const digitizerId = order.assigned_digitizer_id || '00000000-0000-0000-0000-000000000003';
+        const taskNumber = 'TSK-' + order.order_number.replace('ORD-', '');
+
+        if (!task) {
+            task = {
+                id: this.generateUUID(),
+                task_number: taskNumber,
+                order_number: order.order_number,
+                order_id: order.id,
+                assigned_digitizer_id: digitizerId,
+                service_type: order.service_type || 'Digitizing',
+                placement: order.placement || 'Standard',
+                fabric_type: order.fabric_type || '',
+                sizing: order.sizing || 'Standard',
+                file_format: order.file_format || 'DST, EMB',
+                instructions: order.instructions || '',
+                raw_artwork_files: order.raw_artwork_files || [],
+                status: 'revision_requested',
+                revision_notes: revisionNotes,
+                stitch_out_photos: stitchOutPhotos,
+                revision_requested_at: requestedAt,
+                deliverables: order.deliverables || [],
+                assigned_at: requestedAt
+            };
+            allTasks.unshift(task);
+        } else {
+            task.status = 'revision_requested';
+            task.revision_notes = revisionNotes;
+            task.stitch_out_photos = stitchOutPhotos;
+            task.revision_requested_at = requestedAt;
+            task.assigned_digitizer_id = digitizerId;
+        }
+        localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(allTasks));
+
+        // Broadcast to other tabs immediately
+        this.broadcastEvent('order_revision_requested', {
+            orderNumber: order.order_number,
+            taskNumber: taskNumber,
+            digitizerId: digitizerId,
+            revisionNotes: revisionNotes,
+            stitchOutPhotosCount: stitchOutPhotos.length,
+            requestedAt: requestedAt
+        });
+
+        // Sync to InsForge PostgreSQL
+        try {
+            // 1. Update orders table
+            await fetch(`${this.baseUrl}/api/database/records/orders?order_number=eq.${encodeURIComponent(order.order_number)}`, {
+                method: 'PATCH',
+                headers: this.getApiHeaders(),
+                body: JSON.stringify({
+                    status: 'revision_requested',
+                    revision_notes: revisionNotes,
+                    stitch_out_photos: stitchOutPhotos,
+                    updated_at: requestedAt
+                })
+            });
+
+            // 2. Upsert digitizer_tasks
+            const taskCheckRes = await fetch(`${this.baseUrl}/api/database/records/digitizer_tasks?order_number=eq.${encodeURIComponent(order.order_number)}`, {
+                headers: this.getApiHeaders()
+            });
+            const existingTasks = taskCheckRes.ok ? await taskCheckRes.json() : [];
+
+            if (Array.isArray(existingTasks) && existingTasks.length > 0) {
+                await fetch(`${this.baseUrl}/api/database/records/digitizer_tasks?order_number=eq.${encodeURIComponent(order.order_number)}`, {
+                    method: 'PATCH',
+                    headers: this.getApiHeaders(),
+                    body: JSON.stringify({
+                        status: 'revision_requested',
+                        revision_notes: revisionNotes,
+                        stitch_out_photos: stitchOutPhotos,
+                        assigned_digitizer_id: digitizerId,
+                        updated_at: requestedAt
+                    })
+                });
+            } else {
+                await fetch(`${this.baseUrl}/api/database/records/digitizer_tasks`, {
+                    method: 'POST',
+                    headers: this.getApiHeaders(),
+                    body: JSON.stringify([task])
+                });
+            }
+            console.log(`✅ Revision for ${order.order_number} auto-routed to digitizer in InsForge PostgreSQL`);
+            localStorage.setItem('dezan_db_last_synced', requestedAt);
+        } catch (err) {
+            console.warn('InsForge revision sync notice:', err.message);
+        }
+
+        return { order, task };
+    }
+
+    /**
      * Digitizer Submits Completed .dst/.emb Deliverables (persisted to PostgreSQL cloud database + local cache + broadcast)
+     * Also clears open revision states
      * @param {string} orderNumber 
      * @param {Array} deliverables 
      * @returns {Promise<boolean>}
@@ -1081,6 +1573,7 @@ class InsForgeClient {
         if (order) {
             order.deliverables = deliverables;
             order.status = 'completed';
+            order.revision_completed_at = completedAt;
             order.updated_at = completedAt;
             localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
         }
@@ -1092,13 +1585,15 @@ class InsForgeClient {
             task.deliverables = deliverables;
             task.status = 'completed';
             task.completed_at = completedAt;
+            task.revision_completed_at = completedAt;
             localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(allTasks));
         }
 
         // Broadcast to other tabs immediately
         this.broadcastEvent('order_completed', {
             orderNumber: orderNumber,
-            deliverables: deliverables
+            deliverables: deliverables,
+            isRevisionComplete: !!(order && order.revision_notes)
         });
 
         // Sync to InsForge PostgreSQL

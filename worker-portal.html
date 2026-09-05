@@ -218,6 +218,7 @@
                     <select id="task-status-filter" onchange="handleSearchFilter()" class="w-full sm:w-auto px-3.5 py-2.5 bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-primary shadow-xs cursor-pointer">
                         <option value="all">All Tasks</option>
                         <option value="active">Active Queue (In Progress)</option>
+                        <option value="revision_requested">⚠️ Revision Requested</option>
                         <option value="completed">Completed Deliverables</option>
                     </select>
                 </div>
@@ -363,6 +364,19 @@
                     <p id="modal-instructions" class="text-xs text-slate-800 dark:text-slate-300 leading-relaxed font-medium">Standard Wilcom stitch density.</p>
                 </div>
 
+                <!-- Client Revision & Stitch-Out Feedback (Visible when revision is requested) -->
+                <div id="modal-revision-section" class="hidden p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 dark:border-amber-500/40 mb-5">
+                    <div class="flex items-center gap-1.5 text-amber-900 dark:text-amber-300 font-bold text-xs uppercase tracking-wider mb-2">
+                        <span class="material-symbols-outlined text-base text-amber-600 dark:text-amber-400">warning</span>
+                        <span>Client Stitch-Out Revision Feedback</span>
+                    </div>
+                    <p id="modal-revision-notes" class="text-xs text-slate-900 dark:text-slate-100 font-medium leading-relaxed mb-3 p-3 bg-white dark:bg-slate-900 rounded-lg border border-amber-200 dark:border-amber-500/20"></p>
+                    <div id="modal-stitchout-photos-container" class="hidden">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1.5">Garment Sew-Out Inspection Photo (Click to zoom):</span>
+                        <div id="modal-stitchout-photos" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+
                 <!-- Raw Artwork Download -->
                 <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-primary/15 mb-6">
                     <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">Customer Artwork File</span>
@@ -464,6 +478,27 @@
                     Got it
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- ===== STITCH-OUT PHOTO ZOOM MODAL ===== -->
+    <div id="stitch-out-zoom-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="relative max-w-3xl w-full bg-slate-900 border border-amber-500/40 rounded-2xl p-4 shadow-2xl">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-750 mb-3">
+                <div class="flex items-center gap-2 text-white">
+                    <span class="material-symbols-outlined text-amber-400">zoom_in</span>
+                    <h4 class="text-sm font-bold" id="stitch-out-zoom-title">Client Garment Sew-Out Inspection</h4>
+                </div>
+                <button onclick="closeStitchOutZoomModal()" class="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer">
+                    <span class="material-symbols-outlined text-lg">close</span>
+                </button>
+            </div>
+            <div class="flex items-center justify-center bg-black/60 rounded-xl overflow-hidden max-h-[70vh]">
+                <img id="stitch-out-zoom-img" src="" alt="Stitch out zoom" class="max-h-[70vh] w-auto object-contain" />
+            </div>
+            <p class="text-[11px] text-amber-300/90 font-medium text-center mt-3">
+                Examine physical thread tension, loop formation, pull compensation on lettering, and underlay coverage.
+            </p>
         </div>
     </div>
 
@@ -584,6 +619,14 @@
                         );
                     }
                     await renderWorkerTasks();
+                } else if (type === 'order_revision_requested') {
+                    window.insforgeClient.showToast(
+                        '⚠️ Revision Requested!',
+                        `Order ${payload.orderNumber} has client stitch-out feedback and sew-out photo.`,
+                        'warning',
+                        'warning'
+                    );
+                    await renderWorkerTasks();
                 } else if (type === 'remote_db_change') {
                     await renderWorkerTasks();
                 }
@@ -608,6 +651,10 @@
                 if (statusFilter) statusFilter.value = 'active';
                 handleSearchFilter();
                 scrollToSection('section-active-tasks');
+            } else if (sectionType === 'revision') {
+                if (statusFilter) statusFilter.value = 'revision_requested';
+                handleSearchFilter();
+                scrollToSection('section-active-tasks');
             } else if (sectionType === 'completed') {
                 if (statusFilter) statusFilter.value = 'completed';
                 handleSearchFilter();
@@ -630,15 +677,26 @@
             // Update Metrics
             const activeTasks = allWorkerTasks.filter(t => t.status !== 'completed');
             const completedTasks = allWorkerTasks.filter(t => t.status === 'completed');
+            const revisionTasks = allWorkerTasks.filter(t => t.status === 'revision_requested');
 
             const activeMetric = document.getElementById('metric-worker-active');
-            if (activeMetric) activeMetric.textContent = activeTasks.length;
+            if (activeMetric) {
+                activeMetric.textContent = activeTasks.length;
+            }
 
             const completedMetric = document.getElementById('metric-worker-completed');
             if (completedMetric) completedMetric.textContent = completedTasks.length;
 
             const activeBadge = document.getElementById('badge-active-count');
-            if (activeBadge) activeBadge.textContent = activeTasks.length;
+            if (activeBadge) {
+                if (revisionTasks.length > 0) {
+                    activeBadge.textContent = `${activeTasks.length} (${revisionTasks.length} revisions)`;
+                    activeBadge.className = 'text-xs px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black';
+                } else {
+                    activeBadge.textContent = activeTasks.length;
+                    activeBadge.className = 'text-xs px-2 py-0.5 rounded-full bg-amber-50 dark:bg-primary/10 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/20 font-bold';
+                }
+            }
 
             const completedBadge = document.getElementById('badge-completed-count');
             if (completedBadge) completedBadge.textContent = completedTasks.length;
@@ -658,11 +716,13 @@
                     (task.taskId && task.taskId.toLowerCase().includes(searchTerm)) ||
                     (task.placement && task.placement.toLowerCase().includes(searchTerm)) ||
                     (task.serviceType && task.serviceType.toLowerCase().includes(searchTerm)) ||
-                    (task.fileFormat && task.fileFormat.toLowerCase().includes(searchTerm));
+                    (task.fileFormat && task.fileFormat.toLowerCase().includes(searchTerm)) ||
+                    (task.revision_notes && task.revision_notes.toLowerCase().includes(searchTerm));
 
                 // Status matching
                 const matchesStatus = statusFilter === 'all' ||
                     (statusFilter === 'active' && task.status !== 'completed') ||
+                    (statusFilter === 'revision_requested' && task.status === 'revision_requested') ||
                     (statusFilter === 'completed' && task.status === 'completed');
 
                 // Format matching
@@ -712,9 +772,25 @@
         function renderTaskCard(task, isCompleted) {
             const rawFile = (task.rawArtworkFiles && task.rawArtworkFiles[0]) ? task.rawArtworkFiles[0] : { name: 'artwork.png', url: 'logo.png' };
             const stagedFiles = taskFilesState[task.orderNumber] || [];
+            const isRevision = task.status === 'revision_requested';
+
+            let statusBadge = '';
+            if (isCompleted) {
+                statusBadge = '<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 text-xs font-bold"><span class="material-symbols-outlined text-xs">check_circle</span> Completed</span>';
+            } else if (isRevision) {
+                statusBadge = '<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-400 dark:border-amber-500/40 text-xs font-bold animate-pulse"><span class="material-symbols-outlined text-xs text-amber-600 dark:text-amber-400">warning</span> Revision Requested</span>';
+            } else {
+                statusBadge = '<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-500/15 text-amber-900 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 text-xs font-bold"><span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span> Work In Progress</span>';
+            }
+
+            const borderClasses = isCompleted 
+                ? 'border-slate-200 dark:border-primary/20 opacity-90' 
+                : isRevision 
+                    ? 'border-2 border-amber-500 dark:border-amber-400 shadow-md ring-2 ring-amber-400/20' 
+                    : 'border-amber-400/60 dark:border-primary/50 shadow-sm';
 
             return `
-                <div class="p-5 sm:p-6 rounded-2xl bg-white dark:bg-card-dark border ${isCompleted ? 'border-slate-200 dark:border-primary/20 opacity-90' : 'border-amber-400/60 dark:border-primary/50 shadow-sm'} transition-all hover:border-amber-400 dark:hover:border-primary">
+                <div class="p-5 sm:p-6 rounded-2xl bg-white dark:bg-card-dark ${borderClasses} transition-all hover:border-amber-400 dark:hover:border-primary">
                     
                     <!-- Task Header (SANITIZED: strictly no client name or price) -->
                     <div class="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-slate-200 dark:border-primary/15 mb-4">
@@ -727,16 +803,49 @@
                         </div>
 
                         <div class="flex items-center gap-2">
-                            ${isCompleted 
-                                ? '<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 text-xs font-bold"><span class="material-symbols-outlined text-xs">check_circle</span> Completed</span>'
-                                : '<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-500/15 text-amber-900 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 text-xs font-bold"><span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span> Work In Progress</span>'
-                            }
+                            ${statusBadge}
                             <button onclick="openTaskDetailsModal('${task.orderNumber}')" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-primary/20 transition-colors cursor-pointer flex items-center gap-1" title="View Technical Work Order">
                                 <span class="material-symbols-outlined text-sm text-amber-800 dark:text-primary">visibility</span>
                                 <span class="hidden sm:inline">View Specs</span>
                             </button>
                         </div>
                     </div>
+
+                    ${isRevision ? `
+                        <!-- Client Physical Stitch-Out Feedback Box -->
+                        <div class="p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 border-2 border-amber-400 dark:border-amber-500/40 mb-4 shadow-xs">
+                            <div class="flex items-center justify-between gap-2 mb-2">
+                                <div class="flex items-center gap-1.5 text-amber-900 dark:text-amber-300 font-black text-xs uppercase tracking-wider">
+                                    <span class="material-symbols-outlined text-base text-amber-600 dark:text-amber-400">rate_review</span>
+                                    <span>Client Physical Stitch-Out Revision Feedback</span>
+                                </div>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-200/80 dark:bg-amber-500/30 text-amber-950 dark:text-amber-200 uppercase tracking-wider">High Priority Revision</span>
+                            </div>
+                            <div class="p-3 rounded-lg bg-white/90 dark:bg-card-dark/90 border border-amber-200 dark:border-amber-500/30 text-xs text-slate-800 dark:text-slate-200 font-medium mb-3 leading-relaxed">
+                                <strong class="font-bold text-slate-900 dark:text-white block mb-0.5">Specific Revision Instructions:</strong>
+                                "${task.revision_notes || task.revisionNotes || 'Please adjust stitch density and pull compensation.'}"
+                            </div>
+                            ${(task.stitch_out_photos && task.stitch_out_photos.length > 0) ? `
+                                <div>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 block mb-1.5">
+                                        Physical Garment Sew-Out Defect Inspection (Click to zoom):
+                                    </span>
+                                    <div class="flex flex-wrap gap-2.5">
+                                        ${task.stitch_out_photos.map(p => `
+                                            <div class="group relative cursor-pointer" onclick="openStitchOutZoomModal('${p.url}', '${p.name || 'Sew-Out Photo'}')">
+                                                <img src="${p.url}" alt="${p.name || 'Sew-out photo'}" class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border border-amber-300 dark:border-primary/40 shadow-xs group-hover:scale-105 transition-transform" />
+                                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 rounded-lg flex items-center justify-center transition-opacity text-white text-xs font-bold gap-1">
+                                                    <span class="material-symbols-outlined text-base">zoom_in</span>
+                                                    <span>Zoom</span>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-1 block">Check lettering pull-compensation, thread breaks, gap tension, and fabric pull.</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
 
                     <!-- Technical Specs Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
@@ -786,13 +895,13 @@
                                 <button id="btn-select-${task.orderNumber}" onclick="document.getElementById('file-upload-${task.orderNumber}').click()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-primary/40 hover:border-amber-600 dark:hover:border-primary text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 transition-all cursor-pointer">
                                     <span class="material-symbols-outlined text-sm text-amber-800 dark:text-primary">attach_file</span>
                                     <span id="label-${task.orderNumber}">
-                                        ${stagedFiles.length > 0 ? `${stagedFiles.length} file(s) staged` : 'Select .DST & .EMB'}
+                                        ${stagedFiles.length > 0 ? `${stagedFiles.length} file(s) staged` : (isRevision ? 'Select Revised .DST / .EMB' : 'Select .DST & .EMB')}
                                     </span>
                                 </button>
 
-                                <button id="btn-submit-${task.orderNumber}" onclick="submitTaskDeliverables('${task.orderNumber}')" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs shadow-md shadow-primary/25 flex items-center gap-1.5 transition-all hover:scale-[1.02] cursor-pointer">
-                                    <span class="material-symbols-outlined text-sm">cloud_upload</span>
-                                    <span>Submit Deliverables</span>
+                                <button id="btn-submit-${task.orderNumber}" onclick="submitTaskDeliverables('${task.orderNumber}')" class="px-4 py-2 rounded-xl ${isRevision ? 'bg-amber-500 hover:bg-amber-600 text-slate-950' : 'bg-primary hover:bg-primary-hover text-slate-950'} font-black text-xs shadow-md shadow-primary/25 flex items-center gap-1.5 transition-all hover:scale-[1.02] cursor-pointer">
+                                    <span class="material-symbols-outlined text-sm">${isRevision ? 'published_with_changes' : 'cloud_upload'}</span>
+                                    <span>${isRevision ? 'Submit Revised Deliverables' : 'Submit Deliverables'}</span>
                                 </button>
                             </div>
                         ` : `
@@ -928,8 +1037,37 @@
             const statusEl = document.getElementById('modal-status-badge');
             if (task.status === 'completed') {
                 statusEl.innerHTML = '<span class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-400 font-bold text-xs border border-emerald-200 dark:border-emerald-500/30">Completed</span>';
+            } else if (task.status === 'revision_requested') {
+                statusEl.innerHTML = '<span class="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 font-bold text-xs border border-amber-300 dark:border-amber-500/40 animate-pulse">Revision Requested</span>';
             } else {
                 statusEl.innerHTML = '<span class="px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-500/20 text-amber-900 dark:text-amber-400 font-bold text-xs border border-amber-200 dark:border-amber-500/30">In Progress</span>';
+            }
+
+            // Populate Revision Section
+            const revSection = document.getElementById('modal-revision-section');
+            if (revSection) {
+                if (task.status === 'revision_requested' || task.revision_notes) {
+                    revSection.classList.remove('hidden');
+                    document.getElementById('modal-revision-notes').textContent = task.revision_notes || task.revisionNotes || 'Please adjust stitch density and pull compensation.';
+                    
+                    const photosContainer = document.getElementById('modal-stitchout-photos-container');
+                    const photosGrid = document.getElementById('modal-stitchout-photos');
+                    if (task.stitch_out_photos && task.stitch_out_photos.length > 0) {
+                        photosContainer.classList.remove('hidden');
+                        photosGrid.innerHTML = task.stitch_out_photos.map(p => `
+                            <div class="relative group cursor-pointer" onclick="openStitchOutZoomModal('${p.url}', '${p.name || 'Sew-out photo'}')">
+                                <img src="${p.url}" alt="${p.name || 'Sew-out'}" class="w-16 h-16 object-cover rounded-lg border border-amber-300 dark:border-amber-500/40 hover:scale-105 transition-transform" />
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 rounded-lg flex items-center justify-center text-white text-[10px] font-bold">
+                                    <span class="material-symbols-outlined text-sm">zoom_in</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        photosContainer.classList.add('hidden');
+                    }
+                } else {
+                    revSection.classList.add('hidden');
+                }
             }
 
             document.getElementById('task-details-modal').classList.remove('hidden');
@@ -937,6 +1075,22 @@
 
         function closeTaskDetailsModal() {
             const modal = document.getElementById('task-details-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function openStitchOutZoomModal(url, title) {
+            const modal = document.getElementById('stitch-out-zoom-modal');
+            const img = document.getElementById('stitch-out-zoom-img');
+            const titleEl = document.getElementById('stitch-out-zoom-title');
+            if (modal && img) {
+                img.src = url;
+                if (titleEl && title) titleEl.textContent = title;
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeStitchOutZoomModal() {
+            const modal = document.getElementById('stitch-out-zoom-modal');
             if (modal) modal.classList.add('hidden');
         }
 
@@ -962,6 +1116,7 @@
                 closeTaskDetailsModal();
                 closeFormatSpecsModal();
                 closeWorkerAccountModal();
+                closeStitchOutZoomModal();
             }
         });
     </script>
