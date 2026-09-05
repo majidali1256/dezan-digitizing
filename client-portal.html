@@ -102,6 +102,20 @@
                     <span class="material-symbols-outlined text-sm text-amber-800 dark:text-primary group-hover:text-background-dark transition-colors">request_quote</span>
                     <span>Quote</span>
                 </button>
+
+                <!-- Desktop Profile Button -->
+                <button id="header-account-btn" onclick="openAccountModal('profile')" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-card-dark hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-primary/25 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all cursor-pointer group shadow-xs" title="Client Profile & Defaults">
+                    <div class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-900 dark:text-primary font-black text-[10px] flex items-center justify-center border border-amber-500/30 group-hover:scale-105 transition-transform" id="header-account-avatar">
+                        JF
+                    </div>
+                    <span id="header-account-name" class="font-bold text-slate-900 dark:text-white">Profile</span>
+                </button>
+
+                <!-- Desktop Settings Button -->
+                <button id="header-settings-btn" onclick="openAccountModal('security')" class="hidden md:flex items-center justify-center p-2 rounded-xl bg-slate-100 dark:bg-card-dark hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-primary/25 text-slate-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-primary text-xs font-bold transition-all cursor-pointer shadow-xs" title="Settings & Security">
+                    <span class="material-symbols-outlined text-lg">settings</span>
+                </button>
+
                 <button class="theme-toggle-btn p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors border border-slate-200 dark:border-primary/20" aria-label="Toggle theme">
                     <span class="material-symbols-outlined theme-toggle-icon text-lg text-primary-dark dark:text-primary">dark_mode</span>
                 </button>
@@ -270,24 +284,28 @@
     </main>
 
     <!-- ===== FIXED BOTTOM NAVIGATION DOCK ===== -->
-    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-slate-200 dark:border-primary/20 py-2 px-4 shadow-lg transition-colors no-print">
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-slate-200 dark:border-primary/20 py-2 px-3 shadow-lg transition-colors no-print">
         <div class="max-w-md mx-auto flex items-center justify-around">
-            <button onclick="scrollToTop()" class="flex flex-col items-center gap-0.5 text-amber-800 dark:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group">
+            <button onclick="scrollToTop()" class="flex flex-col items-center gap-0.5 text-amber-800 dark:text-primary transition-colors py-1 px-2 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group">
                 <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">home</span>
                 <span class="text-[11px] font-bold">Home</span>
             </button>
-            <button onclick="scrollToSection('section-open-orders')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group">
+            <button onclick="scrollToSection('section-open-orders')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-2 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group">
                 <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">receipt_long</span>
                 <span class="text-[11px] font-bold">Orders</span>
             </button>
-            <button onclick="scrollToSection('section-quotes')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group">
+            <button onclick="scrollToSection('section-quotes')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-2 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group">
                 <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">request_quote</span>
                 <span class="text-[11px] font-bold">Quotes</span>
             </button>
-            <button id="bottom-nav-settings-btn" onclick="openAccountModal('profile')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group" title="Account & Security Settings">
+            <button id="bottom-nav-profile-btn" onclick="openAccountModal('profile')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-2 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group" title="Client Profile & Machinery Defaults">
                 <div class="w-6 h-6 rounded-full bg-amber-500/15 text-amber-800 dark:text-primary font-black text-[10px] flex items-center justify-center border border-amber-500/25 group-hover:scale-105 transition-transform" id="bottom-nav-avatar">
                     JF
                 </div>
+                <span class="text-[11px] font-bold">Profile</span>
+            </button>
+            <button id="bottom-nav-settings-btn" onclick="openAccountModal('security')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-2 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group" title="Account & Security Settings">
+                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">settings</span>
                 <span class="text-[11px] font-bold">Settings</span>
             </button>
         </div>

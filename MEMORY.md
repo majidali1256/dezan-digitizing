@@ -106,8 +106,13 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
     - **Quotes**: Quote estimation status or clean empty state with `+ Request Quote` action.
   - **Client Invoice & Printable Receipt Modal**: Official itemized tax invoice and work order with `@media print` support, unpaid alert banner, and direct "Pay Balance Due" action button.
   - **Header & Navigation Refinement (Implemented)**:
-    - **Header**: Features side-by-side action buttons: Primary Gold `[ + New Order ]` (`#open-new-order-btn`) and Secondary Outline `[ 📄 Quote ]` (`#open-new-quote-btn`) with dark mode toggle. The profile/settings section was relocated to the bottom navigation bar as requested.
-    - **Fixed Bottom Navigation Dock**: 4 quick-access tabs (`Home`, `Orders`, `Quotes`, `Settings` with live client avatar initials `JF` and tune icon). Clicking `Settings` opens the comprehensive Account & Security modal (`#account-modal`).
+    - **Header**: Features side-by-side action buttons: Primary Gold `[ + New Order ]` (`#open-new-order-btn`), Secondary Outline `[ 📄 Quote ]` (`#open-new-quote-btn`), Desktop Profile button (`#header-account-btn` with client monogram avatar and name), Desktop Settings button (`#header-settings-btn` with gear icon), and dark mode toggle.
+    - **Fixed Bottom Navigation Dock (5 Buttons)**: Full access suite with 5 dedicated tabs:
+      1. **Home**: Quick scroll to dashboard top overview.
+      2. **Orders**: Direct anchor jump to active & open orders.
+      3. **Quotes**: Direct anchor jump to quotes queue.
+      4. **Profile**: Dedicated button with client initials monogram avatar (`JF`), opens `#account-modal` directly to the **Profile & Machinery Defaults** tab.
+      5. **Settings**: Dedicated button with gear icon, opens `#account-modal` directly to the **Password & Credential Security** tab.
   - **Distinct Quote vs. Order Architecture**:
     - **Shared Unified Technical Specs**: Both Quote and Order modes share the exact same comprehensive technical specifications (Embroidery Digitizing vs. Vector Art, placement, garment fabric, dimensions, file formats, 3D puff, turnaround speed, and artwork upload dropzone).
     - **Order Flow (Mandatory Upfront Payment)**: Price summary and turnaround options are active. Dual payment term radios were removed; orders strictly require upfront payment to initiate production (`status: 'pending_review'`), launching the secure checkout modal immediately upon placement.
