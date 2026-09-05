@@ -65,53 +65,59 @@
     <!-- ===== MAIN CONTENT ===== -->
     <main class="pb-24 max-w-4xl mx-auto px-4 pt-4 sm:pt-8">
 
-        <!-- ===== HERO SECTION (INSPIRATION FROM IMAGE: SIDE-BY-SIDE ON MOBILE & DESKTOP) ===== -->
+        <!-- ===== HERO SECTION — Float wrap on mobile, grid on desktop ===== -->
         <section class="pb-3 sm:pb-8">
-            <div class="grid grid-cols-12 gap-2 sm:gap-8 items-center">
-                <!-- Left Column: Typography & Value Points (7 cols on mobile & desktop) -->
-                <div class="col-span-7 md:col-span-7 space-y-2 sm:space-y-4 text-left">
-                    <span class="text-[9.5px] sm:text-xs font-black tracking-[0.14em] text-amber-800 dark:text-primary uppercase block whitespace-nowrap">
+            <!-- On mobile: block container with float-right image so text wraps around it.
+                 On md+: switch to 12-col grid with explicit column ordering. -->
+            <div class="block md:grid md:grid-cols-12 md:gap-8 md:items-center">
+
+                <!-- Image: float right on mobile → text wraps. Grid col-5 on desktop. -->
+                <div class="float-right md:float-none md:col-span-5 md:order-2 ml-3 mb-1 md:ml-0 md:mb-0 flex justify-center items-start">
+                    <img src="Hero Page/Embroidery.png" alt="Dezan high-precision embroidery stitches"
+                         class="w-[150px] sm:w-[200px] md:w-full md:max-w-[260px] max-h-[170px] sm:max-h-[220px] object-contain drop-shadow-lg pointer-events-none"
+                         draggable="false">
+                </div>
+
+                <!-- Text: fills around float on mobile, col-span-7 on desktop -->
+                <div class="md:col-span-7 md:order-1 space-y-2 sm:space-y-4 text-left">
+                    <span class="text-[10px] sm:text-xs font-black tracking-[0.14em] text-amber-800 dark:text-primary uppercase block">
                         QUALITY DIGITIZING. REAL PEOPLE.
                     </span>
-                    <h1 class="text-[23px] sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.08]">
-                        Simple Flat-Rate <br class="inline sm:hidden" />
-                        <span class="text-amber-800 dark:text-primary">Pricing</span>
+                    <h1 class="text-[26px] sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.06]">
+                        Simple Flat-Rate
+                        <span class="text-amber-800 dark:text-primary block sm:inline">Pricing</span>
                     </h1>
-                    <p class="text-slate-600 dark:text-slate-300 text-[11.5px] sm:text-base leading-snug sm:leading-relaxed max-w-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-[12.5px] sm:text-base leading-snug sm:leading-relaxed max-w-lg">
                         Professional embroidery digitizing with clean, honest pricing.
                     </p>
 
                     <!-- 3 Circular Icon Feature Bullets -->
                     <div class="pt-1 sm:pt-2 space-y-2 sm:space-y-3.5">
-                        <div class="flex items-center gap-2 sm:gap-3.5 text-[10.5px] sm:text-sm font-semibold text-slate-800 dark:text-slate-200">
-                            <div class="w-[22px] h-[22px] sm:w-10 sm:h-10 rounded-full bg-amber-500/10 dark:bg-primary/20 text-amber-800 dark:text-primary flex items-center justify-center flex-shrink-0 shadow-xs border border-amber-400/30 dark:border-primary/25">
-                                <span class="material-symbols-outlined text-[13px] sm:text-lg fill-1">bolt</span>
+                        <div class="flex items-center gap-2 sm:gap-3.5 text-[12px] sm:text-sm font-semibold text-slate-800 dark:text-slate-200">
+                            <div class="w-[24px] h-[24px] sm:w-10 sm:h-10 rounded-full bg-amber-500/10 dark:bg-primary/20 text-amber-800 dark:text-primary flex items-center justify-center flex-shrink-0 shadow-xs border border-amber-400/30 dark:border-primary/25">
+                                <span class="material-symbols-outlined text-[14px] sm:text-lg fill-1">bolt</span>
                             </div>
-                            <span class="truncate">Next Day Turnaround</span>
+                            <span>Next Day Turnaround</span>
                         </div>
 
-                        <div class="flex items-center gap-2 sm:gap-3.5 text-[10.5px] sm:text-sm font-semibold text-slate-800 dark:text-slate-200">
-                            <div class="w-[22px] h-[22px] sm:w-10 sm:h-10 rounded-full bg-amber-500/10 dark:bg-primary/20 text-amber-800 dark:text-primary flex items-center justify-center flex-shrink-0 shadow-xs border border-amber-400/30 dark:border-primary/25">
-                                <span class="material-symbols-outlined text-[13px] sm:text-lg fill-1">edit</span>
+                        <div class="flex items-center gap-2 sm:gap-3.5 text-[12px] sm:text-sm font-semibold text-slate-800 dark:text-slate-200">
+                            <div class="w-[24px] h-[24px] sm:w-10 sm:h-10 rounded-full bg-amber-500/10 dark:bg-primary/20 text-amber-800 dark:text-primary flex items-center justify-center flex-shrink-0 shadow-xs border border-amber-400/30 dark:border-primary/25">
+                                <span class="material-symbols-outlined text-[14px] sm:text-lg fill-1">edit</span>
                             </div>
-                            <span class="leading-tight">Digitized by hand - no auto conversion</span>
+                            <span class="leading-tight">Digitized by hand — no auto conversion</span>
                         </div>
 
-                        <div class="flex items-center gap-2 sm:gap-3.5 text-[10.5px] sm:text-sm font-semibold text-slate-800 dark:text-slate-200">
-                            <div class="w-[22px] h-[22px] sm:w-10 sm:h-10 rounded-full bg-amber-500/10 dark:bg-primary/20 text-amber-800 dark:text-primary flex items-center justify-center flex-shrink-0 shadow-xs border border-amber-400/30 dark:border-primary/25">
-                                <span class="material-symbols-outlined text-[13px] sm:text-lg fill-1">cloud_download</span>
+                        <div class="flex items-center gap-2 sm:gap-3.5 text-[12px] sm:text-sm font-semibold text-slate-800 dark:text-slate-200">
+                            <div class="w-[24px] h-[24px] sm:w-10 sm:h-10 rounded-full bg-amber-500/10 dark:bg-primary/20 text-amber-800 dark:text-primary flex items-center justify-center flex-shrink-0 shadow-xs border border-amber-400/30 dark:border-primary/25">
+                                <span class="material-symbols-outlined text-[14px] sm:text-lg fill-1">cloud_download</span>
                             </div>
                             <span class="leading-tight">Order history and online downloads</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right Column: Real Embroidered Patch Visual (Zero Bounding Box / No Card) -->
-                <div class="col-span-5 md:col-span-5 flex justify-center items-center">
-                    <div class="relative w-full max-w-[190px] sm:max-w-[260px] flex justify-center items-center">
-                        <img src="Hero Page/Embroidery.png" alt="Dezan high-precision embroidery stitches" class="w-full max-h-[135px] sm:max-h-[220px] object-contain drop-shadow-lg pointer-events-none" draggable="false">
-                    </div>
-                </div>
+                <!-- Clear float so section below is not affected -->
+                <div class="clear-both md:hidden"></div>
             </div>
 
             <!-- Dynamic Client Authentication Banners -->
