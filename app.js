@@ -1512,9 +1512,14 @@ function selectPlan(planName, price) {
 
     const service = planName.toLowerCase().includes('vector') ? 'Vectorizing' : 'Digitizing';
 
-    // If client is not logged in, route to login page first
+    // If client is not logged in, trigger frictionless guest checkout modal directly (sign-in is not required)
     if (!session || !session.role) {
-        window.location.href = `portal-login.html?redirect=new_order&service=${encodeURIComponent(service)}&plan=${encodeURIComponent(planName)}`;
+        if (typeof window.openGuestCheckoutModal === 'function') {
+            window.openGuestCheckoutModal({ service, plan: planName, price });
+        } else {
+            const orderSection = document.getElementById("order-section");
+            if (orderSection) orderSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
         return;
     }
 
@@ -1628,12 +1633,15 @@ function initOrderSystem() {
             }
 
             if (!currentSession || !currentSession.role) {
+                // Sign-in is not required: route through frictionless guest checkout modal
                 e.preventDefault();
                 e.stopPropagation();
-                const plan = document.getElementById('order-plan')?.value || '';
-                const service = document.getElementById('service-type')?.value || '';
-                alert('Please sign in or create an account before placing an order.');
-                window.location.href = `portal-login.html?redirect=new_order&service=${encodeURIComponent(service)}&plan=${encodeURIComponent(plan)}`;
+                const plan = document.getElementById('order-plan')?.value || 'Hat / Left Chest Logos';
+                const service = document.getElementById('service-type')?.value || 'Digitizing';
+                const price = parseFloat(document.getElementById('order-amount')?.value) || 15;
+                if (typeof window.openGuestCheckoutModal === 'function') {
+                    window.openGuestCheckoutModal({ service, plan, price });
+                }
                 return false;
             }
         });

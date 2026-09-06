@@ -546,3 +546,19 @@ To prevent data leakage via browser DevTools:
 2. **Zero Framework Mandate**: Keep all scripts lightweight and vanilla. No bundle builds required.
 3. **Git Hygiene**: Clean atomic commits with descriptive commit messages.
 4. **Deployment Verification**: Always verify both `https://dezan-digitizing.vercel.app/` and `https://majidali1256.github.io/dezan-digitizing/` after major updates.
+
+---
+
+## 16. Frictionless Guest Ordering System (No Sign-In Required)
+- **Zero Account Barrier Policy**:
+  - Customers can submit artwork, configure stitch/vector specs, and complete payment without creating an account or signing in.
+- **Dynamic Outer Page Banners Updated**:
+  - `pricing.html`: `#pricing-login-prompt` updated from lock icon & "Sign in to submit artwork" to a vibrant emerald lightning bolt with "No sign-in required. Click any card below to place an order or quote directly", with a primary `[ Order Now -> ]` action button and subtle `Sign In` link.
+  - `pricing.html`: Section 4 bottom dispatch call-to-action updated from "Log In to Order" to "Order Now".
+  - `contact.html`: `#quote-login-prompt` updated from "Sign in to Submit Your Quote Request" to "Instant Free Quote — No Sign-in Needed" with `[ Request Free Quote -> ]` action.
+- **Frontend Interaction Logic (`app.js`)**:
+  - `selectPlan(planName, price)`: Directly opens `window.openGuestCheckoutModal({ service, plan, price })` for unauthenticated visitors without forcing redirects to `portal-login.html`.
+  - `orderForm` submit interceptor: Removed legacy alert box blocking unauthenticated users; immediately routes into the guest checkout engine.
+- **Login Portal Intent Fallback (`portal-login.html`)**:
+  - `#order-intent-banner` updated with an `[ Order as Guest -> ]` button so users redirected or landing on login can order immediately without registering.
+

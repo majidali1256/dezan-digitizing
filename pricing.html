@@ -128,13 +128,16 @@
                 <!-- Unauthenticated banner (Emerald Green Style) -->
                 <div id="pricing-login-prompt" class="p-2.5 sm:p-3.5 px-3 sm:px-4 rounded-xl sm:rounded-2xl flex items-center justify-between gap-2.5 sm:gap-3 text-left" style="background: linear-gradient(135deg, rgba(6,78,59,0.18) 0%, rgba(16,185,129,0.10) 100%); border: 1px solid rgba(16,185,129,0.45); box-shadow: 0 0 16px rgba(16,185,129,0.22), 0 0 4px rgba(16,185,129,0.12) inset;">
                     <div class="flex items-center gap-2 sm:gap-2.5 text-[11px] sm:text-sm font-medium">
-                        <span class="material-symbols-outlined text-base sm:text-xl flex-shrink-0" style="color: #10b981; text-shadow: 0 0 8px rgba(16,185,129,0.7);">lock</span>
-                        <span class="text-[#064e3b] dark:text-emerald-100">Orders placed in <strong class="text-[#047857] dark:text-emerald-300 font-bold">Client Portal</strong>. Sign in to submit artwork.</span>
+                        <span class="material-symbols-outlined text-base sm:text-xl flex-shrink-0" style="color: #10b981; text-shadow: 0 0 8px rgba(16,185,129,0.7);">bolt</span>
+                        <span class="text-[#064e3b] dark:text-emerald-100"><strong class="text-[#047857] dark:text-emerald-300 font-bold">No sign-in required.</strong> Click any card below to place an order or quote directly.</span>
                     </div>
-                    <a href="portal-login.html" class="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-white font-bold text-xs transition-all flex items-center justify-center gap-1 flex-shrink-0 whitespace-nowrap" style="background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); box-shadow: 0 0 12px rgba(16,185,129,0.4); border: 1px solid rgba(16,185,129,0.3);">
-                        <span>Sign In</span>
-                        <span class="material-symbols-outlined text-xs font-bold">arrow_forward</span>
-                    </a>
+                    <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                        <a href="portal-login.html" class="hidden sm:inline-flex text-[11px] font-semibold text-[#047857] dark:text-emerald-300 hover:underline items-center whitespace-nowrap">Sign In</a>
+                        <button type="button" onclick="window.handleOrderClick(event)" class="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-white font-bold text-xs transition-all flex items-center justify-center gap-1 flex-shrink-0 whitespace-nowrap cursor-pointer hover:brightness-110 active:scale-95 shadow-md" style="background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); box-shadow: 0 0 12px rgba(16,185,129,0.4); border: 1px solid rgba(16,185,129,0.3);">
+                            <span>Order Now</span>
+                            <span class="material-symbols-outlined text-xs font-bold">arrow_forward</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Authenticated client banner (Green Glow Style) -->
@@ -803,12 +806,12 @@
             <div class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-card-dark border border-primary/25 shadow-xs space-y-3">
                 <h3 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">Ready to Place Your Design?</h3>
                 <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-md mx-auto">
-                    Log in to your private Client Portal to upload artwork, specify fabric details, and download completed files.
+                    Upload your artwork and place orders directly with zero account setup required, or log in to track existing orders.
                 </p>
                 <div class="grid grid-cols-2 gap-3 pt-2 max-w-sm mx-auto sm:max-w-none sm:flex sm:flex-row sm:items-center sm:justify-center">
                     <button type="button" onclick="window.handleOrderClick(event)" data-action="order-now" class="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs transition-all flex items-center justify-center gap-1.5 shadow-md cursor-pointer">
-                        <span class="material-symbols-outlined text-base">login</span>
-                        <span>Log In to Order</span>
+                        <span class="material-symbols-outlined text-base">bolt</span>
+                        <span>Order Now</span>
                     </button>
                     <button type="button" onclick="window.handleQuoteClick(event)" data-action="request-quote" class="px-4 py-2.5 rounded-xl bg-white dark:bg-card-dark hover:bg-slate-50 dark:hover:bg-primary/10 text-slate-800 dark:text-slate-200 font-bold text-xs border border-slate-200 dark:border-primary/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
                         <span class="material-symbols-outlined text-base">request_quote</span>

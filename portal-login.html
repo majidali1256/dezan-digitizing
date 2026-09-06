@@ -95,14 +95,20 @@
             </div>
 
             <!-- Order Context Notice Banner (Shown when redirected from Order Now) -->
-            <div id="order-intent-banner" class="hidden mb-5 p-3.5 rounded-xl bg-primary/10 border border-primary/30 text-slate-900 dark:text-slate-100 text-xs flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-primary/20 text-primary flex items-center justify-center flex-shrink-0">
-                    <span class="material-symbols-outlined text-lg">shopping_cart_checkout</span>
+            <div id="order-intent-banner" class="hidden mb-5 p-3.5 rounded-xl bg-primary/10 border border-primary/30 text-slate-900 dark:text-slate-100 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-primary/20 text-primary flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined text-lg">shopping_cart_checkout</span>
+                    </div>
+                    <div>
+                        <p class="font-black text-slate-900 dark:text-white" id="order-intent-title">Sign In or Order as Guest</p>
+                        <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5" id="order-intent-desc">Sign in to save orders to your dashboard, or order instantly without an account.</p>
+                    </div>
                 </div>
-                <div>
-                    <p class="font-black text-slate-900 dark:text-white" id="order-intent-title">Sign In to Place Your Order</p>
-                    <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5" id="order-intent-desc">Please log in or create an account to start your order and track live machine deliverables.</p>
-                </div>
+                <a href="pricing.html" id="order-guest-link" class="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-background-dark font-black text-xs transition-colors flex items-center justify-center gap-1 flex-shrink-0 whitespace-nowrap shadow-xs">
+                    <span>Order as Guest</span>
+                    <span class="material-symbols-outlined text-xs font-bold">arrow_forward</span>
+                </a>
             </div>
 
             <!-- Error Banner -->
@@ -242,12 +248,15 @@
 
                 if (intentBanner) {
                     intentBanner.classList.remove('hidden');
+                    const guestLink = document.getElementById('order-guest-link');
                     if (planParam) {
-                        if (intentTitle) intentTitle.textContent = `Sign In to Order: ${planParam}`;
-                        if (intentDesc) intentDesc.textContent = `Log in or create an account to customize your ${planParam} order specs and files.`;
+                        if (intentTitle) intentTitle.textContent = `Order: ${planParam}`;
+                        if (intentDesc) intentDesc.textContent = `Sign in to track orders in your dashboard, or order instantly as a guest without signing in.`;
+                        if (guestLink) guestLink.href = `pricing.html#order-section`;
                     } else if (serviceParam) {
-                        if (intentTitle) intentTitle.textContent = `Sign In to Order ${serviceParam}`;
-                        if (intentDesc) intentDesc.textContent = `Log in or create an account to submit your ${serviceParam} specs and artwork.`;
+                        if (intentTitle) intentTitle.textContent = `Order: ${serviceParam}`;
+                        if (intentDesc) intentDesc.textContent = `Sign in to track orders in your dashboard, or order instantly as a guest without signing in.`;
+                        if (guestLink) guestLink.href = `pricing.html#order-section`;
                     }
                 }
             } else if (redirectParam === 'request_quote' || redirectParam === 'quote') {
@@ -255,11 +264,16 @@
                 const intentTitle = document.getElementById('order-intent-title');
                 const intentDesc = document.getElementById('order-intent-desc');
                 const serviceParam = urlParams.get('service');
+                const guestLink = document.getElementById('order-guest-link');
 
                 if (intentBanner) {
                     intentBanner.classList.remove('hidden');
-                    if (intentTitle) intentTitle.textContent = serviceParam ? `Sign In to Request a ${serviceParam} Quote` : `Sign In to Request a Custom Quote`;
-                    if (intentDesc) intentDesc.textContent = 'Log in or register to submit project specs, upload artwork, and track quotes in your client dashboard.';
+                    if (intentTitle) intentTitle.textContent = serviceParam ? `Request a ${serviceParam} Quote` : `Request a Custom Quote`;
+                    if (intentDesc) intentDesc.textContent = 'Sign in to manage quotes in your portal, or request a free quote without signing in.';
+                    if (guestLink) {
+                        guestLink.href = 'contact.html#custom-quote-section';
+                        guestLink.innerHTML = '<span>Request Quote as Guest</span><span class="material-symbols-outlined text-xs font-bold">arrow_forward</span>';
+                    }
                 }
             }
         } catch (e) {
