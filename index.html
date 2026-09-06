@@ -150,7 +150,7 @@
                     <span class="text-[9.5px] sm:text-[10.5px] font-extrabold tracking-[0.18em] text-primary uppercase mt-1">Digitizing</span>
                 </div>
             </a>
-            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
+            <nav class="hidden md:flex items-center gap-1 lg:gap-2 text-[15px] lg:text-[16.5px] font-bold">
                 <a href="index.html" class="nav-link-gold transition-colors" data-nav="index.html">Home</a>
                 <a href="about.html" class="nav-link-gold transition-colors" data-nav="about.html">About</a>
                 <a href="services.html" class="nav-link-gold transition-colors"
@@ -160,13 +160,13 @@
                 <a href="pricing.html" class="nav-link-gold transition-colors" data-nav="pricing.html">Pricing</a>
                 <a href="contact.html" class="nav-link-gold transition-colors" data-nav="contact.html">Contact</a>
             </nav>
-            <div class="flex items-center gap-2">
-                <button class="theme-toggle-btn p-2 rounded-lg hover:bg-primary/10 transition-colors"
+            <div class="flex items-center gap-2 sm:gap-2.5">
+                <button class="theme-toggle-btn p-2 sm:p-2.5 rounded-xl hover:bg-primary/10 transition-colors"
                     aria-label="Toggle theme">
                     <span class="material-symbols-outlined theme-toggle-icon text-xl">light_mode</span>
                 </button>
                 <div id="header-auth-slot" class="flex items-center">
-                    <a href="portal-login.html" class="header-login-btn px-3 py-1.5 rounded-lg bg-primary/10 dark:bg-primary/15 hover:bg-primary hover:text-background-dark dark:hover:bg-primary dark:hover:text-background-dark text-primary border border-primary/25 dark:border-primary/30 text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
+                    <a href="portal-login.html" class="header-login-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-primary/10 dark:bg-primary/15 hover:bg-primary hover:text-background-dark dark:hover:bg-primary dark:hover:text-background-dark text-primary border border-primary/25 dark:border-primary/30 text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 shadow-xs">
                         <span class="material-symbols-outlined text-sm">login</span>
                         <span>Login</span>
                     </a>
@@ -191,17 +191,24 @@
               </p>
               
               <!-- 3 Hero Action Buttons (Side-by-Side Row on Both Mobile and Desktop) -->
-              <div class="mt-5 sm:mt-12 flex flex-row gap-2 sm:gap-4 items-center justify-center md:justify-start w-full max-w-xl">
-                <a href="portal-login.html?redirect=new_order" data-action="order-now" onclick="window.handleOrderClick(event)" class="flex-1 sm:flex-initial py-3 px-2.5 sm:px-8 bg-primary text-background-dark rounded-xl font-bold text-center hover:brightness-110 transition-all shadow-md hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer text-xs sm:text-sm whitespace-nowrap">
+              <div class="mt-5 sm:mt-10 lg:mt-12 flex flex-row gap-2 sm:gap-3.5 lg:gap-4 items-center justify-center md:justify-start w-full max-w-xl lg:max-w-2xl">
+                <a href="portal-login.html?redirect=new_order" data-action="order-now" onclick="window.handleOrderClick(event)" class="group flex-1 sm:flex-initial py-3 px-2.5 sm:py-3.5 sm:px-5 md:py-4 md:px-6 lg:py-4.5 lg:px-8 bg-primary text-background-dark rounded-xl sm:rounded-2xl font-black text-center hover:brightness-110 transition-all shadow-md hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-1.5 sm:gap-2.5 lg:gap-3 cursor-pointer text-xs sm:text-sm md:text-base lg:text-[17px] whitespace-nowrap">
+                  <span class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9 rounded-lg sm:rounded-xl bg-black/15 dark:bg-black/20 flex items-center justify-center text-slate-950 shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                    <span class="material-symbols-outlined text-sm sm:text-base md:text-lg lg:text-[21px]">shopping_bag</span>
+                  </span>
                   <span>Order Now</span>
-                  <span class="material-symbols-outlined text-xs sm:text-base">arrow_forward</span>
                 </a>
-                <a href="pricing.html" class="flex-1 sm:flex-initial py-3 px-2.5 sm:px-8 border border-primary/35 hover:border-primary text-slate-900 dark:text-slate-100 rounded-xl font-bold text-center transition-all bg-primary/10 hover:bg-primary/20 flex items-center justify-center text-xs sm:text-sm whitespace-nowrap shadow-xs">
+                <a href="pricing.html" class="group flex-1 sm:flex-initial py-3 px-2.5 sm:py-3.5 sm:px-5 md:py-4 md:px-6 lg:py-4.5 lg:px-8 border border-primary/35 hover:border-primary text-slate-900 dark:text-slate-100 rounded-xl sm:rounded-2xl font-black text-center transition-all bg-primary/10 hover:bg-primary/20 flex items-center justify-center gap-1.5 sm:gap-2.5 lg:gap-3 text-xs sm:text-sm md:text-base lg:text-[17px] whitespace-nowrap shadow-xs hover:shadow-md transform hover:-translate-y-0.5">
+                  <span class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9 rounded-lg sm:rounded-xl bg-primary/20 dark:bg-primary/25 border border-primary/30 flex items-center justify-center text-amber-800 dark:text-primary shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                    <span class="material-symbols-outlined text-sm sm:text-base md:text-lg lg:text-[21px]">sell</span>
+                  </span>
                   <span>View Pricing</span>
                 </a>
-                <a href="contact.html#custom-quote-section" data-action="request-quote" onclick="window.handleQuoteClick(event)" class="flex-1 sm:flex-initial py-3 px-2.5 sm:px-8 border border-primary/35 hover:border-primary text-slate-900 dark:text-slate-100 rounded-xl font-bold text-center transition-all bg-primary/10 hover:bg-primary/20 flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer text-xs sm:text-sm whitespace-nowrap shadow-xs">
+                <a href="contact.html#custom-quote-section" data-action="request-quote" onclick="window.handleQuoteClick(event)" class="group flex-1 sm:flex-initial py-3 px-2.5 sm:py-3.5 sm:px-5 md:py-4 md:px-6 lg:py-4.5 lg:px-8 border border-primary/35 hover:border-primary text-slate-900 dark:text-slate-100 rounded-xl sm:rounded-2xl font-black text-center transition-all bg-primary/10 hover:bg-primary/20 flex items-center justify-center gap-1.5 sm:gap-2.5 lg:gap-3 cursor-pointer text-xs sm:text-sm md:text-base lg:text-[17px] whitespace-nowrap shadow-xs hover:shadow-md transform hover:-translate-y-0.5">
+                  <span class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9 rounded-lg sm:rounded-xl bg-primary/20 dark:bg-primary/25 border border-primary/30 flex items-center justify-center text-amber-800 dark:text-primary shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                    <span class="material-symbols-outlined text-sm sm:text-base md:text-lg lg:text-[21px]">request_quote</span>
+                  </span>
                   <span>Get Quote</span>
-                  <span class="material-symbols-outlined text-xs sm:text-base">request_quote</span>
                 </a>
               </div>
             </div>

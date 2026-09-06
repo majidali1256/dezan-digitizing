@@ -54,7 +54,7 @@
                     <span class="text-[9.5px] sm:text-[10.5px] font-extrabold tracking-[0.18em] text-primary uppercase mt-1">Digitizing</span>
                 </div>
             </a>
-            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
+            <nav class="hidden md:flex items-center gap-1 lg:gap-2 text-[15px] lg:text-[16.5px] font-bold">
                 <a href="index.html" class="nav-link-gold transition-colors">Home</a>
                 <a href="services.html" class="nav-link-gold transition-colors">Services</a>
                 <a href="pricing.html" class="nav-link-gold transition-colors">Pricing</a>
@@ -62,12 +62,12 @@
                 <a href="about.html" class="nav-link-gold transition-colors">About</a>
                 <a href="contact.html" class="nav-link-gold transition-colors">Contact</a>
             </nav>
-            <div class="flex items-center gap-2">
-                <button class="theme-toggle-btn p-2 rounded-lg hover:bg-primary/10 transition-colors cursor-pointer"
+            <div class="flex items-center gap-2 sm:gap-2.5">
+                <button class="theme-toggle-btn p-2 sm:p-2.5 rounded-xl hover:bg-primary/10 transition-colors cursor-pointer"
                     aria-label="Toggle theme"><span
                         class="material-symbols-outlined theme-toggle-icon text-xl">light_mode</span></button>
                 <div id="header-auth-slot" class="flex items-center">
-                    <a href="portal-login.html" class="px-3.5 py-1.5 rounded-lg bg-primary/10 hover:bg-primary hover:text-background-dark text-primary border border-primary/25 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
+                    <a href="portal-login.html" class="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-primary/10 hover:bg-primary hover:text-background-dark text-primary border border-primary/25 text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 shadow-xs">
                         <span class="material-symbols-outlined text-sm">login</span>
                         <span>Client Login</span>
                     </a>
@@ -253,9 +253,15 @@
                             <span class="text-slate-500 dark:text-slate-400">Fabric Type</span>
                             <span id="res-fabric" class="font-bold text-slate-900 dark:text-white">Cotton Pique</span>
                         </div>
-                        <div class="flex justify-between py-1.5">
+                        <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800/80">
                             <span class="text-slate-500 dark:text-slate-400">Target Machine Format</span>
                             <span id="res-format" class="font-bold text-primary font-mono">Tajima (.DST)</span>
+                        </div>
+                        <div class="py-2">
+                            <span class="text-slate-500 dark:text-slate-400 block mb-1 text-xs">Uploaded Customer Files</span>
+                            <div id="res-artworks-list" class="flex flex-wrap gap-1.5">
+                                <span class="text-xs text-slate-400">Loading files...</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -416,6 +422,33 @@
                 }
             }
 
+            // Customer Uploaded Artworks / Documents
+            const artList = document.getElementById('res-artworks-list');
+            if (artList) {
+                const artworks = Array.isArray(order.artworks) && order.artworks.length > 0
+                    ? order.artworks
+                    : (order.artworkUrl ? [{ name: 'artwork.png', url: order.artworkUrl }] : []);
+                if (artworks.length > 0) {
+                    artList.innerHTML = artworks.map(art => {
+                        const aname = art.name || 'Customer File';
+                        const aext = (aname.split('.').pop() || '').toLowerCase();
+                        const isPdf = aext === 'pdf';
+                        const isDoc = ['doc', 'docx', 'txt', 'rtf'].includes(aext);
+                        const isSheet = ['csv', 'xls', 'xlsx'].includes(aext);
+                        const isImg = ['jpg', 'jpeg', 'png', 'svg', 'webp'].includes(aext);
+                        const aicon = isPdf ? 'picture_as_pdf' : (isDoc ? 'description' : (isSheet ? 'table_view' : (isImg ? 'image' : 'attach_file')));
+                        return `
+                            <a href="${art.url}" target="_blank" download="${aname}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700 hover:border-primary transition-colors" title="${aname}">
+                                <span class="material-symbols-outlined text-xs text-primary">${aicon}</span>
+                                <span class="truncate max-w-[130px]">${aname}</span>
+                            </a>
+                        `;
+                    }).join('');
+                } else {
+                    artList.innerHTML = '<span class="text-xs text-slate-400">No artwork attached</span>';
+                }
+            }
+
             // Deliverables
             const pendingBox = document.getElementById('deliverables-pending');
             const readyList = document.getElementById('deliverables-ready-list');
@@ -423,21 +456,32 @@
             if (order.deliverables && order.deliverables.length > 0) {
                 pendingBox.classList.add('hidden');
                 readyList.classList.remove('hidden');
-                readyList.innerHTML = order.deliverables.map(file => `
+                readyList.innerHTML = order.deliverables.map(file => {
+                    const fname = file.filename || file.name || 'Deliverable File';
+                    const ext = (fname.split('.').pop() || file.format || '').toLowerCase();
+                    const isPdf = ext === 'pdf';
+                    const isImg = ['jpg', 'jpeg', 'png', 'webp'].includes(ext);
+                    const isDoc = ['doc', 'docx', 'txt', 'rtf'].includes(ext);
+                    const isSheet = ['csv', 'xls', 'xlsx'].includes(ext);
+                    const isStitch = ['dst', 'emb', 'pes', 'exp'].includes(ext);
+                    const iconName = isPdf ? 'picture_as_pdf' : (isImg ? 'image' : (isDoc ? 'description' : (isSheet ? 'table_view' : (isStitch ? 'architecture' : 'insert_drive_file'))));
+
+                    return `
                     <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-primary/20 flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <span class="material-symbols-outlined text-primary text-xl">insert_drive_file</span>
-                            <div>
-                                <span class="text-xs font-bold text-slate-900 dark:text-white block">${file.filename || file.name || 'Embroidery File'}</span>
-                                <span class="text-[10px] text-slate-500 font-mono">${(file.format || 'DST').toUpperCase()} · Ready for Machine</span>
+                        <div class="flex items-center gap-2.5 min-w-0 pr-2">
+                            <span class="material-symbols-outlined text-primary text-xl shrink-0">${iconName}</span>
+                            <div class="min-w-0">
+                                <span class="text-xs font-bold text-slate-900 dark:text-white block truncate" title="${fname}">${fname}</span>
+                                <span class="text-[10px] text-slate-500 font-mono">${(ext || file.format || 'FILE').toUpperCase()} · Ready for Download</span>
                             </div>
                         </div>
-                        <a href="${file.url}" target="_blank" download class="px-3 py-1.5 bg-primary hover:bg-primary-hover text-background-dark font-bold text-xs rounded-lg transition-all flex items-center gap-1 shadow-sm">
+                        <a href="${file.url}" target="_blank" download="${fname}" class="px-3 py-1.5 bg-primary hover:bg-primary-hover text-background-dark font-bold text-xs rounded-lg transition-all flex items-center gap-1 shadow-sm shrink-0">
                             <span class="material-symbols-outlined text-sm">download</span>
                             <span>Download</span>
                         </a>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
             } else {
                 pendingBox.classList.remove('hidden');
                 readyList.classList.add('hidden');

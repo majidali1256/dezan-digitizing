@@ -656,5 +656,44 @@ The Worker Studio provides an isolated, production-focused environment for embro
     - `contact.html`: `ContactPage` with address and atelier email.
   - Automated validation suite (`scratch/validate_seo_schema.js`): **5/5 schemas parsed with 0 syntax or specification errors**.
 
+---
+
+## 20. Multi-File Upload & Deliverables Architecture (Up to 5 Files for Clients and Workers)
+- **Client Side (Up to 5 Files)**:
+  - Supports all standard formats: PDF, JPEG, JPG, PNG, AI, EPS, CDR, PSD, Word Documents (.DOC, .DOCX), Rich Text (.RTF), OpenDocument (.ODT), Spreadsheets (.CSV, .XLS, .XLSX), Vector, Stitch files (.DST, .EMB, .PES, .EXP), Archives (.ZIP, .RAR).
+  - Integrated into both Guest Quick-Order modal (`app.js`) and Client Portal Order modal (`client-portal.html`).
+  - Added live file chips with format badges, file size indicator, removal buttons, and limit badges (`X/5 Files`).
+  - Strict client-side and backend validation enforcing max 5 files and 50MB per file limits with clear alerts.
+- **Worker Side (Up to 5 Deliverables)**:
+  - Workers can stage and upload up to 5 deliverable files per task (.DST, .EMB, .PDF color run sheets, .JPEG sewout proofs, .DOCX notes, etc.) via `worker-portal.html`.
+  - Staged deliverable chips with live size, individual deletion, and format detection.
+  - Multi-artwork display in worker cards and Technical Specs Modal allowing workers to download all customer-uploaded documents and artwork files.
+- **Backend & Database (`server/`)**:
+  - `server/config/config.js`: Updated allowed extensions to support PDF, documents (.doc, .docx, .odt, .rtf, .txt), spreadsheets (.xls, .xlsx, .csv), images, vectors, stitch files, and archives. Increased maxFiles limit to 5.
+  - `server/middleware/upload.js`: Multer middleware updated with comprehensive file filter for all document, artwork, and deliverable types.
+  - `server/controllers/orderController.js`: Supports both `artworks` and `rawArtworkFiles` arrays up to 5 files; safely stores JSON arrays in `raw_artwork_files`; `trackOrder` returns parsed array of client files and worker deliverables.
+  - `server/controllers/taskController.js`: Caps worker uploaded deliverables to max 5 files; synchronizes deliverables and completion to master order.
+  - `track-order.html`: Public order tracking renders all uploaded customer files and all completed deliverables with format-specific icons (PDF, image, doc, embroidery).
+- **Automated Verification**:
+  - Validated via `scratch/test_5_files_workflow.js` (client 5-file order creation with PDF, JPEG, DOCX, PNG, AI; public tracking; admin assignment; worker 5-deliverables submission; public tracking deliverables download). All 100% passing.
+
+---
+
+## 21. Profile Machinery Customization & Streamlined Target Size Entry
+- **Production Machinery Preferences Update**:
+  - **Removed "Default Target Fabric"**: Removed fabric default preference from `client-profile.html` and `client-portal.html` account modal, leaving fabric selection flexible on a per-order basis.
+  - **Default Embroidery Machine (Write & Select)**: Replaced rigid format select with an adaptable `Default Embroidery Machine` field supporting both freeform custom typing and quick selection via datalist and preset selector:
+    - Supported presets: Tajima (.DST), Barudan (.DST / .DAT), Brother / Baby Lock (.PES), Wilcom Master (.EMB), Melco (.EXP), Bernina (.EXP / .ART), Janome (.JEF), Ricoma (.DST), SWF (.DST), Happy (.TAP / .DST), Husqvarna / Pfaff (.VP3), ZSK (.DST), Toyota (.DST).
+    - Persisted in user profile (`defaultMachine` & `preferredMachine`), automatically deriving default file format fallback.
+- **Single Target Size Box in Client Portal**:
+  - **Before**: 3 separate split boxes (`[Width] × [Height] [Unit]`).
+  - **After**: A single, clean text input box (`id="dig-size"`) with intuitive placeholder (`e.g. 3.5 in, 4x2.5 in, 10cm, Left Chest...`), allowing the client to write their desired size directly in their own words and preferred measurement format.
+  - Seamlessly mapped to order creation and backend `sizing` field.
+- **Laptop Navigation Bar Button Enhancements**:
+  - Increased navigation links font size from `14px` (`text-sm`) to `15px` / `16.5px` (`md:text-[15px] lg:text-[16.5px] font-bold`) on laptop and desktop screens.
+  - Added dedicated button-like padding (`6px 12px` up to `7px 15px`) and 9px rounded pills with interactive gold background hover state (`rgba(212, 175, 53, 0.08)` / dark `0.14`).
+  - Active page links feature a crisp 2.5px golden underline indicator.
+  - Symmetrically scaled the header login button (`px-4 py-2 text-sm`) and theme toggle button for balanced desktop and laptop ergonomics.
+
 
 
