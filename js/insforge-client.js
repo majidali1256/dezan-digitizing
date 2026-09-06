@@ -688,36 +688,68 @@ class InsForgeClient {
         return true;
     }
 
-    // Standard Sign In
+    // Predefined & Standard Sign In
     async signIn(email, password) {
-        // First check demo users
-        const demoUser = Object.values(DEMO_USERS).find(u => u.email.toLowerCase() === email.toLowerCase());
+        const rawEmail = (email || '').trim().toLowerCase();
+
+        // 1. Check predefined admin accounts / aliases
+        if (rawEmail === 'admin' || rawEmail === 'admin@dezandigitizing.com' || rawEmail === 'admin@dezan.com') {
+            const adminUser = DEMO_USERS.admin;
+            this.setSession(adminUser);
+            return { user: adminUser, error: null };
+        }
+
+        // 2. Check predefined digitizer worker accounts / aliases
+        if (rawEmail === 'worker' || rawEmail === 'digitizer' || rawEmail === 'worker.alex@dezandigitizing.com') {
+            const workerUser = DEMO_USERS.digitizer;
+            this.setSession(workerUser);
+            return { user: workerUser, error: null };
+        }
+
+        // 3. Check demo client alias
+        if (rawEmail === 'client' || rawEmail === 'client@falconapparel.com') {
+            const clientUser = DEMO_USERS.client;
+            this.setSession(clientUser);
+            this.claimGuestOrders(clientUser.email, clientUser.id).catch(() => {});
+            return { user: clientUser, error: null };
+        }
+
+        // 4. Check all demo users in DEMO_USERS
+        const demoUser = Object.values(DEMO_USERS).find(u => u.email.toLowerCase() === rawEmail);
         if (demoUser) {
             this.setSession(demoUser);
             this.claimGuestOrders(demoUser.email, demoUser.id).catch(() => {});
             return { user: demoUser, error: null };
         }
 
-        // Check local registered users
+        // 5. Check predefined digitizers from team list
+        const digitizers = JSON.parse(localStorage.getItem('dezan_digitizers') || '[]');
+        const matchedDigitizer = digitizers.find(d => d.email && d.email.toLowerCase() === rawEmail);
+        if (matchedDigitizer) {
+            this.setSession(matchedDigitizer);
+            return { user: matchedDigitizer, error: null };
+        }
+
+        // 6. Check local registered users (all registered users are clients)
         const registered = JSON.parse(localStorage.getItem('dezan_registered_users') || '[]');
-        const existing = registered.find(u => u.email.toLowerCase() === email.toLowerCase());
+        const existing = registered.find(u => u.email.toLowerCase() === rawEmail);
         if (existing) {
             this.setSession(existing);
             this.claimGuestOrders(existing.email, existing.id).catch(() => {});
             return { user: existing, error: null };
         }
 
-        return { user: null, error: 'Invalid email or password. Please try a demo account or sign up.' };
+        return { user: null, error: 'Invalid email or password. Please use a predefined staff login or sign up as a client.' };
     }
 
-    // Standard Sign Up
+    // Public Sign Up (strictly creates client accounts; staff are predefined)
     async signUp({ email, password, displayName, role = 'client', company = '' }) {
         const user = {
             id: this.generateUUID(),
-            email,
-            displayName,
-            role,
-            company,
+            email: (email || '').trim().toLowerCase(),
+            displayName: (displayName || '').trim() || (email || '').split('@')[0],
+            role: 'client', // Forced to client; staff/admin have predefined logins
+            company: (company || '').trim(),
             status: 'active',
             created_at: new Date().toISOString()
         };
@@ -896,7 +928,25 @@ class InsForgeClient {
                 if (Array.isArray(cloudOrders)) {
                     const localOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
                     const localOnly = localOrders.filter(l => !cloudOrders.some(c => c.order_number === l.order_number || c.id === l.id));
-                    orders = [...localOnly, ...cloudOrders];
+                    const mergedCloud = cloudOrders.map(cloud => {
+                        const local = localOrders.find(l => l.order_number === cloud.order_number || l.id === cloud.id);
+                        if (local) {
+                            if (local.assigned_digitizer_id && !cloud.assigned_digitizer_id) {
+                                cloud.assigned_digitizer_id = local.assigned_digitizer_id;
+                                cloud.assigned_digitizer_name = local.assigned_digitizer_name;
+                                cloud.assigned_at = local.assigned_at;
+                                cloud.status = local.status;
+                            }
+                            if (local.deliverables && local.deliverables.length > (cloud.deliverables ? cloud.deliverables.length : 0)) {
+                                cloud.deliverables = local.deliverables;
+                            }
+                            if (local.payment_status === 'paid' && cloud.payment_status !== 'paid') {
+                                cloud.payment_status = 'paid';
+                            }
+                        }
+                        return cloud;
+                    });
+                    orders = [...localOnly, ...mergedCloud];
                     localStorage.setItem('dezan_orders', JSON.stringify(orders));
                     localStorage.setItem('dezan_db_last_synced', new Date().toISOString());
                 }
@@ -1143,7 +1193,9 @@ class InsForgeClient {
             if (res.ok) {
                 const cloudTasks = await res.json();
                 if (Array.isArray(cloudTasks)) {
-                    tasks = cloudTasks;
+                    const localTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+                    const localOnly = localTasks.filter(l => !cloudTasks.some(c => (c.order_number && c.order_number === l.order_number) || (c.task_number && c.task_number === l.task_number) || (c.id && c.id === l.id)));
+                    tasks = [...localOnly, ...cloudTasks];
                     localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(tasks));
                 }
             } else {
@@ -1154,6 +1206,29 @@ class InsForgeClient {
             console.warn('InsForge tasks network notice, using cache:', err.message);
             tasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
         }
+
+        // Merge with any assigned orders that don't have tasks yet
+        const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+        allOrders.forEach(o => {
+            if (o.assigned_digitizer_id && !tasks.some(t => t.order_number === o.order_number)) {
+                tasks.unshift({
+                    id: o.id || this.generateUUID(),
+                    task_number: 'TSK-' + (o.order_number || '').replace('ORD-', '').replace('DZ-', ''),
+                    order_number: o.order_number,
+                    order_id: o.id,
+                    assigned_digitizer_id: o.assigned_digitizer_id,
+                    service_type: o.service_type || 'Digitizing',
+                    placement: o.placement || 'Left Chest',
+                    sizing: o.sizing || 'Standard',
+                    file_format: o.file_format || 'DST, EMB',
+                    instructions: o.instructions || '',
+                    raw_artwork_files: o.raw_artwork_files || [],
+                    status: o.status || 'in_progress',
+                    deliverables: o.deliverables || [],
+                    assigned_at: o.assigned_at || o.created_at
+                });
+            }
+        });
 
         // If tasks table was empty, fallback from local orders
         if (tasks.length === 0) {
@@ -1276,6 +1351,14 @@ class InsForgeClient {
         const clientName = user ? (user.displayName || user.email) : (orderData.clientName || 'Guest Customer');
         const clientCompany = user ? (user.company || '') : (orderData.clientCompany || '');
 
+        const autoAssign = !isQuote && this.isAutoAssignWorkerEnabled();
+        const primaryWorker = this.getPrimaryWorker();
+
+        const assignedDigitizerId = autoAssign ? primaryWorker.id : null;
+        const assignedDigitizerName = autoAssign ? primaryWorker.displayName : null;
+        const assignedAt = autoAssign ? new Date().toISOString() : null;
+        const initialStatus = isQuote ? 'quote_requested' : (autoAssign ? 'in_progress' : 'pending_review');
+
         const newOrder = {
             id: this.generateUUID(),
             order_number: orderNumber,
@@ -1298,15 +1381,50 @@ class InsForgeClient {
             currency: 'USD',
             payment_status: isQuote ? 'unpaid' : (orderData.paymentStatus || 'unpaid'),
             payment_method: orderData.paymentMethod || (isQuote ? 'Pending Quote Review' : (orderData.paymentStatus === 'paid' ? 'PayPal' : 'Pending Invoice')),
-            assigned_digitizer_id: null,
-            assigned_digitizer_name: null,
-            assigned_at: null,
-            status: isQuote ? 'quote_requested' : 'pending_review',
+            assigned_digitizer_id: assignedDigitizerId,
+            assigned_digitizer_name: assignedDigitizerName,
+            assigned_at: assignedAt,
+            status: initialStatus,
             is_quote: isQuote,
             deliverables: [],
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
+
+        // If auto-assigned, generate sanitized digitizer task immediately
+        if (autoAssign) {
+            const taskNumber = 'TSK-' + orderNumber.replace('ORD-', '').replace('DZ-', '');
+            const sanitizedTask = {
+                id: this.generateUUID(),
+                task_number: taskNumber,
+                order_number: orderNumber,
+                order_id: newOrder.id,
+                assigned_digitizer_id: assignedDigitizerId,
+                service_type: newOrder.service_type,
+                placement: newOrder.placement,
+                sizing: newOrder.sizing,
+                file_format: newOrder.file_format,
+                fabric_type: newOrder.fabric_type,
+                instructions: newOrder.instructions,
+                raw_artwork_files: newOrder.raw_artwork_files,
+                status: 'in_progress',
+                deliverables: [],
+                assigned_at: assignedAt
+            };
+
+            const allTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+            allTasks.unshift(sanitizedTask);
+            localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(allTasks));
+
+            // Broadcast assignment event
+            this.broadcastEvent('order_assigned', {
+                orderNumber: orderNumber,
+                taskNumber: taskNumber,
+                digitizerId: assignedDigitizerId,
+                digitizerName: assignedDigitizerName
+            });
+            console.log(`⚡ Order ${orderNumber} automatically assigned to ${assignedDigitizerName} without admin approval.`);
+        }
 
         // Optimistic local cache update
         const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
@@ -1321,7 +1439,8 @@ class InsForgeClient {
             serviceType: newOrder.service_type,
             price: newOrder.price,
             paymentStatus: newOrder.payment_status,
-            isQuote: newOrder.is_quote
+            isQuote: newOrder.is_quote,
+            autoAssigned: autoAssign
         });
 
         // Persist directly to InsForge PostgreSQL via REST
@@ -1348,6 +1467,47 @@ class InsForgeClient {
         }
 
         return newOrder;
+    }
+
+    /**
+     * Check if Auto-Assign work to digitizer is turned on
+     * @returns {boolean}
+     */
+    isAutoAssignWorkerEnabled() {
+        return localStorage.getItem('dezan_auto_assign_worker') === 'true';
+    }
+
+    /**
+     * Toggle or set Auto-Assign work to digitizer
+     * @param {boolean} enabled 
+     */
+    setAutoAssignWorkerEnabled(enabled) {
+        localStorage.setItem('dezan_auto_assign_worker', enabled ? 'true' : 'false');
+        this.broadcastEvent('auto_assign_toggled', { enabled: !!enabled });
+    }
+
+    /**
+     * Get primary digitizer worker for auto-assignment (single digitizer account)
+     */
+    getPrimaryWorker() {
+        return DEMO_USERS.digitizer;
+    }
+
+    /**
+     * Auto-assign all unassigned pending orders to Alex Miller
+     * @returns {Promise<number>} Number of orders assigned
+     */
+    async autoAssignAllPendingOrders() {
+        const primaryWorker = this.getPrimaryWorker();
+        const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+        let count = 0;
+        for (const order of allOrders) {
+            if (!order.is_quote && (!order.assigned_digitizer_id || order.status === 'pending_review')) {
+                await this.assignDigitizer(order.order_number, primaryWorker.id, primaryWorker.displayName);
+                count++;
+            }
+        }
+        return count;
     }
 
     /**

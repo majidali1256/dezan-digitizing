@@ -326,6 +326,7 @@
             setAdminLayout(currentAdminLayout);
             await renderAllAdminData();
             updateActiveNavIndicators(adminPage);
+            updateAdminAutoAssignUI();
             if (adminPage === 'orders') {
                 const params = new URLSearchParams(window.location.search);
                 if (params.has('q')) {
@@ -380,7 +381,15 @@
                         'warning'
                     );
                     await renderAllAdminData();
-                } else if (type === 'payment_reminder_sent' || type === 'remote_db_change') {
+                } else if (type === 'auto_assign_toggled') {
+                    updateAdminAutoAssignUI();
+                    window.insforgeClient.showToast(
+                        payload.enabled ? '⚡ Auto-Assign Enabled' : 'Auto-Assign Disabled',
+                        payload.enabled ? 'New orders directly route to worker Alex Miller.' : 'Orders now require manual admin approval.',
+                        payload.enabled ? 'smart_toy' : 'tune',
+                        'info'
+                    );
+                } else if (type === 'order_assigned' || type === 'payment_reminder_sent' || type === 'remote_db_change') {
                     await renderAllAdminData();
                 }
             });
@@ -455,6 +464,7 @@
             renderClientsDirectory(clients);
             renderDesignCatalog(catalogDesigns);
             renderDigitizerTeamHub(allOrders, digitizers);
+            updateAdminAutoAssignUI();
         }
 
         /**
@@ -543,6 +553,8 @@
                     legacyTbody.innerHTML = combined.map(o => renderAdminOrderTableRow(o, 'all')).join('');
                 }
             }
+
+            updateAdminAutoAssignUI();
         }
 
         /**
@@ -1636,6 +1648,150 @@ Email: fdezan91@gmail.com`;
                 }
             }
         }
+
+        // ===== AUTO-ASSIGN WORKER ENGINE (1-WORKER DIRECT ROUTING) =====
+        function updateAdminAutoAssignUI() {
+            if (!window.insforgeClient) return;
+            const isEnabled = window.insforgeClient.isAutoAssignWorkerEnabled();
+            const primaryWorker = window.insforgeClient.getPrimaryWorker ? window.insforgeClient.getPrimaryWorker() : { displayName: 'Alex Miller' };
+
+            // 1. Top bar button (#admin-auto-assign-btn)
+            const topBtn = document.getElementById('admin-auto-assign-btn');
+            const topIcon = document.getElementById('admin-auto-assign-icon');
+            const topLabel = document.getElementById('admin-auto-assign-label');
+            if (topBtn && topIcon && topLabel) {
+                if (isEnabled) {
+                    topBtn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-500/20';
+                    topIcon.textContent = 'smart_toy';
+                    topIcon.className = 'material-symbols-outlined text-sm text-emerald-600 dark:text-emerald-400';
+                    topLabel.textContent = 'Auto-Assign: ON';
+                    topBtn.setAttribute('title', `Auto-assignment is ON. New bookings automatically route to ${primaryWorker.displayName}. Click to turn OFF.`);
+                } else {
+                    topBtn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700';
+                    topIcon.textContent = 'toggle_off';
+                    topIcon.className = 'material-symbols-outlined text-sm text-slate-500 dark:text-slate-400';
+                    topLabel.textContent = 'Auto-Assign: OFF';
+                    topBtn.setAttribute('title', 'Auto-assignment is OFF. New bookings wait for manual admin review. Click to turn ON.');
+                }
+            }
+
+            // 2. Header bar button (#header-auto-assign-btn)
+            const headerBtn = document.getElementById('header-auto-assign-btn');
+            const headerIcon = document.getElementById('header-auto-assign-icon');
+            const headerText = document.getElementById('header-auto-assign-text');
+            if (headerBtn && headerIcon && headerText) {
+                if (isEnabled) {
+                    headerBtn.className = 'px-3 py-1 rounded-xl bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-500/25 border border-emerald-300 dark:border-emerald-500/30 text-xs font-bold transition-all flex items-center gap-1 shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2';
+                    headerIcon.textContent = 'bolt';
+                    headerIcon.className = 'material-symbols-outlined text-sm text-emerald-600 dark:text-emerald-400';
+                    headerText.textContent = 'Auto-Assign: ON';
+                } else {
+                    headerBtn.className = 'px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-xs font-bold transition-all flex items-center gap-1 shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2';
+                    headerIcon.textContent = 'bolt';
+                    headerIcon.className = 'material-symbols-outlined text-sm text-slate-500 dark:text-slate-400';
+                    headerText.textContent = 'Auto-Assign: OFF';
+                }
+            }
+
+            // 3. Stage 1 Banner (#stage-auto-assign-strip)
+            const stripIcon = document.getElementById('auto-assign-strip-icon');
+            const stripText = document.getElementById('auto-assign-strip-text');
+            const stripBtnText = document.getElementById('auto-assign-strip-btn-text');
+            if (stripIcon && stripText && stripBtnText) {
+                if (isEnabled) {
+                    stripIcon.textContent = 'bolt';
+                    stripIcon.className = 'material-symbols-outlined text-sm text-emerald-600 dark:text-emerald-400';
+                    stripText.textContent = `Auto-assignment is ACTIVE. New bookings skip admin approval and route directly to ${primaryWorker.displayName}.`;
+                    stripBtnText.textContent = 'Turn OFF';
+                } else {
+                    stripIcon.textContent = 'toggle_off';
+                    stripIcon.className = 'material-symbols-outlined text-sm text-amber-600 dark:text-primary';
+                    stripText.textContent = 'Auto-assignment: OFF — Incoming bookings require admin approval before reaching worker.';
+                    stripBtnText.textContent = 'Turn ON Auto-Assign';
+                }
+            }
+
+            // 4. Batch Assign Button (#assign-all-pending-btn)
+            const allOrders = (window.insforgeClient.getOrders ? window.insforgeClient.getOrders() : []);
+            const unassignedOrders = allOrders.filter(o => !o.is_quote && (!o.assigned_digitizer_id || o.status === 'pending_review'));
+            const batchBtn = document.getElementById('assign-all-pending-btn');
+            const batchLabel = document.getElementById('assign-all-pending-label');
+            if (batchBtn && batchLabel) {
+                if (unassignedOrders.length > 0) {
+                    batchBtn.classList.remove('hidden');
+                    batchLabel.textContent = `Assign ${unassignedOrders.length} to Alex Miller`;
+                } else {
+                    batchBtn.classList.add('hidden');
+                }
+            }
+        }
+
+        function toggleAdminAutoAssign() {
+            if (!window.insforgeClient) return;
+            const current = window.insforgeClient.isAutoAssignWorkerEnabled();
+            const next = !current;
+            window.insforgeClient.setAutoAssignWorkerEnabled(next);
+            updateAdminAutoAssignUI();
+            const worker = window.insforgeClient.getPrimaryWorker ? window.insforgeClient.getPrimaryWorker() : { displayName: 'Alex Miller' };
+            if (next) {
+                window.insforgeClient.showToast(
+                    '⚡ Auto-Assign Activated',
+                    `New bookings will now be assigned directly to ${worker.displayName} without requiring admin review.`,
+                    'smart_toy',
+                    'success'
+                );
+            } else {
+                window.insforgeClient.showToast(
+                    'Auto-Assign Disabled',
+                    'New orders will now pause in "Needs attention" until manually approved and assigned by an admin.',
+                    'tune',
+                    'info'
+                );
+            }
+        }
+
+        async function autoAssignAllPendingOrders() {
+            if (!window.insforgeClient) return;
+            const btn = document.getElementById('assign-all-pending-btn');
+            const origHTML = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-xs">sync</span> Assigning...';
+            }
+
+            try {
+                const count = await window.insforgeClient.autoAssignAllPendingOrders();
+                const worker = window.insforgeClient.getPrimaryWorker ? window.insforgeClient.getPrimaryWorker() : { displayName: 'Alex Miller' };
+                if (count > 0) {
+                    window.insforgeClient.showToast(
+                        'Orders Dispatched',
+                        `Assigned ${count} pending order${count > 1 ? 's' : ''} directly to ${worker.displayName}.`,
+                        'bolt',
+                        'success'
+                    );
+                } else {
+                    window.insforgeClient.showToast(
+                        'All Caught Up',
+                        'No unassigned pending orders found.',
+                        'check_circle',
+                        'info'
+                    );
+                }
+                await renderAllAdminData();
+            } catch (err) {
+                console.error('Error auto-assigning pending orders:', err);
+                window.insforgeClient.showToast('Assignment Error', err.message, 'error', 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = origHTML;
+                }
+            }
+        }
+
+        window.updateAdminAutoAssignUI = updateAdminAutoAssignUI;
+        window.toggleAdminAutoAssign = toggleAdminAutoAssign;
+        window.autoAssignAllPendingOrders = autoAssignAllPendingOrders;
 
         // ===== 1-CLICK OFFICIAL TAX INVOICE GENERATOR =====
         function openInvoiceModal(orderNumber) {

@@ -137,6 +137,11 @@
                 <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">Manage incoming orders, production, payments, and completed work.</p>
             </div>
             <div class="flex items-center gap-2">
+                <!-- Auto Assign Toggle Button -->
+                <button id="admin-auto-assign-btn" onclick="toggleAdminAutoAssign()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700" title="Toggle automatic dispatch of new orders to digitizer Alex Miller">
+                    <span class="material-symbols-outlined text-sm" id="admin-auto-assign-icon">toggle_off</span>
+                    <span id="admin-auto-assign-label">Auto-Assign: OFF</span>
+                </button>
                 <div id="admin-db-sync-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-[11px] shadow-xs">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span id="admin-db-sync-text" class="text-emerald-800 dark:text-emerald-300 font-bold">Data updated</span>
@@ -179,6 +184,12 @@
                     <span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">search</span>
                     <span>Search</span>
                     <kbd class="px-2 py-0.2 rounded bg-white dark:bg-slate-700 text-[10px] font-mono border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 shadow-2xs">/</kbd>
+                </button>
+
+                <!-- Auto-Assign Direct Switcher in Header -->
+                <button onclick="toggleAdminAutoAssign()" id="header-auto-assign-btn" class="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-xs font-bold transition-all flex items-center gap-1 shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Toggle Auto-Assign to Worker (Alex Miller)">
+                    <span class="material-symbols-outlined text-sm" id="header-auto-assign-icon">bolt</span>
+                    <span id="header-auto-assign-text" class="hidden sm:inline">Auto-Assign: OFF</span>
                 </button>
 
                 <!-- Export CSV button -->
@@ -255,6 +266,25 @@
                             <p class="text-[11px] text-slate-600 dark:text-slate-400">Incoming bookings awaiting digitizer dispatch and active client revision requests.</p>
                         </div>
                     </div>
+                    <!-- Right Actions: Batch auto-assign existing unassigned orders -->
+                    <div class="flex items-center gap-2">
+                        <button id="assign-all-pending-btn" onclick="autoAssignAllPendingOrders()" class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white text-xs font-bold shadow-xs transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-primary" title="Instantly assign all pending orders to Alex Miller">
+                            <span class="material-symbols-outlined text-xs">bolt</span>
+                            <span id="assign-all-pending-label">Assign All to Alex Miller</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Auto-assign status info banner inside Stage 1 -->
+                <div id="stage-auto-assign-strip" class="px-5 py-2.5 bg-slate-50/80 dark:bg-slate-900/60 border-b border-primary/10 text-xs flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                        <span class="material-symbols-outlined text-sm text-amber-600 dark:text-primary" id="auto-assign-strip-icon">toggle_off</span>
+                        <span id="auto-assign-strip-text">Auto-assignment: OFF — Incoming bookings require admin approval before reaching worker.</span>
+                    </div>
+                    <button onclick="toggleAdminAutoAssign()" class="text-amber-700 dark:text-primary hover:underline font-bold text-xs inline-flex items-center gap-1 cursor-pointer" id="auto-assign-strip-btn">
+                        <span id="auto-assign-strip-btn-text">Turn ON Auto-Assign</span>
+                        <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                    </button>
                 </div>
                 <!-- Cards Container -->
                 <div id="stage-unassigned-cards" class="stage-cards-container p-5 bg-amber-50/20 dark:bg-amber-950/10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

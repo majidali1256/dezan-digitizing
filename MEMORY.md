@@ -177,7 +177,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
     - If a client is already authenticated, clicking "Order Now" on marketing pages opens the full 2-stage order wizard in `client-portal.html?action=new_order`, and clicking "Get Quote" opens `client-portal.html?action=request_quote`.
 
 ### Role-Based Order Portal (Implemented & Live)
-- `/portal-login.html`: Unified authentication page with automatic role routing, order intent banners, and 1-click test switcher.
+- `/portal-login.html`: Unified authentication page with automatic role routing, order intent banners, simplified client-only registration (role field removed; all public signups are assigned `role: 'client'`), and 1-click predefined staff & client logins (Master Admin: `admin@dezandigitizing.com`, Digitizer Worker: `worker.alex@dezandigitizing.com`, Demo Client: `client@falconapparel.com`).
 - `/client-portal.html`: Redesigned Client Portal (Matching user's reference mockup with warm Dezan gold theme):
   - **Header**: Bold title + "Track orders, pay invoices, and request quotes easily."
   - **3 Quick-Action Cards**: Place Order, Request Quote, Track Order.
@@ -479,6 +479,30 @@ To prevent data leakage via browser DevTools:
   - Replaced standalone "DEZAN" brand title with full name **"DEZAN DIGITIZING"** across all 8 marketing and client-facing pages (`index.html`, `about.html`, `services.html`, `portfolio.html`, `pricing.html`, `contact.html`, `order-success.html`, `profile.html`).
   - Added `whitespace-nowrap text-base sm:text-lg font-black tracking-tight` ensuring zero layout wrapping on compact mobile devices (390px) while maintaining bold desktop presence.
   - Verified with Playwright visual screenshots on mobile and desktop.
+- **Admin Orders Auto-Assign Worker Engine (`admin-orders.html`, `admin-portal.html`, `js/insforge-client.js`, `js/admin-workspace.js`)**:
+  - **Single Digitizer Scope**: Directs all auto-assigned production tickets to primary digitizer **Alex Miller (Lead Digitizer)** (`id: '00000000-0000-0000-0000-000000000003'`, `worker.alex@dezandigitizing.com`).
+  - **Interactive Auto-Assign Toggle**:
+    - Prominent action button in top bar (`#admin-auto-assign-btn`), header bar (`#header-auto-assign-btn`), and Stage 1 "Needs attention" banner (`#stage-auto-assign-strip`) across both `admin-orders.html` and `admin-portal.html`.
+    - **When ON**:
+      - Incoming customer orders (guest checkout or authenticated client portal) skip manual admin review and directly assign to Alex Miller (`assigned_digitizer_id = '00000000-0000-0000-0000-000000000003'`, `status = 'in_progress'`).
+      - Sanitized technical task is automatically upserted into `dezan_digitizer_tasks` (and remote InsForge PostgreSQL `digitizer_tasks`).
+      - Realtime event `order_assigned` broadcasts across open tabs so worker portal (`worker-portal.html`) immediately receives the task without page reload.
+      - Emerald active pill state with robot/lightning icon and live confirmation toasts.
+    - **When OFF**:
+      - Incoming bookings pause in `pending_review` with `assigned_digitizer_id = null`, requiring manual admin assignment.
+    - **1-Click Batch Dispatch**:
+      - Inside Stage 1 ("Needs attention"), added `#assign-all-pending-btn` displaying exact count (e.g. `Assign 7 to Alex Miller`) to dispatch all accumulated unassigned orders to Alex Miller in one click.
+    - **Automated Verification**:
+      - 100% verified with automated Playwright headless test (`scratch/test_auto_assign.js`): verified toggle ON, direct auto-assignment to Alex Miller, immediate presence in worker portal active queue, toggle OFF, and 1-click batch assignment.
+- **Public Signup Role Restriction & Predefined Staff Logins (`portal-login.html`, `js/insforge-client.js`)**:
+  - Removed user-facing account role dropdown from registration form on `portal-login.html`.
+  - Public registration automatically and unconditionally assigns `role: 'client'`.
+  - Admin (`admin@dezandigitizing.com`) and worker (`worker.alex@dezandigitizing.com`) accounts use predefined logins.
+  - Enhanced `signIn()` in `js/insforge-client.js` with demo alias matching for instant staff access.
+- **Optional Account Convenience & Automatic Guest Order Claiming**:
+  - Customer checkout is completely frictionless: client can upload logo, specify details, pay, and receive instant confirmation without creating an account.
+  - On `order-success.html`, guest customers can optionally create a password with 1 click.
+  - `claimGuestOrders(clientEmail, userId)` in `js/insforge-client.js` automatically links all past orders matching the customer's email address whenever an account is created or signed into.
 
 ---
 

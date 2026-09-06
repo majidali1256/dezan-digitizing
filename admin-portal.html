@@ -137,6 +137,11 @@
                 <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">Your business overview: order activity, production, and payments.</p>
             </div>
             <div class="flex items-center gap-2">
+                <!-- Auto Assign Toggle Button -->
+                <button id="admin-auto-assign-btn" onclick="toggleAdminAutoAssign()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700" title="Toggle automatic dispatch of new orders to digitizer Alex Miller">
+                    <span class="material-symbols-outlined text-sm" id="admin-auto-assign-icon">toggle_off</span>
+                    <span id="admin-auto-assign-label">Auto-Assign: OFF</span>
+                </button>
                 <div id="admin-db-sync-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-[11px] shadow-xs">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span id="admin-db-sync-text" class="text-emerald-800 dark:text-emerald-300 font-bold">Data updated</span>

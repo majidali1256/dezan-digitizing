@@ -832,16 +832,50 @@ document.addEventListener("DOMContentLoaded", () => {
                 createdOrder = await window.insforgeClient.createOrder(orderPayload);
             } else {
                 const orderNum = (isQuote ? 'QUO-' : 'DZ-') + Math.floor(1000 + Math.random() * 9000);
+                const isAutoAssign = !isQuote && (localStorage.getItem('dezan_auto_assign_worker') === 'true');
+                const primaryWorker = {
+                    id: '00000000-0000-0000-0000-000000000003',
+                    name: 'Alex Miller (Lead Digitizer)'
+                };
+                const assignedAt = isAutoAssign ? new Date().toISOString() : null;
                 createdOrder = {
                     id: (isQuote ? 'quo_' : 'guest_') + Date.now(),
                     order_number: orderNum,
                     ...orderPayload,
+                    assigned_digitizer_id: isAutoAssign ? primaryWorker.id : null,
+                    assigned_digitizer_name: isAutoAssign ? primaryWorker.name : null,
+                    assigned_at: assignedAt,
+                    status: isQuote ? 'quote_requested' : (isAutoAssign ? 'in_progress' : 'pending_review'),
                     is_quote: isQuote,
+                    deliverables: [],
                     created_at: new Date().toISOString()
                 };
                 const existing = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
                 existing.unshift(createdOrder);
                 localStorage.setItem('dezan_orders', JSON.stringify(existing));
+
+                if (isAutoAssign) {
+                    const taskNumber = 'TSK-' + orderNum.replace('ORD-', '').replace('DZ-', '');
+                    const sanitizedTask = {
+                        id: 'tsk_' + Date.now(),
+                        task_number: taskNumber,
+                        order_number: orderNum,
+                        order_id: createdOrder.id,
+                        assigned_digitizer_id: primaryWorker.id,
+                        service_type: createdOrder.service_type || 'Digitizing',
+                        placement: createdOrder.placement || 'Standard',
+                        sizing: createdOrder.sizing || 'Standard',
+                        file_format: createdOrder.file_format || 'DST, EMB',
+                        instructions: createdOrder.instructions || '',
+                        raw_artwork_files: createdOrder.rawArtworkFiles || [],
+                        status: 'in_progress',
+                        deliverables: [],
+                        assigned_at: assignedAt
+                    };
+                    const tasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+                    tasks.unshift(sanitizedTask);
+                    localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(tasks));
+                }
             }
 
             sessionStorage.setItem('dezan_last_guest_order', JSON.stringify(createdOrder));
