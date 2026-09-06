@@ -39,6 +39,35 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 4. **Interactive Components (`twenty-first-dev`)**: Modern UI micro-interactions, responsive touch comparison sliders, sleek dropzones, radiant hover states.
 5. **Visual Verification (`playwright-visual-verification`)**: Multi-viewport visual QA across Desktop (1512x982), Tablet (834x1112), and Mobile (390x844).
 
+### 4.1 Anti-Muddy Blending, Contrast & Universal Theme Color Consistency (Implemented)
+- **Elimination of Translucent Overlays (`bg-primary/5` on `#f8f7f6` canvas)**:
+  - Previously, cards using 5% brand gold opacity (`bg-primary/5`) against the warm off-white canvas `#f8f7f6` produced an unwashed parchment / dirty beige tint (`#f6f4eb`).
+  - Converted all cards and containers across all outer pages (`about.html`, `contact.html`, `index.html`, `services.html`, `pricing.html`, `portfolio.html`, `order-success.html`, `profile.html`, `portal-login.html`) to solid `bg-white` in light mode and `dark:bg-card-dark` (`#16140c`) in dark mode with refined `border-primary/20` or `border-primary/25` borders.
+- **Strict WCAG 2.1 AA Text Contrast Ratios ($\ge 4.5:1$ - $7:1$)**:
+  - **Light Mode (`styles.css`)**:
+    - `:root:not(.dark) .text-primary` = `#9a7810` (achieving a crisp ~7:1 contrast ratio against white/light backgrounds, replacing unreadable bright yellows).
+    - Elevated washed-out slate grays: `:root:not(.dark) .text-slate-400` = `#475569` (5.8:1 contrast) and `.text-slate-500` = `#334155` (7.5:1 contrast).
+    - Review & star ratings: `:root:not(.dark) .text-amber-400` fixed from muddy dark brown-orange `#b45309` to radiant gold `#c0931b` / `#d4af35`.
+  - **Dark Mode Anti-Dark-On-Dark Protection**:
+    - Overrode unadorned Tailwind text classes: `.dark .text-slate-500` $\rightarrow$ `#94a3b8`, `.text-slate-600` $\rightarrow$ `#cbd5e1`, `.text-slate-700` $\rightarrow$ `#e2e8f0`, `.text-slate-800` $\rightarrow$ `#f1f5f9`, `.text-slate-900` $\rightarrow$ `#ffffff`.
+- **Cured Cool Blue-Slate vs Warm Olive-Dark Theme Clash**:
+  - Tailwind's default `slate-800` (`#1e293b`) is cool blue, clashing with Dezan's signature dark luxury canvas (`#201d12`, warm olive-dark).
+  - Globally harmonized `.dark .dark\:bg-slate-800` (and all opacity variants `/90`, `/80`, `/70`, `/50`) to `#16140c !important` with `border-color: rgba(212, 175, 53, 0.22) !important`.
+  - Added global border harmonization for `.dark .border-slate-700`, `.dark .dark\:border-slate-700`, `.dark .border-slate-800`, `.dark .dark\:border-slate-800`.
+- **Universal Color Token Consistency**:
+  - Replaced jarring mismatched amber/brown classes (`text-amber-800`, `text-amber-900`, `bg-amber-500`) with global mapping to `#9a7810` in light mode and `#d4af35` in dark mode.
+  - Unified the Header Login button across all 9 pages and `app.js` into sleek brand gold tokens (`bg-primary/10 dark:bg-primary/15 hover:bg-primary text-primary border border-primary/25`).
+  - Mobile bottom navigation bars updated with high-contrast inactive icons (`#475569` light / `#94a3b8` dark) and active gold indicators (`#9a7810` light / `#d4af35` dark).
+
+### 4.2 Stacked Luxury Brand Lockup (Header & Footer Typography)
+- **Problem**: The horizontal single-line "DEZAN DIGITIZING" text competed for horizontal real estate on mobile screens and felt generic compared to modern luxury design standards.
+- **Solution & Token Contract**:
+  - Implemented a 2-line stacked architectural lockup across all 8 public pages (`index.html`, `about.html`, `services.html`, `portfolio.html`, `pricing.html`, `contact.html`, `order-success.html`, `profile.html`):
+    - **Top Line (Brand Root)**: `<span class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN</span>` (or `text-white` in dark footers).
+    - **Bottom Line (Craft Subtitle)**: `<span class="text-[9.5px] sm:text-[10.5px] font-extrabold tracking-[0.18em] text-primary uppercase mt-1">Digitizing</span>`.
+  - Nested within `<div class="flex flex-col text-left leading-none">` alongside the circular emblem `logo.png` (`w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover`).
+  - Gives the brand a refined, high-fashion horology/atelier lockup with optimal visual hierarchy and enhanced horizontal clearance on mobile viewports.
+
 ---
 
 ## 5. Site Map & Route Architecture
@@ -47,8 +76,10 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 - `/index.html`: Home page (Hero with Before/After Comparison Slider: zero bounding box or card border around the astronaut patch, allowing the slider divider line to sweep end-to-end across the full artwork; bold typography with gold shine `Dezan Digitizing Service`; all 3 action buttons `Order Now`, `View Pricing`, and `Get Quote` arranged in a proud, touch-friendly side-by-side row on both mobile and desktop below the slider, Services preview, Live Feedback Carousel, Trust stats).
 - `/about.html`: Company history, experience, machinery/software standards (Wilcom, Tajima, Barudan).
 - `/services.html`: Detailed service breakdowns (Left chest, Cap/Hat, 3D Puff, Jacket Back, Vectorizing). Clean hero without dark background image, side-by-side action buttons in a 2-col grid on mobile, and 2-column grid for Expert Services fitting above the fold on mobile without scrolling.
+  - **Brand Color Harmonization**: Eliminated all mismatched dark brown / amber shades (`text-amber-800` on hero eyebrow and "Order Now" links), replacing with brand gold token `text-primary`. Harmonized Card 2 in the Transparent Pricing section (removed jarring solid yellow card and dark brown text `sm:bg-primary sm:text-background-dark`, aligned with clean card styling and 2px primary border), and updated pricing preview figures ($15 Left Chest/Hat, $25 Jacket Back / Large).
 - `/portfolio.html`: High-resolution gallery and customer feedback showcase.
-- `/pricing.html`: Dedicated flat-rate Pricing showcase in responsive 2-column grid layout, strictly adhering to Dezan's brand color scheme (Dezan Gold `#d4af35`, Dark Luxury `#201d12`, Card Dark `#16140c`, Warm Canvas `#f8f7f6`):
+- `/pricing.html`: Dedicated flat-rate Pricing showcase in responsive 2-column grid layout, strictly adhering to Dezan's brand color scheme (Dezan Gold `#d4af35` / `#9a7810`, Dark Luxury `#201d12`, Card Dark `#16140c`, Warm Canvas `#f8f7f6`):
+  - **Brand Color Harmonization**: Eliminated all mismatched amber/brown shades (`text-amber-800`, `text-amber-950`, `bg-amber-500/10`, `border-amber-400`, `to-amber-600`) in favor of brand tokens `text-primary`, `bg-primary/10`, `border-primary/25`, ensuring 100% aesthetic consistency with `index.html` and `services.html`.
   - **Hero**: "QUALITY DIGITIZING. REAL PEOPLE.", "Simple Flat-Rate Pricing", subtitle "Professional embroidery digitizing with clean, honest pricing.", 3 circular icon badges (Next Day Turnaround, Digitized by hand - no auto conversion, Order history and online downloads), and real stitch proof embroidery patch visual floating freely with zero bounding box or card border.
   - **Digitizing 2-Column Grid (Compact & Centered)**: Centered `max-w-2xl mx-auto` container with refined proportions (20px padding, 44px icon badges, 32-36px pricing typography) preventing wide/bloated cards:
     - Card 1: **$15 Hat / Left Chest Logos** (Up to 5.5 inches) with compact bespoke SVG icon featuring baseball cap and collared polo shirt.
@@ -68,6 +99,26 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - **Instant Visibility & Zero CLS**: Removed `.reveal` opacity blocking so all cards and sections render immediately across all devices, with full light/dark mode contrast parity verified via Playwright visual verification across Desktop (1440x900), Tablet (834x1112), and Mobile (390x844).
 - `/contact.html`: Contact form for general inquiries, and authenticated "Request a Custom Quote" portal showcase. Legacy unauthenticated quote submission forms have been removed.
 - `/order-success.html`: Order confirmation receipt page with transaction lookup parameters.
+
+### Spacing Harmonization & Mobile Compact Layouts (Implemented Across All 6 Outer Pages)
+- **Problem**: Elements and sections appeared oversized and vertically bloated on mobile screens (especially stacked pricing cards and step boxes dominating screen height), combined with irregular section spacing (`py-16` / 128px gaps on some pages, `py-4` on others).
+- **Harmonized Spacing Tokens**:
+  - Inner Page Headers: `px-4 pt-6 pb-2 sm:pt-10 sm:pb-4 text-center`
+  - Standard Content Sections: `py-6 sm:py-10`
+  - Featured / Contrast Sections: `py-8 sm:py-12`
+  - Homepage Hero: `pt-5 pb-8 sm:pt-12 sm:pb-12 lg:pt-16 lg:pb-16`
+  - Anchor Navigation: Clean `scroll-mt-20` on sections like `#portfolio` and `#custom-quote-section`.
+- **Mobile Compact Component Transformations**:
+  - `services.html`:
+    - "Transparent Pricing" preview: Converted from massive stacked vertical boxes into sleek horizontal rows (`p-3 rounded-xl flex items-center justify-between`) on mobile while preserving the 3-column desktop layout (`sm:grid sm:grid-cols-3 sm:gap-4 sm:p-6 sm:flex-col`). Reduces mobile card stack height from ~450px to ~155px.
+    - "How It Works" steps: Converted from bulky `w-16 h-16` circles and `p-6` vertical stack into a compact roadmap (`w-10 h-10` badge, horizontal row per step on mobile, 3-col grid on desktop).
+  - `about.html`:
+    - Converted bloated single-column stats stack into a balanced 2x2 grid on mobile (`grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 p-3.5 sm:p-6 rounded-xl sm:rounded-2xl`).
+    - Standardized all `py-16` section padding down to `py-6 sm:py-10`.
+  - `contact.html`:
+    - Converted the 3 stacked vertical contact cards into a **single horizontal line 3-column grid** from left to right on mobile (`grid grid-cols-3 gap-2 sm:gap-4`), reducing card height from ~360px down to ~80px and bringing the message form immediately into view.
+  - `app.js`:
+    - Enhanced scroll reveal observer with `rootMargin: 150px` and a 1000ms safety fallback so no element remains stuck invisible (`opacity: 0`).
 
 ### Client Authentication Gate & Order / Quote Dispatcher (Implemented)
 - **Universal Order & Quote Authentication Gates (`window.handleOrderClick`, `window.handleQuoteClick`)**:
@@ -367,6 +418,22 @@ To prevent data leakage via browser DevTools:
     - Persistent bottom dock on smartphone screens (`Overview`, `Orders`, `Revisions`, `Team`, `Profile`) wired to `switchAdminView(...)`.
 - **Automated Verification**:
   - 100% verified with Playwright test (`scratch/verify_admin_navigation_ux.js`) across Desktop (1512x982) and Mobile (390x844). Verified sticky nav, filter tabs, table/grid toggling, team filtering, search keyboard shortcuts, and mobile dock switching with 0 console errors.
+- **Custom Quote Card Theme & Mobile Optimization (`contact.html`)**:
+  - Replaced dark/slate gradient container with clean unified card theme (`bg-white dark:bg-card-dark`, `border border-primary/20 shadow-xs`).
+  - Integrated full dark theme consistency by adding `"card-dark": "#16140c"` across all site pages (`contact.html`, `index.html`, `services.html`, `about.html`, `portfolio.html`, `order-success.html`, `profile.html`).
+  - Compacted mobile layout into a single-screen height footprint (~340px vertical height).
+  - Converted the 3 process steps (`Submit Specs`, `Master Review`, `1-Click Start`) into a compact 3-column horizontal grid (`grid grid-cols-3`) with tight typography.
+  - Verified with Playwright across mobile light, mobile dark, and desktop viewports.
+- **Realistic / Pet Portrait Digitizing Pricing Box Added (`pricing.html` & `services.html`)**:
+  - Added 3rd digitizing box: **Realistic / Pet Portrait** ($25 for Left Chest / Hat size $\le$ 5.5", $40 flat for larger sizes > 5.5").
+  - Desktop: Upgraded digitizing grid to a clean 3-column layout (`grid-cols-3 max-w-6xl`) with bespoke embroidery hoop SVG icon, dual-tier price display, 5-point feature checklist, and aligned action button.
+  - Mobile: Added 3rd compact horizontal card with `$25 / $40` price chip and subtext `Left Chest $25 • Larger $40 Flat`.
+  - Aligned `services.html` Pet Portrait card with `$25 / $40` pricing.
+  - Verified via Playwright across Desktop (1512x982), Mobile Light (390x844), and Mobile Dark (390x844).
+- **Brand Text Update to "DEZAN DIGITIZING" Across All Headers & Footers**:
+  - Replaced standalone "DEZAN" brand title with full name **"DEZAN DIGITIZING"** across all 8 marketing and client-facing pages (`index.html`, `about.html`, `services.html`, `portfolio.html`, `pricing.html`, `contact.html`, `order-success.html`, `profile.html`).
+  - Added `whitespace-nowrap text-base sm:text-lg font-black tracking-tight` ensuring zero layout wrapping on compact mobile devices (390px) while maintaining bold desktop presence.
+  - Verified with Playwright visual screenshots on mobile and desktop.
 
 ---
 

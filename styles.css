@@ -469,17 +469,128 @@ html.dark {
     color: #d4af35;
 }
 
+/* Reviews and Star Ratings in Gold */
 :root:not(.dark) .text-amber-400 {
-    color: #b45309;
+    color: #c0931b;
 }
 :root:not(.dark) .bg-slate-900 .text-amber-400,
 :root:not(.dark) .bg-slate-950 .text-amber-400,
-:root:not(.dark) .bg-card-dark .text-amber-400 {
-    color: #fbbf24;
+:root:not(.dark) .bg-card-dark .text-amber-400,
+:root:not(.dark) .bg-background-dark .text-amber-400 {
+    color: #d4af35;
 }
 
-:root:not(.dark) .text-slate-400:not(.bg-slate-900 *):not(.bg-slate-950 *):not(.bg-card-dark *):not(.bg-black *) {
+/* Elevate Muted Light Mode Text (Eliminates Washed-Out Grays) */
+:root:not(.dark) .text-slate-400:not(.bg-slate-900 *):not(.bg-slate-950 *):not(.bg-card-dark *):not(.bg-background-dark *):not(.bg-black *) {
     color: #475569;
+}
+:root:not(.dark) .text-slate-500:not(.bg-slate-900 *):not(.bg-slate-950 *):not(.bg-card-dark *):not(.bg-background-dark *):not(.bg-black *) {
+    color: #334155;
+}
+
+/* ============================================
+   Dark Mode Contrast & Theme Harmonization
+   Eliminates dark-on-dark text and blue-slate vs olive-dark color clash
+   ============================================ */
+.dark .text-slate-500:not([class*="dark:text-"]) {
+    color: #94a3b8;
+}
+.dark .text-slate-600:not([class*="dark:text-"]) {
+    color: #cbd5e1;
+}
+.dark .text-slate-700:not([class*="dark:text-"]) {
+    color: #e2e8f0;
+}
+.dark .text-slate-800:not([class*="dark:text-"]) {
+    color: #f1f5f9;
+}
+.dark .text-slate-900:not([class*="dark:text-"]) {
+    color: #ffffff;
+}
+
+/* Harmonize Dark Mode Cards to Rich Luxury Dark (#16140c) with Subtle Gold Borders */
+.dark .dark\:bg-slate-800,
+.dark .dark\:bg-slate-800\/90,
+.dark .dark\:bg-slate-800\/80,
+.dark .dark\:bg-slate-800\/70,
+.dark .dark\:bg-slate-800\/50,
+.dark .dark\:bg-slate-800\/40 {
+    background-color: #16140c !important;
+    border-color: rgba(212, 175, 53, 0.22) !important;
+}
+
+.dark .border-slate-700,
+.dark .dark\:border-slate-700,
+.dark .border-slate-800,
+.dark .dark\:border-slate-800 {
+    border-color: rgba(212, 175, 53, 0.22) !important;
+}
+
+/* ============================================
+   Global Theme Color Harmonization
+   Converts any lingering amber/brown shades to Dezan's signature gold tokens
+   ============================================ */
+:root:not(.dark) .text-amber-800,
+:root:not(.dark) .text-amber-900,
+:root:not(.dark) .text-amber-950 {
+    color: #9a7810;
+}
+:root:not(.dark) .text-amber-700 {
+    color: #a17d12;
+}
+:root:not(.dark) .text-amber-600 {
+    color: #b89324;
+}
+:root:not(.dark) .bg-amber-50 {
+    background-color: rgba(212, 175, 53, 0.08);
+}
+:root:not(.dark) .bg-amber-100 {
+    background-color: rgba(212, 175, 53, 0.15);
+}
+:root:not(.dark) .bg-amber-500 {
+    background-color: #d4af35;
+}
+:root:not(.dark) .border-amber-200,
+:root:not(.dark) .border-amber-300,
+:root:not(.dark) .border-amber-400 {
+    border-color: rgba(212, 175, 53, 0.3);
+}
+
+.dark .text-amber-700,
+.dark .text-amber-800,
+.dark .text-amber-900,
+.dark .text-amber-950 {
+    color: #d4af35;
+}
+.dark .bg-amber-50,
+.dark .bg-amber-100,
+.dark .bg-amber-500\/10,
+.dark .bg-amber-500\/15,
+.dark .bg-amber-500\/20 {
+    background-color: rgba(212, 175, 53, 0.15);
+}
+.dark .border-amber-200,
+.dark .border-amber-300,
+.dark .border-amber-400,
+.dark .border-amber-500,
+.dark .border-amber-500\/20,
+.dark .border-amber-500\/30,
+.dark .border-amber-500\/40 {
+    border-color: rgba(212, 175, 53, 0.25);
+}
+
+/* Mobile Bottom Nav Clarity (Sharp in both Light & Dark) */
+nav.fixed.bottom-0 a:not(.text-primary) {
+    color: #475569;
+}
+.dark nav.fixed.bottom-0 a:not(.text-primary) {
+    color: #94a3b8;
+}
+nav.fixed.bottom-0 a:hover {
+    color: #9a7810;
+}
+.dark nav.fixed.bottom-0 a:hover {
+    color: #d4af35;
 }
 
 /* ============================================

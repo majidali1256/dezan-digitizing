@@ -16,7 +16,7 @@
             darkMode: "class",
             theme: {
                 extend: {
-                    colors: { "primary": "#d4af35", "background-light": "#f8f7f6", "background-dark": "#201d12" },
+                    colors: { "primary": "#d4af35", "background-light": "#f8f7f6", "background-dark": "#201d12", "card-dark": "#16140c" },
                     fontFamily: { "display": ["Inter", "sans-serif"] },
                 },
             },
@@ -31,9 +31,12 @@
     <header
         class="sticky top-0 z-50 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-primary/20">
         <div class="flex items-center justify-between px-4 py-3 max-w-6xl mx-auto">
-            <a href="index.html" class="flex items-center gap-2">
-                <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover">
-                <span class="text-lg font-black tracking-tight">DEZAN</span>
+            <a href="index.html" class="flex items-center gap-2.5">
+                <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover">
+                <div class="flex flex-col text-left leading-none">
+                    <span class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN</span>
+                    <span class="text-[9.5px] sm:text-[10.5px] font-extrabold tracking-[0.18em] text-primary uppercase mt-1">Digitizing</span>
+                </div>
             </a>
             <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
                 <a href="index.html" class="nav-link-gold transition-colors" data-nav="index.html">Home</a>
@@ -50,7 +53,7 @@
                     aria-label="Toggle theme"><span
                         class="material-symbols-outlined theme-toggle-icon text-xl">light_mode</span></button>
                 <div id="header-auth-slot" class="flex items-center">
-                    <a href="portal-login.html" class="header-login-btn px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 dark:hover:bg-primary text-amber-900 dark:text-primary hover:text-amber-950 dark:hover:text-background-dark border border-amber-300 dark:border-primary/30 text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
+                    <a href="portal-login.html" class="header-login-btn px-3 py-1.5 rounded-lg bg-primary/10 dark:bg-primary/15 hover:bg-primary hover:text-background-dark dark:hover:bg-primary dark:hover:text-background-dark text-primary border border-primary/25 dark:border-primary/30 text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
                         <span class="material-symbols-outlined text-sm">login</span>
                         <span>Login</span>
                     </a>
@@ -63,13 +66,13 @@
     <main class="pb-20">
 
         <!-- Header Section -->
-        <section class="px-4 pt-8 pb-4 text-center reveal">
-            <h1 class="text-3xl md:text-4xl font-black tracking-tight text-gradient-gold inline-block">Clients Feedbacks</h1>
-            <p class="text-slate-500 text-sm max-w-xl mx-auto mt-2">Don't just take our word for it — see what our clients have to say. Real feedback from real customers who trust Dezan Digitizing for their embroidery and vector art needs.</p>
+        <section class="px-4 pt-6 pb-2 sm:pt-10 sm:pb-4 text-center reveal">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-gradient-gold inline-block">Clients Feedbacks</h1>
+            <p class="text-slate-500 text-xs sm:text-sm max-w-xl mx-auto mt-1 sm:mt-2">Don't just take our word for it — see what our clients have to say. Real feedback from real customers who trust Dezan Digitizing for their embroidery and vector art needs.</p>
         </section>
 
         <!-- Client Feedback (Sticky Scroll Layout) -->
-        <section class="py-8 overflow-visible bg-background-light dark:bg-background-dark">
+        <section class="py-6 sm:py-10 overflow-visible bg-background-light dark:bg-background-dark">
             <div class="px-4 max-w-6xl mx-auto mb-6">
                 <h3 class="text-xl font-bold border-l-4 border-primary pl-3">Client's Feedback</h3>
             </div>
@@ -210,40 +213,40 @@
             </div>
         </section>
 
-                <!-- ===== FACEBOOK REVIEWS (MASONRY) ===== -->
-        <section class="py-12 px-4 max-w-6xl mx-auto reveal">
+        <!-- ===== FACEBOOK REVIEWS (MASONRY) ===== -->
+        <section class="py-6 sm:py-10 px-4 max-w-6xl mx-auto reveal">
             <h3 class="text-xl font-bold mb-6 border-l-4 border-primary pl-3">Reviews</h3>
             
             <div class="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
                 
                 <!-- Review 1 (Erkan) -->
-                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="break-inside-avoid bg-white dark:bg-card-dark rounded-2xl p-5 shadow-xs border border-primary/20 dark:border-primary/25">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review3.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200/80 dark:border-primary/25 bg-no-repeat" style="background-image: url('reviews/review3.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm">Erkan Koyuncu</p>
-                            <div class="flex items-center gap-1 text-xs text-slate-500">
+                            <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                                 <span>Nov 21, 2022</span>
                                 <span class="material-symbols-outlined text-[10px]">public</span>
                             </div>
                         </div>
                     </div>
-                    <p class="text-sm mb-3">Fresh out of the machine 😍<br><br>Thank you <span class="text-blue-500 font-semibold cursor-pointer">Felix Dezan</span> for the amazing job with the digitizing!<br><br>SEASIDE MOSTLY HATS</p>
+                    <p class="text-sm mb-3">Fresh out of the machine 😍<br><br>Thank you <span class="text-primary font-semibold cursor-pointer">Felix Dezan</span> for the amazing job with the digitizing!<br><br>SEASIDE MOSTLY HATS</p>
                     <div class="mt-2 overflow-hidden rounded-lg cursor-pointer hover:opacity-90 transition-opacity">
                         <img src="reviews/review3.jpeg" class="w-full h-32 object-cover object-bottom" alt="Digitized Hats">
                     </div>
                 </div>
 
                 <!-- Review 2 (Maralyn) -->
-                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="break-inside-avoid bg-white dark:bg-card-dark rounded-2xl p-5 shadow-xs border border-primary/20 dark:border-primary/25">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review4.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200/80 dark:border-primary/25 bg-no-repeat" style="background-image: url('reviews/review4.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm flex items-center gap-1">Maralyn Kublek <span class="bg-red-500 text-white rounded-[4px] px-1 text-[8px] uppercase font-bold ml-1">Recommends</span></p>
                             <p class="text-xs font-semibold">Dezan Digitizing.</p>
-                            <div class="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5">
+                            <div class="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                                 <span>Dec 1, 2022</span>
                                 <span class="material-symbols-outlined text-[10px]">public</span>
                             </div>
@@ -253,14 +256,14 @@
                 </div>
 
                 <!-- Review 3 (Lisa) -->
-                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="break-inside-avoid bg-white dark:bg-card-dark rounded-2xl p-5 shadow-xs border border-primary/20 dark:border-primary/25">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review5.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200/80 dark:border-primary/25 bg-no-repeat" style="background-image: url('reviews/review5.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm flex items-center gap-1">Lisa Jenkins <span class="bg-red-500 text-white rounded-[4px] px-1 text-[8px] uppercase font-bold ml-1">Recommends</span></p>
                             <p class="text-xs font-semibold">Dezan Digitizing.</p>
-                            <div class="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5">
+                            <div class="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                                 <span>Mar 7</span>
                                 <span class="material-symbols-outlined text-[10px]">public</span>
                             </div>
@@ -270,28 +273,28 @@
                 </div>
 
                 <!-- Review 4 (Sandy) -->
-                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="break-inside-avoid bg-white dark:bg-card-dark rounded-2xl p-5 shadow-xs border border-primary/20 dark:border-primary/25">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review6.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200/80 dark:border-primary/25 bg-no-repeat" style="background-image: url('reviews/review6.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm">Sandy Escobar</p>
-                            <div class="flex items-center gap-1 text-xs text-slate-500">
+                            <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                                 <span>6d</span>
                                 <span class="material-symbols-outlined text-[10px]">group</span>
                             </div>
                         </div>
                     </div>
-                    <p class="text-sm"><span class="text-blue-500 font-semibold cursor-pointer">Felix Dezan</span> you're killing it! Thank you for all your hard work and patience. You're awesome and we couldn't do it without you! ❤️ - 😃 feeling grateful.</p>
+                    <p class="text-sm"><span class="text-primary font-semibold cursor-pointer">Felix Dezan</span> you're killing it! Thank you for all your hard work and patience. You're awesome and we couldn't do it without you! ❤️ - 😃 feeling grateful.</p>
                 </div>
 
                 <!-- Review 5 (Judith) -->
-                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="break-inside-avoid bg-white dark:bg-card-dark rounded-2xl p-5 shadow-xs border border-primary/20 dark:border-primary/25">
                     <div class="flex items-center gap-3 mb-3">
                         <div>
                             <p class="font-bold text-sm flex items-center gap-1">Judith Staponkus <span class="bg-red-500 text-white rounded-[4px] px-1 text-[8px] uppercase font-bold ml-1">Recommends</span></p>
                             <p class="text-xs font-semibold">Dezan Digitizing.</p>
-                            <div class="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5">
+                            <div class="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                                 <span>Nov 6, 2022</span>
                                 <span class="material-symbols-outlined text-[10px]">group</span>
                             </div>
@@ -301,14 +304,14 @@
                 </div>
                 
                 <!-- Review 6 (Susan) -->
-                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="break-inside-avoid bg-white dark:bg-card-dark rounded-2xl p-5 shadow-xs border border-primary/20 dark:border-primary/25">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review7.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200/80 dark:border-primary/25 bg-no-repeat" style="background-image: url('reviews/review7.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm flex items-center gap-1">Susan Michael <span class="bg-red-500 text-white rounded-[4px] px-1 text-[8px] uppercase font-bold ml-1">Recommends</span></p>
                             <p class="text-xs font-semibold">Dezan Digitizing.</p>
-                            <div class="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5">
+                            <div class="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                                 <span>Oct 24, 2022</span>
                                 <span class="material-symbols-outlined text-[10px]">public</span>
                             </div>
@@ -318,13 +321,13 @@
                 </div>
                 
                 <!-- Review 7 (Karen) -->
-                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="break-inside-avoid bg-white dark:bg-card-dark rounded-2xl p-5 shadow-xs border border-primary/20 dark:border-primary/25">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review8.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200/80 dark:border-primary/25 bg-no-repeat" style="background-image: url('reviews/review8.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm">Karen Parmenter Giddings</p>
-                            <div class="flex items-center gap-1 text-xs text-slate-500">
+                            <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                                 <span>Apr 19</span>
                                 <span class="material-symbols-outlined text-[10px]">public</span>
                             </div>
@@ -333,15 +336,14 @@
                     <p class="text-sm">i want to take a min and give a big 'shout out' to dezan digitizing! need something digitized? contact felix! he and his team have done awesome work for me! way to go FELIX thank you!</p>
                 </div>
 
-
                 <!-- NEW REVIEW: Ashlea Foxwell -->
-                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="break-inside-avoid bg-white dark:bg-card-dark rounded-2xl p-5 shadow-xs border border-primary/20 dark:border-primary/25">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review2.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200/80 dark:border-primary/25 bg-no-repeat" style="background-image: url('reviews/review2.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm">Ashlea Foxwell</p>
-                            <div class="flex items-center gap-1 text-xs text-slate-500">
+                            <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                                 <span>Jan 30</span>
                                 <span class="material-symbols-outlined text-[10px]">public</span>
                             </div>
@@ -351,13 +353,13 @@
                 </div>
 
                 <!-- NEW REVIEW: Chris Velasquez -->
-                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="break-inside-avoid bg-white dark:bg-card-dark rounded-2xl p-5 shadow-xs border border-primary/20 dark:border-primary/25">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review9.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200/80 dark:border-primary/25 bg-no-repeat" style="background-image: url('reviews/review9.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm">Chris Velasquez</p>
-                            <div class="flex items-center gap-1 text-xs text-slate-500">
+                            <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                                 <span>Oct 11, 2025</span>
                                 <span class="material-symbols-outlined text-[10px]">public</span>
                             </div>
@@ -367,13 +369,13 @@
                 </div>
 
                 <!-- NEW REVIEW: Jean Trinh Le -->
-                <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="break-inside-avoid bg-white dark:bg-card-dark rounded-2xl p-5 shadow-xs border border-primary/20 dark:border-primary/25">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review10.jpeg'); background-size: 800%; background-position: 2% 80%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200/80 dark:border-primary/25 bg-no-repeat" style="background-image: url('reviews/review10.jpeg'); background-size: 800%; background-position: 2% 80%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm">Jean Trinh Le</p>
-                            <div class="flex items-center gap-1 text-xs text-slate-500">
+                            <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                                 <span>7w</span>
                                 <span class="material-symbols-outlined text-[10px]">public</span>
                             </div>
@@ -387,7 +389,7 @@
 
 
         <!-- CTA -->
-        <section class="px-4 py-12 max-w-6xl mx-auto reveal">
+        <section class="px-4 py-6 sm:py-10 max-w-6xl mx-auto reveal">
             <a href="contact.html#custom-quote-section" data-action="request-quote" onclick="window.handleQuoteClick(event)"
                 class="block w-full max-w-md mx-auto bg-primary hover:bg-primary-hover text-background-dark py-4 rounded-xl font-black text-center shadow-lg shadow-primary/20 btn-hover-effect cursor-pointer">
                 <span class="material-symbols-outlined align-middle mr-1">request_quote</span> Request a Quote
@@ -403,9 +405,12 @@
         <div class="max-w-6xl mx-auto px-4">
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4 sm:gap-8 mb-10">
                 <div class="col-span-2 md:col-span-4 lg:col-span-1">
-                    <div class="flex items-center gap-2 mb-4">
-                        <img src="logo.png" alt="Dezan Digitizing" class="w-7 h-7 rounded-full object-cover">
-                        <span class="text-white font-black tracking-tight">DEZAN</span>
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover">
+                        <div class="flex flex-col text-left leading-none">
+                            <span class="text-white font-black tracking-tight text-base sm:text-lg">DEZAN</span>
+                            <span class="text-[9.5px] sm:text-[10.5px] font-extrabold tracking-[0.18em] text-primary uppercase mt-1">Digitizing</span>
+                        </div>
                     </div>
                     <p class="text-sm mb-4">Professional digitizing &amp; vector services for brands that demand
                         perfection.</p>

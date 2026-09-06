@@ -17,7 +17,7 @@
             darkMode: "class",
             theme: {
                 extend: {
-                    colors: { "primary": "#d4af35", "background-light": "#f8f7f6", "background-dark": "#201d12" },
+                    colors: { "primary": "#d4af35", "background-light": "#f8f7f6", "background-dark": "#201d12", "card-dark": "#16140c" },
                     fontFamily: { "display": ["Inter", "sans-serif"] },
                 },
             },
@@ -32,9 +32,12 @@
     <header
         class="sticky top-0 z-50 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-primary/20">
         <div class="flex items-center justify-between px-4 py-3 max-w-6xl mx-auto">
-            <a href="index.html" class="flex items-center gap-2">
-                <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover">
-                <span class="text-lg font-black tracking-tight">DEZAN</span>
+            <a href="index.html" class="flex items-center gap-2.5">
+                <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover">
+                <div class="flex flex-col text-left leading-none">
+                    <span class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN</span>
+                    <span class="text-[9.5px] sm:text-[10.5px] font-extrabold tracking-[0.18em] text-primary uppercase mt-1">Digitizing</span>
+                </div>
             </a>
             <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
                 <a href="index.html" class="nav-link-gold transition-colors" data-nav="index.html">Home</a>
@@ -52,7 +55,7 @@
                     <span class="material-symbols-outlined theme-toggle-icon text-xl">light_mode</span>
                 </button>
                 <div id="header-auth-slot" class="flex items-center">
-                    <a href="portal-login.html" class="header-login-btn px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 dark:hover:bg-primary text-amber-900 dark:text-primary hover:text-amber-950 dark:hover:text-background-dark border border-amber-300 dark:border-primary/30 text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
+                    <a href="portal-login.html" class="header-login-btn px-3 py-1.5 rounded-lg bg-primary/10 dark:bg-primary/15 hover:bg-primary hover:text-background-dark dark:hover:bg-primary dark:hover:text-background-dark text-primary border border-primary/25 dark:border-primary/30 text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
                         <span class="material-symbols-outlined text-sm">login</span>
                         <span>Login</span>
                     </a>
@@ -65,22 +68,22 @@
     <main class="pb-20">
 
         <!-- Hero -->
-        <section class="relative py-16 md:py-24 reveal">
-            <div class="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
-                <div class="flex flex-col gap-6">
+        <section class="relative py-8 sm:py-12 md:py-16 reveal">
+            <div class="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+                <div class="flex flex-col gap-4 sm:gap-6">
                     <span class="text-primary font-bold tracking-widest text-xs uppercase">Est. 2008</span>
-                    <h1 class="text-4xl md:text-5xl font-black leading-tight tracking-tight">
-                        Professional <span class="text-primary">Embroidery Digitizing</span> & Vector Art
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight">
+                        Professional <span class="text-primary">Embroidery Digitizing</span> &amp; Vector Art
                     </h1>
-                    <p class="text-lg text-slate-600 dark:text-slate-400 max-w-lg leading-relaxed">
+                    <p class="text-sm sm:text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-lg leading-relaxed">
                         Whether you are a solo Etsy shop owner, a local promotional products business, or a large-scale apparel brand, we provide the technical foundation for your best work.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-4 pt-2">
+                    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-1 sm:pt-2">
                         <a href="portfolio.html"
-                            class="bg-primary text-background-dark px-8 py-3 rounded-lg font-bold btn-hover-effect text-center w-full sm:w-auto">View
+                            class="bg-primary text-background-dark px-6 sm:px-8 py-3 rounded-xl font-bold btn-hover-effect text-center w-full sm:w-auto text-sm">View
                             Portfolio</a>
                         <a href="services.html"
-                            class="border-2 border-primary/30 hover:border-primary px-8 py-3 rounded-lg font-bold transition-all text-center w-full sm:w-auto">Our
+                            class="border-2 border-primary/30 hover:border-primary px-6 sm:px-8 py-3 rounded-xl font-bold transition-all text-center w-full sm:w-auto text-sm">Our
                             Services</a>
                     </div>
                 </div>
@@ -93,33 +96,33 @@
             </div>
         </section>
 
-        <!-- Stats -->
-        <section class="py-16 reveal">
-            <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-primary/5 dark:bg-primary/10 p-6 rounded-2xl border border-primary/10 text-center">
-                    <h3 class="text-3xl font-black text-primary mb-1">15+</h3>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Years Excellence</p>
+        <!-- Stats (Harmonized Spacing & 2x2 Compact Mobile Grid) -->
+        <section class="py-6 sm:py-10 reveal">
+            <div class="max-w-6xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                <div class="bg-white dark:bg-card-dark p-3.5 sm:p-6 rounded-xl sm:rounded-2xl border border-primary/20 dark:border-primary/25 text-center shadow-xs">
+                    <h3 class="text-2xl sm:text-3xl font-black text-primary mb-0.5 sm:mb-1">15+</h3>
+                    <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">Years Excellence</p>
                 </div>
-                <div class="bg-primary/5 dark:bg-primary/10 p-6 rounded-2xl border border-primary/10 text-center">
-                    <h3 class="text-3xl font-black text-primary mb-1">10k+</h3>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Projects Done</p>
+                <div class="bg-white dark:bg-card-dark p-3.5 sm:p-6 rounded-xl sm:rounded-2xl border border-primary/20 dark:border-primary/25 text-center shadow-xs">
+                    <h3 class="text-2xl sm:text-3xl font-black text-primary mb-0.5 sm:mb-1">10k+</h3>
+                    <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">Projects Done</p>
                 </div>
-                <div class="bg-primary/5 dark:bg-primary/10 p-6 rounded-2xl border border-primary/10 text-center">
-                    <h3 class="text-3xl font-black text-primary mb-1">24h</h3>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Turnaround</p>
+                <div class="bg-white dark:bg-card-dark p-3.5 sm:p-6 rounded-xl sm:rounded-2xl border border-primary/20 dark:border-primary/25 text-center shadow-xs">
+                    <h3 class="text-2xl sm:text-3xl font-black text-primary mb-0.5 sm:mb-1">24h</h3>
+                    <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">Turnaround</p>
                 </div>
-                <div class="bg-primary/5 dark:bg-primary/10 p-6 rounded-2xl border border-primary/10 text-center">
-                    <h3 class="text-3xl font-black text-primary mb-1">99%</h3>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Happy Clients</p>
+                <div class="bg-white dark:bg-card-dark p-3.5 sm:p-6 rounded-xl sm:rounded-2xl border border-primary/20 dark:border-primary/25 text-center shadow-xs">
+                    <h3 class="text-2xl sm:text-3xl font-black text-primary mb-0.5 sm:mb-1">99%</h3>
+                    <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">Happy Clients</p>
                 </div>
             </div>
         </section>
 
         <!-- Our Story -->
-        <section class="py-16 reveal">
+        <section class="py-6 sm:py-10 reveal">
             <div class="max-w-4xl mx-auto px-4">
-                <h2 class="text-3xl font-bold mb-6 border-l-4 border-primary pl-3">Our Story</h2>
-                <div class="space-y-4 text-slate-600 dark:text-slate-400 leading-relaxed text-lg">
+                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-6 border-l-4 border-primary pl-3 text-slate-900 dark:text-white">Our Story</h2>
+                <div class="space-y-3 sm:space-y-4 text-slate-600 dark:text-slate-400 leading-relaxed text-sm sm:text-base md:text-lg">
                     <p>From a small, dedicated workshop founded over 15 years ago to becoming a global industry leader,
                         Dezan Digitizing has been defined by one thing: <strong
                             class="text-slate-900 dark:text-slate-100">uncompromising precision</strong>.</p>
@@ -134,37 +137,37 @@
         </section>
 
         <!-- Why Choose Dezan -->
-        <section class="py-16 reveal">
+        <section class="py-6 sm:py-10 reveal">
             <div class="max-w-6xl mx-auto px-4">
-                <h2 class="text-3xl font-bold mb-10 text-center">Why Choose Dezan?</h2>
-                <div class="grid md:grid-cols-3 gap-6">
+                <h2 class="text-xl sm:text-3xl font-bold mb-6 sm:mb-10 text-center text-slate-900 dark:text-white">Why Choose Dezan?</h2>
+                <div class="grid md:grid-cols-3 gap-4 sm:gap-6">
                     <div
-                        class="group p-8 rounded-2xl bg-white dark:bg-slate-800 border border-primary/5 hover:border-primary/40 transition-all shadow-sm">
+                        class="group p-5 sm:p-8 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800 border border-primary/10 hover:border-primary/40 transition-all shadow-xs">
                         <div
-                            class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
-                            <span class="material-symbols-outlined text-3xl">workspace_premium</span>
+                            class="w-11 h-11 sm:w-14 sm:h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-4 sm:mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
+                            <span class="material-symbols-outlined text-2xl sm:text-3xl">workspace_premium</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-3">In-House Expertise</h3>
-                        <p class="text-slate-500 leading-relaxed">Our master digitizers craft custom files manually using the latest software. We never auto-digitize, ensuring perfect stitch balance.</p>
+                        <h3 class="text-base sm:text-xl font-bold mb-2 sm:mb-3 text-slate-900 dark:text-white">In-House Expertise</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm leading-relaxed">Our master digitizers craft custom files manually using the latest software. We never auto-digitize, ensuring perfect stitch balance.</p>
                     </div>
                     <div
-                        class="group p-8 rounded-2xl bg-white dark:bg-slate-800 border border-primary/5 hover:border-primary/40 transition-all shadow-sm">
+                        class="group p-5 sm:p-8 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800 border border-primary/10 hover:border-primary/40 transition-all shadow-xs">
                         <div
-                            class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
-                            <span class="material-symbols-outlined text-3xl">bolt</span>
+                            class="w-11 h-11 sm:w-14 sm:h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-4 sm:mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
+                            <span class="material-symbols-outlined text-2xl sm:text-3xl">bolt</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-3">Fast Turnaround</h3>
-                        <p class="text-slate-500 leading-relaxed">Get your digitizing and vector files back in 12-24
+                        <h3 class="text-base sm:text-xl font-bold mb-2 sm:mb-3 text-slate-900 dark:text-white">Fast Turnaround</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm leading-relaxed">Get your digitizing and vector files back in 12-24
                             hours without sacrificing quality.</p>
                     </div>
                     <div
-                        class="group p-8 rounded-2xl bg-white dark:bg-slate-800 border border-primary/5 hover:border-primary/40 transition-all shadow-sm">
+                        class="group p-5 sm:p-8 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800 border border-primary/10 hover:border-primary/40 transition-all shadow-xs">
                         <div
-                            class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
-                            <span class="material-symbols-outlined text-3xl">support_agent</span>
+                            class="w-11 h-11 sm:w-14 sm:h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-4 sm:mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
+                            <span class="material-symbols-outlined text-2xl sm:text-3xl">support_agent</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-3">Expert Support</h3>
-                        <p class="text-slate-500 leading-relaxed">Direct access to senior digitizers. Free edits and
+                        <h3 class="text-base sm:text-xl font-bold mb-2 sm:mb-3 text-slate-900 dark:text-white">Expert Support</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm leading-relaxed">Direct access to senior digitizers. Free edits and
                             technical advice included.</p>
                     </div>
                 </div>
@@ -172,45 +175,45 @@
         </section>
 
         <!-- Craftsmanship Process -->
-        <section class="py-16 reveal">
+        <section class="py-6 sm:py-10 reveal">
             <div class="max-w-6xl mx-auto px-4">
-                <div class="bg-primary/5 dark:bg-primary/10 rounded-2xl p-8 md:p-12">
-                    <h2 class="text-3xl font-bold mb-8 border-l-4 border-primary pl-3">Our Craftsmanship Process</h2>
-                    <div class="grid md:grid-cols-2 gap-8">
-                        <ul class="space-y-6">
-                            <li class="flex gap-4">
-                                <span class="material-symbols-outlined text-primary mt-1 shrink-0">check_circle</span>
+                <div class="bg-white dark:bg-card-dark rounded-2xl p-5 sm:p-8 md:p-12 border border-primary/20 dark:border-primary/25 shadow-xs">
+                    <h2 class="text-xl sm:text-3xl font-bold mb-5 sm:mb-8 border-l-4 border-primary pl-3 text-slate-900 dark:text-white">Our Craftsmanship Process</h2>
+                    <div class="grid md:grid-cols-2 gap-6 sm:gap-8">
+                        <ul class="space-y-4 sm:space-y-6">
+                            <li class="flex gap-3 sm:gap-4">
+                                <span class="material-symbols-outlined text-primary mt-0.5 sm:mt-1 shrink-0 text-lg sm:text-2xl">check_circle</span>
                                 <div>
-                                    <h4 class="font-bold mb-1">Optimized Stitch Density</h4>
-                                    <p class="text-sm text-slate-500">Customized density settings based on your specific
+                                    <h4 class="font-bold text-sm sm:text-base mb-0.5 sm:mb-1 text-slate-900 dark:text-white">Optimized Stitch Density</h4>
+                                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Customized density settings based on your specific
                                         fabric choice.</p>
                                 </div>
                             </li>
-                            <li class="flex gap-4">
-                                <span class="material-symbols-outlined text-primary mt-1 shrink-0">check_circle</span>
+                            <li class="flex gap-3 sm:gap-4">
+                                <span class="material-symbols-outlined text-primary mt-0.5 sm:mt-1 shrink-0 text-lg sm:text-2xl">check_circle</span>
                                 <div>
-                                    <h4 class="font-bold mb-1">Precision Color Blending</h4>
-                                    <p class="text-sm text-slate-500">Advanced gradients and shading techniques for
+                                    <h4 class="font-bold text-sm sm:text-base mb-0.5 sm:mb-1 text-slate-900 dark:text-white">Precision Color Blending</h4>
+                                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Advanced gradients and shading techniques for
                                         realistic textures.</p>
                                 </div>
                             </li>
-                            <li class="flex gap-4">
-                                <span class="material-symbols-outlined text-primary mt-1 shrink-0">check_circle</span>
+                            <li class="flex gap-3 sm:gap-4">
+                                <span class="material-symbols-outlined text-primary mt-0.5 sm:mt-1 shrink-0 text-lg sm:text-2xl">check_circle</span>
                                 <div>
-                                    <h4 class="font-bold mb-1">Vector Art Cleanup</h4>
-                                    <p class="text-sm text-slate-500">We refine every line and curve before the
+                                    <h4 class="font-bold text-sm sm:text-base mb-0.5 sm:mb-1 text-slate-900 dark:text-white">Vector Art Cleanup</h4>
+                                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400">We refine every line and curve before the
                                         digitizing process begins.</p>
                                 </div>
                             </li>
                         </ul>
-                        <div class="grid grid-cols-2 gap-3">
-                            <img alt="Embroidery machine" class="rounded-xl w-full h-40 object-cover"
+                        <div class="grid grid-cols-2 gap-2.5 sm:gap-3">
+                            <img alt="Embroidery machine" class="rounded-xl w-full h-32 sm:h-40 object-cover"
                                 src="images/1.jpeg" />
-                            <img alt="Digital stitch patterns" class="rounded-xl w-full h-40 object-cover"
+                            <img alt="Digital stitch patterns" class="rounded-xl w-full h-32 sm:h-40 object-cover"
                                 src="images/2.jpeg" />
-                            <img alt="Mountain embroidery art" class="rounded-xl w-full h-40 object-cover"
+                            <img alt="Mountain embroidery art" class="rounded-xl w-full h-32 sm:h-40 object-cover"
                                 src="images/3.jpeg" />
-                            <img alt="Colored threads" class="rounded-xl w-full h-40 object-cover"
+                            <img alt="Colored threads" class="rounded-xl w-full h-32 sm:h-40 object-cover"
                                 src="images/4.jpeg" />
                         </div>
                     </div>
@@ -219,19 +222,19 @@
         </section>
 
         <!-- CTA -->
-        <section class="py-16 reveal">
+        <section class="py-8 sm:py-12 reveal">
             <div class="max-w-4xl mx-auto px-4">
-                <div class="bg-slate-900 text-white p-8 md:p-12 rounded-2xl text-center space-y-6">
-                    <h2 class="text-3xl font-bold">Ready to elevate your embroidery?</h2>
-                    <p class="text-slate-400">Contact us today for a free quote on your next project.</p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <div class="bg-slate-900 text-white p-6 sm:p-8 md:p-12 rounded-2xl text-center space-y-4 sm:space-y-6">
+                    <h2 class="text-2xl sm:text-3xl font-bold">Ready to elevate your embroidery?</h2>
+                    <p class="text-slate-400 text-xs sm:text-sm md:text-base">Contact us today for a free quote on your next project.</p>
+                    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                         <a href="contact.html#custom-quote-section" data-action="request-quote" onclick="window.handleQuoteClick(event)"
-                            class="bg-primary text-background-dark px-8 py-3 rounded-lg font-bold btn-hover-effect text-center w-full sm:w-auto flex items-center justify-center gap-1.5 cursor-pointer">
+                            class="bg-primary text-background-dark px-6 sm:px-8 py-3 rounded-xl font-bold btn-hover-effect text-center w-full sm:w-auto flex items-center justify-center gap-1.5 cursor-pointer text-xs sm:text-sm">
                             <span>Get a Quote</span>
                             <span class="material-symbols-outlined text-base">request_quote</span>
                         </a>
                         <a href="contact.html"
-                            class="border border-white/20 px-8 py-3 rounded-lg font-bold btn-hover-effect text-center w-full sm:w-auto">Contact
+                            class="border border-white/20 px-6 sm:px-8 py-3 rounded-xl font-bold btn-hover-effect text-center w-full sm:w-auto text-xs sm:text-sm">Contact
                             Us</a>
                     </div>
                 </div>
@@ -245,9 +248,12 @@
         <div class="max-w-6xl mx-auto px-4">
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4 sm:gap-8 mb-10">
                 <div class="col-span-2 md:col-span-4 lg:col-span-1">
-                    <div class="flex items-center gap-2 mb-4">
-                        <img src="logo.png" alt="Dezan Digitizing" class="w-7 h-7 rounded-full object-cover">
-                        <span class="text-white font-black tracking-tight">DEZAN</span>
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover">
+                        <div class="flex flex-col text-left leading-none">
+                            <span class="text-white font-black tracking-tight text-base sm:text-lg">DEZAN</span>
+                            <span class="text-[9.5px] sm:text-[10.5px] font-extrabold tracking-[0.18em] text-primary uppercase mt-1">Digitizing</span>
+                        </div>
                     </div>
                     <p class="text-sm mb-4">Professional digitizing &amp; vector services for brands that demand
                         perfection.</p>

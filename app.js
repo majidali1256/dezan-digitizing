@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 // Logged out: show Login button!
                 slot.innerHTML = `
-                    <a href="portal-login.html" class="header-login-btn px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 dark:hover:bg-primary text-amber-900 dark:text-primary hover:text-amber-950 dark:hover:text-background-dark border border-amber-300 dark:border-primary/30 text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
+                    <a href="portal-login.html" class="header-login-btn px-3 py-1.5 rounded-lg bg-primary/10 dark:bg-primary/15 hover:bg-primary hover:text-background-dark dark:hover:bg-primary dark:hover:text-background-dark text-primary border border-primary/25 dark:border-primary/30 text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
                         <span class="material-symbols-outlined text-sm">login</span>
                         <span>Login</span>
                     </a>
@@ -249,15 +249,23 @@ document.addEventListener("DOMContentLoaded", () => {
     // ===== SCROLL REVEAL ANIMATIONS =====
     const revealElements = document.querySelectorAll(".reveal");
     if (revealElements.length > 0) {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add("revealed");
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-        revealElements.forEach(el => observer.observe(el));
+        if ("IntersectionObserver" in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("revealed");
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: "150px 0px 150px 0px", threshold: 0.01 });
+            revealElements.forEach(el => observer.observe(el));
+            // Safety fallback so content never gets stuck invisible
+            setTimeout(() => {
+                revealElements.forEach(el => el.classList.add("revealed"));
+            }, 1000);
+        } else {
+            revealElements.forEach(el => el.classList.add("revealed"));
+        }
     }
 
 
@@ -1252,19 +1260,19 @@ function initInteractiveElements() {
         toast.className = `global-toast fixed top-20 right-4 z-[100] px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 border transition-all duration-300 transform translate-y-[-20px] opacity-0 pointer-events-none`;
         
         if (type === 'success') {
-            toast.className += ' bg-white dark:bg-slate-800 border-green-500/30 text-slate-800 dark:text-white';
+            toast.className += ' bg-white dark:bg-card-dark border-green-500/40 text-slate-900 dark:text-white';
             toast.innerHTML = `
                 <span class="material-symbols-outlined text-green-500 text-xl filled-icon">check_circle</span>
                 <p class="text-sm font-semibold">${message}</p>
             `;
         } else if (type === 'error') {
-            toast.className += ' bg-white dark:bg-slate-800 border-red-500/30 text-slate-800 dark:text-white';
+            toast.className += ' bg-white dark:bg-card-dark border-red-500/40 text-slate-900 dark:text-white';
             toast.innerHTML = `
                 <span class="material-symbols-outlined text-red-500 text-xl filled-icon">error</span>
                 <p class="text-sm font-semibold">${message}</p>
             `;
         } else {
-            toast.className += ' bg-white dark:bg-slate-800 border-primary/30 text-slate-800 dark:text-white';
+            toast.className += ' bg-white dark:bg-card-dark border-primary/40 text-slate-900 dark:text-white';
             toast.innerHTML = `
                 <span class="material-symbols-outlined text-primary text-xl">info</span>
                 <p class="text-sm font-semibold">${message}</p>
@@ -1294,17 +1302,17 @@ function initInteractiveElements() {
         backdrop.className = 'global-dialog-modal fixed inset-0 z-[99] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity duration-300 opacity-0';
         
         const modal = document.createElement('div');
-        modal.className = 'bg-background-light dark:bg-background-dark border border-primary/20 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl transition-transform duration-300 transform scale-95 flex flex-col max-h-[85vh]';
+        modal.className = 'bg-white dark:bg-card-dark border border-primary/25 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl transition-transform duration-300 transform scale-95 flex flex-col max-h-[85vh]';
         
         modal.innerHTML = `
-            <div class="flex items-center justify-between px-6 py-4 border-b border-primary/10 bg-slate-50/50 dark:bg-slate-900/50">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-primary/15 bg-slate-50/80 dark:bg-card-dark">
                 <h3 class="font-black text-gradient-gold text-lg">${title}</h3>
                 <button class="close-modal-btn text-slate-400 hover:text-red-500 transition-colors text-2xl font-light leading-none">&times;</button>
             </div>
-            <div class="p-6 text-sm text-slate-600 dark:text-slate-300 overflow-y-auto space-y-4 flex-1">
+            <div class="p-6 text-sm text-slate-700 dark:text-slate-200 overflow-y-auto space-y-4 flex-1">
                 ${contentHTML}
             </div>
-            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/30 flex justify-end gap-3 border-t border-primary/10">
+            <div class="px-6 py-4 bg-slate-50/80 dark:bg-black/40 flex justify-end gap-3 border-t border-primary/15">
                 ${actionsHTML || `<button class="close-modal-btn bg-primary text-background-dark font-bold text-xs px-5 py-2.5 rounded-lg hover:brightness-110 transition-all">Close</button>`}
             </div>
         `;

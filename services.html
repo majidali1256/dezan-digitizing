@@ -17,7 +17,7 @@
             darkMode: "class",
             theme: {
                 extend: {
-                    colors: { "primary": "#d4af35", "background-light": "#f8f7f6", "background-dark": "#201d12" },
+                    colors: { "primary": "#d4af35", "background-light": "#f8f7f6", "background-dark": "#201d12", "card-dark": "#16140c" },
                     fontFamily: { "display": ["Inter", "sans-serif"] },
                 },
             },
@@ -32,9 +32,12 @@
     <header
         class="sticky top-0 z-50 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-primary/20">
         <div class="flex items-center justify-between px-4 py-3 max-w-6xl mx-auto">
-            <a href="index.html" class="flex items-center gap-2">
-                <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover">
-                <span class="text-lg font-black tracking-tight">DEZAN</span>
+            <a href="index.html" class="flex items-center gap-2.5">
+                <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover">
+                <div class="flex flex-col text-left leading-none">
+                    <span class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN</span>
+                    <span class="text-[9.5px] sm:text-[10.5px] font-extrabold tracking-[0.18em] text-primary uppercase mt-1">Digitizing</span>
+                </div>
             </a>
             <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
                 <a href="index.html" class="nav-link-gold transition-colors" data-nav="index.html">Home</a>
@@ -52,7 +55,7 @@
                     <span class="material-symbols-outlined theme-toggle-icon text-xl">light_mode</span>
                 </button>
                 <div id="header-auth-slot" class="flex items-center">
-                    <a href="portal-login.html" class="header-login-btn px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 dark:hover:bg-primary text-amber-900 dark:text-primary hover:text-amber-950 dark:hover:text-background-dark border border-amber-300 dark:border-primary/30 text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
+                    <a href="portal-login.html" class="header-login-btn px-3 py-1.5 rounded-lg bg-primary/10 dark:bg-primary/15 hover:bg-primary hover:text-background-dark dark:hover:bg-primary dark:hover:text-background-dark text-primary border border-primary/25 dark:border-primary/30 text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
                         <span class="material-symbols-outlined text-sm">login</span>
                         <span>Login</span>
                     </a>
@@ -67,7 +70,7 @@
         <!-- Hero -->
         <section class="pt-4 sm:pt-10 pb-2 sm:pb-6 text-center px-4 max-w-4xl mx-auto">
             <div class="flex flex-col items-center justify-center gap-2 sm:gap-3.5">
-                <span class="text-[10px] sm:text-xs font-black tracking-[0.16em] text-amber-800 dark:text-primary uppercase">
+                <span class="text-[10px] sm:text-xs font-black tracking-[0.16em] text-primary uppercase">
                     Precision Craftsmanship
                 </span>
                 <h1 class="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
@@ -96,7 +99,7 @@
             <h3 class="text-base sm:text-xl font-bold mb-3 sm:mb-6 border-l-4 border-primary pl-2.5 sm:pl-3 text-slate-900 dark:text-white">Expert Services</h3>
             <div class="grid grid-cols-2 gap-2.5 sm:gap-6">
                 <div
-                    class="flex flex-col bg-white dark:bg-slate-800/90 rounded-xl overflow-hidden border border-primary/15 dark:border-primary/20 shadow-xs hover-scale">
+                    class="flex flex-col bg-white dark:bg-card-dark rounded-xl overflow-hidden border border-primary/15 dark:border-primary/25 shadow-xs hover-scale">
                     <div class="aspect-[16/10] sm:aspect-video bg-cover bg-center"
                         style='background-image: url("images/Pet Embroidery.png");'>
                     </div>
@@ -107,14 +110,14 @@
                                 We manually digitize every design, mapping stitch direction, underlay &amp; pull compensation for 3D puff, left chest &amp; jacket backs.
                             </p>
                         </div>
-                        <a href="portal-login.html?redirect=new_order&service=Digitizing" data-action="order-now" data-service="Digitizing" onclick="window.handleOrderClick(event, 'Digitizing')" class="text-amber-800 dark:text-primary font-black text-[11px] sm:text-sm flex items-center gap-1 cursor-pointer hover:underline">
+                        <a href="portal-login.html?redirect=new_order&service=Digitizing" data-action="order-now" data-service="Digitizing" onclick="window.handleOrderClick(event, 'Digitizing')" class="text-primary font-black text-[11px] sm:text-sm flex items-center gap-1 cursor-pointer hover:underline">
                             <span>Order Now</span>
                             <span class="material-symbols-outlined text-xs sm:text-sm">arrow_forward</span>
                         </a>
                     </div>
                 </div>
                 <div
-                    class="flex flex-col bg-white dark:bg-slate-800/90 rounded-xl overflow-hidden border border-primary/15 dark:border-primary/20 shadow-xs hover-scale">
+                    class="flex flex-col bg-white dark:bg-card-dark rounded-xl overflow-hidden border border-primary/15 dark:border-primary/25 shadow-xs hover-scale">
                     <div class="aspect-[16/10] sm:aspect-video bg-cover bg-center"
                         style='background-image: url("Hero Page/Vector.png");'>
                     </div>
@@ -125,7 +128,7 @@
                                 Convert low-res images into scalable AI, EPS, SVG, and print-ready PDF formats for screenprinting and engraving.
                             </p>
                         </div>
-                        <a href="portal-login.html?redirect=new_order&service=Vectorizing" data-action="order-now" data-service="Vectorizing" onclick="window.handleOrderClick(event, 'Vectorizing')" class="text-amber-800 dark:text-primary font-black text-[11px] sm:text-sm flex items-center gap-1 cursor-pointer hover:underline">
+                        <a href="portal-login.html?redirect=new_order&service=Vectorizing" data-action="order-now" data-service="Vectorizing" onclick="window.handleOrderClick(event, 'Vectorizing')" class="text-primary font-black text-[11px] sm:text-sm flex items-center gap-1 cursor-pointer hover:underline">
                             <span>Order Now</span>
                             <span class="material-symbols-outlined text-xs sm:text-sm">arrow_forward</span>
                         </a>
@@ -135,20 +138,20 @@
         </section>
 
         <!-- Portfolio Section -->
-        <section id="portfolio" class="px-4 py-12 reveal max-w-6xl mx-auto pt-24 -mt-12">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold border-l-4 border-primary pl-3">Portfolio</h3>
+        <section id="portfolio" class="scroll-mt-20 px-4 py-8 sm:py-12 reveal max-w-6xl mx-auto">
+            <div class="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 class="text-base sm:text-xl font-bold border-l-4 border-primary pl-2.5 sm:pl-3 text-slate-900 dark:text-white">Portfolio</h3>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-4">
                 <div
                     class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 reveal portfolio-card">
                     <img alt="Custom embroidered pet portrait"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                         src="images/Pet Embroidery.png" />
                     <div
-                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
-                        <p class="text-white text-sm font-bold">Pet Portraits</p>
-                        <p class="text-primary text-[10px] uppercase tracking-widest">Embroidery</p>
+                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4">
+                        <p class="text-white text-xs sm:text-sm font-bold">Pet Portraits</p>
+                        <p class="text-primary text-[9px] sm:text-[10px] uppercase tracking-widest">Embroidery</p>
                     </div>
                 </div>
                 <div
@@ -157,9 +160,9 @@
                         alt="Left chest logo embroidery"
                         src="images/Left Chest Logos.png" />
                     <div
-                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
-                        <p class="text-white text-sm font-bold">Left Chest Logos</p>
-                        <p class="text-primary text-[10px] uppercase tracking-widest">Corporate</p>
+                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4">
+                        <p class="text-white text-xs sm:text-sm font-bold">Left Chest Logos</p>
+                        <p class="text-primary text-[9px] sm:text-[10px] uppercase tracking-widest">Corporate</p>
                     </div>
                 </div>
                 <div
@@ -168,9 +171,9 @@
                         alt="Large jacket back embroidery"
                         src="images/Jacket%20Backs.png" />
                     <div
-                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
-                        <p class="text-white text-sm font-bold">Jacket Backs</p>
-                        <p class="text-primary text-[10px] uppercase tracking-widest">Custom Design</p>
+                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4">
+                        <p class="text-white text-xs sm:text-sm font-bold">Jacket Backs</p>
+                        <p class="text-primary text-[9px] sm:text-[10px] uppercase tracking-widest">Custom Design</p>
                     </div>
                 </div>
                 <div
@@ -178,9 +181,9 @@
                     <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                         alt="3D Puff Embroidery hat"
                         src="images/Custom Hats.png" />
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
-                        <p class="text-white text-sm font-bold">Custom Hats</p>
-                        <p class="text-primary text-[10px] uppercase tracking-widest">3D Puff</p>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4">
+                        <p class="text-white text-xs sm:text-sm font-bold">Custom Hats</p>
+                        <p class="text-primary text-[9px] sm:text-[10px] uppercase tracking-widest">3D Puff</p>
                     </div>
                 </div>
                 <div
@@ -189,77 +192,96 @@
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                         src="Hero%20Page/Vector.png" />
                     <div
-                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
-                        <p class="text-white text-sm font-bold">Vector Logo Trace</p>
-                        <p class="text-primary text-[10px] uppercase tracking-widest">Vector Art</p>
+                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4">
+                        <p class="text-white text-xs sm:text-sm font-bold">Vector Logo Trace</p>
+                        <p class="text-primary text-[9px] sm:text-[10px] uppercase tracking-widest">Vector Art</p>
                     </div>
                 </div>
 
             </div>
         </section>
 
-        <!-- Pricing Preview -->
-        <section class="px-4 py-12 bg-primary/5 dark:bg-primary/10 reveal">
+        <!-- Pricing Preview (Compact on Mobile, Grid on Desktop) -->
+        <section class="px-4 py-8 sm:py-12 bg-slate-100/60 dark:bg-black/30 border-y border-primary/15 reveal">
             <div class="max-w-6xl mx-auto">
-                <h3 class="text-xl font-bold mb-6 border-l-4 border-primary pl-3">Transparent Pricing</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div
-                        class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-primary/10 text-center shadow-sm hover-scale">
-                        <span class="text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">Left Chest / Hat</span>
-                        <div class="my-3"><span class="text-3xl font-black text-slate-900 dark:text-white">$10</span></div>
-                        <p class="text-xs text-slate-600 dark:text-slate-400">Up to 6" — Same Day Delivery</p>
+                <div class="flex items-center justify-between mb-4 sm:mb-6">
+                    <h3 class="text-base sm:text-xl font-bold border-l-4 border-primary pl-2.5 sm:pl-3 text-slate-900 dark:text-white">Transparent Pricing</h3>
+                    <a href="pricing.html" class="text-primary text-xs sm:text-sm font-semibold flex items-center gap-1 hover:underline">
+                        <span>Full Pricing</span>
+                        <span class="material-symbols-outlined text-xs sm:text-sm">arrow_forward</span>
+                    </a>
+                </div>
+                <div class="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-3 sm:gap-4">
+                    <!-- Card 1: Left Chest / Hat -->
+                    <div class="bg-white dark:bg-card-dark p-3 sm:p-6 rounded-xl border border-primary/15 dark:border-primary/25 shadow-xs hover-scale flex items-center justify-between sm:flex-col sm:text-center">
+                        <div class="text-left sm:text-center">
+                            <span class="text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider block">Left Chest / Hat</span>
+                            <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 mt-0.5 sm:mt-2">Up to 5.5" — Same Day Delivery</p>
+                        </div>
+                        <div class="text-right sm:text-center sm:my-3 flex-shrink-0 pl-2">
+                            <span class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">$15</span>
+                        </div>
                     </div>
-                    <div class="bg-primary p-6 rounded-xl shadow-lg shadow-primary/20 text-center hover-scale">
-                        <span class="text-background-dark/80 text-xs font-bold uppercase tracking-wider">Jacket
-                            Back</span>
-                        <div class="my-3"><span class="text-3xl font-black text-background-dark">$15 – $25</span></div>
-                        <p class="text-xs text-background-dark/80 font-medium">Larger than 6" — Same Day Delivery</p>
+                    <!-- Card 2: Jacket Back / Large (Featured) -->
+                    <div class="bg-white dark:bg-card-dark p-3 sm:p-6 rounded-xl border-2 border-primary shadow-xs hover-scale flex items-center justify-between sm:flex-col sm:text-center relative">
+                        <div class="text-left sm:text-center">
+                            <span class="text-primary text-xs font-bold uppercase tracking-wider block">Jacket Back / Large</span>
+                            <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 mt-0.5 sm:mt-2">Larger than 5.5" — Same Day Delivery</p>
+                        </div>
+                        <div class="text-right sm:text-center sm:my-3 flex-shrink-0 pl-2">
+                            <span class="text-2xl sm:text-3xl font-black text-primary">$25</span>
+                        </div>
                     </div>
-                    <div
-                        class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-primary/10 text-center shadow-sm hover-scale">
-                        <span class="text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">Pet Portrait</span>
-                        <div class="my-3"><span class="text-3xl font-black text-slate-900 dark:text-white">$25 – $50</span></div>
-                        <p class="text-xs text-slate-600 dark:text-slate-400">Realistic images — 2 - 3 Days</p>
+                    <!-- Card 3: Pet Portrait -->
+                    <div class="bg-white dark:bg-card-dark p-3 sm:p-6 rounded-xl border border-primary/15 dark:border-primary/25 shadow-xs hover-scale flex items-center justify-between sm:flex-col sm:text-center">
+                        <div class="text-left sm:text-center">
+                            <span class="text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider block">Realistic / Pet Portrait</span>
+                            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-2">Left Chest $25 &bull; Over 5.5" $40 Flat</p>
+                        </div>
+                        <div class="text-right sm:text-center sm:my-3 flex-shrink-0 pl-2">
+                            <span class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">$25 / $40</span>
+                        </div>
                     </div>
                 </div>
-                <p class="text-center text-sm text-slate-600 dark:text-slate-400 mt-4">Vector Art: Simple <strong
-                        class="text-amber-800 dark:text-primary font-bold">$10</strong> &nbsp;|&nbsp; Complex <strong
-                        class="text-amber-800 dark:text-primary font-bold">$20</strong></p>
+                <p class="text-center text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-3 sm:mt-4">Vector Art: Simple <strong
+                        class="text-primary font-bold">$10</strong> &nbsp;|&nbsp; Complex <strong
+                        class="text-primary font-bold">$20</strong></p>
                 <a href="pricing.html"
-                    class="block mt-4 w-full max-w-sm mx-auto py-3 bg-primary text-background-dark rounded-lg font-bold text-sm text-center btn-hover-effect">View
+                    class="block mt-3 sm:mt-4 w-full max-w-xs sm:max-w-sm mx-auto py-2.5 sm:py-3 bg-primary text-background-dark rounded-xl font-bold text-xs sm:text-sm text-center btn-hover-effect shadow-xs">View
                     Full Price List &amp; Order</a>
             </div>
         </section>
 
-        <!-- Steps -->
-        <div class="mt-12 overflow-hidden reveal">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Steps (Ultra-Compact 3-Col Process Stepper) -->
+        <section class="px-4 py-5 sm:py-10 max-w-6xl mx-auto reveal">
+            <h3 class="text-base sm:text-xl font-bold mb-3 sm:mb-6 border-l-4 border-primary pl-2.5 sm:pl-3 text-slate-900 dark:text-white">How It Works</h3>
+            <div class="grid grid-cols-3 gap-2 sm:gap-6">
                 <!-- Step 1 -->
-                <div class="flex flex-col items-center text-center p-6">
-                    <div
-                        class="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-background-dark text-2xl font-bold mb-4">
-                        1</div>
-                    <h4 class="font-bold text-lg mb-2">Submit Your Design</h4>
-                    <p class="text-slate-500 text-sm">Upload your artwork and specify your requirements.</p>
+                <div class="flex flex-col items-center text-center p-2.5 sm:p-6 bg-white dark:bg-card-dark rounded-xl sm:rounded-2xl border border-primary/15 dark:border-primary/25 shadow-xs">
+                    <div class="flex items-center justify-center w-8 h-8 sm:w-14 sm:h-14 rounded-full bg-primary text-background-dark text-xs sm:text-xl font-black shrink-0 mb-1.5 sm:mb-3 shadow-xs">
+                        1
+                    </div>
+                    <h4 class="font-bold text-[11px] sm:text-lg mb-0.5 sm:mb-1.5 text-slate-900 dark:text-white leading-tight">Submit Design</h4>
+                    <p class="text-slate-600 dark:text-slate-400 text-[9.5px] sm:text-sm leading-tight">Upload artwork &amp; specs</p>
                 </div>
                 <!-- Step 2 -->
-                <div class="flex flex-col items-center text-center p-6">
-                    <div
-                        class="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-background-dark text-2xl font-bold mb-4">
-                        2</div>
-                    <h4 class="font-bold text-lg mb-2">Review & Approve</h4>
-                    <p class="text-slate-500 text-sm">We'll send a preview for your approval before digitizing.</p>
+                <div class="flex flex-col items-center text-center p-2.5 sm:p-6 bg-white dark:bg-card-dark rounded-xl sm:rounded-2xl border border-primary/15 dark:border-primary/25 shadow-xs">
+                    <div class="flex items-center justify-center w-8 h-8 sm:w-14 sm:h-14 rounded-full bg-primary text-background-dark text-xs sm:text-xl font-black shrink-0 mb-1.5 sm:mb-3 shadow-xs">
+                        2
+                    </div>
+                    <h4 class="font-bold text-[11px] sm:text-lg mb-0.5 sm:mb-1.5 text-slate-900 dark:text-white leading-tight">Review &amp; Approve</h4>
+                    <p class="text-slate-600 dark:text-slate-400 text-[9.5px] sm:text-sm leading-tight">Fast digital preview</p>
                 </div>
                 <!-- Step 3 -->
-                <div class="flex flex-col items-center text-center p-6">
-                    <div
-                        class="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-background-dark text-2xl font-bold mb-4">
-                        3</div>
-                    <h4 class="font-bold text-lg mb-2">Receive Your Files</h4>
-                    <p class="text-slate-500 text-sm">Get high-quality digitized files within 12-24 hours.</p>
+                <div class="flex flex-col items-center text-center p-2.5 sm:p-6 bg-white dark:bg-card-dark rounded-xl sm:rounded-2xl border border-primary/15 dark:border-primary/25 shadow-xs">
+                    <div class="flex items-center justify-center w-8 h-8 sm:w-14 sm:h-14 rounded-full bg-primary text-background-dark text-xs sm:text-xl font-black shrink-0 mb-1.5 sm:mb-3 shadow-xs">
+                        3
+                    </div>
+                    <h4 class="font-bold text-[11px] sm:text-lg mb-0.5 sm:mb-1.5 text-slate-900 dark:text-white leading-tight">Receive Files</h4>
+                    <p class="text-slate-600 dark:text-slate-400 text-[9.5px] sm:text-sm leading-tight">Ready in 12–24h</p>
                 </div>
             </div>
-        </div>
+        </section>
 
     </main>
 
@@ -268,9 +290,12 @@
         <div class="max-w-6xl mx-auto px-4">
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4 sm:gap-8 mb-10">
                 <div class="col-span-2 md:col-span-4 lg:col-span-1">
-                    <div class="flex items-center gap-2 mb-4">
-                        <img src="logo.png" alt="Dezan Digitizing" class="w-7 h-7 rounded-full object-cover">
-                        <span class="text-white font-black tracking-tight">DEZAN</span>
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover">
+                        <div class="flex flex-col text-left leading-none">
+                            <span class="text-white font-black tracking-tight text-base sm:text-lg">DEZAN</span>
+                            <span class="text-[9.5px] sm:text-[10.5px] font-extrabold tracking-[0.18em] text-primary uppercase mt-1">Digitizing</span>
+                        </div>
                     </div>
                     <p class="text-sm mb-4">Professional digitizing &amp; vector services for brands that demand
                         perfection.</p>
