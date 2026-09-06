@@ -122,23 +122,23 @@
 
             <!-- Dynamic Client Authentication Banners -->
             <div class="mt-3 sm:mt-6 max-w-2xl mx-auto">
-                <!-- Unauthenticated banner -->
-                <div id="pricing-login-prompt" class="p-2.5 sm:p-3.5 px-3 sm:px-4 rounded-xl sm:rounded-2xl flex items-center justify-between gap-2.5 sm:gap-3 text-left" style="background: linear-gradient(135deg, rgba(217,119,6,0.14) 0%, rgba(245,158,11,0.08) 100%); border: 1px solid rgba(217,119,6,0.35); box-shadow: 0 0 14px rgba(217,119,6,0.16), 0 0 4px rgba(245,158,11,0.10) inset;">
-                    <div class="flex items-center gap-2 sm:gap-2.5 text-[11px] sm:text-sm text-amber-950 dark:text-amber-200 font-medium">
-                        <span class="material-symbols-outlined text-amber-700 dark:text-primary text-base sm:text-xl flex-shrink-0" style="text-shadow: 0 0 6px rgba(217,119,6,0.5);">lock</span>
-                        <span>Orders placed in <strong>Client Portal</strong>. Sign in to submit artwork.</span>
+                <!-- Unauthenticated banner (Emerald Green Style) -->
+                <div id="pricing-login-prompt" class="p-2.5 sm:p-3.5 px-3 sm:px-4 rounded-xl sm:rounded-2xl flex items-center justify-between gap-2.5 sm:gap-3 text-left" style="background: linear-gradient(135deg, rgba(6,78,59,0.18) 0%, rgba(16,185,129,0.10) 100%); border: 1px solid rgba(16,185,129,0.45); box-shadow: 0 0 16px rgba(16,185,129,0.22), 0 0 4px rgba(16,185,129,0.12) inset;">
+                    <div class="flex items-center gap-2 sm:gap-2.5 text-[11px] sm:text-sm font-medium">
+                        <span class="material-symbols-outlined text-base sm:text-xl flex-shrink-0" style="color: #10b981; text-shadow: 0 0 8px rgba(16,185,129,0.7);">lock</span>
+                        <span class="text-[#064e3b] dark:text-emerald-100">Orders placed in <strong class="text-[#047857] dark:text-emerald-300 font-bold">Client Portal</strong>. Sign in to submit artwork.</span>
                     </div>
-                    <a href="portal-login.html" class="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs transition-all flex items-center justify-center gap-1 shadow-xs flex-shrink-0 whitespace-nowrap">
+                    <a href="portal-login.html" class="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-white font-bold text-xs transition-all flex items-center justify-center gap-1 flex-shrink-0 whitespace-nowrap" style="background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); box-shadow: 0 0 12px rgba(16,185,129,0.4); border: 1px solid rgba(16,185,129,0.3);">
                         <span>Sign In</span>
-                        <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        <span class="material-symbols-outlined text-xs font-bold">arrow_forward</span>
                     </a>
                 </div>
 
                 <!-- Authenticated client banner (Green Glow Style) -->
                 <div id="pricing-client-banner" class="hidden p-2.5 sm:p-3.5 px-3 sm:px-4 rounded-xl sm:rounded-2xl flex items-center justify-between gap-2.5 sm:gap-3 text-left" style="background: linear-gradient(135deg, rgba(6,78,59,0.18) 0%, rgba(16,185,129,0.10) 100%); border: 1px solid rgba(16,185,129,0.45); box-shadow: 0 0 16px rgba(16,185,129,0.22), 0 0 4px rgba(16,185,129,0.12) inset;">
-                    <div class="flex items-center gap-2 sm:gap-2.5 text-[11px] sm:text-sm font-medium" style="color: #065f46;" class="dark:text-emerald-100">
+                    <div class="flex items-center gap-2 sm:gap-2.5 text-[11px] sm:text-sm font-medium">
                         <span class="material-symbols-outlined text-lg sm:text-xl flex-shrink-0" style="color: #10b981; text-shadow: 0 0 8px rgba(16,185,129,0.7);">verified_user</span>
-                        <span style="color: #064e3b;" class="dark:text-emerald-100">Signed in as <strong id="pricing-client-name" style="color: #047857;" class="dark:text-emerald-300 font-bold">Client</strong>. Click any card below to place an order.</span>
+                        <span class="text-[#064e3b] dark:text-emerald-100">Signed in as <strong id="pricing-client-name" class="text-[#047857] dark:text-emerald-300 font-bold">Client</strong>. Click any card below to place an order.</span>
                     </div>
                     <a href="client-portal.html?action=new_order" class="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-white font-bold text-xs transition-all flex items-center justify-center gap-1 flex-shrink-0 whitespace-nowrap" style="background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); box-shadow: 0 0 12px rgba(16,185,129,0.4); border: 1px solid rgba(16,185,129,0.3);">
                         <span>New Order</span>
