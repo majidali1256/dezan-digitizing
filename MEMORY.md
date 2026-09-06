@@ -182,66 +182,31 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 
 ### Role-Based Order Portal (Implemented & Live)
 - `/portal-login.html`: Unified authentication page with automatic role routing, order intent banners, simplified client-only registration (role field removed; all public signups are assigned `role: 'client'`), and 1-click predefined staff & client logins (Master Admin: `admin@dezandigitizing.com`, Digitizer Worker: `worker.alex@dezandigitizing.com`, Demo Client: `client@falconapparel.com`).
-- `/client-portal.html`: Redesigned Client Portal (Matching user's reference mockup with warm Dezan gold theme):
-  - **Header**: Bold title + "Track orders, pay invoices, and request quotes easily."
-  - **3 Quick-Action Cards**:
-    - **Place Order**: Styled in signature brand warm golden-brown shade (`bg-primary hover:bg-primary-hover text-background-dark border-primary/50 shadow-md shadow-primary/20`) with dark icon badge and high-contrast typography, serving as the primary hero CTA.
-    - **Request Quote** & **Track Order**: Clean secondary cards for custom quoting and order tracking.
-  - **4 Stat Metric Badges**: Open Orders, Completed, Quotes, **Balance Due** (Dynamically calculates total outstanding balance for unpaid/pending orders; displays rose badge with count `X Due` when > $0, or emerald `All settled` when $0.00; clickable to instantly filter by due payments).
-  - **Adaptive 2-Stage Place Order Flow**:
-    - **Step 1 (Clean Choice & Compact Mobile Cards)**: Modal opens showing *only* "What type of work do you need?" with two choices: **Embroidery Digitizing** and **Vector Art Conversion**. On mobile viewports, cards render as ultra-compact horizontal rows (`p-3.5` with icon + title + description + badges + arrow) ensuring both options fit simultaneously above the fold with zero clipping; on desktop (`sm:`), expands into spacious 2-column bento cards.
-    - **Step 2 (Tailored Form & Pinned Action Bar)**:
-      - **Internal Scroll Container**: Form body scrolls smoothly (`flex-1 overflow-y-auto overscroll-contain`) while header and footer stay pinned.
-      - **Sticky Bottom Action Bar**: Live calculated price (`#order-total-price-display`), itemized fee callout, back button, cancel, and primary CTA (`Pay & Place Order` or `Send Quote Request`) stay anchored at the bottom with safe-area inset padding (`pb-[max(0.75rem,env(safe-area-inset-bottom))]`), preventing submit buttons from being buried or cut off by mobile browser chrome.
-      - **Digitizing Specific Controls**: Job Name/Reference, Target Placement, Fabric/Garment Material (Cotton/Pique, 6-Panel Structured Cap, Beanie, Fleece, Denim, Leather), Target Size ($W \times H$ in/cm with `min-w-0 flex-1` responsive inputs), Required Machine File Formats (DST, EMB, PES, EXP, CND, JEF), Special Technical Options (3D Puff $+ \$5$, Applique, Match Sample, Flame Specs), Drag-and-drop artwork uploader, Production Notes, and Turnaround Speed (Standard vs. Rush $+ \$10$).
-      - **Vector Specific Controls**: Job Name, Intended Vector Usage, Formats (AI, EPS, SVG, PDF, CDR, PNG), Drag-and-drop uploader, Production Notes.
-      - **Dynamic Price Engine**: Updates price and itemized breakdown live as options and turnaround speeds change.
-      - **Service Switcher Banner**: Sticky top banner allowing clients to switch service type instantly without page reload.
-  - **Mobile Bottom-Sheet Architecture (All Modals)**:
-    - Standardized `#new-order-modal`, `#revision-request-modal`, `#checkout-payment-modal`, `#client-invoice-modal`, `#client-profile-modal`, and `#client-settings-modal` to open as ergonomic native bottom-sheets on mobile (`rounded-t-3xl sm:rounded-2xl`, `max-h-[92dvh] sm:max-h-[90vh]`) featuring top drag pill handles, sticky headers, and safe-area padding for zero-clipping on iOS Safari and Android Chrome.
-  - **Foolproof Revision & Physical Stitch-Out Feedback Engine**:
-    - Completed orders render side-by-side action buttons: Primary `[ Download Files / DST ]` and Secondary `[ Request a Revision ]`.
-    - Clicking `[ Request a Revision ]` opens `#revision-request-modal`:
-      - Specific feedback note textarea (e.g. pull compensation, lettering density, cap seam curvature).
-      - Picture submission dropzone specifically for uploading a physical garment/cap sew-out defect photo with live thumbnail preview.
-      - 1-click submit updating order status to `revision_requested`, broadcasting event, and auto-routing to assigned digitizer.
-      - Order card immediately updates with pulsing amber `Revision In Progress` badge and client feedback callout.
-  - **Due Payment & Incomplete Order Flow**:
-    - Orders created with deferred payment or incomplete checkouts have `payment_status: 'unpaid'`.
-    - Unpaid order cards feature a glowing rose accent border, a `Payment Due` badge, and an amber `Pay Now ($XX.00)` button.
-    - **1-Click Checkout Modal (`#checkout-payment-modal`)**: Tabbed payment interface supporting PayPal and Credit Card with instant 256-bit encrypted simulated gateway, toast alert notifications, and real-time InsForge PostgreSQL patch updates.
-    - **New Order Wizard**: Allows clients to select payment preference ("Pay on Invoice (Due Later)" vs. "Pay Upfront Now").
-  - **Sectioned Layout**:
-    - **Open Orders**: Dynamic cards with Order #, Date, Job Name, Price, Status Badge, Pay Now button (if unpaid), Revision in Progress badge, and View Details.
-    - **Completed Orders**: Machine deliverable downloads (`.DST`, `.EMB`) + `[ Request a Revision ]` + View Invoice & Receipt.
-    - **Quotes**: Quote estimation status or clean empty state with `+ Request Quote` action.
-  - **Client Invoice & Printable Receipt Modal**: Official itemized tax invoice and work order with `@media print` support, unpaid alert banner, and direct "Pay Balance Due" action button.
-  - **Header & Navigation Refinement (Implemented)**:
-    - **Header**: Streamlined to remove duplicate top action buttons (retaining only Desktop Profile button `#header-account-btn` with client monogram avatar and name, Desktop Settings button `#header-settings-btn` with gear icon, and dark mode toggle) to eliminate clutter and direct focus to the hero action grid.
-    - **Fixed Bottom Navigation Dock (5 Distinct Buttons)**: Full access suite with 5 dedicated tabs:
-      1. **Home**: Quick scroll to dashboard top overview.
-      2. **Orders**: Direct anchor jump to active & open orders.
-      3. **Quotes**: Direct anchor jump to quotes queue.
-      4. **Profile**: Dedicated button with client initials monogram avatar (`JF`), opens `#client-profile-modal` strictly containing **only profile and machinery preferences**: Full Name, Company/Brand, Locked Primary Email, Phone/WhatsApp, and Production & Machinery Preferences (Default Machine Format `.DST`, Default Fabric, Preferred Turnaround Speed).
-      5. **Settings**: Dedicated button with gear icon, opens `#client-settings-modal` strictly containing **only portal settings and security**: Appearance & Theme switchers (Light vs. Dark buttons), Portal Password Change (with live password strength meter and match indicator), Email Notification Preferences (Orders, Revisions, Invoices), and Active Session Management with Sign Out.
-  - **Distinct Quote vs. Order Architecture**:
-    - **Shared Unified Technical Specs**: Both Quote and Order modes share the exact same comprehensive technical specifications (Embroidery Digitizing vs. Vector Art, placement, garment fabric, dimensions, file formats, 3D puff, turnaround speed, and artwork upload dropzone).
-    - **Order Flow (Mandatory Upfront Payment)**: Price summary and turnaround options are active. Dual payment term radios were removed; orders strictly require upfront payment to initiate production (`status: 'pending_review'`), launching the secure checkout modal immediately upon placement.
-    - **Quote Flow (Zero Upfront Payment & Admin Price Appraisal)**: Custom/personalized pieces use the Quote vehicle where no upfront payment is charged. Price breakdown is hidden and reassurance banner confirms free appraisal. Quotes are created with prefix `QUO-XXXX`, `is_quote: true`, and `status: 'quote_requested'`.
-    - **Admin Pricing Workflow (`admin-portal.html`)**: Stage 3 ("Incomplete Bookings, Payment Due & Quotes") features an amber `[ Give Price ]` action button for quotes, opening `#set-quote-price-modal`. The admin specifies approved USD price and notes (e.g., stitch density breakdown). Submitting patches InsForge PostgreSQL, updates status to `quote_ready`, and broadcasts `quote_priced`.
-    - **Client Quote Conversion Flow (`client-portal.html`)**: Real-time listeners detect quote pricing, displaying a pulsing `• Price Ready: $XX.XX` badge, Admin Pricing Note callout, and a prominent `[ Pay $XX.XX & Start Order ]` CTA. Paying via `#checkout-payment-modal` automatically converts the quote into an active production order (`is_quote: false`, `status: 'pending_review'`).
-  - **Comprehensive Client Account & Security Suite (`#account-modal`)**:
-    - **Dock Integration**: Accessible directly from the bottom dock `Settings` tab.
-    - **3-Tab Modular Architecture**:
-      1. **Profile & Machinery Defaults (`#client-tab-profile`)**: Edit Full Name, Company / Brand Name, primary contact Phone / WhatsApp, preferred embroidery machine file format (`.DST`, `.EMB`, `.PES`, `.EXP`, `.JEF`, `.VP3`, `.AI Vector`), default fabric/garment type (Pique Cotton, Structured Twill Caps, Fleece, Dri-FIT, Canvas, Patches), and default turnaround SLA speed (`standard`, `rush`, `urgent`). Displays locked primary billing email and verified client badge. Synchronizes with session storage, `localStorage`, and InsForge PostgreSQL backend.
-      2. **Password & Credential Security (`#client-tab-security`)**: Secure password change flow featuring current password verification, new password with dynamic 4-segment strength meter (Too Weak, Weak, Good, Strong), confirmation password match validator with live visual feedback, show/hide eye toggle buttons, and toast alerts.
-      3. **Account & Billing Overview (`#client-tab-overview`)**: Monogram avatar, Client ID `#FC-882`, verified badge, lifetime order volume counter, live balance due metric, Net 30 billing terms, VIP fast-track SLA badge, and portal sign-out.
-- `/worker-portal.html`: Redesigned Digitizer Studio:
-  - **Revision & Sew-Out Inspection Queue**: Tasks with status `revision_requested` display a prominent amber border with subtle glow, a pulsing `⚠️ Revision Requested` badge, and an eye-catching `Client Physical Stitch-Out Revision Feedback` callout containing the client's exact instructions and physical garment photo thumbnail.
-  - **Click-to-Zoom Modal (`#stitch-out-zoom-modal`)**: Digitizers can click any sew-out photo to inspect embroidery defects at maximum resolution.
-  - **Revised Deliverables Submission**: Primary action button changes to `Submit Revised Deliverables` to upload version 2 stitch files with InsForge Storage and database sync.
-  - **Strict Data Masking (Zero-Leakage Compliance)**: Customer personal identity (`client_name`, `client_email`, `client_company`) and pricing/payment status are 100% masked from workers at both the UI and database levels.
-  - **Studio Controls**: 3 quick-action cards, 4 production metric badges, instant search & filter toolbar (with `⚠️ Revision Requested` filter), technical work order specs modal, machine format cheatsheet modal, worker profile modal, and mobile bottom navigation dock.
+
+#### Client Portal Suite (Modular Multi-Page Architecture)
+Powered by shared stylesheet [`client-workspace.css`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/client-workspace.css) and shared controller [`js/client-workspace.js`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/js/client-workspace.js):
+- **Sticky Segmented Navigation Bar (`#client-sticky-nav`)**: Sticky top sub-header with horizontal scroll on mobile, active indicator pill with brand gold fill (`#d4af35`), live notification badges, and "+ New Order" primary CTA button.
+- **Fixed Bottom Navigation Dock (Mobile)**: 5 dedicated touch-friendly buttons (`Dashboard`, `Orders`, `Quotes`, `Billing`, `Settings`) with 44x44px minimum touch targets and automatic active state highlighting across all pages.
+- **Dedicated Subpages**:
+  1. [`client-portal.html`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/client-portal.html): Executive Dashboard overview with 3 quick-action cards (`Place Order`, `Request Quote`, `Track Order`), 4 metric cards (`Open Orders`, `Completed`, `Quotes`, `Balance Due`), and quick preview queues.
+  2. [`client-orders.html`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/client-orders.html): Dedicated My Orders page with status filter pills (`All Orders`, `In Production`, `Delivered / Ready`, `Revisions`, `Payment Due`), live search input, order cards, physical stitch-out revision modal trigger, and order specification drawer.
+  3. [`client-quotes.html`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/client-quotes.html): Dedicated Custom Quotes estimation page with 100% Free Digitizer Estimation guarantee banner, empty state, and 1-click quote creation.
+  4. [`client-invoices.html`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/client-invoices.html): Dedicated Invoices & Billing page with financial metrics (`Total Invoiced`, `Total Settled`, `Balance Due`), itemized receipt cards with payment status tags, printable tax invoice modal, and PayPal settlement integration.
+  5. [`client-profile.html`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/client-profile.html): Dedicated Profile & Settings page with contact info form, machinery defaults (default machine format `.DST`, target fabric), and password security.
+
+#### Worker Studio Suite (Modular Multi-Page Architecture)
+Powered by shared stylesheet [`worker-workspace.css`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/worker-workspace.css) and shared controller [`js/worker-workspace.js`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/js/worker-workspace.js):
+- **Sticky Segmented Navigation Bar (`#worker-sticky-nav`)**: Sticky studio sub-header with studio tokens, active indicator pill, and live task counters.
+- **Fixed Bottom Navigation Dock (Mobile)**: 5 dedicated buttons (`Studio`, `Tasks`, `Archive`, `Specs`, `Settings`) with automatic active state highlighting.
+- **Strict Privacy & Zero-Leakage Compliance**: Client PII (name, email, phone, company) and commercial billing prices are 100% masked from workers across both UI and database layers (`Client #CLI-XXXX`, `[Protected PII]`, `[Confidential - Admin Only]`).
+- **Dedicated Subpages**:
+  1. [`worker-portal.html`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/worker-portal.html): Studio Dashboard overview with QC standards, 4 production metric badges, quick navigation links, and active production preview.
+  2. [`worker-tasks.html`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/worker-tasks.html): Active Production Workbench with garment specifications, deliverable submission modal (with machine format selection `.dst`, `.emb`, `.pes`, `.exp`), and artwork zoom preview.
+  3. [`worker-archive.html`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/worker-archive.html): Completed Deliverables Archive with production verification badges and client satisfaction ratings.
+  4. [`worker-specs.html`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/worker-specs.html): Machine Format Standards & Quality SOP page with technical parameters for `.DST`, `.EMB`, `.PES`, `.EXP`, and complete Fabric Underlay & Pull Compensation Matrix.
+  5. [`worker-settings.html`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/worker-settings.html): Workstation Hardware & Capacity page with monitor calibration specs, digitizing software versions, and daily stitch capacity controls.
+
+#### Admin Portal Suite (Modular Multi-Page Architecture)
 - `/admin-portal.html`: Master Admin Executive Control Center (Continuous Unified Scroll Architecture):
   - **4-Stage Operational Orders Pipeline Architecture (`#master-orders-section`)**:
     Instead of dumping orders into a single list or grid, orders are organized into 4 dedicated, clearly demarcated operational stage subsections, each with its own contextual color theme, icon, live count badge, responsive visual bento cards grid, and toggleable structured table view:
@@ -525,6 +490,28 @@ To prevent data leakage via browser DevTools:
 ├── Hero Page/                 # Hero section assets & slider images
 ├── images/                    # Static branding and vector images
 ├── fiverr_portfolio_mockups/  # High-res multi-device showcase graphics
+├── js/
+│   ├── insforge-client.js     # BaaS client & database abstraction layer
+│   ├── admin-workspace.js     # Shared controller for Admin Portal Suite
+│   ├── client-workspace.js    # Shared controller for Client Portal Suite
+│   └── worker-workspace.js    # Shared controller for Worker Studio Suite
+├── client-workspace.css       # Unified design tokens & styles for Client Suite
+├── worker-workspace.css       # Unified design tokens & styles for Worker Suite
+├── client-portal.html         # Client Suite: Dashboard Overview
+├── client-orders.html         # Client Suite: My Orders & Revision Drawers
+├── client-quotes.html         # Client Suite: Custom Quotes & Estimations
+├── client-invoices.html       # Client Suite: Invoices, Billing & Receipts
+├── client-profile.html        # Client Suite: Profile & Machinery Defaults
+├── worker-portal.html         # Worker Studio: Dashboard & QC Standards
+├── worker-tasks.html          # Worker Studio: Active Workbench & Submissions
+├── worker-archive.html        # Worker Studio: Completed Files & Ratings
+├── worker-specs.html          # Worker Studio: Machine Formats & SOP Guide
+├── worker-settings.html       # Worker Studio: Hardware & Capacity Presets
+├── admin-portal.html          # Admin Suite: Master Executive Dashboard
+├── admin-orders.html          # Admin Suite: 4-Stage Orders Pipeline
+├── admin-clients.html         # Admin Suite: Customer Directory & Dossiers
+├── admin-catalog.html         # Admin Suite: Pricing & Product Catalog
+├── admin-team.html            # Admin Suite: Staff & Digitizer Roster
 ├── DESIGN.md                  # Unified Design System tokens & specs
 ├── MEMORY.md                  # Project memory & repository single source of truth
 ├── README.md                  # High-level repository guide & deployment documentation

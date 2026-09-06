@@ -1,0 +1,196 @@
+/* ===================================================================
+   DEZAN DIGITIZING — WORKER STUDIO WORKSPACE STYLESHEET
+   Design Tokens: Brand Gold Primitives → Studio Surfaces → Components
+   Technical Workbench Aesthetics & Strict Privacy Protection
+   =================================================================== */
+
+:root {
+    --worker-gold: #d4af35;
+    --worker-gold-hover: #c49f25;
+    --worker-gold-dark: #9a7810;
+    --worker-gold-subtle: rgba(212, 175, 53, 0.12);
+    --worker-ink: #0f172a;
+    --worker-slate: #475569;
+    --worker-line: #e2e8f0;
+    --worker-white: #ffffff;
+    --worker-canvas: #f8f7f6;
+    --worker-surface: var(--worker-white);
+    --worker-text: var(--worker-ink);
+    --worker-muted: var(--worker-slate);
+    --worker-border: var(--worker-line);
+    --worker-selected: #f7e59c;
+    --worker-shadow: 0 2px 5px rgb(15 23 42 / 3%), 0 12px 28px rgb(15 23 42 / 3%);
+}
+
+.dark {
+    --worker-canvas: #201d12;
+    --worker-surface: #16140c;
+    --worker-text: #f8fafc;
+    --worker-muted: #94a3b8;
+    --worker-border: #3c3a31;
+    --worker-selected: #40371c;
+    --worker-shadow: 0 8px 24px rgb(0 0 0 / 25%);
+}
+
+body[data-worker-page] {
+    background-color: var(--worker-canvas);
+    color: var(--worker-text);
+    min-height: 100vh;
+}
+
+/* ===== HEADER ===== */
+body[data-worker-page] > header {
+    background-color: var(--worker-surface);
+    border-color: var(--worker-border);
+}
+
+body[data-worker-page] header button,
+body[data-worker-page] header a {
+    min-height: 40px;
+}
+
+/* ===== STICKY WORKER NAVIGATION BAR ===== */
+#worker-sticky-nav {
+    background-color: var(--worker-surface);
+    border-color: var(--worker-border);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+#worker-sticky-nav nav {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+#worker-sticky-nav nav::-webkit-scrollbar {
+    display: none;
+}
+
+.worker-nav-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: all 0.18s ease;
+    color: var(--worker-muted);
+    border: 1px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.worker-nav-tab:hover {
+    color: var(--worker-text);
+    background-color: var(--worker-gold-subtle);
+    border-color: rgba(212, 175, 53, 0.25);
+}
+
+.worker-nav-tab.active {
+    background-color: var(--worker-gold);
+    color: #0f172a !important;
+    border-color: var(--worker-gold);
+    box-shadow: 0 2px 8px rgba(212, 175, 53, 0.35);
+}
+
+.worker-nav-tab.active .material-symbols-outlined {
+    color: #0f172a !important;
+}
+
+.worker-nav-tab .nav-badge {
+    padding: 2px 7px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+    background-color: rgba(0, 0, 0, 0.08);
+    color: inherit;
+}
+
+.dark .worker-nav-tab .nav-badge {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ===== METRIC CARDS ===== */
+.worker-metric-card {
+    background-color: var(--worker-surface);
+    border: 1px solid var(--worker-border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: var(--worker-shadow);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.worker-metric-card:hover {
+    border-color: rgba(212, 175, 53, 0.45);
+    transform: translateY(-1px);
+}
+
+/* ===== FILTER TABS ===== */
+.worker-filter-pill {
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    border: 1px solid var(--worker-border);
+    background-color: var(--worker-surface);
+    color: var(--worker-muted);
+}
+
+.worker-filter-pill:hover {
+    color: var(--worker-text);
+    border-color: var(--worker-gold);
+}
+
+.worker-filter-pill.active {
+    background-color: var(--worker-gold);
+    color: #0f172a;
+    border-color: var(--worker-gold);
+    box-shadow: 0 2px 6px rgba(212, 175, 53, 0.25);
+}
+
+/* ===== TECHNICAL TASK CARDS ===== */
+.worker-task-card {
+    background-color: var(--worker-surface);
+    border: 1px solid var(--worker-border);
+    border-radius: 16px;
+    box-shadow: var(--worker-shadow);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.worker-task-card:hover {
+    border-color: rgba(212, 175, 53, 0.45);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* Format tags */
+.format-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: rgba(212, 175, 53, 0.12);
+    color: var(--worker-gold-dark);
+    border: 1px solid rgba(212, 175, 53, 0.25);
+}
+
+.dark .format-tag {
+    color: var(--worker-gold);
+    border-color: rgba(212, 175, 53, 0.35);
+}
+
+/* ===== ACCESSIBLE FOCUS-VISIBLE ===== */
+body[data-worker-page] button:focus-visible,
+body[data-worker-page] a:focus-visible,
+body[data-worker-page] input:focus-visible,
+body[data-worker-page] select:focus-visible,
+body[data-worker-page] textarea:focus-visible {
+    outline: 2px solid var(--worker-gold);
+    outline-offset: 2px;
+}

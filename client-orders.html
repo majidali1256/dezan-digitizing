@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>My Orders | Dezan Digitizing Client Workspace</title>
+    <meta name="description" content="View and manage your embroidery digitizing and vector conversion orders, track production stages, and download final machine stitch files." />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#d4af35",
+                        "primary-hover": "#c49f25",
+                        "primary-dark": "#9a7810",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#201d12",
+                        "card-dark": "#16140c"
+                    },
+                    fontFamily: { display: ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="client-workspace.css" />
+</head>
+
+<body data-client-page="orders" class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30 transition-colors duration-200">
+
+    <!-- ===== ROLE DEMO SWITCHER BAR ===== -->
+    <div class="bg-slate-100/90 dark:bg-card-dark border-b border-slate-200 dark:border-primary/20 py-2.5 px-4 text-xs">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/10 text-blue-800 dark:text-blue-400 font-bold border border-blue-300 dark:border-blue-500/20 text-[10px]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></span> CLIENT WORKSPACE
+                </span>
+                <span class="text-slate-700 dark:text-slate-400 font-medium hidden sm:inline">Orders Queue &bull; Live InsForge Sync</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-slate-600 dark:text-slate-500 text-[11px] font-semibold hidden md:inline">Switch Workspace:</span>
+                <button onclick="window.insforgeClient.loginAsDemo('admin')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 text-amber-900 dark:text-primary border border-slate-300 dark:border-primary/30 text-[10px] font-bold shadow-sm cursor-pointer">Admin</button>
+                <button onclick="window.insforgeClient.loginAsDemo('digitizer')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-[10px] font-bold shadow-sm cursor-pointer">Worker</button>
+                <button onclick="window.insforgeClient.signOut()" class="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-[10px] font-bold ml-1 shadow-sm cursor-pointer">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HEADER ===== -->
+    <header class="sticky top-0 z-40 bg-white/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-primary/20 transition-colors">
+        <div class="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
+            <a href="index.html" class="flex items-center gap-2">
+                <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover shadow-sm">
+                <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN <span class="text-primary-dark dark:text-primary text-xs uppercase font-bold tracking-widest ml-1">Client Portal</span></span>
+            </a>
+
+            <div class="flex items-center gap-2 sm:gap-2.5">
+                <a href="client-profile.html" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-card-dark hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-primary/25 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all cursor-pointer group shadow-xs" title="Profile & Defaults">
+                    <div class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-900 dark:text-primary font-black text-[10px] flex items-center justify-center border border-amber-500/30" id="header-account-avatar">
+                        CL
+                    </div>
+                    <span id="header-account-name" class="font-bold text-slate-900 dark:text-white hidden sm:inline">Client Profile</span>
+                </a>
+
+                <button class="theme-toggle-btn p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors border border-slate-200 dark:border-primary/20 cursor-pointer" aria-label="Toggle theme">
+                    <span class="material-symbols-outlined theme-toggle-icon text-lg text-primary-dark dark:text-primary">dark_mode</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== STICKY CLIENT NAVIGATION BAR ===== -->
+    <section id="client-sticky-nav" class="sticky top-[57px] z-30 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md border-b border-primary/20 dark:border-primary/25 shadow-xs py-2 px-4 transition-colors no-print">
+        <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <nav class="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none" aria-label="Client Navigation Tabs">
+                <a href="client-portal.html" data-client-link="dashboard" id="nav-tab-dashboard" class="client-nav-tab">
+                    <span class="material-symbols-outlined text-sm">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="client-orders.html" data-client-link="orders" id="nav-tab-orders" class="client-nav-tab active">
+                    <span class="material-symbols-outlined text-sm">receipt_long</span>
+                    <span>My Orders</span>
+                    <span class="nav-badge" id="nav-badge-orders">0</span>
+                </a>
+                <a href="client-quotes.html" data-client-link="quotes" id="nav-tab-quotes" class="client-nav-tab">
+                    <span class="material-symbols-outlined text-sm">request_quote</span>
+                    <span>Custom Quotes</span>
+                    <span class="nav-badge" id="nav-badge-quotes">0</span>
+                </a>
+                <a href="client-invoices.html" data-client-link="invoices" id="nav-tab-invoices" class="client-nav-tab">
+                    <span class="material-symbols-outlined text-sm">payments</span>
+                    <span>Invoices &amp; Billing</span>
+                    <span class="nav-badge" id="nav-badge-invoices">$0</span>
+                </a>
+                <a href="client-profile.html" data-client-link="profile" id="nav-tab-profile" class="client-nav-tab">
+                    <span class="material-symbols-outlined text-sm">settings</span>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="flex items-center gap-2">
+                <button onclick="window.clientWorkspace.openNewOrderModal()" class="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs transition-all flex items-center gap-1.5 shadow-xs cursor-pointer">
+                    <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+                    <span>+ New Order</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full pb-28">
+
+        <!-- Title & Subtitle -->
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">My Orders</h1>
+                <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">Track active digitizing stages, download production-ready stitch files, and request revisions.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-[11px] shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-emerald-800 dark:text-emerald-300 font-bold">Live DB Sync</span>
+                </div>
+                <button onclick="window.clientWorkspace.loadData()" class="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-primary/20 text-slate-600 dark:text-slate-300 hover:text-amber-800 dark:hover:text-primary transition-colors cursor-pointer" title="Refresh orders">
+                    <span class="material-symbols-outlined text-sm">refresh</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Controls Bar -->
+        <div class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none" id="order-filter-tabs">
+                <button onclick="window.clientWorkspace.setFilter('all')" data-filter="all" class="client-filter-pill active">
+                    All Orders
+                </button>
+                <button onclick="window.clientWorkspace.setFilter('in_progress')" data-filter="in_progress" class="client-filter-pill">
+                    In Production
+                </button>
+                <button onclick="window.clientWorkspace.setFilter('completed')" data-filter="completed" class="client-filter-pill">
+                    Delivered / Ready
+                </button>
+                <button onclick="window.clientWorkspace.setFilter('revision_requested')" data-filter="revision_requested" class="client-filter-pill">
+                    Revisions
+                </button>
+                <button onclick="window.clientWorkspace.setFilter('unpaid')" data-filter="unpaid" class="client-filter-pill">
+                    Payment Due
+                </button>
+            </div>
+
+            <!-- Search input -->
+            <div class="relative w-full md:w-64">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                <input type="text" id="order-search-input" oninput="window.clientWorkspace.handleSearch(event)" placeholder="Search order #, design..." class="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary" />
+            </div>
+        </div>
+
+        <!-- Orders Queue List -->
+        <div id="orders-list-container" class="space-y-3.5">
+            <!-- Populated dynamically by client-workspace.js -->
+        </div>
+
+    </main>
+
+    <!-- ===== REVISION MODAL ===== -->
+    <div id="revision-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-lg bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/30 shadow-2xl p-6 text-slate-900 dark:text-slate-100">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-primary/20">
+                <h3 class="font-black text-base flex items-center gap-2 text-slate-900 dark:text-white">
+                    <span class="material-symbols-outlined text-red-600">history_edu</span>
+                    <span>Request Free Revision</span>
+                </h3>
+                <button onclick="window.clientWorkspace.closeRevisionModal()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="space-y-3.5 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Order Ref: <span id="revision-order-id-disp" class="font-mono text-amber-700 dark:text-primary font-black">ORD-NEW</span></label>
+                    <p class="text-slate-500 dark:text-slate-400">Describe exactly what needs adjusting (e.g., stitch density, lettering pull comp, color order).</p>
+                </div>
+                <div>
+                    <label class="block font-bold mb-1">Correction Instructions *</label>
+                    <textarea id="revision-notes-input" rows="4" placeholder="Explain the adjustments needed..." class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs focus:border-primary"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="window.clientWorkspace.closeRevisionModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-xs">Cancel</button>
+                    <button type="button" onclick="alert('Revision request sent to digitizer studio. Estimated turnaround: 4-8 hours.'); window.clientWorkspace.closeRevisionModal();" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-xs">Submit Revision Request</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ORDER DETAILS INSPECT MODAL ===== -->
+    <div id="order-details-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-lg bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/30 shadow-2xl p-6 text-slate-900 dark:text-slate-100">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-primary/20">
+                <h3 class="font-black text-base flex items-center gap-2 text-slate-900 dark:text-white">
+                    <span class="material-symbols-outlined text-amber-700 dark:text-primary">visibility</span>
+                    <span>Order Specification Drawer</span>
+                </h3>
+                <button onclick="window.clientWorkspace.closeOrderDetailsModal()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Order ID:</span>
+                    <strong id="drawer-order-id" class="font-mono text-amber-900 dark:text-primary">ORD-NEW</strong>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Design Name:</span>
+                    <strong id="drawer-design-name" class="text-slate-900 dark:text-white">Sample</strong>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Service &amp; Tier:</span>
+                    <span><strong id="drawer-service">Digitizing</strong> (<span id="drawer-plan">Standard</span>)</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Status:</span>
+                    <strong id="drawer-status" class="capitalize text-amber-800 dark:text-primary">In Progress</strong>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Target Fabric:</span>
+                    <strong id="drawer-fabric">Pique Polo Knit</strong>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Dimensions:</span>
+                    <strong id="drawer-dimensions">3.5" W x 2.2" H</strong>
+                </div>
+                <div class="flex justify-between py-1">
+                    <span class="text-slate-500">Amount:</span>
+                    <strong id="drawer-amount" class="text-sm font-black text-slate-900 dark:text-white">$15.00</strong>
+                </div>
+            </div>
+            <div class="flex justify-end pt-4">
+                <button type="button" onclick="window.clientWorkspace.closeOrderDetailsModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-xs">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FIXED BOTTOM NAVIGATION DOCK (MOBILE) ===== -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-primary/20 dark:border-primary/25 py-2 px-2 shadow-xl transition-colors no-print">
+        <div class="max-w-md mx-auto flex items-center justify-between">
+            <a href="client-portal.html" data-client-link="dashboard" aria-label="Dashboard" title="Dashboard" id="mobile-dock-dashboard" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">dashboard</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Dashboard</span>
+            </a>
+            <a href="client-orders.html" data-client-link="orders" aria-label="Orders" title="Orders" id="mobile-dock-orders" class="flex-1 flex flex-col items-center justify-center py-1 text-amber-800 dark:text-primary rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">receipt_long</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Orders</span>
+            </a>
+            <a href="client-quotes.html" data-client-link="quotes" aria-label="Quotes" title="Quotes" id="mobile-dock-quotes" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">request_quote</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Quotes</span>
+            </a>
+            <a href="client-invoices.html" data-client-link="invoices" aria-label="Invoices" title="Invoices" id="mobile-dock-invoices" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">payments</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Billing</span>
+            </a>
+            <a href="client-profile.html" data-client-link="profile" aria-label="Settings" title="Settings" id="mobile-dock-profile" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">settings</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Settings</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Scripts -->
+    <script src="js/insforge-client.js"></script>
+    <script src="js/client-workspace.js"></script>
+</body>
+
+</html>

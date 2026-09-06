@@ -29,6 +29,7 @@
         }
     </script>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="worker-workspace.css" />
     <style>
         html, body {
             overflow-x: hidden;
@@ -57,7 +58,7 @@
     </style>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30 transition-colors duration-200">
+<body data-worker-page="dashboard" class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30 transition-colors duration-200">
 
     <!-- ===== ROLE DEMO SWITCHER BAR ===== -->
     <div class="bg-slate-100/90 dark:bg-card-dark border-b border-slate-200 dark:border-primary/20 py-2.5 px-4 text-xs">
@@ -105,6 +106,43 @@
             </div>
         </div>
     </header>
+
+    <!-- ===== STICKY WORKER NAVIGATION BAR ===== -->
+    <section id="worker-sticky-nav" class="sticky top-[57px] z-30 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md border-b border-primary/20 dark:border-primary/25 shadow-xs py-2 px-4 transition-colors no-print">
+        <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <nav class="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none" aria-label="Worker Studio Navigation Tabs">
+                <a href="worker-portal.html" data-worker-link="dashboard" id="worker-nav-dashboard" class="worker-nav-tab active">
+                    <span class="material-symbols-outlined text-sm">dashboard</span>
+                    <span>Studio Queue</span>
+                </a>
+                <a href="worker-tasks.html" data-worker-link="tasks" id="worker-nav-tasks" class="worker-nav-tab">
+                    <span class="material-symbols-outlined text-sm">precision_manufacturing</span>
+                    <span>Active Tasks</span>
+                    <span class="nav-badge" id="nav-badge-tasks">0</span>
+                </a>
+                <a href="worker-archive.html" data-worker-link="archive" id="worker-nav-archive" class="worker-nav-tab">
+                    <span class="material-symbols-outlined text-sm">task_alt</span>
+                    <span>Completed Archive</span>
+                    <span class="nav-badge" id="nav-badge-archive">0</span>
+                </a>
+                <a href="worker-specs.html" data-worker-link="specs" id="worker-nav-specs" class="worker-nav-tab">
+                    <span class="material-symbols-outlined text-sm">menu_book</span>
+                    <span>Format Specs &amp; Guide</span>
+                </a>
+                <a href="worker-settings.html" data-worker-link="settings" id="worker-nav-settings" class="worker-nav-tab">
+                    <span class="material-symbols-outlined text-sm">settings</span>
+                    <span>Workstation</span>
+                </a>
+            </nav>
+
+            <div class="flex items-center gap-2">
+                <a href="worker-tasks.html" class="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs transition-all flex items-center gap-1.5 shadow-xs cursor-pointer">
+                    <span class="material-symbols-outlined text-sm">bolt</span>
+                    <span>Workbench</span>
+                </a>
+            </div>
+        </div>
+    </section>
 
     <!-- ===== MAIN WORKSPACE ===== -->
     <main class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full pb-28">
@@ -241,7 +279,7 @@
                     <span>Active Production Queue</span>
                     <span id="badge-active-count" class="text-xs px-2 py-0.5 rounded-full bg-amber-50 dark:bg-primary/10 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/20 font-bold">0</span>
                 </h2>
-                <button onclick="filterBySection('active')" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View active only</button>
+                <a href="worker-tasks.html" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View active queue &rarr;</a>
             </div>
             <div id="active-tasks-container" class="space-y-4">
                 <!-- Rendered by JS -->
@@ -256,7 +294,7 @@
                     <span>Completed Deliverables Archive</span>
                     <span id="badge-completed-count" class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 font-bold">0</span>
                 </h2>
-                <button onclick="filterBySection('completed')" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View archive only</button>
+                <a href="worker-archive.html" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View archive &rarr;</a>
             </div>
             <div id="completed-tasks-container" class="space-y-4">
                 <!-- Rendered by JS -->
@@ -265,25 +303,29 @@
 
     </main>
 
-    <!-- ===== FIXED BOTTOM NAVIGATION DOCK ===== -->
-    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-slate-200 dark:border-primary/20 py-2 px-4 shadow-lg transition-colors no-print">
-        <div class="max-w-md mx-auto flex items-center justify-around">
-            <button onclick="scrollToTop()" class="flex flex-col items-center gap-0.5 text-amber-800 dark:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group" title="Studio Overview">
-                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">home</span>
-                <span class="text-[11px] font-bold">Studio</span>
-            </button>
-            <button onclick="scrollToSection('section-active-tasks')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group" title="Active Queue">
-                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">pending_actions</span>
-                <span class="text-[11px] font-bold">Active</span>
-            </button>
-            <button onclick="scrollToSection('section-completed-tasks')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group" title="Completed Files">
-                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">task_alt</span>
-                <span class="text-[11px] font-bold">Completed</span>
-            </button>
-            <button onclick="openWorkerAccountModal()" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group" title="Worker Profile & Workstation">
-                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">badge</span>
-                <span class="text-[11px] font-bold">Profile</span>
-            </button>
+    <!-- ===== FIXED BOTTOM NAVIGATION DOCK (MOBILE) ===== -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-primary/20 dark:border-primary/25 py-2 px-2 shadow-xl transition-colors no-print">
+        <div class="max-w-md mx-auto flex items-center justify-between">
+            <a href="worker-portal.html" data-worker-link="dashboard" aria-label="Studio" title="Studio" id="worker-dock-dashboard" class="flex-1 flex flex-col items-center justify-center py-1 text-amber-800 dark:text-primary rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">dashboard</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Studio</span>
+            </a>
+            <a href="worker-tasks.html" data-worker-link="tasks" aria-label="Tasks" title="Tasks" id="worker-dock-tasks" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">pending_actions</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Tasks</span>
+            </a>
+            <a href="worker-archive.html" data-worker-link="archive" aria-label="Archive" title="Archive" id="worker-dock-archive" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">task_alt</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Archive</span>
+            </a>
+            <a href="worker-specs.html" data-worker-link="specs" aria-label="Specs" title="Specs" id="worker-dock-specs" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">menu_book</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Specs</span>
+            </a>
+            <a href="worker-settings.html" data-worker-link="settings" aria-label="Settings" title="Settings" id="worker-dock-settings" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">settings</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Settings</span>
+            </a>
         </div>
     </nav>
 

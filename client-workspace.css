@@ -1,0 +1,248 @@
+/* ===================================================================
+   DEZAN DIGITIZING — CLIENT WORKSPACE STYLESHEET
+   Design Tokens: Brand Gold Primitives → Semantic Surfaces → Components
+   Strict WCAG 2.1 AA Compliant Contrast & Responsive Architecture
+   =================================================================== */
+
+:root {
+    --client-gold: #d4af35;
+    --client-gold-hover: #c49f25;
+    --client-gold-dark: #9a7810;
+    --client-gold-subtle: rgba(212, 175, 53, 0.12);
+    --client-ink: #0f172a;
+    --client-slate: #475569;
+    --client-line: #e2e8f0;
+    --client-white: #ffffff;
+    --client-canvas: #f8f7f6;
+    --client-surface: var(--client-white);
+    --client-text: var(--client-ink);
+    --client-muted: var(--client-slate);
+    --client-border: var(--client-line);
+    --client-selected: #f7e59c;
+    --client-shadow: 0 2px 5px rgb(15 23 42 / 3%), 0 12px 28px rgb(15 23 42 / 3%);
+}
+
+.dark {
+    --client-canvas: #201d12;
+    --client-surface: #16140c;
+    --client-text: #f8fafc;
+    --client-muted: #94a3b8;
+    --client-border: #3c3a31;
+    --client-selected: #40371c;
+    --client-shadow: 0 8px 24px rgb(0 0 0 / 25%);
+}
+
+body[data-client-page] {
+    background-color: var(--client-canvas);
+    color: var(--client-text);
+    min-height: 100vh;
+}
+
+/* ===== HEADER ===== */
+body[data-client-page] > header {
+    background-color: var(--client-surface);
+    border-color: var(--client-border);
+}
+
+body[data-client-page] header button,
+body[data-client-page] header a {
+    min-height: 40px;
+}
+
+/* ===== STICKY CLIENT NAVIGATION BAR ===== */
+#client-sticky-nav {
+    background-color: var(--client-surface);
+    border-color: var(--client-border);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+#client-sticky-nav nav {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+#client-sticky-nav nav::-webkit-scrollbar {
+    display: none;
+}
+
+.client-nav-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: all 0.18s ease;
+    color: var(--client-muted);
+    border: 1px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.client-nav-tab:hover {
+    color: var(--client-text);
+    background-color: var(--client-gold-subtle);
+    border-color: rgba(212, 175, 53, 0.25);
+}
+
+.client-nav-tab.active {
+    background-color: var(--client-gold);
+    color: #0f172a !important;
+    border-color: var(--client-gold);
+    box-shadow: 0 2px 8px rgba(212, 175, 53, 0.35);
+}
+
+.client-nav-tab.active .material-symbols-outlined {
+    color: #0f172a !important;
+}
+
+.client-nav-tab .nav-badge {
+    padding: 2px 7px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+    background-color: rgba(0, 0, 0, 0.08);
+    color: inherit;
+}
+
+.dark .client-nav-tab .nav-badge {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ===== METRIC CARDS ===== */
+.client-metric-card {
+    background-color: var(--client-surface);
+    border: 1px solid var(--client-border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: var(--client-shadow);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.client-metric-card:hover {
+    border-color: rgba(212, 175, 53, 0.45);
+    transform: translateY(-1px);
+}
+
+/* ===== FILTER TABS ===== */
+.client-filter-pill {
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    border: 1px solid var(--client-border);
+    background-color: var(--client-surface);
+    color: var(--client-muted);
+}
+
+.client-filter-pill:hover {
+    color: var(--client-text);
+    border-color: var(--client-gold);
+}
+
+.client-filter-pill.active {
+    background-color: var(--client-gold);
+    color: #0f172a;
+    border-color: var(--client-gold);
+    box-shadow: 0 2px 6px rgba(212, 175, 53, 0.25);
+}
+
+/* ===== ORDER CARDS & DRAWERS ===== */
+.client-order-card {
+    background-color: var(--client-surface);
+    border: 1px solid var(--client-border);
+    border-radius: 16px;
+    box-shadow: var(--client-shadow);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.client-order-card:hover {
+    border-color: rgba(212, 175, 53, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* ===== STATUS BADGES ===== */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: capitalize;
+}
+
+.status-badge.in_progress {
+    background-color: rgba(217, 119, 6, 0.12);
+    color: #b45309;
+    border: 1px solid rgba(217, 119, 6, 0.25);
+}
+.dark .status-badge.in_progress {
+    color: #fbbf24;
+    border-color: rgba(251, 191, 36, 0.3);
+}
+
+.status-badge.completed {
+    background-color: rgba(16, 185, 129, 0.12);
+    color: #047857;
+    border: 1px solid rgba(16, 185, 129, 0.28);
+}
+.dark .status-badge.completed {
+    color: #34d399;
+    border-color: rgba(52, 211, 153, 0.3);
+}
+
+.status-badge.revision_requested {
+    background-color: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+    border: 1px solid rgba(239, 68, 68, 0.28);
+}
+.dark .status-badge.revision_requested {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.3);
+}
+
+.status-badge.quote_pending {
+    background-color: rgba(59, 130, 246, 0.12);
+    color: #1d4ed8;
+    border: 1px solid rgba(59, 130, 246, 0.25);
+}
+.dark .status-badge.quote_pending {
+    color: #60a5fa;
+    border-color: rgba(96, 165, 250, 0.3);
+}
+
+/* ===== ACCESSIBLE FOCUS-VISIBLE ===== */
+body[data-client-page] button:focus-visible,
+body[data-client-page] a:focus-visible,
+body[data-client-page] input:focus-visible,
+body[data-client-page] select:focus-visible,
+body[data-client-page] textarea:focus-visible {
+    outline: 2px solid var(--client-gold);
+    outline-offset: 2px;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    #client-sticky-nav,
+    header,
+    .no-print {
+        display: none !important;
+    }
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    #invoice-modal-content {
+        box-shadow: none !important;
+        border: none !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+}

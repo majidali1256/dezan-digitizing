@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Invoices &amp; Billing | Dezan Digitizing Client Workspace</title>
+    <meta name="description" content="View billing history, itemized receipts, and settle outstanding balances via PayPal or Credit Card." />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#d4af35",
+                        "primary-hover": "#c49f25",
+                        "primary-dark": "#9a7810",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#201d12",
+                        "card-dark": "#16140c"
+                    },
+                    fontFamily: { display: ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="client-workspace.css" />
+</head>
+
+<body data-client-page="invoices" class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30 transition-colors duration-200">
+
+    <!-- ===== ROLE DEMO SWITCHER BAR ===== -->
+    <div class="bg-slate-100/90 dark:bg-card-dark border-b border-slate-200 dark:border-primary/20 py-2.5 px-4 text-xs">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/10 text-blue-800 dark:text-blue-400 font-bold border border-blue-300 dark:border-blue-500/20 text-[10px]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></span> CLIENT WORKSPACE
+                </span>
+                <span class="text-slate-700 dark:text-slate-400 font-medium hidden sm:inline">Billing &bull; PayPal Secured</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-slate-600 dark:text-slate-500 text-[11px] font-semibold hidden md:inline">Switch Workspace:</span>
+                <button onclick="window.insforgeClient.loginAsDemo('admin')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 text-amber-900 dark:text-primary border border-slate-300 dark:border-primary/30 text-[10px] font-bold shadow-sm cursor-pointer">Admin</button>
+                <button onclick="window.insforgeClient.loginAsDemo('digitizer')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-[10px] font-bold shadow-sm cursor-pointer">Worker</button>
+                <button onclick="window.insforgeClient.signOut()" class="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-[10px] font-bold ml-1 shadow-sm cursor-pointer">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HEADER ===== -->
+    <header class="sticky top-0 z-40 bg-white/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-primary/20 transition-colors">
+        <div class="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
+            <a href="index.html" class="flex items-center gap-2">
+                <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover shadow-sm">
+                <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN <span class="text-primary-dark dark:text-primary text-xs uppercase font-bold tracking-widest ml-1">Client Portal</span></span>
+            </a>
+
+            <div class="flex items-center gap-2 sm:gap-2.5">
+                <a href="client-profile.html" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-card-dark hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-primary/25 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all cursor-pointer group shadow-xs">
+                    <div class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-900 dark:text-primary font-black text-[10px] flex items-center justify-center border border-amber-500/30" id="header-account-avatar">
+                        CL
+                    </div>
+                    <span id="header-account-name" class="font-bold text-slate-900 dark:text-white hidden sm:inline">Client Profile</span>
+                </a>
+
+                <button class="theme-toggle-btn p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors border border-slate-200 dark:border-primary/20 cursor-pointer" aria-label="Toggle theme">
+                    <span class="material-symbols-outlined theme-toggle-icon text-lg text-primary-dark dark:text-primary">dark_mode</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== STICKY CLIENT NAVIGATION BAR ===== -->
+    <section id="client-sticky-nav" class="sticky top-[57px] z-30 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md border-b border-primary/20 dark:border-primary/25 shadow-xs py-2 px-4 transition-colors no-print">
+        <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <nav class="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none" aria-label="Client Navigation Tabs">
+                <a href="client-portal.html" data-client-link="dashboard" id="nav-tab-dashboard" class="client-nav-tab">
+                    <span class="material-symbols-outlined text-sm">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="client-orders.html" data-client-link="orders" id="nav-tab-orders" class="client-nav-tab">
+                    <span class="material-symbols-outlined text-sm">receipt_long</span>
+                    <span>My Orders</span>
+                    <span class="nav-badge" id="nav-badge-orders">0</span>
+                </a>
+                <a href="client-quotes.html" data-client-link="quotes" id="nav-tab-quotes" class="client-nav-tab">
+                    <span class="material-symbols-outlined text-sm">request_quote</span>
+                    <span>Custom Quotes</span>
+                    <span class="nav-badge" id="nav-badge-quotes">0</span>
+                </a>
+                <a href="client-invoices.html" data-client-link="invoices" id="nav-tab-invoices" class="client-nav-tab active">
+                    <span class="material-symbols-outlined text-sm">payments</span>
+                    <span>Invoices &amp; Billing</span>
+                    <span class="nav-badge" id="nav-badge-invoices">$0</span>
+                </a>
+                <a href="client-profile.html" data-client-link="profile" id="nav-tab-profile" class="client-nav-tab">
+                    <span class="material-symbols-outlined text-sm">settings</span>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="flex items-center gap-2">
+                <button onclick="window.clientWorkspace.openNewOrderModal()" class="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs transition-all flex items-center gap-1.5 shadow-xs cursor-pointer">
+                    <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+                    <span>+ New Order</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full pb-28">
+
+        <!-- Title & Subtitle -->
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">Invoices &amp; Billing</h1>
+                <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">Review official itemized receipts and settle balances securely via PayPal.</p>
+            </div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                <span class="material-symbols-outlined text-sm">verified_user</span>
+                <span>PayPal Buyer Protected</span>
+            </div>
+        </div>
+
+        <!-- 3 Billing Metric Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6">
+            <div class="client-metric-card">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Total Invoiced</span>
+                <span class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white" id="billing-total-invoiced">$55.00</span>
+            </div>
+            <div class="client-metric-card">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Total Settled</span>
+                <span class="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400" id="billing-total-paid">$55.00</span>
+            </div>
+            <div class="client-metric-card">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Balance Due</span>
+                <span class="text-2xl sm:text-3xl font-black text-amber-800 dark:text-primary" id="metric-balance-due">$0.00</span>
+            </div>
+        </div>
+
+        <!-- Invoices List -->
+        <div id="invoices-list-container" class="space-y-3.5">
+            <!-- Populated dynamically by client-workspace.js -->
+        </div>
+
+    </main>
+
+    <!-- ===== CLIENT INVOICE MODAL ===== -->
+    <div id="client-invoice-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-xl bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/30 shadow-2xl p-6 sm:p-8 text-slate-900 dark:text-slate-100" id="client-invoice-print-area">
+            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-200 dark:border-primary/20">
+                <div class="flex items-center gap-2.5">
+                    <img src="logo.png" alt="Dezan" class="w-8 h-8 rounded-full object-cover">
+                    <div>
+                        <strong class="text-base font-black text-slate-900 dark:text-white block leading-none">DEZAN DIGITIZING</strong>
+                        <span class="text-[10px] uppercase font-bold text-amber-800 dark:text-primary tracking-wider">Commercial Invoice</span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="font-mono text-xs font-bold text-slate-600 dark:text-slate-400 block" id="invoice-number-disp">INV-8492</span>
+                    <span class="text-[11px] text-slate-500" id="invoice-date-disp">Sep 6, 2026</span>
+                </div>
+            </div>
+
+            <div class="space-y-4 text-xs mb-6">
+                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/10 flex justify-between">
+                    <div>
+                        <span class="text-slate-500 block">Billed To:</span>
+                        <strong class="text-slate-900 dark:text-white">John Foster</strong>
+                        <p class="text-slate-500">Creative Merch &amp; Embroidery</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-slate-500 block">Order Ref:</span>
+                        <strong id="invoice-order-ref" class="font-mono text-amber-900 dark:text-primary">ORD-8492</strong>
+                    </div>
+                </div>
+
+                <div class="border rounded-xl border-slate-200 dark:border-primary/20 overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-100 dark:bg-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                            <tr>
+                                <th class="p-2.5">Service Description</th>
+                                <th class="p-2.5 text-right">Rate</th>
+                                <th class="p-2.5 text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-t border-slate-100 dark:border-primary/10">
+                                <td class="p-2.5 font-medium" id="invoice-item-desc">Embroidery Digitizing — Standard Left Chest</td>
+                                <td class="p-2.5 text-right font-mono" id="invoice-item-rate">$15.00</td>
+                                <td class="p-2.5 text-right font-mono font-bold" id="invoice-item-amount">$15.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex justify-between items-center pt-2">
+                    <span class="text-sm font-bold text-slate-600 dark:text-slate-400">Total Invoice Amount:</span>
+                    <strong class="text-xl font-black text-slate-900 dark:text-white" id="invoice-total-disp">$15.00</strong>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-primary/20 no-print">
+                <button type="button" onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-xs flex items-center gap-1.5 cursor-pointer">
+                    <span class="material-symbols-outlined text-sm">print</span>
+                    <span>Print Invoice</span>
+                </button>
+                <div class="flex gap-2">
+                    <button type="button" onclick="window.clientWorkspace.closeClientInvoiceModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-xs cursor-pointer">Close</button>
+                    <a href="https://paypal.me/dezandigitizing" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs flex items-center gap-1.5 shadow-md cursor-pointer">
+                        <span class="material-symbols-outlined text-sm">payments</span>
+                        <span>Settle with PayPal</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FIXED BOTTOM NAVIGATION DOCK (MOBILE) ===== -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-primary/20 dark:border-primary/25 py-2 px-2 shadow-xl transition-colors no-print">
+        <div class="max-w-md mx-auto flex items-center justify-between">
+            <a href="client-portal.html" data-client-link="dashboard" aria-label="Dashboard" title="Dashboard" id="mobile-dock-dashboard" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">dashboard</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Dashboard</span>
+            </a>
+            <a href="client-orders.html" data-client-link="orders" aria-label="Orders" title="Orders" id="mobile-dock-orders" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">receipt_long</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Orders</span>
+            </a>
+            <a href="client-quotes.html" data-client-link="quotes" aria-label="Quotes" title="Quotes" id="mobile-dock-quotes" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">request_quote</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Quotes</span>
+            </a>
+            <a href="client-invoices.html" data-client-link="invoices" aria-label="Invoices" title="Invoices" id="mobile-dock-invoices" class="flex-1 flex flex-col items-center justify-center py-1 text-amber-800 dark:text-primary rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">payments</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Billing</span>
+            </a>
+            <a href="client-profile.html" data-client-link="profile" aria-label="Settings" title="Settings" id="mobile-dock-profile" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">settings</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Settings</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Scripts -->
+    <script src="js/insforge-client.js"></script>
+    <script src="js/client-workspace.js"></script>
+</body>
+
+</html>

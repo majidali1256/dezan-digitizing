@@ -28,6 +28,7 @@
         }
     </script>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="client-workspace.css" />
     <style>
         @media print {
             body {
@@ -65,7 +66,7 @@
     </style>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30 transition-colors duration-200">
+<body data-client-page="dashboard" class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30 transition-colors duration-200">
 
     <!-- ===== ROLE DEMO SWITCHER BAR ===== -->
     <div class="bg-slate-100/90 dark:bg-card-dark border-b border-slate-200 dark:border-primary/20 py-2.5 px-4 text-xs">
@@ -114,6 +115,44 @@
         </div>
     </header>
 
+    <!-- ===== STICKY CLIENT NAVIGATION BAR ===== -->
+    <section id="client-sticky-nav" class="sticky top-[57px] z-30 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md border-b border-primary/20 dark:border-primary/25 shadow-xs py-2 px-4 transition-colors no-print">
+        <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <nav class="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none" aria-label="Client Navigation Tabs">
+                <a href="client-portal.html" data-client-link="dashboard" id="nav-tab-dashboard" class="client-nav-tab active">
+                    <span class="material-symbols-outlined text-sm">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="client-orders.html" data-client-link="orders" id="nav-tab-orders" class="client-nav-tab">
+                    <span class="material-symbols-outlined text-sm">receipt_long</span>
+                    <span>My Orders</span>
+                    <span class="nav-badge" id="nav-badge-orders">0</span>
+                </a>
+                <a href="client-quotes.html" data-client-link="quotes" id="nav-tab-quotes" class="client-nav-tab">
+                    <span class="material-symbols-outlined text-sm">request_quote</span>
+                    <span>Custom Quotes</span>
+                    <span class="nav-badge" id="nav-badge-quotes">0</span>
+                </a>
+                <a href="client-invoices.html" data-client-link="invoices" id="nav-tab-invoices" class="client-nav-tab">
+                    <span class="material-symbols-outlined text-sm">payments</span>
+                    <span>Invoices &amp; Billing</span>
+                    <span class="nav-badge" id="nav-badge-invoices">$0</span>
+                </a>
+                <a href="client-profile.html" data-client-link="profile" id="nav-tab-profile" class="client-nav-tab">
+                    <span class="material-symbols-outlined text-sm">settings</span>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="flex items-center gap-2">
+                <button onclick="openNewOrderModal()" class="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs transition-all flex items-center gap-1.5 shadow-xs cursor-pointer">
+                    <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+                    <span>+ New Order</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
     <!-- ===== MAIN DASHBOARD ===== -->
     <main class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full pb-28">
 
@@ -159,15 +198,15 @@
             </button>
 
             <!-- Track Order -->
-            <button onclick="focusOrderSearch()" class="flex items-center gap-3.5 p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-md hover:border-primary dark:hover:border-primary transition-all text-left group cursor-pointer">
+            <a href="client-orders.html" class="flex items-center gap-3.5 p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-md hover:border-primary dark:hover:border-primary transition-all text-left group cursor-pointer">
                 <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-800 dark:text-primary flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0 border border-amber-500/20">
                     <span class="material-symbols-outlined text-2xl">travel_explore</span>
                 </div>
                 <div>
                     <h3 class="text-sm font-black text-slate-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">Track Order</h3>
-                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Check order status</p>
+                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">View orders &amp; downloads</p>
                 </div>
-            </button>
+            </a>
         </div>
 
         <!-- 4 Stat Metric Badges -->
@@ -237,7 +276,7 @@
                     <span>In Production &amp; Active Jobs</span>
                     <span id="badge-active-count" class="text-xs px-2 py-0.5 rounded-full bg-amber-50 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30 font-bold">0</span>
                 </h2>
-                <button onclick="filterBySection('in_progress')" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</button>
+                <a href="client-orders.html" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</a>
             </div>
             <div id="active-orders-container" class="space-y-3.5">
                 <!-- Populated by JS -->
@@ -251,7 +290,7 @@
                     <span>Completed &amp; Download Deliverables</span>
                     <span id="badge-completed-count" class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 font-bold">0</span>
                 </h2>
-                <button onclick="filterBySection('completed')" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</button>
+                <a href="client-orders.html" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</a>
             </div>
             <div id="completed-orders-container" class="space-y-3.5">
                 <!-- Populated by JS -->
@@ -265,7 +304,7 @@
                     <span>Quotes</span>
                     <span id="badge-quotes-count" class="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 font-bold">0</span>
                 </h2>
-                <button onclick="filterBySection('quotes')" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</button>
+                <a href="client-quotes.html" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</a>
             </div>
             <div id="quotes-container" class="space-y-3.5">
                 <!-- Populated by JS -->
@@ -274,31 +313,29 @@
 
     </main>
 
-    <!-- ===== FIXED BOTTOM NAVIGATION DOCK ===== -->
-    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-slate-200 dark:border-primary/20 py-2 px-3 shadow-lg transition-colors no-print">
-        <div class="max-w-md mx-auto flex items-center justify-around">
-            <button onclick="scrollToTop()" class="flex flex-col items-center gap-0.5 text-amber-800 dark:text-primary transition-colors py-1 px-2 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group">
-                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">home</span>
-                <span class="text-[11px] font-bold">Home</span>
-            </button>
-            <button onclick="scrollToSection('section-open-orders')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-2 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group">
-                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">receipt_long</span>
-                <span class="text-[11px] font-bold">Orders</span>
-            </button>
-            <button onclick="scrollToSection('section-quotes')" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-2 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group">
-                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">request_quote</span>
-                <span class="text-[11px] font-bold">Quotes</span>
-            </button>
-            <button id="bottom-nav-profile-btn" onclick="openProfileModal()" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-2 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group" title="Client Profile & Machinery Defaults">
-                <div class="w-6 h-6 rounded-full bg-amber-500/15 text-amber-800 dark:text-primary font-black text-[10px] flex items-center justify-center border border-amber-500/25 group-hover:scale-105 transition-transform" id="bottom-nav-avatar">
-                    JF
-                </div>
-                <span class="text-[11px] font-bold">Profile</span>
-            </button>
-            <button id="bottom-nav-settings-btn" onclick="openSettingsModal()" class="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors py-1 px-2 rounded-xl hover:bg-slate-100 dark:hover:bg-primary/10 cursor-pointer group" title="Portal Settings">
-                <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">settings</span>
-                <span class="text-[11px] font-bold">Settings</span>
-            </button>
+    <!-- ===== FIXED BOTTOM NAVIGATION DOCK (MOBILE) ===== -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-primary/20 dark:border-primary/25 py-2 px-2 shadow-xl transition-colors no-print">
+        <div class="max-w-md mx-auto flex items-center justify-between">
+            <a href="client-portal.html" data-client-link="dashboard" aria-label="Dashboard" title="Dashboard" id="mobile-dock-dashboard" class="flex-1 flex flex-col items-center justify-center py-1 text-amber-800 dark:text-primary rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">dashboard</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Dashboard</span>
+            </a>
+            <a href="client-orders.html" data-client-link="orders" aria-label="Orders" title="Orders" id="mobile-dock-orders" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">receipt_long</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Orders</span>
+            </a>
+            <a href="client-quotes.html" data-client-link="quotes" aria-label="Quotes" title="Quotes" id="mobile-dock-quotes" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">request_quote</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Quotes</span>
+            </a>
+            <a href="client-invoices.html" data-client-link="invoices" aria-label="Invoices" title="Invoices" id="mobile-dock-invoices" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">payments</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Billing</span>
+            </a>
+            <a href="client-profile.html" data-client-link="profile" aria-label="Settings" title="Settings" id="mobile-dock-profile" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">settings</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Settings</span>
+            </a>
         </div>
     </nav>
 

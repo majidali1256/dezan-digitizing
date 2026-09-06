@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Active Tasks Workbench | Dezan Digitizing Worker Studio</title>
+    <meta name="description" content="Digitizer production workbench - Active embroidery digitizing and vector conversion tasks with deliverable machine file uploads." />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#d4af35",
+                        "primary-hover": "#c49f25",
+                        "primary-dark": "#9a7810",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#201d12",
+                        "card-dark": "#16140c"
+                    },
+                    fontFamily: { display: ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="worker-workspace.css" />
+</head>
+
+<body data-worker-page="tasks" class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30 transition-colors duration-200">
+
+    <!-- ===== ROLE DEMO SWITCHER BAR ===== -->
+    <div class="bg-slate-100/90 dark:bg-card-dark border-b border-slate-200 dark:border-primary/20 py-2.5 px-4 text-xs">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-500/10 text-purple-900 dark:text-purple-400 font-bold border border-purple-300 dark:border-purple-500/25 text-[10px]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-purple-600 dark:bg-purple-400 animate-pulse"></span> RESTRICTED WORKER WORKSPACE
+                </span>
+                <span class="text-slate-700 dark:text-slate-400 font-medium hidden sm:inline">Logged in as: <strong id="header-worker-name" class="text-slate-900 dark:text-white font-bold">Alex Miller</strong></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-slate-600 dark:text-slate-500 text-[11px] font-semibold hidden md:inline">Switch Workspace:</span>
+                <button onclick="window.insforgeClient.loginAsDemo('admin')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 text-amber-900 dark:text-primary border border-slate-300 dark:border-primary/30 text-[10px] font-bold shadow-xs cursor-pointer">Admin</button>
+                <button onclick="window.insforgeClient.loginAsDemo('client')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-[10px] font-bold shadow-xs cursor-pointer">Client</button>
+                <button onclick="window.insforgeClient.signOut()" class="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-[10px] font-bold ml-1 shadow-xs cursor-pointer">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HEADER ===== -->
+    <header class="sticky top-0 z-40 bg-white/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-primary/20 transition-colors">
+        <div class="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
+            <a href="index.html" class="flex items-center gap-2">
+                <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover shadow-xs">
+                <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN <span class="text-amber-800 dark:text-primary text-xs uppercase font-bold tracking-widest ml-1">Digitizer Studio</span></span>
+            </a>
+
+            <div class="flex items-center gap-2.5">
+                <!-- Masking Security Pill -->
+                <div class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/25 text-xs font-bold" title="Customer personal identity and commercial pricing are strictly masked from this workspace">
+                    <span class="material-symbols-outlined text-sm text-emerald-700 dark:text-emerald-400">shield</span>
+                    <span>Client PII &amp; Price Masked</span>
+                </div>
+
+                <a href="worker-settings.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all border border-slate-200 dark:border-primary/20 cursor-pointer">
+                    <span class="material-symbols-outlined text-base text-amber-800 dark:text-primary">badge</span>
+                    <span class="hidden md:inline">Alex Miller</span>
+                </a>
+
+                <button class="theme-toggle-btn p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors border border-slate-200 dark:border-primary/20 cursor-pointer" aria-label="Toggle theme">
+                    <span class="material-symbols-outlined theme-toggle-icon text-lg text-amber-800 dark:text-primary">dark_mode</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== STICKY WORKER NAVIGATION BAR ===== -->
+    <section id="worker-sticky-nav" class="sticky top-[57px] z-30 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md border-b border-primary/20 dark:border-primary/25 shadow-xs py-2 px-4 transition-colors no-print">
+        <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <nav class="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none" aria-label="Worker Studio Navigation Tabs">
+                <a href="worker-portal.html" data-worker-link="dashboard" id="worker-nav-dashboard" class="worker-nav-tab">
+                    <span class="material-symbols-outlined text-sm">dashboard</span>
+                    <span>Studio Queue</span>
+                </a>
+                <a href="worker-tasks.html" data-worker-link="tasks" id="worker-nav-tasks" class="worker-nav-tab active">
+                    <span class="material-symbols-outlined text-sm">precision_manufacturing</span>
+                    <span>Active Tasks</span>
+                    <span class="nav-badge" id="nav-badge-tasks">0</span>
+                </a>
+                <a href="worker-archive.html" data-worker-link="archive" id="worker-nav-archive" class="worker-nav-tab">
+                    <span class="material-symbols-outlined text-sm">task_alt</span>
+                    <span>Completed Archive</span>
+                    <span class="nav-badge" id="nav-badge-archive">0</span>
+                </a>
+                <a href="worker-specs.html" data-worker-link="specs" id="worker-nav-specs" class="worker-nav-tab">
+                    <span class="material-symbols-outlined text-sm">menu_book</span>
+                    <span>Format Specs &amp; Guide</span>
+                </a>
+                <a href="worker-settings.html" data-worker-link="settings" id="worker-nav-settings" class="worker-nav-tab">
+                    <span class="material-symbols-outlined text-sm">settings</span>
+                    <span>Workstation</span>
+                </a>
+            </nav>
+
+            <div class="flex items-center gap-2">
+                <button onclick="window.workerWorkspace.init()" class="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-primary/20 text-slate-600 dark:text-slate-300 hover:text-amber-800 dark:hover:text-primary transition-colors cursor-pointer" title="Refresh queue">
+                    <span class="material-symbols-outlined text-sm">refresh</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full pb-28">
+
+        <!-- Header Title -->
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">Active Tasks Workbench</h1>
+                <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">Review target garment specs, download high-res artwork, and submit machine stitch deliverables.</p>
+            </div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30 text-xs font-bold">
+                <span class="material-symbols-outlined text-sm">timelapse</span>
+                <span>Active Workstation Mode</span>
+            </div>
+        </div>
+
+        <!-- Filter Controls Bar -->
+        <div class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none" id="worker-filter-tabs">
+                <button onclick="window.workerWorkspace.setFilter('all')" data-filter="all" class="worker-filter-pill active">
+                    All Active Tasks
+                </button>
+                <button onclick="window.workerWorkspace.setFilter('digitizing')" data-filter="digitizing" class="worker-filter-pill">
+                    Digitizing
+                </button>
+                <button onclick="window.workerWorkspace.setFilter('vectorizing')" data-filter="vectorizing" class="worker-filter-pill">
+                    Vectorizing
+                </button>
+                <button onclick="window.workerWorkspace.setFilter('rush')" data-filter="rush" class="worker-filter-pill flex items-center gap-1">
+                    <span class="material-symbols-outlined text-xs text-rose-500">bolt</span>
+                    <span>Rush Priority</span>
+                </button>
+            </div>
+
+            <!-- Search input -->
+            <div class="relative w-full md:w-64">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                <input type="text" id="worker-search-input" oninput="window.workerWorkspace.handleSearch(event)" placeholder="Search task #, design..." class="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary" />
+            </div>
+        </div>
+
+        <!-- Tasks Workbench Container -->
+        <div id="tasks-workbench-container" class="space-y-3.5">
+            <!-- Populated dynamically by worker-workspace.js -->
+        </div>
+
+    </main>
+
+    <!-- ===== DELIVERABLE UPLOAD MODAL ===== -->
+    <div id="deliverable-upload-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-lg bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/30 shadow-2xl p-6 text-slate-900 dark:text-slate-100">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-primary/20">
+                <h3 class="font-black text-base flex items-center gap-2 text-slate-900 dark:text-white">
+                    <span class="material-symbols-outlined text-primary">upload_file</span>
+                    <span>Upload Machine Deliverables</span>
+                </h3>
+                <button onclick="window.workerWorkspace.closeDeliverableUploadModal()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form onsubmit="window.workerWorkspace.handleDeliverableSubmit(event)" class="space-y-3.5 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Task Ref: <span id="upload-task-id" class="font-mono text-amber-900 dark:text-primary font-black">ORD-NEW</span></label>
+                    <p class="text-slate-500 dark:text-slate-400" id="upload-design-name">Design Title</p>
+                </div>
+
+                <!-- Dropzone -->
+                <div class="border-2 border-dashed border-slate-300 dark:border-primary/30 rounded-2xl p-6 text-center bg-slate-50 dark:bg-slate-900/40 hover:border-primary transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-3xl text-primary mb-1">cloud_upload</span>
+                    <p class="font-bold text-slate-800 dark:text-slate-200">Drag &amp; drop machine stitch files</p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Supports .DST, .EMB, .PES, .EXP, .AI, .EPS, .PDF</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold mb-1">Final Stitch Count *</label>
+                        <input type="number" id="deliverable-stitch-count" required value="12450" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs focus:border-primary font-mono" />
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-1">Hoop Size Used</label>
+                        <input type="text" id="deliverable-hoop" value="100mm x 100mm" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs focus:border-primary" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold mb-1">Production Notes for Client</label>
+                    <textarea id="deliverable-notes" rows="2" placeholder="e.g. Optimized with center-out sequencing and underlay for pique polo." class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs focus:border-primary"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-primary/15">
+                    <button type="button" onclick="window.workerWorkspace.closeDeliverableUploadModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-xs">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs shadow-md">Complete &amp; Submit Deliverable</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== TASK DETAILS INSPECT MODAL ===== -->
+    <div id="task-details-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-lg bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/30 shadow-2xl p-6 text-slate-900 dark:text-slate-100">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-primary/20">
+                <h3 class="font-black text-base flex items-center gap-2 text-slate-900 dark:text-white">
+                    <span class="material-symbols-outlined text-primary">assignment</span>
+                    <span>Production Technical Specs</span>
+                </h3>
+                <button onclick="window.workerWorkspace.closeTaskDetailsModal()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Ticket Number:</span>
+                    <strong id="detail-task-id" class="font-mono text-amber-900 dark:text-primary">ORD-NEW</strong>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Client Reference:</span>
+                    <span id="detail-client-id" class="font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[11px]">Client #CLI-8492</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Target Fabric:</span>
+                    <strong id="detail-fabric" class="text-slate-900 dark:text-white">Pique Polo Knit</strong>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Dimensions:</span>
+                    <strong id="detail-dimensions">3.5" W x 2.2" H</strong>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Requested Format:</span>
+                    <strong id="detail-format" class="format-tag">DST</strong>
+                </div>
+                <div class="py-1">
+                    <span class="text-slate-500 block mb-1">Special Machine Instructions:</span>
+                    <p id="detail-instructions" class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-slate-800 dark:text-slate-200 italic leading-relaxed">None</p>
+                </div>
+            </div>
+            <div class="flex justify-end pt-3">
+                <button type="button" onclick="window.workerWorkspace.closeTaskDetailsModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-xs">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ZOOM MODAL ===== -->
+    <div id="stitch-zoom-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4" onclick="if(event.target === this) window.workerWorkspace.closeStitchOutZoomModal()">
+        <div class="relative max-w-3xl w-full bg-white dark:bg-card-dark rounded-2xl overflow-hidden shadow-2xl p-4">
+            <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-200 dark:border-primary/20">
+                <h4 id="zoom-modal-title" class="font-bold text-sm text-slate-900 dark:text-white">Artwork Preview</h4>
+                <button onclick="window.workerWorkspace.closeStitchOutZoomModal()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="flex items-center justify-center max-h-[70vh] overflow-hidden rounded-xl bg-slate-950/10">
+                <img id="zoom-modal-img" src="" alt="Zoom Preview" class="max-h-[70vh] w-auto object-contain">
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FIXED BOTTOM NAVIGATION DOCK (MOBILE) ===== -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-primary/20 dark:border-primary/25 py-2 px-2 shadow-xl transition-colors no-print">
+        <div class="max-w-md mx-auto flex items-center justify-between">
+            <a href="worker-portal.html" data-worker-link="dashboard" aria-label="Studio" title="Studio" id="worker-dock-dashboard" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">dashboard</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Studio</span>
+            </a>
+            <a href="worker-tasks.html" data-worker-link="tasks" aria-label="Tasks" title="Tasks" id="worker-dock-tasks" class="flex-1 flex flex-col items-center justify-center py-1 text-amber-800 dark:text-primary rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">pending_actions</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Tasks</span>
+            </a>
+            <a href="worker-archive.html" data-worker-link="archive" aria-label="Archive" title="Archive" id="worker-dock-archive" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">task_alt</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Archive</span>
+            </a>
+            <a href="worker-specs.html" data-worker-link="specs" aria-label="Specs" title="Specs" id="worker-dock-specs" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">menu_book</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Specs</span>
+            </a>
+            <a href="worker-settings.html" data-worker-link="settings" aria-label="Settings" title="Settings" id="worker-dock-settings" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer group">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">settings</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Settings</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Scripts -->
+    <script src="js/insforge-client.js"></script>
+    <script src="js/worker-workspace.js"></script>
+</body>
+
+</html>
