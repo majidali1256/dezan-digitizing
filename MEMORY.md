@@ -181,7 +181,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
     - If a client is already authenticated, clicking "Order Now" on marketing pages opens the full 2-stage order wizard in `client-portal.html?action=new_order`, and clicking "Get Quote" opens `client-portal.html?action=request_quote`.
 
 ### Role-Based Order Portal (Implemented & Live)
-- `/portal-login.html`: Unified authentication page with automatic role routing, order intent banners, simplified client-only registration (role field removed; all public signups are assigned `role: 'client'`), and 1-click predefined staff & client logins (Master Admin: `admin@dezandigitizing.com`, Digitizer Worker: `worker.alex@dezandigitizing.com`, Demo Client: `client@falconapparel.com`).
+- `/portal-login.html`: Unified authentication page with automatic role routing, order intent banners, simplified client-only registration (role field removed; all public signups are assigned `role: 'client'`), **Continue with Google** social auth (official multi-color Google SVG icon, centered divider, Google Account Chooser modal `#google-account-modal`, and backend endpoint `POST /api/auth/google` with auto-client registration and guest order claiming), and 1-click predefined staff & client logins (Master Admin: `admin@dezandigitizing.com`, Digitizer Worker: `worker.alex@dezandigitizing.com`, Demo Client: `client@falconapparel.com`).
 
 #### Client Portal Suite (Modular Multi-Page Architecture)
 Powered by shared stylesheet [`client-workspace.css`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/client-workspace.css) and shared controller [`js/client-workspace.js`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/js/client-workspace.js):

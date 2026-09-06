@@ -426,9 +426,99 @@ const resetPassword = async (req, res) => {
     }
 };
 
+/**
+ * Google OAuth Sign In & Auto-Registration
+ * POST /api/auth/google
+ */
+const googleAuth = async (req, res) => {
+    try {
+        const { email, displayName, avatarUrl, googleId } = req.body;
+
+        if (!email) {
+            return badRequest(res, 'Google account email is required');
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+        const userName = (displayName || normalizedEmail.split('@')[0] || 'Google User').trim();
+
+        // 1. Check if profile already exists
+        const userRes = await query(
+            `SELECT id, role, email, display_name, company, phone, status, password_hash 
+             FROM public.profiles WHERE LOWER(email) = $1`,
+            [normalizedEmail]
+        );
+
+        let user;
+
+        if (userRes.rows.length > 0) {
+            user = userRes.rows[0];
+            if (user.status === 'suspended') {
+                return unauthorized(res, 'Your account has been suspended. Please contact support.');
+            }
+        } else {
+            // 2. Auto-register new client account
+            const userId = crypto.randomUUID();
+            const salt = await bcrypt.genSalt(10);
+            const randomPassword = crypto.randomBytes(24).toString('hex');
+            const passwordHash = await bcrypt.hash(randomPassword, salt);
+
+            try {
+                await query(
+                    `INSERT INTO auth.users 
+                        (id, email, password, email_verified, is_project_admin, is_anonymous, created_at, updated_at) 
+                     VALUES ($1, $2, $3, true, false, false, NOW(), NOW())`,
+                    [userId, normalizedEmail, passwordHash]
+                );
+            } catch (authErr) {
+                console.warn('[Google auth.users insert]:', authErr.message);
+            }
+
+            const insertRes = await query(
+                `INSERT INTO public.profiles 
+                    (id, role, email, display_name, company, phone, status, password_hash, created_at, updated_at) 
+                 VALUES ($1, 'client', $2, $3, '', '', 'active', $4, NOW(), NOW()) 
+                 RETURNING id, role, email, display_name, company, phone, status, created_at`,
+                [userId, normalizedEmail, userName, passwordHash]
+            );
+
+            user = insertRes.rows[0];
+
+            // Claim prior guest orders
+            try {
+                await query(
+                    'UPDATE public.orders SET client_id = $1 WHERE LOWER(client_email) = $2 AND client_id IS NULL',
+                    [user.id, normalizedEmail]
+                );
+            } catch (claimErr) {
+                console.warn('[Google Guest Claim]:', claimErr.message);
+            }
+        }
+
+        const token = generateToken(user);
+
+        return success(res, {
+            user: {
+                id: user.id,
+                email: user.email,
+                displayName: user.display_name,
+                role: user.role || 'client',
+                company: user.company || '',
+                phone: user.phone || '',
+                status: user.status || 'active',
+                provider: 'google'
+            },
+            token
+        }, 'Google authentication successful');
+    } catch (err) {
+        console.error('[Google Auth Error]:', err);
+        return error(res, `Google authentication failed: ${err.message}`);
+    }
+};
+
 module.exports = {
     register,
     login,
+    googleAuth,
     getMe,
     updateProfile,
     changePassword,

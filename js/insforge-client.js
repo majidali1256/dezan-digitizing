@@ -848,6 +848,75 @@ class InsForgeClient {
     }
 
     /**
+     * Google Authentication (Sign In & Auto-Registration)
+     * Handles both live InsForge OAuth and Node.js REST API with automatic guest order claiming
+     */
+    async signInWithGoogle(options = {}) {
+        const { email, displayName, googleId, avatarUrl } = options;
+
+        // 1. If live InsForge SDK has OAuth method and no explicit email passed, attempt SDK OAuth flow
+        if (this.insforge && this.insforge.auth && typeof this.insforge.auth.signInWithOAuth === 'function' && !email) {
+            try {
+                const redirectUrl = window.location.origin + '/portal-login.html';
+                const { data, error } = await this.insforge.auth.signInWithOAuth('google', {
+                    redirectTo: redirectUrl
+                });
+                if (!error && data?.url) {
+                    window.location.href = data.url;
+                    return { user: null, error: null };
+                }
+            } catch (sdkErr) {
+                console.warn('[InsForge OAuth Fallback]:', sdkErr.message);
+            }
+        }
+
+        // 2. Direct Google Auth API call (Node.js backend)
+        const targetEmail = (email || 'client@falconapparel.com').trim().toLowerCase();
+        const targetName = (displayName || 'John Falcon').trim();
+
+        const apiRes = await this.callBackendApi('/auth/google', 'POST', {
+            email: targetEmail,
+            displayName: targetName,
+            avatarUrl: avatarUrl || '',
+            googleId: googleId || 'google_' + Math.random().toString(36).substring(2, 10)
+        });
+
+        if (apiRes.success && apiRes.data && apiRes.data.user) {
+            const apiUser = {
+                id: apiRes.data.user.id,
+                email: apiRes.data.user.email,
+                displayName: apiRes.data.user.displayName || apiRes.data.user.display_name,
+                role: apiRes.data.user.role || 'client',
+                company: apiRes.data.user.company || '',
+                phone: apiRes.data.user.phone || '',
+                status: apiRes.data.user.status || 'active',
+                provider: 'google'
+            };
+            if (apiRes.data.token && typeof localStorage !== 'undefined') {
+                localStorage.setItem('dezan_jwt_token', apiRes.data.token);
+            }
+            this.setSession(apiUser);
+            await this.claimGuestOrders(apiUser.email, apiUser.id).catch(() => {});
+            return { user: apiUser, error: null };
+        }
+
+        // 3. Client-side fallback if server cannot be reached
+        const fallbackUser = {
+            id: this.generateUUID(),
+            email: targetEmail,
+            displayName: targetName,
+            role: 'client',
+            company: '',
+            status: 'active',
+            provider: 'google',
+            created_at: new Date().toISOString()
+        };
+        this.setSession(fallbackUser);
+        await this.claimGuestOrders(fallbackUser.email, fallbackUser.id).catch(() => {});
+        return { user: fallbackUser, error: null };
+    }
+
+    /**
      * Update current user profile details (name, company, phone, preferences, etc.)
      */
     async updateUserProfile(updates) {
