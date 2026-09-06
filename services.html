@@ -65,58 +65,70 @@
     <main class="pb-20">
 
         <!-- Hero -->
-        <section class="reveal">
-            <div
-                class="relative min-h-[350px] md:min-h-[450px] flex flex-col items-center justify-center p-6 text-center bg-slate-900 overflow-hidden">
-                <div class="absolute inset-0 opacity-30 bg-cover bg-center"
-                    style='background-image: url("Hero Page/Embroidery.png");'>
-                </div>
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
-                <div class="relative z-10 flex flex-col gap-4 max-w-xl">
-                    <span class="text-primary font-bold tracking-widest text-xs uppercase">Precision
-                        Craftsmanship</span>
-                    <h1 class="text-white text-3xl md:text-5xl font-black leading-tight">Premium Embroidery Digitizing
-                        &amp; Vector Art</h1>
-                    <p class="text-slate-300 text-sm md:text-base">Experience precision and quality with our expert
-                        digitizing services. Fast 12-24h turnaround and unmatched detail.</p>
-                    <div class="flex flex-col sm:flex-row gap-3 mt-4 justify-center">
-                        <a href="portal-login.html?redirect=new_order" data-action="order-now" onclick="window.handleOrderClick(event)"
-                            class="bg-primary text-background-dark font-bold py-3 px-8 rounded-lg btn-hover-effect text-center cursor-pointer">Get
-                            Started Now</a>
-                        <a href="#portfolio"
-                            class="bg-white/10 backdrop-blur-sm text-white border border-white/20 font-bold py-3 px-8 rounded-lg btn-hover-effect text-center">View
-                            Portfolio</a>
-                    </div>
+        <section class="pt-4 sm:pt-10 pb-2 sm:pb-6 text-center px-4 max-w-4xl mx-auto">
+            <div class="flex flex-col items-center justify-center gap-2 sm:gap-3.5">
+                <span class="text-[10px] sm:text-xs font-black tracking-[0.16em] text-amber-800 dark:text-primary uppercase">
+                    Precision Craftsmanship
+                </span>
+                <h1 class="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
+                    Premium Embroidery Digitizing <br class="hidden sm:inline" />&amp; Vector Art
+                </h1>
+                <p class="text-slate-600 dark:text-slate-300 text-xs sm:text-base max-w-xl leading-snug sm:leading-relaxed">
+                    Experience precision and quality with our expert digitizing services. Fast 12-24h turnaround and unmatched detail.
+                </p>
+                <!-- Two buttons in 2-column grid on mobile, flex row on desktop -->
+                <div class="grid grid-cols-2 gap-2 sm:gap-3.5 w-full max-w-xs sm:max-w-md mx-auto pt-1.5 sm:pt-3">
+                    <a href="portal-login.html?redirect=new_order" data-action="order-now" onclick="window.handleOrderClick(event)"
+                        class="bg-primary hover:bg-primary-hover text-background-dark font-black py-2.5 px-3 sm:py-3 sm:px-6 rounded-xl text-xs sm:text-sm text-center cursor-pointer shadow-sm transition-all flex items-center justify-center gap-1">
+                        <span>Get Started</span>
+                        <span class="material-symbols-outlined text-xs sm:text-sm">arrow_forward</span>
+                    </a>
+                    <a href="#portfolio"
+                        class="bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-bold py-2.5 px-3 sm:py-3 sm:px-6 rounded-xl text-xs sm:text-sm text-center shadow-xs transition-all flex items-center justify-center">
+                        <span>View Portfolio</span>
+                    </a>
                 </div>
             </div>
         </section>
 
-        <!-- Service Cards -->
-        <section class="px-4 py-12 reveal max-w-6xl mx-auto">
-            <h3 class="text-xl font-bold mb-6 border-l-4 border-primary pl-3">Expert Services</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Service Cards (Grid on Mobile and Desktop) -->
+        <section class="px-4 py-4 sm:py-10 max-w-6xl mx-auto">
+            <h3 class="text-base sm:text-xl font-bold mb-3 sm:mb-6 border-l-4 border-primary pl-2.5 sm:pl-3 text-slate-900 dark:text-white">Expert Services</h3>
+            <div class="grid grid-cols-2 gap-2.5 sm:gap-6">
                 <div
-                    class="flex flex-col bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-primary/10 shadow-sm hover-scale">
-                    <div class="aspect-video bg-cover bg-center"
+                    class="flex flex-col bg-white dark:bg-slate-800/90 rounded-xl overflow-hidden border border-primary/15 dark:border-primary/20 shadow-xs hover-scale">
+                    <div class="aspect-[16/10] sm:aspect-video bg-cover bg-center"
                         style='background-image: url("images/Pet Embroidery.png");'>
                     </div>
-                    <div class="p-5">
-                        <h4 class="font-bold text-lg mb-2">Embroidery Digitizing</h4>
-                        <p class="text-slate-500 text-sm mb-4">We manually digitize every design, carefully mapping out stitch direction, underlay, and pull compensation so your machines run smoothly and your 3D puff, left chest logos, and jacket backs look incredibly crisp.</p>
-                        <a href="portal-login.html?redirect=new_order&service=Digitizing" data-action="order-now" data-service="Digitizing" onclick="window.handleOrderClick(event, 'Digitizing')" class="text-primary font-bold text-sm flex items-center gap-1 cursor-pointer">Order Now
-                            <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
+                    <div class="p-2.5 sm:p-5 flex flex-col flex-1 justify-between">
+                        <div>
+                            <h4 class="font-bold text-xs sm:text-lg mb-1 sm:mb-2 text-slate-900 dark:text-white leading-tight">Embroidery Digitizing</h4>
+                            <p class="text-slate-500 dark:text-slate-400 text-[10px] sm:text-sm mb-2 sm:mb-4 line-clamp-2 sm:line-clamp-none leading-tight sm:leading-normal">
+                                We manually digitize every design, mapping stitch direction, underlay &amp; pull compensation for 3D puff, left chest &amp; jacket backs.
+                            </p>
+                        </div>
+                        <a href="portal-login.html?redirect=new_order&service=Digitizing" data-action="order-now" data-service="Digitizing" onclick="window.handleOrderClick(event, 'Digitizing')" class="text-amber-800 dark:text-primary font-black text-[11px] sm:text-sm flex items-center gap-1 cursor-pointer hover:underline">
+                            <span>Order Now</span>
+                            <span class="material-symbols-outlined text-xs sm:text-sm">arrow_forward</span>
+                        </a>
                     </div>
                 </div>
                 <div
-                    class="flex flex-col bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-primary/10 shadow-sm hover-scale">
-                    <div class="aspect-video bg-cover bg-center"
+                    class="flex flex-col bg-white dark:bg-slate-800/90 rounded-xl overflow-hidden border border-primary/15 dark:border-primary/20 shadow-xs hover-scale">
+                    <div class="aspect-[16/10] sm:aspect-video bg-cover bg-center"
                         style='background-image: url("Hero Page/Vector.png");'>
                     </div>
-                    <div class="p-5">
-                        <h4 class="font-bold text-lg mb-2">Vector Art Conversion</h4>
-                        <p class="text-slate-500 text-sm mb-4">Convert low-res images into scalable AI, EPS, SVG, and PDF formats, perfect for screenprinting, vinyl, and laser engraving.</p>
-                        <a href="portal-login.html?redirect=new_order&service=Vectorizing" data-action="order-now" data-service="Vectorizing" onclick="window.handleOrderClick(event, 'Vectorizing')" class="text-primary font-bold text-sm flex items-center gap-1 cursor-pointer">Order Now
-                            <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
+                    <div class="p-2.5 sm:p-5 flex flex-col flex-1 justify-between">
+                        <div>
+                            <h4 class="font-bold text-xs sm:text-lg mb-1 sm:mb-2 text-slate-900 dark:text-white leading-tight">Vector Art Conversion</h4>
+                            <p class="text-slate-500 dark:text-slate-400 text-[10px] sm:text-sm mb-2 sm:mb-4 line-clamp-2 sm:line-clamp-none leading-tight sm:leading-normal">
+                                Convert low-res images into scalable AI, EPS, SVG, and print-ready PDF formats for screenprinting and engraving.
+                            </p>
+                        </div>
+                        <a href="portal-login.html?redirect=new_order&service=Vectorizing" data-action="order-now" data-service="Vectorizing" onclick="window.handleOrderClick(event, 'Vectorizing')" class="text-amber-800 dark:text-primary font-black text-[11px] sm:text-sm flex items-center gap-1 cursor-pointer hover:underline">
+                            <span>Order Now</span>
+                            <span class="material-symbols-outlined text-xs sm:text-sm">arrow_forward</span>
+                        </a>
                     </div>
                 </div>
             </div>
