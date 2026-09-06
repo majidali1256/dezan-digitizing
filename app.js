@@ -179,6 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
     //  INSTANT GUEST CHECKOUT MODAL SYSTEM
     // ===================================================================
     const guestOrderState = {
+        isQuote: false,
         service: 'Digitizing',
         plan: 'Left Chest / Hat',
         price: 15.00,
@@ -212,10 +213,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover">
                         <div>
                             <div class="flex items-center gap-2">
-                                <h3 class="font-black text-base text-slate-900 dark:text-white">Instant Guest Checkout</h3>
-                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold tracking-wide uppercase border border-emerald-500/20">No Signup Needed</span>
+                                <h3 id="guest-modal-title" class="font-black text-base text-slate-900 dark:text-white">Instant Guest Checkout</h3>
+                                <span id="guest-modal-badge" class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold tracking-wide uppercase border border-emerald-500/20">No Signup Needed</span>
                             </div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Receive your production-ready files within 12-24 hours</p>
+                            <p id="guest-modal-sub" class="text-xs text-slate-500 dark:text-slate-400">Receive your production-ready files within 12-24 hours</p>
                         </div>
                     </div>
                     <button type="button" onclick="window.closeGuestCheckoutModal()" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 dark:hover:bg-primary/10 text-slate-400 hover:text-slate-600 dark:hover:text-primary transition-colors cursor-pointer" aria-label="Close modal">
@@ -225,6 +226,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 <!-- Scrollable Form Body -->
                 <form id="guest-checkout-form" onsubmit="window.handleGuestCheckoutSubmit(event)" class="p-5 overflow-y-auto space-y-4 text-xs sm:text-sm">
+                    <!-- Order vs Quote Mode Switcher -->
+                    <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-primary/20">
+                        <button type="button" id="guest-mode-order-btn" onclick="window.setGuestMode(false)" class="py-1.5 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-primary text-background-dark shadow-xs cursor-pointer">
+                            <span class="material-symbols-outlined text-sm">bolt</span>
+                            <span>Place Flat-Rate Order</span>
+                        </button>
+                        <button type="button" id="guest-mode-quote-btn" onclick="window.setGuestMode(true)" class="py-1.5 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer">
+                            <span class="material-symbols-outlined text-sm">request_quote</span>
+                            <span>Request Free Quote ($0)</span>
+                        </button>
+                    </div>
+
                     <!-- Existing Account Notice -->
                     <div class="p-2.5 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-between">
                         <span class="text-xs text-slate-700 dark:text-slate-300">Have an account with us?</span>
@@ -236,7 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     <!-- 1. Service & Plan Selection -->
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">1. Select Service &amp; Plan</label>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">1. Select Service &amp; Specifications</label>
                         <div class="grid grid-cols-2 gap-2 mb-2.5">
                             <button type="button" id="guest-svc-digitizing" onclick="window.setGuestService('Digitizing')" class="py-2 px-3 rounded-xl border-2 border-primary bg-primary/10 text-slate-900 dark:text-white font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                                 <span class="material-symbols-outlined text-base text-primary">texture</span>
@@ -248,16 +261,18 @@ document.addEventListener("DOMContentLoaded", () => {
                             </button>
                         </div>
 
-                        <!-- Digitizing Plans -->
-                        <div id="guest-digitizing-plans" class="grid grid-cols-3 gap-2">
-                            <label class="relative flex flex-col p-2.5 rounded-xl border-2 border-primary bg-primary/10 cursor-pointer transition-all guest-plan-option text-center" data-plan="Left Chest / Hat" data-price="15.00">
-                                <input type="radio" name="guest_plan" value="Left Chest / Hat" checked class="sr-only" onchange="window.updateGuestPrice('Left Chest / Hat', 15)">
-                                <span class="text-[11px] font-bold uppercase text-slate-900 dark:text-white">Left Chest / Hat</span>
-                                <span class="text-[10px] text-slate-500 dark:text-slate-400">Up to 5.5"</span>
-                                <span class="text-sm font-black text-primary mt-1">$15</span>
-                            </label>
-                            <label class="relative flex flex-col p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-card-dark cursor-pointer transition-all guest-plan-option text-center" data-plan="Jacket Back" data-price="25.00">
-                                <input type="radio" name="guest_plan" value="Jacket Back" class="sr-only" onchange="window.updateGuestPrice('Jacket Back', 25)">
+                        <!-- Digitizing & Vector Plans Container (Order Mode) -->
+                        <div id="guest-plans-section">
+                            <!-- Digitizing Plans -->
+                            <div id="guest-digitizing-plans" class="grid grid-cols-3 gap-2">
+                                <label class="relative flex flex-col p-2.5 rounded-xl border-2 border-primary bg-primary/10 cursor-pointer transition-all guest-plan-option text-center" data-plan="Left Chest / Hat" data-price="15.00">
+                                    <input type="radio" name="guest_plan" value="Left Chest / Hat" checked class="sr-only" onchange="window.updateGuestPrice('Left Chest / Hat', 15)">
+                                    <span class="text-[11px] font-bold uppercase text-slate-900 dark:text-white">Left Chest / Hat</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400">Up to 5.5"</span>
+                                    <span class="text-sm font-black text-primary mt-1">$15</span>
+                                </label>
+                                <label class="relative flex flex-col p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-card-dark cursor-pointer transition-all guest-plan-option text-center" data-plan="Jacket Back" data-price="25.00">
+                                    <input type="radio" name="guest_plan" value="Jacket Back" class="sr-only" onchange="window.updateGuestPrice('Jacket Back', 25)">
                                 <span class="text-[11px] font-bold uppercase text-slate-900 dark:text-white">Jacket Back</span>
                                 <span class="text-[10px] text-slate-500 dark:text-slate-400">Over 5.5"</span>
                                 <span class="text-sm font-black text-primary mt-1">$25</span>
@@ -270,20 +285,32 @@ document.addEventListener("DOMContentLoaded", () => {
                             </label>
                         </div>
 
-                        <!-- Vector Plans -->
-                        <div id="guest-vector-plans" class="grid grid-cols-2 gap-2 hidden">
-                            <label class="relative flex flex-col p-2.5 rounded-xl border-2 border-primary bg-primary/10 cursor-pointer transition-all guest-vector-option text-center" data-plan="Simple Vector Redraw" data-price="15.00">
-                                <input type="radio" name="guest_vector_plan" value="Simple Vector Redraw" checked class="sr-only" onchange="window.updateGuestPrice('Simple Vector Redraw', 15)">
-                                <span class="text-[11px] font-bold uppercase text-slate-900 dark:text-white">Simple Redraw</span>
-                                <span class="text-[10px] text-slate-500 dark:text-slate-400">Basic / 1-2 Colors</span>
-                                <span class="text-sm font-black text-primary mt-1">$15</span>
-                            </label>
-                            <label class="relative flex flex-col p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-card-dark cursor-pointer transition-all guest-vector-option text-center" data-plan="Complex Vector Redraw" data-price="25.00">
-                                <input type="radio" name="guest_vector_plan" value="Complex Vector Redraw" class="sr-only" onchange="window.updateGuestPrice('Complex Vector Redraw', 25)">
-                                <span class="text-[11px] font-bold uppercase text-slate-900 dark:text-white">Complex Redraw</span>
-                                <span class="text-[10px] text-slate-500 dark:text-slate-400">Detailed / Mascot</span>
-                                <span class="text-sm font-black text-primary mt-1">$25</span>
-                            </label>
+                            <!-- Vector Plans -->
+                            <div id="guest-vector-plans" class="grid grid-cols-2 gap-2 hidden">
+                                <label class="relative flex flex-col p-2.5 rounded-xl border-2 border-primary bg-primary/10 cursor-pointer transition-all guest-vector-option text-center" data-plan="Simple Vector Redraw" data-price="15.00">
+                                    <input type="radio" name="guest_vector_plan" value="Simple Vector Redraw" checked class="sr-only" onchange="window.updateGuestPrice('Simple Vector Redraw', 15)">
+                                    <span class="text-[11px] font-bold uppercase text-slate-900 dark:text-white">Simple Redraw</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400">Basic / 1-2 Colors</span>
+                                    <span class="text-sm font-black text-primary mt-1">$15</span>
+                                </label>
+                                <label class="relative flex flex-col p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-card-dark cursor-pointer transition-all guest-vector-option text-center" data-plan="Complex Vector Redraw" data-price="25.00">
+                                    <input type="radio" name="guest_vector_plan" value="Complex Vector Redraw" class="sr-only" onchange="window.updateGuestPrice('Complex Vector Redraw', 25)">
+                                    <span class="text-[11px] font-bold uppercase text-slate-900 dark:text-white">Complex Redraw</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400">Detailed / Mascot</span>
+                                    <span class="text-sm font-black text-primary mt-1">$25</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Quote Notice (Quote Mode) -->
+                        <div id="guest-quote-notice" class="hidden p-3 rounded-xl bg-primary/10 border border-primary/25 text-slate-700 dark:text-slate-300 text-xs">
+                            <div class="flex items-center gap-2 font-bold text-primary mb-1">
+                                <span class="material-symbols-outlined text-base">verified</span>
+                                <span>100% Free Stitch Appraisal &amp; Estimation</span>
+                            </div>
+                            <p class="text-[11px] text-slate-600 dark:text-slate-400">
+                                Upload your artwork and specify dimensions/garment fabric below. Our master digitizers will analyze thread pathways, estimate exact stitch count, and quote a fair flat price within 1 hour.
+                            </p>
                         </div>
                     </div>
 
@@ -370,8 +397,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     </div>
 
-                    <!-- 4. Payment Section -->
-                    <div class="pt-2 border-t border-slate-200 dark:border-primary/20">
+                    <!-- 4. Payment Section (Order Mode) -->
+                    <div id="guest-payment-section" class="pt-2 border-t border-slate-200 dark:border-primary/20">
                         <div class="flex items-center justify-between mb-3 bg-primary/10 dark:bg-primary/15 p-3 rounded-xl border border-primary/25">
                             <div>
                                 <span class="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-300 block">Total Due (Flat-Rate)</span>
@@ -433,6 +460,30 @@ document.addEventListener("DOMContentLoaded", () => {
                             <span>256-Bit SSL Encrypted · 100% Quality Guaranteed · Free Revisions</span>
                         </div>
                     </div>
+
+                    <!-- 4. Quote Submit Section (Quote Mode) -->
+                    <div id="guest-quote-submit-section" class="hidden pt-2 border-t border-slate-200 dark:border-primary/20 space-y-3">
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-primary/10 dark:bg-primary/15 border border-primary/25">
+                            <div>
+                                <span class="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-300 block">Upfront Payment</span>
+                                <span class="text-xs font-bold text-slate-900 dark:text-white">Zero Charge Today</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400">FREE</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 block">Pay only after price approval</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="guest-quote-submit-btn" class="w-full py-3 rounded-xl bg-primary hover:brightness-110 text-background-dark font-black text-sm flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-base">send</span>
+                            <span id="guest-quote-submit-text">Submit Free Custom Quote Request</span>
+                        </button>
+
+                        <div class="flex items-center justify-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
+                            <span class="material-symbols-outlined text-xs text-emerald-600 dark:text-emerald-400">verified_user</span>
+                            <span>No credit card needed · 100% Free Appraisal · Fast 1-hour response</span>
+                        </div>
+                    </div>
                 </form>
             </div>
         `;
@@ -444,12 +495,55 @@ document.addEventListener("DOMContentLoaded", () => {
         return wrap;
     }
 
+    window.setGuestMode = function(isQuote) {
+        guestOrderState.isQuote = isQuote;
+        const orderModeBtn = document.getElementById('guest-mode-order-btn');
+        const quoteModeBtn = document.getElementById('guest-mode-quote-btn');
+        const modalTitle = document.getElementById('guest-modal-title');
+        const modalBadge = document.getElementById('guest-modal-badge');
+        const modalSub = document.getElementById('guest-modal-sub');
+        const plansSection = document.getElementById('guest-plans-section');
+        const quoteNotice = document.getElementById('guest-quote-notice');
+        const paymentSection = document.getElementById('guest-payment-section');
+        const quoteSubmitSection = document.getElementById('guest-quote-submit-section');
+
+        if (isQuote) {
+            if (orderModeBtn) orderModeBtn.className = 'py-1.5 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer';
+            if (quoteModeBtn) quoteModeBtn.className = 'py-1.5 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-primary text-background-dark shadow-xs cursor-pointer';
+            if (modalTitle) modalTitle.textContent = 'Request a Free Custom Quote';
+            if (modalBadge) {
+                modalBadge.textContent = '100% Free · No Signup Needed';
+                modalBadge.className = 'px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-bold tracking-wide uppercase border border-amber-500/20';
+            }
+            if (modalSub) modalSub.textContent = 'Upload artwork for stitch estimation & flat price appraisal within 1 hour';
+            if (plansSection) plansSection.classList.add('hidden');
+            if (quoteNotice) quoteNotice.classList.remove('hidden');
+            if (paymentSection) paymentSection.classList.add('hidden');
+            if (quoteSubmitSection) quoteSubmitSection.classList.remove('hidden');
+        } else {
+            if (orderModeBtn) orderModeBtn.className = 'py-1.5 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-primary text-background-dark shadow-xs cursor-pointer';
+            if (quoteModeBtn) quoteModeBtn.className = 'py-1.5 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer';
+            if (modalTitle) modalTitle.textContent = 'Instant Guest Checkout';
+            if (modalBadge) {
+                modalBadge.textContent = 'No Signup Needed';
+                modalBadge.className = 'px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold tracking-wide uppercase border border-emerald-500/20';
+            }
+            if (modalSub) modalSub.textContent = 'Receive your production-ready files within 12-24 hours';
+            if (plansSection) plansSection.classList.remove('hidden');
+            if (quoteNotice) quoteNotice.classList.add('hidden');
+            if (paymentSection) paymentSection.classList.remove('hidden');
+            if (quoteSubmitSection) quoteSubmitSection.classList.add('hidden');
+        }
+    };
+
     window.openGuestCheckoutModal = function(options = {}) {
         let modal = document.getElementById('guest-checkout-modal');
         if (!modal) {
             modal = createGuestCheckoutModalElement();
             document.body.appendChild(modal);
         }
+
+        window.setGuestMode(!!options.isQuote);
 
         const reqService = (options.service || 'Digitizing').toLowerCase().includes('vector') ? 'Vector Art' : 'Digitizing';
         window.setGuestService(reqService);
@@ -663,15 +757,25 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        const isQuote = guestOrderState.isQuote === true;
         const cardBtn = document.getElementById('guest-card-submit-btn');
         const paypalBtn = document.getElementById('guest-paypal-submit-btn');
-        if (cardBtn) {
-            cardBtn.disabled = true;
-            cardBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">progress_activity</span> Processing Secure Payment...';
-        }
-        if (paypalBtn) {
-            paypalBtn.disabled = true;
-            paypalBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">progress_activity</span> Processing PayPal...';
+        const quoteBtn = document.getElementById('guest-quote-submit-btn');
+
+        if (isQuote) {
+            if (quoteBtn) {
+                quoteBtn.disabled = true;
+                quoteBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">progress_activity</span> Submitting Quote Request...';
+            }
+        } else {
+            if (cardBtn) {
+                cardBtn.disabled = true;
+                cardBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">progress_activity</span> Processing Secure Payment...';
+            }
+            if (paypalBtn) {
+                paypalBtn.disabled = true;
+                paypalBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">progress_activity</span> Processing PayPal...';
+            }
         }
 
         let rawArtworkFiles = [];
@@ -703,8 +807,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ].filter(Boolean).join('\n');
 
         const orderPayload = {
+            isQuote: isQuote,
+            is_quote: isQuote,
+            status: isQuote ? 'quote_requested' : 'pending_review',
             serviceType: guestOrderState.service,
-            planName: guestOrderState.plan,
+            planName: isQuote ? (guestOrderState.service + ' Custom Quote') : guestOrderState.plan,
             projectName: projectName,
             placement: dimensions || 'Standard Placement',
             sizing: dimensions || 'Standard',
@@ -712,9 +819,9 @@ document.addEventListener("DOMContentLoaded", () => {
             fabricType: fabric,
             instructions: combinedInstructions,
             rawArtworkFiles: rawArtworkFiles,
-            price: guestOrderState.price,
-            paymentStatus: 'paid',
-            paymentMethod: guestOrderState.paymentMethod,
+            price: isQuote ? 0 : guestOrderState.price,
+            paymentStatus: isQuote ? 'unpaid' : 'paid',
+            paymentMethod: isQuote ? 'Quote Request' : guestOrderState.paymentMethod,
             clientName: name,
             clientEmail: email
         };
@@ -724,11 +831,12 @@ document.addEventListener("DOMContentLoaded", () => {
             if (window.insforgeClient && typeof window.insforgeClient.createOrder === 'function') {
                 createdOrder = await window.insforgeClient.createOrder(orderPayload);
             } else {
-                const orderNum = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+                const orderNum = (isQuote ? 'QUO-' : 'DZ-') + Math.floor(1000 + Math.random() * 9000);
                 createdOrder = {
-                    id: 'guest_' + Date.now(),
+                    id: (isQuote ? 'quo_' : 'guest_') + Date.now(),
                     order_number: orderNum,
                     ...orderPayload,
+                    is_quote: isQuote,
                     created_at: new Date().toISOString()
                 };
                 const existing = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
@@ -738,11 +846,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             sessionStorage.setItem('dezan_last_guest_order', JSON.stringify(createdOrder));
 
-            const targetUrl = `order-success.html?orderId=${encodeURIComponent(createdOrder.order_number)}&txn=${encodeURIComponent(createdOrder.id ? createdOrder.id.slice(0, 8) : 'TXN-' + Math.floor(100000 + Math.random() * 900000))}&plan=${encodeURIComponent(createdOrder.plan_name)}&project=${encodeURIComponent(createdOrder.project_name)}&service=${encodeURIComponent(createdOrder.service_type)}&amount=${encodeURIComponent(createdOrder.price)}&email=${encodeURIComponent(email)}&guest=true`;
+            const targetUrl = `order-success.html?orderId=${encodeURIComponent(createdOrder.order_number)}&txn=${encodeURIComponent(createdOrder.id ? createdOrder.id.slice(0, 8) : (isQuote ? 'QUO-' : 'TXN-') + Math.floor(100000 + Math.random() * 900000))}&plan=${encodeURIComponent(createdOrder.plan_name)}&project=${encodeURIComponent(createdOrder.project_name)}&service=${encodeURIComponent(createdOrder.service_type)}&amount=${encodeURIComponent(createdOrder.price)}&email=${encodeURIComponent(email)}&guest=true${isQuote ? '&quote=true' : ''}`;
             window.location.href = targetUrl;
         } catch (err) {
-            console.error('Order creation error:', err);
-            alert('There was an issue processing your order: ' + err.message);
+            console.error('Order/Quote creation error:', err);
+            alert('There was an issue processing your request: ' + err.message);
             if (cardBtn) {
                 cardBtn.disabled = false;
                 cardBtn.innerHTML = `<span class="material-symbols-outlined text-base">lock</span> Pay $${guestOrderState.price.toFixed(2)} Now & Place Order`;
@@ -750,6 +858,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (paypalBtn) {
                 paypalBtn.disabled = false;
                 paypalBtn.innerHTML = `<span class="material-symbols-outlined text-base">payments</span> Complete with PayPal ($${guestOrderState.price.toFixed(2)})`;
+            }
+            if (quoteBtn) {
+                quoteBtn.disabled = false;
+                quoteBtn.innerHTML = `<span class="material-symbols-outlined text-base">send</span> Submit Free Custom Quote Request`;
             }
         }
     };
@@ -777,9 +889,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 window.location.href = 'worker-portal.html';
             }
         } else {
-            let url = 'portal-login.html?redirect=request_quote';
-            if (service) url += `&service=${encodeURIComponent(service)}`;
-            window.location.href = url;
+            // Unauthenticated visitor: Open instant Guest Quote modal!
+            window.openGuestCheckoutModal({ isQuote: true, service });
         }
     };
 
@@ -1626,7 +1737,7 @@ function initSuccessPage() {
         if (stored) guestOrder = JSON.parse(stored);
     } catch (_) {}
 
-    const orderId = params.get("orderId") || (guestOrder ? guestOrder.order_number : "ORD-" + Math.floor(1000 + Math.random() * 9000));
+    const orderId = params.get("orderId") || (guestOrder ? guestOrder.order_number : "DZ-" + Math.floor(1000 + Math.random() * 9000));
     const txnId = params.get("txn") || (guestOrder ? (guestOrder.id ? guestOrder.id.slice(0, 8) : 'TXN-884192') : "TXN-" + Math.floor(100000 + Math.random() * 900000));
     const plan = params.get("plan") || (guestOrder ? guestOrder.plan_name : "Left Chest / Hat");
     const project = params.get("project") || (guestOrder ? guestOrder.project_name : "Custom Embroidery Design");
@@ -1634,6 +1745,7 @@ function initSuccessPage() {
     const amount = params.get("amount") || (guestOrder ? guestOrder.price : "15.00");
     const email = params.get("email") || (guestOrder ? guestOrder.client_email : "");
 
+    const headerOrderEl = document.getElementById("success-header-order-id");
     const orderIdEl = document.getElementById("success-order-id");
     const txnEl = document.getElementById("success-txn-id");
     const planEl = document.getElementById("success-plan");
@@ -1642,6 +1754,7 @@ function initSuccessPage() {
     const amountEl = document.getElementById("success-amount");
     const emailEl = document.getElementById("success-email");
 
+    if (headerOrderEl) headerOrderEl.textContent = orderId.startsWith('#') ? orderId : '#' + orderId;
     if (orderIdEl) orderIdEl.textContent = orderId;
     if (txnEl) txnEl.textContent = txnId;
     if (planEl) planEl.textContent = plan;
@@ -1649,6 +1762,47 @@ function initSuccessPage() {
     if (serviceEl) serviceEl.textContent = service;
     if (amountEl) amountEl.textContent = "$" + parseFloat(amount).toFixed(2);
     if (emailEl) emailEl.textContent = email || "Delivered to your email";
+
+    const isQuote = params.get("quote") === "true" || orderId.startsWith("QUO-");
+    const prefixEl = document.getElementById("success-header-prefix");
+    const subheadEl = document.getElementById("success-subhead");
+    const summaryTitleEl = document.getElementById("success-summary-title");
+    const statusBadgeEl = document.getElementById("success-status-badge");
+    const idLabelEl = document.getElementById("success-id-label");
+    const amountLabelEl = document.getElementById("success-amount-label");
+    const claimCardTitleEl = document.getElementById("claim-card-title");
+    const claimCardSubEl = document.getElementById("claim-card-sub");
+    const fallbackNoteEl = document.getElementById("claim-fallback-note");
+
+    if (isQuote) {
+        if (prefixEl) prefixEl.textContent = "Quote requested!";
+        if (subheadEl) subheadEl.textContent = "Your request has been submitted. Our master digitizers will review your artwork and estimate stitch counts within 1 hour.";
+        if (summaryTitleEl) summaryTitleEl.textContent = "Quote Summary";
+        if (idLabelEl) idLabelEl.textContent = "Quote Number";
+        if (statusBadgeEl) {
+            statusBadgeEl.className = "px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs font-bold flex items-center gap-1 border border-amber-500/20";
+            statusBadgeEl.innerHTML = '<span class="material-symbols-outlined text-sm">schedule</span> Quote Submitted · Free Review';
+        }
+        if (amountLabelEl) amountLabelEl.textContent = "Estimated Price";
+        if (amountEl) amountEl.textContent = "Free · Pending Appraisal";
+        if (claimCardTitleEl) claimCardTitleEl.textContent = "Create a password to access your quotes & orders anytime";
+        if (claimCardSubEl) claimCardSubEl.textContent = "Track status, view digitizer price appraisal, and approve with 1 click.";
+        if (fallbackNoteEl) fallbackNoteEl.textContent = "Or keep this Quote ID for reference — your custom stitch appraisal will arrive in your email within 1 hour.";
+    } else {
+        if (prefixEl) prefixEl.textContent = "Order confirmed!";
+        if (subheadEl) subheadEl.textContent = "Your payment was successful and your order has been submitted.";
+        if (summaryTitleEl) summaryTitleEl.textContent = "Order Summary";
+        if (idLabelEl) idLabelEl.textContent = "Order Number";
+        if (statusBadgeEl) {
+            statusBadgeEl.className = "px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-1 border border-emerald-500/20";
+            statusBadgeEl.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span> Paid &amp; Confirmed';
+        }
+        if (amountLabelEl) amountLabelEl.textContent = "Amount Paid";
+        if (amountEl) amountEl.textContent = "$" + parseFloat(amount).toFixed(2);
+        if (claimCardTitleEl) claimCardTitleEl.textContent = "Create a password to access your orders anytime";
+        if (claimCardSubEl) claimCardSubEl.textContent = "Track status, download files, and view your complete order history.";
+        if (fallbackNoteEl) fallbackNoteEl.textContent = "Or keep this Order ID for reference — finished files will arrive in your email.";
+    }
 
     // Handle Account Claiming Widget vs Logged-In User
     let session = null;

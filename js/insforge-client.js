@@ -1271,7 +1271,7 @@ class InsForgeClient {
         }
 
         const isQuote = (orderData.isQuote === true) || (orderData.status === 'quote_requested');
-        const orderNumber = (isQuote ? 'QUO-' : 'ORD-') + Math.floor(1000 + Math.random() * 9000);
+        const orderNumber = (isQuote ? 'QUO-' : 'DZ-') + Math.floor(1000 + Math.random() * 9000);
         const clientId = user ? user.id : null;
         const clientName = user ? (user.displayName || user.email) : (orderData.clientName || 'Guest Customer');
         const clientCompany = user ? (user.company || '') : (orderData.clientCompany || '');

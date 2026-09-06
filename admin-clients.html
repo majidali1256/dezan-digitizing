@@ -101,25 +101,25 @@
         <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
             <!-- Left: Segmented Primary Navigation Tabs (Section Jump Links) -->
             <nav class="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none" aria-label="Admin Navigation Tabs">
-                <a href="admin-portal.html" data-admin-link="orders" id="nav-tab-orders" class="admin-nav-tab px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap bg-amber-500 text-slate-950 shadow-xs ring-2 ring-amber-400/40 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                <a href="admin-portal.html" data-admin-link="dashboard" aria-label="Dashboard" title="Dashboard" id="nav-tab-dashboard" class="admin-nav-tab px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap bg-amber-500 text-slate-950 shadow-xs ring-2 ring-amber-400/40 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                    <span class="material-symbols-outlined text-sm">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+<a href="admin-orders.html" data-admin-link="orders" aria-label="Orders" title="Orders" id="nav-tab-orders" class="admin-nav-tab px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap bg-amber-500 text-slate-950 shadow-xs ring-2 ring-amber-400/40 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                     <span class="material-symbols-outlined text-sm">receipt_long</span>
                     <span>Orders</span>
-                    <span id="nav-badge-orders" class="text-[10px] font-black px-2 py-0.2 rounded-full bg-slate-950/20 text-slate-950">0</span>
                 </a>
-                <a href="admin-clients.html" data-admin-link="clients" id="nav-tab-clients" class="admin-nav-tab px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                <a href="admin-clients.html" data-admin-link="clients" aria-label="Clients" title="Clients" id="nav-tab-clients" class="admin-nav-tab px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                     <span class="material-symbols-outlined text-sm text-emerald-600 dark:text-emerald-400">groups</span>
-                    <span>Clients & History</span>
-                    <span id="nav-badge-clients" class="text-[10px] font-black px-2 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-900 dark:text-emerald-300">0</span>
+                    <span>Clients</span>
                 </a>
-                <a href="admin-catalog.html" data-admin-link="catalog" id="nav-tab-catalog" class="admin-nav-tab px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                <a href="admin-catalog.html" data-admin-link="catalog" aria-label="Catalog" title="Catalog" id="nav-tab-catalog" class="admin-nav-tab px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                     <span class="material-symbols-outlined text-sm text-blue-600 dark:text-blue-400">palette</span>
-                    <span>Design Catalog</span>
-                    <span id="nav-badge-catalog" class="text-[10px] font-black px-2 py-0.2 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-900 dark:text-blue-300">0</span>
+                    <span>Catalog</span>
                 </a>
-                <a href="admin-team.html" data-admin-link="team" id="nav-tab-team" class="admin-nav-tab px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                <a href="admin-team.html" data-admin-link="team" aria-label="Team" title="Team" id="nav-tab-team" class="admin-nav-tab px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                     <span class="material-symbols-outlined text-sm text-purple-600 dark:text-purple-400">badge</span>
-                    <span>Digitizer Team</span>
-                    <span id="nav-badge-team" class="text-[10px] font-black px-2 py-0.2 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-900 dark:text-purple-300">3</span>
+                    <span>Team</span>
                 </a>
             </nav>
 
@@ -597,19 +597,23 @@
     <!-- ===== FIXED BOTTOM NAVIGATION DOCK (MOBILE) ===== -->
     <nav class="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-primary/20 dark:border-primary/25 py-2 px-2 shadow-xl transition-colors no-print">
         <div class="max-w-md mx-auto flex items-center justify-between">
-            <a href="admin-portal.html" data-admin-link="orders" id="mobile-dock-orders" class="flex-1 flex flex-col items-center justify-center py-1 text-amber-800 dark:text-primary rounded-xl cursor-pointer group focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Master Orders Queue">
+            <a href="admin-portal.html" data-admin-link="dashboard" aria-label="Dashboard" title="Dashboard" id="mobile-dock-dashboard" class="flex-1 flex flex-col items-center justify-center py-1 text-amber-800 dark:text-primary rounded-xl cursor-pointer group focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">dashboard</span>
+                <span class="text-[9px] font-bold mt-0.5 tracking-tight">Dashboard</span>
+            </a>
+<a href="admin-orders.html" data-admin-link="orders" aria-label="Orders" title="Orders" id="mobile-dock-orders" class="flex-1 flex flex-col items-center justify-center py-1 text-amber-800 dark:text-primary rounded-xl cursor-pointer group focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                 <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">receipt_long</span>
                 <span class="text-[9px] font-bold mt-0.5 tracking-tight">Orders</span>
             </a>
-            <a href="admin-clients.html" data-admin-link="clients" id="mobile-dock-clients" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary rounded-xl cursor-pointer group focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Clients & History">
+            <a href="admin-clients.html" data-admin-link="clients" aria-label="Clients" title="Clients" id="mobile-dock-clients" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary rounded-xl cursor-pointer group focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                 <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">groups</span>
                 <span class="text-[9px] font-bold mt-0.5 tracking-tight">Clients</span>
             </a>
-            <a href="admin-catalog.html" data-admin-link="catalog" id="mobile-dock-catalog" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary rounded-xl cursor-pointer group focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Design Catalog">
+            <a href="admin-catalog.html" data-admin-link="catalog" aria-label="Catalog" title="Catalog" id="mobile-dock-catalog" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary rounded-xl cursor-pointer group focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                 <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">palette</span>
                 <span class="text-[9px] font-bold mt-0.5 tracking-tight">Catalog</span>
             </a>
-            <a href="admin-team.html" data-admin-link="team" id="mobile-dock-team" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary rounded-xl cursor-pointer group focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Digitizer Team">
+            <a href="admin-team.html" data-admin-link="team" aria-label="Team" title="Team" id="mobile-dock-team" class="flex-1 flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary rounded-xl cursor-pointer group focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                 <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">badge</span>
                 <span class="text-[9px] font-bold mt-0.5 tracking-tight">Team</span>
             </a>

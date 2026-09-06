@@ -132,9 +132,20 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - `app.js`:
     - Enhanced scroll reveal observer with `rootMargin: 150px` and a 1000ms safety fallback so no element remains stuck invisible (`opacity: 0`).
 
-### Instant Guest Checkout Modal & Post-Payment Account Claiming Architecture (Implemented & Live)
-- **Zero Forced Registration Checkout (`window.openGuestCheckoutModal`)**:
-  - Unauthenticated visitors clicking any "Order Now" / "Place Order" button on `index.html`, `pricing.html`, `services.html`, or `profile.html` are presented with an **Instant Guest Checkout Modal** instead of a forced login barrier.
+### Instant Guest Checkout Modal & Post-Payment/Post-Quote Account Claiming Architecture (Implemented & Live)
+- **Unified Zero Forced Registration Engine (`window.openGuestCheckoutModal`)**:
+  - Unauthenticated visitors clicking any "Order Now" / "Place Order" or "Get Custom Quote" / "Request Free Quote" button on `index.html`, `pricing.html`, `services.html`, `contact.html`, `portfolio.html`, or `about.html` are presented with the **Instant Guest Modal** instead of a forced login barrier.
+  - **Interactive 2-Pill Mode Switcher**:
+    - **`[ ⚡ Place Flat-Rate Order ]` Mode**:
+      - Modal Title: "Instant Guest Checkout", Badge: "No Signup Needed".
+      - Displays flat pricing tiers ($15 / $25) for Digitizing & Vector Art.
+      - Requires upfront payment via simulated 256-bit SSL Credit Card or PayPal checkout.
+      - Order ID Prefix: `DZ-XXXX`, Status: `pending_review`, Payment: `paid`.
+    - **`[ 📄 Request Free Quote ($0) ]` Mode**:
+      - Modal Title: "Request a Free Custom Quote", Badge: "100% Free · No Signup Needed".
+      - Completely hides flat pricing plans and payment forms; renders the "100% Free Stitch Appraisal & Estimation" banner.
+      - Zero upfront charge ($0.00); 1-click submission button: `[ Submit Free Custom Quote Request ]`.
+      - Quote ID Prefix: `QUO-XXXX`, Status: `quote_requested`, Payment: `unpaid` ($0.00).
   - **Dynamic Service & Plan Preselection**:
     - Supports dynamic service switching between **Embroidery Digitizing** and **Vector Art**.
     - Intelligent plan name alias normalization (e.g. `'Larger Designs'` -> `'Jacket Back'` $25, `'Simple Vector'` -> `'Simple Vector Redraw'` $15, `'Complex Vector'` -> `'Complex Vector Redraw'` $25, `'Hat / Left Chest Logos'` -> `'Left Chest / Hat'` $15).
@@ -142,20 +153,28 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - **Direct Drag-and-Drop File Upload**:
     - Integrates file upload with live thumbnail image preview and file size metadata.
     - Files upload directly to InsForge Storage (`artworks` bucket) or fallback with file metadata.
-  - **Checkout & Payment Methods**:
-    - Simulated SSL Encrypted Credit Card checkout and PayPal integration.
-    - Persists new orders immediately into InsForge PostgreSQL database (`public.orders`) with `client_id: null`, `status: 'pending'`, `payment_status: 'paid'`, and full order details.
-  - **Post-Payment Confirmation (`order-success.html`)**:
-    - Displays full order confirmation details: Order Number (`ORD-XXXX`), Transaction ID, Plan, Service, Delivery Email, Total Paid, and Emerald "Paid & Confirmed" status badge.
-    - **Post-Payment Account Claiming Card**: Pre-fills the customer's delivery email and prompts for a password (`Minimum 6 characters`).
-    - **Automatic Order Claiming (`insforgeClient.claimGuestOrders`)**:
-      - Upon submitting the password, an InsForge authentication account is created via `insforgeClient.signUp(email, password, { name })`.
-      - Automatically executes a database patch linking all unassigned guest orders (`WHERE client_email = lower(?) AND client_id IS NULL`) to the newly registered `auth.uid()`.
-      - Synchronizes local cache and redirects to `client-portal.html?welcome=new_account`, displaying the claimed order directly in their new portal dashboard.
-  - **Quote Submissions**:
-    - "Get Quote" / "Request a Quote" actions continue to route to `portal-login.html?redirect=request_quote` or directly launch `#quote-wizard-modal` for authenticated clients.
+  - **Dynamic Confirmation & Receipt Screen (`order-success.html`)**:
+    - **For Paid Orders**:
+      - Header: `Order confirmed! #DZ-1048`
+      - Subtitle: `Your payment was successful and your order has been submitted.`
+      - Summary Card: "Order Summary", Label: "Order Number", Status: `Paid & Confirmed` (emerald badge), Amount: `$15.00` / `$25.00`.
+      - Fallback note: `Or keep this Order ID for reference — finished files will arrive in your email.`
+    - **For Custom Quotes**:
+      - Header: `Quote requested! #QUO-4321`
+      - Subtitle: `Your request has been submitted. Our master digitizers will review your artwork and estimate stitch counts within 1 hour.`
+      - Summary Card: "Quote Summary", Label: "Quote Number", Status: `Quote Submitted · Free Review` (amber badge), Amount: `Free · Pending Appraisal`.
+      - Fallback note: `Or keep this Quote ID for reference — your custom stitch appraisal will arrive in your email within 1 hour.`
+    - **Frictionless Account Claiming Card (Both Orders & Quotes)**:
+      - Clean inline card directly under the confirmation:
+        `Create a password to access your orders/quotes anytime`
+        `Password: ______  Confirm Password: ______`
+        `[ Create My Account ]`
+      - Pre-populates the customer's guest email (e.g. `david.miller@example.com`).
+  - **Automatic Retroactive Linking (`insforgeClient.claimGuestOrders`)**:
+    - When an unauthenticated visitor submits multiple orders and quotes as a guest (e.g. `john@gmail.com`), their records persist in the InsForge PostgreSQL `orders` table with `client_id: null`.
+    - As soon as they create an account (either on the confirmation page or later at `portal-login.html`), `claimGuestOrders(clientEmail, userId)` automatically matches all orders and quotes with that verified email (`WHERE client_email = lower(?) AND client_id IS NULL`), assigns `client_id = auth.uid()`, and immediately reflects their full history in `client-portal.html` with zero missing records.
   - **Logged-In Fast-Track**:
-    - If a client is already authenticated, clicking "Order Now" on marketing pages bypasses the guest checkout modal and opens the full 2-stage order wizard in `client-portal.html?action=new_order`.
+    - If a client is already authenticated, clicking "Order Now" on marketing pages opens the full 2-stage order wizard in `client-portal.html?action=new_order`, and clicking "Get Quote" opens `client-portal.html?action=request_quote`.
 
 ### Role-Based Order Portal (Implemented & Live)
 - `/portal-login.html`: Unified authentication page with automatic role routing, order intent banners, and 1-click test switcher.

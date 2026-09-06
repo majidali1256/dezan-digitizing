@@ -35,7 +35,7 @@ body > main h1 { font-size: 30px; font-weight: 700; letter-spacing: -.035em; }
 #admin-sticky-nav .admin-nav-tab { min-height: 56px; padding: 12px 4px; border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: transparent; color: var(--admin-muted); box-shadow: none; --tw-ring-shadow: 0 0 #0000; font-size: 13px; }
 #admin-sticky-nav .admin-nav-tab.bg-amber-500 { border-bottom-color: var(--admin-gold); color: var(--admin-text); }
 #admin-sticky-nav .admin-nav-tab > .material-symbols-outlined { color: inherit; font-size: 20px; }
-#admin-sticky-nav .admin-nav-tab > span:last-child { background: var(--admin-canvas); color: var(--admin-muted); font-weight: 600; }
+#admin-sticky-nav .admin-nav-tab > [id^="nav-badge-"] { background: var(--admin-canvas); color: var(--admin-muted); font-weight: 600; }
 #overview-metrics-section { gap: 0; border: 1px solid var(--admin-border); border-radius: 16px; background: var(--admin-surface); box-shadow: var(--admin-shadow); overflow: hidden; }
 #overview-metrics-section > div { border: 0; border-radius: 0; background: transparent; box-shadow: none; padding: 20px 24px; gap: 4px; }
 #overview-metrics-section > div + div { border-left: 1px solid var(--admin-border); }
@@ -78,7 +78,7 @@ body button:focus-visible, body [role="button"]:focus-visible, body a:focus-visi
     #admin-sticky-nav { padding: 0 16px; }
     #admin-sticky-nav nav { width: 100%; gap: 16px; }
     #admin-sticky-nav .admin-nav-tab { font-size: 12px; }
-    #admin-sticky-nav .admin-nav-tab > span:last-child { display: none; }
+    #admin-sticky-nav .admin-nav-tab > [id^="nav-badge-"] { display: none; }
     #overview-metrics-section > div { padding: 16px; }
     #overview-metrics-section > div:nth-child(3) { border-left: 0; }
     #overview-metrics-section > div:nth-child(n+3) { border-top: 1px solid var(--admin-border); }

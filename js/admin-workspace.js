@@ -80,7 +80,8 @@
 
             // Highlight mobile dock buttons
             const mobileDockMap = {
-                'overview': 'mobile-dock-overview',
+                'overview': 'mobile-dock-dashboard',
+                'dashboard': 'mobile-dock-dashboard',
                 'orders': 'mobile-dock-orders',
                 'clients': 'mobile-dock-clients',
                 'catalog': 'mobile-dock-catalog',
@@ -98,11 +99,11 @@
             }
         }
 
-        const adminPages = { orders: 'admin-portal.html', clients: 'admin-clients.html', catalog: 'admin-catalog.html', team: 'admin-team.html' };
+        const adminPages = { dashboard: 'admin-portal.html', orders: 'admin-orders.html', clients: 'admin-clients.html', catalog: 'admin-catalog.html', team: 'admin-team.html' };
         const adminPage = document.body.dataset.adminPage || 'orders';
 
         function switchAdminView(viewKey) {
-            const key = viewKey === 'overview' ? 'orders' : viewKey;
+            const key = viewKey === 'overview' ? 'dashboard' : viewKey;
             if (adminPages[key]) {
                 if (key === adminPage) scrollToTop();
                 else window.location.href = adminPages[key];
@@ -158,6 +159,7 @@
         }
 
         function setFilter(filterName) {
+            if (adminPage !== 'orders') { window.location.href = adminPages.orders + '?stage=' + encodeURIComponent(filterName); return; }
             activeAdminFilter = filterName;
             const select = document.getElementById('filter-status');
             if (select) select.value = filterName;
@@ -330,7 +332,11 @@
                     document.getElementById('admin-search-input').value = params.get('q');
                     handleSearchInput();
                 }
-                if (params.has('stage')) setFilter(params.get('stage'));
+                if (params.has('stage')) {
+                    const stage = params.get('stage');
+                    if (['unassigned','in-progress','incomplete','completed'].some(key => stage === 'stage-' + key + '-sub')) setStageScope(stage);
+                    else setFilter(stage);
+                }
                 if (params.get('focus') === 'search') focusAdminSearch();
             }
 
@@ -1873,7 +1879,7 @@ function renderAdminInsights(orders, stages) {
     const keys = ['unassigned', 'in-progress', 'incomplete', 'completed'];
     const total = stages.reduce((n, group) => n + group.length, 0);
     document.getElementById('admin-stage-chart').innerHTML = stages.map((group, i) => `
-        <button class="admin-bar-row" onclick="setStageScope('stage-${keys[i]}-sub'); scrollToSection('master-orders-section')" aria-label="${labels[i]}: ${group.length} orders. Open this stage.">
+        <button class="admin-bar-row" onclick="openAdminChartStage('stage-${keys[i]}-sub')" aria-label="${labels[i]}: ${group.length} orders. Open this stage.">
             <span>${labels[i]}</span><strong>${group.length}</strong>
             <span class="admin-bar-track" aria-hidden="true"><span style="width:${total ? group.length / total * 100 : 0}%"></span></span>
         </button>`).join('') + (!total ? '<p class="admin-chart-note">No orders to show yet.</p>' : '');
@@ -1914,4 +1920,8 @@ function renderAdminInsights(orders, stages) {
         <div class="admin-payment-track" aria-hidden="true">${amounts.map((v,i) => `<span class="admin-payment-${i}" style="width:${paymentTotal ? v/paymentTotal*100 : 0}%"></span>`).join('')}</div>
         <dl class="admin-payment-legend">${['Marked paid','Unpaid / pending','Other status'].map((name,i) => `<div><dt><span class="admin-payment-${i}" aria-hidden="true"></span>${name}</dt><dd>${money(amounts[i])}</dd></div>`).join('')}</dl>
         ${paymentTotal ? '' : '<p class="admin-chart-note">No priced orders to show yet.</p>'}`;
+}
+
+function openAdminChartStage(stage) {
+    window.location.href = adminPages.orders + '?stage=' + encodeURIComponent(stage);
 }

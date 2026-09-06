@@ -75,9 +75,12 @@
                 </div>
             </div>
 
-            <h1 class="text-3xl font-black tracking-tight mb-2 text-slate-900 dark:text-white">Order Confirmed!</h1>
-            <p class="text-slate-600 dark:text-slate-300 mb-8">Thank you for your order. We've received your request and will get started
-                right away.</p>
+            <h1 class="text-2xl sm:text-3xl font-black tracking-tight mb-2 text-slate-900 dark:text-white">
+                <span id="success-header-prefix">Order confirmed!</span> <span id="success-header-order-id" class="text-primary font-mono">#DZ-1048</span>
+            </h1>
+            <p id="success-subhead" class="text-sm sm:text-base font-medium text-slate-600 dark:text-slate-300 mb-8">
+                Your payment was successful and your order has been submitted.
+            </p>
 
             <!-- Order Details Card -->
             <div
@@ -85,15 +88,15 @@
                 <div class="flex items-center justify-between pb-3 border-b border-primary/15 mb-4">
                     <h2 class="text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-white">
                         <span class="material-symbols-outlined text-primary">receipt_long</span>
-                        Order Summary
+                        <span id="success-summary-title">Order Summary</span>
                     </h2>
-                    <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-1 border border-emerald-500/20">
+                    <span id="success-status-badge" class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-1 border border-emerald-500/20">
                         <span class="material-symbols-outlined text-sm">check_circle</span> Paid &amp; Confirmed
                     </span>
                 </div>
                 <div class="space-y-3 text-sm">
                     <div class="flex justify-between py-2 border-b border-primary/10">
-                        <span class="text-slate-600 dark:text-slate-400">Order Number</span>
+                        <span id="success-id-label" class="text-slate-600 dark:text-slate-400">Order Number</span>
                         <span class="font-mono font-bold text-sm text-primary" id="success-order-id">—</span>
                     </div>
                     <div class="flex justify-between py-2 border-b border-primary/10">
@@ -117,7 +120,7 @@
                         <span class="font-semibold text-slate-900 dark:text-white" id="success-email">—</span>
                     </div>
                     <div class="flex justify-between py-2">
-                        <span class="font-bold text-slate-900 dark:text-white">Amount Paid</span>
+                        <span id="success-amount-label" class="font-bold text-slate-900 dark:text-white">Amount Paid</span>
                         <span class="font-black text-primary text-xl" id="success-amount">$0</span>
                     </div>
                 </div>
@@ -128,43 +131,43 @@
                 <div class="absolute top-0 right-0 bg-primary text-background-dark px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-bl-xl">
                     Optional
                 </div>
-                <div class="flex items-center gap-3 mb-3">
+                <div class="flex items-center gap-3 mb-2">
                     <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
-                        <span class="material-symbols-outlined text-2xl">account_circle</span>
+                        <span class="material-symbols-outlined text-2xl">lock_open</span>
                     </div>
                     <div>
-                        <h3 class="text-base font-black text-slate-900 dark:text-white">Track this order &amp; download files anytime</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Set a password to unlock your personal Client Portal with 1 click.</p>
+                        <h3 id="claim-card-title" class="text-base sm:text-lg font-black text-slate-900 dark:text-white">Create a password to access your orders anytime</h3>
+                        <p id="claim-card-sub" class="text-xs text-slate-500 dark:text-slate-400">Track status, download files, and view your complete order history.</p>
                     </div>
                 </div>
 
                 <div id="claim-account-form" class="space-y-3 mt-4">
                     <div>
-                        <label class="block text-[11px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Your Email</label>
+                        <label class="block text-[11px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Email</label>
                         <input type="email" id="claim-email" readonly class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-primary/20 text-slate-700 dark:text-slate-300 font-semibold text-xs cursor-not-allowed">
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-[11px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Create Password</label>
-                            <input type="password" id="claim-password" placeholder="At least 6 characters" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20 text-slate-900 dark:text-white text-xs placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary">
+                            <label class="block text-[11px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Password</label>
+                            <input type="password" id="claim-password" placeholder="Enter password (min. 6 chars)" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20 text-slate-900 dark:text-white text-xs placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Confirm Password</label>
-                            <input type="password" id="claim-password-confirm" placeholder="Re-enter password" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20 text-slate-900 dark:text-white text-xs placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary">
+                            <input type="password" id="claim-password-confirm" placeholder="Confirm password" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20 text-slate-900 dark:text-white text-xs placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary">
                         </div>
                     </div>
 
                     <div id="claim-error-msg" class="hidden p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold"></div>
                     <div id="claim-success-msg" class="hidden p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-1.5">
                         <span class="material-symbols-outlined text-sm">check_circle</span>
-                        <span>Account activated! Redirecting to your portal...</span>
+                        <span>Account created! Redirecting to your dashboard...</span>
                     </div>
 
                     <button type="button" id="claim-submit-btn" onclick="window.submitGuestAccountClaim()" class="w-full py-3 rounded-xl bg-primary hover:brightness-110 text-background-dark font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer mt-2">
-                        <span class="material-symbols-outlined text-base">lock</span>
-                        <span>Save Password &amp; Open My Client Portal</span>
+                        <span class="material-symbols-outlined text-base">person_add</span>
+                        <span>Create My Account</span>
                     </button>
-                    <p class="text-[11px] text-slate-500 text-center">
+                    <p id="claim-fallback-note" class="text-[11px] text-slate-500 text-center">
                         Or keep this Order ID for reference — finished files will arrive in your email.
                     </p>
                 </div>
