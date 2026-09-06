@@ -5,6 +5,7 @@ const { authenticate, optionalAuth } = require('../middleware/auth');
 const { requireAdmin } = require('../middleware/roles');
 
 router.post('/', optionalAuth, orderController.createOrder);
+router.get('/track', orderController.trackOrder);
 router.get('/', authenticate, orderController.getOrders);
 router.get('/:id', authenticate, orderController.getOrderById);
 router.put('/:id/status', authenticate, requireAdmin, orderController.updateOrderStatus);

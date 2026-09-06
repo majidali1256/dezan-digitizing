@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const config = require('../config/config');
 const { query } = require('../config/db');
 const { success, error, badRequest, unauthorized } = require('../utils/apiResponse');
+const emailService = require('../services/emailService');
 
 // Demo account instant credentials whitelist for seamless offline/dev testing
 const DEMO_PASSWORDS = {
@@ -81,10 +82,10 @@ const register = async (req, res) => {
 
         const newUser = insertRes.rows[0];
 
-        // Claim any previous guest orders created with this email
+        // Claim all previous guest orders created with this email
         try {
             await query(
-                'UPDATE public.orders SET client_id = $1 WHERE LOWER(client_email) = $2 AND client_id IS NULL',
+                'UPDATE public.orders SET client_id = $1 WHERE LOWER(client_email) = $2',
                 [newUser.id, normalizedEmail]
             );
         } catch (claimErr) {
@@ -345,7 +346,8 @@ const forgotPassword = async (req, res) => {
         const normalizedEmail = email.trim().toLowerCase();
 
         // Check user existence
-        await query('SELECT id, email, display_name FROM public.profiles WHERE LOWER(email) = $1', [normalizedEmail]);
+        const userRes = await query('SELECT id, email, display_name FROM public.profiles WHERE LOWER(email) = $1', [normalizedEmail]);
+        const user = userRes.rows.length > 0 ? userRes.rows[0] : { email: normalizedEmail, display_name: '' };
         
         // Generate secure 6-digit numeric OTP and hex token
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -360,11 +362,22 @@ const forgotPassword = async (req, res) => {
 
         console.log(`🔑 [Password Reset OTP] Issued for ${normalizedEmail}: ${otp} (expires in 15m)`);
 
+        // Send transactional email with OTP & direct reset link
+        try {
+            emailService.sendPasswordResetOTP({
+                email: normalizedEmail,
+                otpCode: otp,
+                displayName: user.display_name
+            }).catch(err => console.warn('[Password Reset Email Send Warning]:', err.message));
+        } catch (e) {
+            console.warn('[Password Reset Email Error]:', e.message);
+        }
+
         return success(res, {
             email: normalizedEmail,
-            otp: otp, // Returned for instant testing and frontend verification banner
+            otp: otp, // Returned for instant dev testing & UI confirmation
             expiresInMinutes: 15
-        }, 'Password reset code generated successfully.');
+        }, 'Password reset code generated and sent to your email.');
     } catch (err) {
         console.error('[Forgot Password Error]:', err);
         return error(res, `Failed to process password reset: ${err.message}`);

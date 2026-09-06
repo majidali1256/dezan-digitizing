@@ -700,18 +700,24 @@ class InsForgeClient {
         }
     }
 
-    setSession(user, sessionOnly = false) {
+    setSession(user) {
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('dezan_session', JSON.stringify(user));
+        }
         if (typeof sessionStorage !== 'undefined') {
             sessionStorage.setItem('dezan_session', JSON.stringify(user));
-        }
-        if (!sessionOnly && typeof localStorage !== 'undefined') {
-            localStorage.setItem('dezan_session', JSON.stringify(user));
         }
     }
 
     signOut() {
-        if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem('dezan_session');
-        if (typeof localStorage !== 'undefined') localStorage.removeItem('dezan_session');
+        if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.removeItem('dezan_session');
+            sessionStorage.removeItem('dezan_jwt_token');
+        }
+        if (typeof localStorage !== 'undefined') {
+            localStorage.removeItem('dezan_session');
+            localStorage.removeItem('dezan_jwt_token');
+        }
         window.location.href = 'portal-login.html';
     }
 
@@ -728,7 +734,6 @@ class InsForgeClient {
     // Predefined & Standard Sign In
     async signIn(email, password, remember = true) {
         const rawEmail = (email || '').trim().toLowerCase();
-        const sessionOnly = !remember;
 
         // 1. Attempt Node.js REST API login first
         const apiRes = await this.callBackendApi('/auth/login', 'POST', { email: rawEmail, password });
@@ -743,13 +748,14 @@ class InsForgeClient {
                 status: apiRes.data.user.status || 'active'
             };
             if (apiRes.data.token) {
-                if (remember && typeof localStorage !== 'undefined') {
+                if (typeof localStorage !== 'undefined') {
                     localStorage.setItem('dezan_jwt_token', apiRes.data.token);
-                } else if (typeof sessionStorage !== 'undefined') {
+                }
+                if (typeof sessionStorage !== 'undefined') {
                     sessionStorage.setItem('dezan_jwt_token', apiRes.data.token);
                 }
             }
-            this.setSession(apiUser, sessionOnly);
+            this.setSession(apiUser);
             this.claimGuestOrders(apiUser.email, apiUser.id).catch(() => {});
             return { user: apiUser, error: null };
         }

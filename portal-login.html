@@ -182,6 +182,14 @@
 
             <!-- ===== SIGN UP FORM ===== -->
             <form id="signup-form" onsubmit="handleSignUp(event)" class="space-y-4 hidden">
+                <!-- Order Auto-Claim Notice Banner -->
+                <div id="order-claim-notice" class="hidden p-3 rounded-xl bg-primary/10 border border-primary/30 text-amber-900 dark:text-primary text-xs flex items-start gap-2.5">
+                    <span class="material-symbols-outlined text-base text-primary shrink-0 mt-0.5">folder_shared</span>
+                    <div class="leading-relaxed">
+                        <span class="font-bold">Catalog Linking Active:</span> Your order <strong id="order-claim-ref" class="font-mono font-bold text-slate-900 dark:text-white"></strong> and stitch files will be automatically added to your client catalog upon registration.
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">Full Name</label>
                     <input type="text" id="signup-name" required placeholder="John Doe" 
@@ -924,6 +932,56 @@
                 }
             } catch (e) {
                 console.warn('OAuth callback detection error:', e);
+            }
+        })();
+
+        // Parse incoming query parameters (smart claim, register tab, forgot password)
+        (function initUrlParams() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const tabParam = urlParams.get('tab');
+                const emailParam = urlParams.get('email');
+                const nameParam = urlParams.get('name');
+                const orderParam = urlParams.get('order');
+                const codeParam = urlParams.get('code');
+
+                if (emailParam) {
+                    const signinEmail = document.getElementById('signin-email');
+                    const signupEmail = document.getElementById('signup-email');
+                    if (signinEmail) signinEmail.value = emailParam;
+                    if (signupEmail) signupEmail.value = emailParam;
+                }
+
+                if (nameParam) {
+                    const signupName = document.getElementById('signup-name');
+                    if (signupName) signupName.value = nameParam;
+                }
+
+                if (tabParam === 'register' || tabParam === 'signup') {
+                    switchAuthTab('signup');
+                    if (orderParam) {
+                        const claimNotice = document.getElementById('order-claim-notice');
+                        const claimOrderRef = document.getElementById('order-claim-ref');
+                        if (claimNotice) claimNotice.classList.remove('hidden');
+                        if (claimOrderRef) claimOrderRef.textContent = orderParam;
+                    }
+                } else if (tabParam === 'forgot' || tabParam === 'reset') {
+                    openForgotPasswordModal();
+                    if (emailParam) {
+                        const forgotEmail = document.getElementById('forgot-email');
+                        if (forgotEmail) forgotEmail.value = emailParam;
+                    }
+                    if (codeParam) {
+                        const forgotTarget = document.getElementById('forgot-target-email');
+                        if (forgotTarget) forgotTarget.textContent = emailParam || 'your email';
+                        document.getElementById('forgot-step-1')?.classList.add('hidden');
+                        document.getElementById('forgot-step-2')?.classList.remove('hidden');
+                        const resetOtp = document.getElementById('reset-otp');
+                        if (resetOtp) resetOtp.value = codeParam;
+                    }
+                }
+            } catch (e) {
+                console.warn('URL param parse error:', e);
             }
         })();
     </script>

@@ -140,10 +140,13 @@ class EmailService {
     async sendOrderConfirmation(order, clientEmail) {
         if (!clientEmail) return;
         const subject = `Order Confirmed: ${order.order_number} · Dezan Digitizing`;
+        const trackUrl = `https://dezan-digitizing.vercel.app/track-order.html?order=${order.order_number}&email=${encodeURIComponent(clientEmail)}`;
+        const claimUrl = `https://dezan-digitizing.vercel.app/portal-login.html?tab=register&email=${encodeURIComponent(clientEmail)}&order=${order.order_number}&name=${encodeURIComponent(order.customer_name || '')}`;
+
         const content = `
             <div class="badge">Order Confirmed</div>
-            <h2 style="color: #ffffff; margin-top: 0; font-size: 20px;">Thank you for your order!</h2>
-            <p>Your embroidery / vector artwork has been received and routed into our production queue. Our master digitizers are reviewing your specifications.</p>
+            <h2 style="color: #ffffff; margin-top: 0; font-size: 20px;">Your order has been created!</h2>
+            <p>Your embroidery / vector artwork has been received and routed into our production queue. Our master digitizers are reviewing your stitch parameters.</p>
             
             <div class="info-card">
                 <div class="info-row"><span class="info-label">Order Number</span><span class="info-val" style="color: #d4af35;">${order.order_number}</span></div>
@@ -154,15 +157,54 @@ class EmailService {
                 <div class="info-row"><span class="info-label">Payment Status</span><span class="info-val" style="color: #10b981;">${(order.payment_status || 'Paid').toUpperCase()}</span></div>
             </div>
 
-            <p style="font-size: 13px; color: #94a3b8;">Turnaround is typically 12–24 hours. You will receive an instant alert as soon as your production files (.DST, .EMB, .PDF) are ready for download.</p>
+            <p style="font-size: 13px; color: #94a3b8;">Standard turnaround is 12–24 hours. You can track live production progress and download your stitch files (.DST, .EMB, .PDF) as soon as they are ready.</p>
+
+            <div style="margin-top: 24px; padding: 20px; border-radius: 12px; background: rgba(212, 175, 53, 0.08); border: 1px dashed rgba(212, 175, 53, 0.35); text-align: center;">
+                <h4 style="margin: 0 0 8px 0; color: #d4af35; font-size: 15px; font-weight: 800;">✨ Add This Order to Your Permanent Design Catalog</h4>
+                <p style="margin: 0 0 14px 0; font-size: 13px; color: #cbd5e1; line-height: 1.5;">Create your free client account using this email to organize all your stitch files in your personal catalog, submit free sew-out revisions, and re-order with 1-click.</p>
+                <a href="${claimUrl}" style="display: inline-block; padding: 11px 24px; background: #d4af35; color: #0d0c07; text-decoration: none; font-weight: 900; font-size: 13px; border-radius: 8px;">Create Free Account & Claim Order &rarr;</a>
+            </div>
         `;
-        const actionBtn = `<a href="https://dezan-digitizing.vercel.app/client-orders.html?order=${order.order_number}" class="btn-cta">Track Order in Client Portal &rarr;</a>`;
+        const actionBtn = `<a href="${trackUrl}" class="btn-cta">Track Order & Download Files &rarr;</a>`;
         
         return this.sendMail({
             to: clientEmail,
             subject,
-            html: this.wrapTemplate({ title: subject, preheader: `Order ${order.order_number} confirmed`, content, actionBtn }),
-            text: `Thank you for your order ${order.order_number}. Track it online at https://dezan-digitizing.vercel.app/client-orders.html`
+            html: this.wrapTemplate({ title: subject, preheader: `Order ${order.order_number} confirmed. Track progress or create account.`, content, actionBtn }),
+            text: `Your order ${order.order_number} has been created! Track live progress and get ready files at: ${trackUrl} — Or create your account to add to your catalog: ${claimUrl}`
+        });
+    }
+
+    /**
+     * Send Password Reset OTP Code to User
+     */
+    async sendPasswordResetOTP({ email, otpCode, displayName }) {
+        if (!email) return;
+        const subject = `Your Password Reset Code: ${otpCode} · Dezan Digitizing`;
+        const resetUrl = `https://dezan-digitizing.vercel.app/portal-login.html?tab=forgot&email=${encodeURIComponent(email)}&code=${otpCode}`;
+
+        const content = `
+            <div class="badge" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">Account Security</div>
+            <h2 style="color: #ffffff; margin-top: 0; font-size: 20px;">Password Reset Request</h2>
+            <p>Hello ${displayName || 'Valued Client'},</p>
+            <p>We received a request to reset your password for your Dezan Digitizing portal account. Use the 6-digit verification code below to set a new password:</p>
+
+            <div style="text-align: center; margin: 28px 0;">
+                <div style="display: inline-block; padding: 16px 32px; background: #201d12; border: 2px solid #d4af35; border-radius: 12px; font-family: monospace; font-size: 32px; font-weight: 900; letter-spacing: 0.35em; color: #d4af35;">
+                    ${otpCode}
+                </div>
+                <p style="font-size: 12px; color: #94a3b8; margin-top: 8px;">This verification code expires in <strong>15 minutes</strong>.</p>
+            </div>
+
+            <p style="font-size: 13px; color: #94a3b8;">If you did not request this password reset, you can safely ignore this email. Your account remains secure.</p>
+        `;
+        const actionBtn = `<a href="${resetUrl}" class="btn-cta">Reset Password Now &rarr;</a>`;
+
+        return this.sendMail({
+            to: email,
+            subject,
+            html: this.wrapTemplate({ title: subject, preheader: `Your verification code is ${otpCode}`, content, actionBtn }),
+            text: `Your Dezan Digitizing password reset code is ${otpCode}. It expires in 15 minutes. Reset online: ${resetUrl}`
         });
     }
 

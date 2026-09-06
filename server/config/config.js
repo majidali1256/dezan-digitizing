@@ -18,7 +18,7 @@ const config = {
     },
     jwt: {
         secret: process.env.JWT_SECRET || 'dezan_digitizing_jwt_secret_token_secure_key_2026',
-        expiresIn: process.env.JWT_EXPIRES_IN || '7d'
+        expiresIn: process.env.JWT_EXPIRES_IN || '365d'
     },
     cors: {
         origin: process.env.CORS_ORIGIN || '*'

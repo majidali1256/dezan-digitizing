@@ -33,7 +33,9 @@ const createOrder = async (req, res) => {
             // Guest checkout fields if unauthenticated
             clientName,
             clientEmail,
-            clientCompany
+            clientCompany,
+            customerName,
+            customerEmail
         } = req.body;
 
         if (!serviceType || !projectName || !placement) {
@@ -42,8 +44,8 @@ const createOrder = async (req, res) => {
 
         // Determine client metadata
         let clientId = null;
-        let finalClientName = clientName;
-        let finalClientEmail = clientEmail;
+        let finalClientName = clientName || customerName;
+        let finalClientEmail = clientEmail || customerEmail;
         let finalClientCompany = clientCompany || null;
 
         if (req.user) {
@@ -380,11 +382,112 @@ const confirmPayment = async (req, res) => {
     }
 };
 
+/**
+ * Track Order Public Endpoint (No Auth Required)
+ * GET /api/orders/track?orderNumber=ORD-XXXX&email=customer@example.com
+ */
+const trackOrder = async (req, res) => {
+    try {
+        const { orderNumber, email } = req.query;
+
+        if (!orderNumber || !email) {
+            return badRequest(res, 'Both orderNumber and email are required to track an order.');
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+        const trimmedOrderNumber = orderNumber.trim();
+
+        // Search for order matching order_number and client_email
+        const orderRes = await query(
+            `SELECT * FROM public.orders 
+             WHERE (LOWER(order_number) = LOWER($1) OR id::text = $1)
+               AND LOWER(client_email) = $2`,
+            [trimmedOrderNumber, normalizedEmail]
+        );
+
+        if (orderRes.rows.length === 0) {
+            return notFound(res, 'No order found matching this order number and email combination. Please check your spelling.');
+        }
+
+        const order = orderRes.rows[0];
+
+        // Fetch any revision requests for this order
+        let revisions = [];
+        try {
+            const revRes = await query(
+                `SELECT id, revision_number, notes, status, created_at 
+                 FROM public.revisions 
+                 WHERE order_id = $1 
+                 ORDER BY revision_number DESC`,
+                [order.id]
+            );
+            revisions = revRes.rows;
+        } catch (_) {}
+
+        // Map status to 4-stage stepper
+        // Stage 1: Received & In Review (pending_review, pending)
+        // Stage 2: Assigned to Digitizer (assigned)
+        // Stage 3: In Production & QA (in_progress, qa_review, revision_requested)
+        // Stage 4: Ready for Download (completed, approved)
+        let step = 1;
+        let stepLabel = 'Order Received & Spec Review';
+        let stepDescription = 'Your artwork and specifications are being verified by our technical embroidery staff.';
+
+        if (order.status === 'assigned') {
+            step = 2;
+            stepLabel = 'Assigned to Master Digitizer';
+            stepDescription = 'A dedicated embroidery digitizer is mapping stitch angles, underlay density, and pull compensation.';
+        } else if (['in_progress', 'qa_review', 'revision_requested'].includes(order.status)) {
+            step = 3;
+            stepLabel = 'Production Sew-Out & QA';
+            stepDescription = order.status === 'revision_requested' 
+                ? 'Your requested stitch revision is currently being modified and re-sampled.'
+                : 'Digitizing is underway and undergoing machine sew-out quality control.';
+        } else if (order.status === 'completed') {
+            step = 4;
+            stepLabel = 'Production Ready & Approved';
+            stepDescription = 'Your production embroidery stitch files and approval previews are ready for download below.';
+        }
+
+        return success(res, {
+            order: {
+                id: order.id,
+                orderNumber: order.order_number,
+                projectName: order.project_name,
+                serviceType: order.service_type,
+                format: order.file_format || 'DST, EMB',
+                size: order.sizing || 'Standard Size',
+                placement: order.placement,
+                fabric: order.fabric_type || 'Standard',
+                status: order.status,
+                paymentStatus: order.payment_status,
+                price: order.price,
+                turnaround: order.turnaround_speed || 'Standard',
+                createdAt: order.created_at,
+                deliverables: order.deliverables || [],
+                clientName: order.client_name,
+                clientEmail: order.client_email
+            },
+            tracking: {
+                currentStep: step,
+                totalSteps: 4,
+                stepLabel,
+                stepDescription
+            },
+            revisions
+        }, 'Order tracking information retrieved successfully');
+    } catch (err) {
+        console.error('[Track Order Error]:', err);
+        return error(res, `Failed to track order: ${err.message}`);
+    }
+};
+
 module.exports = {
     createOrder,
     getOrders,
     getOrderById,
     updateOrderStatus,
     assignDigitizer,
-    confirmPayment
+    confirmPayment,
+    trackOrder
 };
