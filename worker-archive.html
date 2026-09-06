@@ -161,6 +161,65 @@
         </div>
     </nav>
 
+    <!-- ===== WORK ORDER DETAILS MODAL ===== -->
+    <div id="task-details-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-lg bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/30 shadow-2xl p-6 text-slate-900 dark:text-slate-100">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-primary/20">
+                <h3 class="font-black text-base flex items-center gap-2 text-slate-900 dark:text-white">
+                    <span class="material-symbols-outlined text-amber-800 dark:text-primary">assignment</span>
+                    <span>Production Specs (<span id="detail-task-id" class="font-mono text-amber-900 dark:text-primary">ORD-0000</span>)</span>
+                </h3>
+                <button onclick="window.workerWorkspace.closeTaskDetailsModal()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Design Title:</span>
+                    <strong id="detail-design-name" class="text-slate-900 dark:text-white">Apex Mountain</strong>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Client Reference:</span>
+                    <span id="detail-client-id" class="font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[11px]">Client #CLI-8492</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Target Fabric:</span>
+                    <strong id="detail-fabric" class="text-slate-900 dark:text-white">Pique Polo Knit</strong>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Dimensions:</span>
+                    <strong id="detail-dimensions">3.5" W x 2.2" H</strong>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
+                    <span class="text-slate-500">Requested Format:</span>
+                    <strong id="detail-format" class="format-tag">DST</strong>
+                </div>
+                <div class="py-1">
+                    <span class="text-slate-500 block mb-1">Special Machine Instructions:</span>
+                    <p id="detail-instructions" class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-slate-800 dark:text-slate-200 italic leading-relaxed">None</p>
+                </div>
+            </div>
+            <div class="flex justify-end pt-3">
+                <button type="button" onclick="window.workerWorkspace.closeTaskDetailsModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-xs">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ZOOM MODAL ===== -->
+    <div id="stitch-zoom-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4" onclick="if(event.target === this) window.workerWorkspace.closeStitchOutZoomModal()">
+        <div class="relative max-w-3xl w-full bg-white dark:bg-card-dark rounded-2xl overflow-hidden shadow-2xl p-4">
+            <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-200 dark:border-primary/20">
+                <h4 id="zoom-modal-title" class="font-bold text-sm text-slate-900 dark:text-white">Artwork Preview</h4>
+                <button onclick="window.workerWorkspace.closeStitchOutZoomModal()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="flex items-center justify-center max-h-[70vh] overflow-hidden rounded-xl bg-slate-950/10">
+                <img id="zoom-modal-img" src="" alt="Zoom Preview" class="max-h-[70vh] w-auto object-contain">
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="js/insforge-client.js"></script>
     <script src="js/worker-workspace.js"></script>

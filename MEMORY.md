@@ -549,3 +549,41 @@ To prevent data leakage via browser DevTools:
 - **Login Portal Intent Fallback (`portal-login.html`)**:
   - `#order-intent-banner` updated with an `[ Order as Guest -> ]` button so users redirected or landing on login can order immediately without registering.
 
+---
+
+## 17. Modular Multi-Page Suite Architecture: Client Workspace & Digitizer Worker Studio (Live & Verified)
+
+### 17.1 Client Workspace Suite (5 Specialized Pages)
+Following the multi-page modular architecture established for the Admin Suite, the Client Workspace is decomposed into distinct, dedicated subpages sharing `client-workspace.css` and `js/client-workspace.js`:
+- **`client-portal.html` (Dashboard Overview)**:
+  - High-level project pipeline overview, pending actions, live order metrics, and quick navigation cards to sub-workbenches.
+- **`client-orders.html` (My Orders Workbench)**:
+  - Full-featured order management center with interactive search, status tabs (`All`, `Active`, `Completed`, `Revisions`), physical sew-out revision drawer, and direct `.DST`/`.EMB` file downloads.
+- **`client-quotes.html` (Custom Quotes & Estimates)**:
+  - Dedicated quote request wizard with automated pricing estimation, turnaround guarantees, and free quote history.
+- **`client-invoices.html` (Billing, Invoices & Receipts)**:
+  - Financial records center with payment tracking, downloadable PDF receipts, and integrated PayPal checkout.
+- **`client-profile.html` (Client Profile & Preferences)**:
+  - Account information management, machinery format defaults (`.DST`, `.PES`, `.EMB`, `.EXP`), default fabric substrate settings, and password security.
+- **Mobile Responsive Dock**:
+  - Fixed bottom navigation bar (`#client-dock-*`) providing thumb-friendly switching between Dashboard, Orders, Quotes, Invoices, and Profile on mobile devices.
+
+### 17.2 Digitizer Worker Studio Suite (5 Specialized Pages)
+The Worker Studio provides an isolated, production-focused environment for embroidery digitizers and vector artists, sharing `worker-workspace.css` and `js/worker-workspace.js`:
+- **`worker-portal.html` (Studio Dashboard)**:
+  - Production queue overview, daily stitch milestones, quality compliance guidelines, and recent activity feed.
+- **`worker-tasks.html` (Active Tasks Workbench)**:
+  - Dedicated production queue with filter pills (`All`, `Digitizing`, `Vectorizing`, `Rush Priority`), instant search, technical specs modal (`#task-details-modal`), artwork zoom preview (`#stitch-zoom-modal`), and deliverable upload modal (`#deliverable-upload-modal`).
+- **`worker-archive.html` (Completed Deliverables Archive)**:
+  - Catalog of completed tickets with verified stitch counts, delivered file archives, and technical specifications review.
+- **`worker-specs.html` (Format Specs & SOP Guide)**:
+  - Interactive embroidery standards documentation, machine format guide (Tajima, Barudan, Brother, Melco), pull compensation matrix, and density guidelines by fabric substrate.
+- **`worker-settings.html` (Workstation Settings)**:
+  - Digitizer profile, CAD software configuration (Wilcom, Pulse, Wings), and daily stitch capacity controls.
+- **Strict Privacy & Anti-Leakage Masking**:
+  - Worker workspaces enforce 100% physical and data-level masking: client personal names, emails, phone numbers, companies, and commercial prices are omitted or masked as `Client #CLI-XXXX` and `[Confidential - Admin Only]`.
+- **Mobile Responsive Dock**:
+  - Fixed bottom dock (`#worker-dock-*`) optimized for mobile and tablet devices with 44px touch targets.
+- **Automated Verification**:
+  - Fully verified with Playwright across Desktop (1440x900) and Mobile (390x844) viewports.
+

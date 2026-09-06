@@ -729,6 +729,12 @@
             const completedMetric = document.getElementById('metric-worker-completed');
             if (completedMetric) completedMetric.textContent = completedTasks.length;
 
+            const navBadgeTasks = document.getElementById('nav-badge-tasks');
+            if (navBadgeTasks) navBadgeTasks.textContent = activeTasks.length;
+
+            const navBadgeArchive = document.getElementById('nav-badge-archive');
+            if (navBadgeArchive) navBadgeArchive.textContent = completedTasks.length;
+
             const activeBadge = document.getElementById('badge-active-count');
             if (activeBadge) {
                 if (revisionTasks.length > 0) {
