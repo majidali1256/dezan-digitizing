@@ -94,15 +94,6 @@
             </a>
 
             <div class="flex items-center gap-2 sm:gap-2.5">
-                <button id="open-new-order-btn" onclick="openNewOrderModal()" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs shadow-md shadow-primary/20 transition-all flex items-center gap-1.5 cursor-pointer" title="Place a new embroidery or vector order">
-                    <span class="material-symbols-outlined text-sm">add_circle</span>
-                    <span>New Order</span>
-                </button>
-                <button id="open-new-quote-btn" onclick="openNewQuoteModal()" class="px-3.5 py-2 rounded-xl border border-primary/40 dark:border-primary/40 bg-amber-500/10 hover:bg-primary text-amber-950 hover:text-background-dark dark:text-primary dark:hover:text-background-dark font-black text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer group" title="Request a custom price quote">
-                    <span class="material-symbols-outlined text-sm text-amber-800 dark:text-primary group-hover:text-background-dark transition-colors">request_quote</span>
-                    <span>Quote</span>
-                </button>
-
                 <!-- Desktop Profile Button -->
                 <button id="header-account-btn" onclick="openProfileModal()" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-card-dark hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-primary/25 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all cursor-pointer group shadow-xs" title="Client Profile & Defaults">
                     <div class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-900 dark:text-primary font-black text-[10px] flex items-center justify-center border border-amber-500/30 group-hover:scale-105 transition-transform" id="header-account-avatar">
@@ -146,13 +137,13 @@
         <!-- 3 Quick Action Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6">
             <!-- Place Order -->
-            <button onclick="openNewOrderModal()" class="flex items-center gap-3.5 p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/25 shadow-sm hover:shadow-md hover:border-primary dark:hover:border-primary transition-all text-left group cursor-pointer">
-                <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-800 dark:text-primary flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0 border border-amber-500/20">
+            <button onclick="openNewOrderModal()" class="flex items-center gap-3.5 p-4 rounded-2xl bg-primary hover:bg-primary-hover text-background-dark border border-primary/50 shadow-md shadow-primary/20 hover:shadow-lg hover:scale-[1.01] transition-all text-left group cursor-pointer">
+                <div class="w-12 h-12 rounded-xl bg-background-dark/15 text-background-dark flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0 border border-background-dark/20">
                     <span class="material-symbols-outlined text-2xl">add_shopping_cart</span>
                 </div>
                 <div>
-                    <h3 class="text-sm font-black text-slate-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">Place Order</h3>
-                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Start a new order</p>
+                    <h3 class="text-sm font-black text-background-dark">Place Order</h3>
+                    <p class="text-xs font-bold text-background-dark/80">Start a new order</p>
                 </div>
             </button>
 

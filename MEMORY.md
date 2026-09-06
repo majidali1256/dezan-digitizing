@@ -180,7 +180,9 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 - `/portal-login.html`: Unified authentication page with automatic role routing, order intent banners, simplified client-only registration (role field removed; all public signups are assigned `role: 'client'`), and 1-click predefined staff & client logins (Master Admin: `admin@dezandigitizing.com`, Digitizer Worker: `worker.alex@dezandigitizing.com`, Demo Client: `client@falconapparel.com`).
 - `/client-portal.html`: Redesigned Client Portal (Matching user's reference mockup with warm Dezan gold theme):
   - **Header**: Bold title + "Track orders, pay invoices, and request quotes easily."
-  - **3 Quick-Action Cards**: Place Order, Request Quote, Track Order.
+  - **3 Quick-Action Cards**:
+    - **Place Order**: Styled in signature brand warm golden-brown shade (`bg-primary hover:bg-primary-hover text-background-dark border-primary/50 shadow-md shadow-primary/20`) with dark icon badge and high-contrast typography, serving as the primary hero CTA.
+    - **Request Quote** & **Track Order**: Clean secondary cards for custom quoting and order tracking.
   - **4 Stat Metric Badges**: Open Orders, Completed, Quotes, **Balance Due** (Dynamically calculates total outstanding balance for unpaid/pending orders; displays rose badge with count `X Due` when > $0, or emerald `All settled` when $0.00; clickable to instantly filter by due payments).
   - **Adaptive 2-Stage Place Order Flow**:
     - **Step 1 (Clean Choice)**: Modal opens showing *only* "What type of work do you need?" with two large cards: **Embroidery Digitizing** and **Vector Art Conversion**. All detailed form inputs stay completely hidden until a card is selected.
@@ -207,7 +209,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
     - **Quotes**: Quote estimation status or clean empty state with `+ Request Quote` action.
   - **Client Invoice & Printable Receipt Modal**: Official itemized tax invoice and work order with `@media print` support, unpaid alert banner, and direct "Pay Balance Due" action button.
   - **Header & Navigation Refinement (Implemented)**:
-    - **Header**: Features side-by-side action buttons: Primary Gold `[ + New Order ]` (`#open-new-order-btn`), Secondary Outline `[ 📄 Quote ]` (`#open-new-quote-btn`), Desktop Profile button (`#header-account-btn` with client monogram avatar and name), Desktop Settings button (`#header-settings-btn` with gear icon), and dark mode toggle.
+    - **Header**: Streamlined to remove duplicate top action buttons (retaining only Desktop Profile button `#header-account-btn` with client monogram avatar and name, Desktop Settings button `#header-settings-btn` with gear icon, and dark mode toggle) to eliminate clutter and direct focus to the hero action grid.
     - **Fixed Bottom Navigation Dock (5 Distinct Buttons)**: Full access suite with 5 dedicated tabs:
       1. **Home**: Quick scroll to dashboard top overview.
       2. **Orders**: Direct anchor jump to active & open orders.
