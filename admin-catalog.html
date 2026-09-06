@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Orders | Dezan Admin</title>
+    <title>Design catalog | Dezan Admin</title>
     <meta name="description" content="Master Control Panel - Manage orders, review revenue, and delegate tickets to digitizers." />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -66,7 +66,7 @@
     </style>
 </head>
 
-<body data-admin-page="orders" class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30">
+<body data-admin-page="catalog" class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30">
 
 
     <!-- ===== HEADER ===== -->
@@ -133,8 +133,8 @@
         <!-- Title & Subtitle + Live DB Sync -->
         <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div>
-                <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">Orders</h1>
-                <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">Manage incoming orders, production, payments, and completed work.</p>
+                <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">Design catalog</h1>
+                <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">Browse designs and access artwork and production files.</p>
             </div>
             <div class="flex items-center gap-2">
                 <div id="admin-db-sync-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-[11px] shadow-xs">
@@ -147,330 +147,8 @@
             </div>
         </div>
 
-        <!-- 4 Executive Stat Metric Badges -->
-        <div id="overview-metrics-section" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-            <!-- Total Revenue -->
-            <div class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 shadow-xs flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Order value</span>
-                    <span class="material-symbols-outlined text-amber-700 dark:text-primary text-base">payments</span>
-                </div>
-                <span id="stat-revenue" class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">$0.00</span>
-                <div class="flex items-center justify-between mt-1 pt-1 border-t border-slate-100 dark:border-primary/10 text-[11px]">
-                    <span class="text-emerald-700 dark:text-emerald-400 font-semibold" id="stat-revenue-completed">Completed: $0.00</span>
-                    <span class="font-bold cursor-pointer transition-colors" id="stat-revenue-unpaid" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="setFilter('unpaid')">Due: $0.00</span>
-                </div>
-            </div>
-
-            <!-- Active Orders -->
-            <div role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="switchAdminView('orders')" class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 shadow-xs flex flex-col justify-between cursor-pointer hover:border-amber-400 transition-all group">
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Active Orders</span>
-                    <span class="material-symbols-outlined text-amber-700 dark:text-primary text-base group-hover:scale-110 transition-transform">pending_actions</span>
-                </div>
-                <span id="stat-active-orders" class="text-2xl sm:text-3xl font-black text-amber-800 dark:text-primary">0</span>
-                <span class="text-[11px] text-slate-500 font-medium" id="stat-unassigned-sub">0 need worker</span>
-            </div>
-
-            <!-- Registered Clients -->
-            <div role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="switchAdminView('clients')" class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 shadow-xs flex flex-col justify-between cursor-pointer hover:border-emerald-400 transition-all group">
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Clients</span>
-                    <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-base group-hover:scale-110 transition-transform">groups</span>
-                </div>
-                <span id="stat-clients-count" class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">0</span>
-                <span class="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
-                    <span>View Directory</span>
-                    <span class="material-symbols-outlined text-[12px]">arrow_forward</span>
-                </span>
-            </div>
-
-            <!-- Design Catalog Count -->
-            <div role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="switchAdminView('catalog')" class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 shadow-xs flex flex-col justify-between cursor-pointer hover:border-blue-400 transition-all group">
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Design Catalog</span>
-                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-base group-hover:scale-110 transition-transform">palette</span>
-                </div>
-                <span id="stat-catalog-count" class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">0</span>
-                <span class="text-[11px] text-blue-700 dark:text-blue-400 font-semibold flex items-center gap-0.5">
-                    <span>Browse Library</span>
-                    <span class="material-symbols-outlined text-[12px]">arrow_forward</span>
-                </span>
-            </div>
-        </div>
-
-        <section id="admin-insights" aria-labelledby="admin-insights-title" class="admin-insights">
-            <div class="admin-insights-heading"><div><h2 id="admin-insights-title">Business at a glance</h2><p>All orders · independent of the search and stage filters below</p></div><a href="#master-orders-section">Go to orders ↓</a></div>
-            <div class="admin-chart-grid">
-                <article class="admin-chart-card admin-trend-card"><div class="admin-chart-heading"><div><h3>Order activity</h3><p>New orders and quotes by creation date</p></div><label>Period <select id="admin-chart-period" onchange="renderAdminOrders()"><option value="14">14 days</option><option value="30">30 days</option></select></label></div><div id="admin-activity-chart"></div><details class="admin-chart-details"><summary>View daily counts</summary><div id="admin-activity-data"></div></details></article>
-                <article class="admin-chart-card"><h3>Orders by stage</h3><p>Current workload · cancelled orders excluded</p><div id="admin-stage-chart"></div></article>
-                <article class="admin-chart-card"><h3>Payment overview</h3><p>Order value by recorded payment status</p><div id="admin-payment-chart"></div><p class="admin-chart-note">Excludes quotes and cancelled orders. These values are order totals, not a transaction ledger.</p></article>
-            </div>
-        </section>
-
         <!-- =================================================================== -->
-        <section id="master-orders-section" class="bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 rounded-2xl shadow-xs overflow-hidden mb-10 transition-all scroll-mt-28">
-            <!-- Master Orders Header Bar -->
-            <div class="p-5 border-b border-primary/15 dark:border-primary/20 flex flex-wrap items-center justify-between gap-4">
-                <div>
-                    <h3 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2" id="orders-section-heading">
-                        <span class="material-symbols-outlined text-amber-700 dark:text-primary">receipt_long</span>
-                        <span id="orders-section-title">Orders</span>
-                    </h3>
-                    <p class="text-xs text-slate-600 dark:text-slate-400" id="orders-section-subtitle">Start with orders that need attention, or select a stage below.</p>
-                </div>
-                <div class="flex items-center gap-2">
-            <!-- Right Controls: View Tools & Density Switcher -->
-            <div class="flex items-center gap-2">
 
-                <!-- Density Switcher: Cards vs Table -->
-                <div class="flex items-center bg-slate-100 dark:bg-slate-900 p-0.5 rounded-xl border border-primary/20 dark:border-primary/25 text-xs">
-                    <button onclick="setAdminLayout('grid')" id="layout-toggle-grid" class="px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Visual Bento Cards View">
-                        <span class="material-symbols-outlined text-sm">grid_view</span>
-                        <span class="text-[11px] hidden sm:inline">Cards</span>
-                    </button>
-                    <button onclick="setAdminLayout('table')" id="layout-toggle-table" class="px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Compact Table View">
-                        <span class="material-symbols-outlined text-sm">table_rows</span>
-                        <span class="text-[11px] hidden sm:inline">Table</span>
-                    </button>
-                </div>
-
-                <!-- Quick Search Shortcut button -->
-                <button onclick="focusAdminSearch()" class="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold border border-primary/20 dark:border-primary/25 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Press / or Cmd+K to Search">
-                    <span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">search</span>
-                    <span>Search</span>
-                    <kbd class="px-2 py-0.2 rounded bg-white dark:bg-slate-700 text-[10px] font-mono border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 shadow-2xs">/</kbd>
-                </button>
-
-                <!-- Export CSV button -->
-                <button onclick="exportOrdersCSV()" id="export-csv-btn" class="px-3 py-1 rounded-xl bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 dark:hover:bg-primary text-amber-900 dark:text-primary hover:text-amber-950 dark:hover:text-background-dark border border-amber-300 dark:border-primary/30 text-xs font-bold transition-all flex items-center gap-1 shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Download Financial Ledger CSV">
-                    <span class="material-symbols-outlined text-sm">download</span>
-                    <span class="hidden sm:inline">Export</span>
-                </button>
-            </div>                    <!-- Hidden filter select for backward compatibility -->
-                    <select id="filter-status" onchange="renderAdminOrders()" class="hidden">
-                        <option value="all">All</option>
-                        <option value="pending_review">Pending Assignment</option>
-                        <option value="revision_requested">Revision Requested</option>
-                        <option value="unpaid">Payment Due</option>
-                        <option value="in_progress">In Production</option>
-                        <option value="completed">Completed</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Instant Search Bar & Stage Jumper Anchors -->
-            <div class="p-4 bg-slate-50/70 dark:bg-slate-900/40 border-b border-primary/15 dark:border-primary/20 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-                <!-- Search Input with Clear Button -->
-                <div class="relative flex-1 max-w-md">
-                    <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base pointer-events-none">search</span>
-                    <input type="text" id="admin-search-input" oninput="handleSearchInput()" aria-label="Search orders by order number, client, email, or digitizer" placeholder="Search order, client, email, or digitizer…" class="w-full pl-9 pr-8 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-primary/30 rounded-xl text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-primary shadow-xs" />
-                    <button id="admin-search-clear-btn" onclick="clearAdminSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Clear search">
-                        <span class="material-symbols-outlined text-sm">close</span>
-                    </button>
-                </div>
-
-                <!-- Stage Quick-Jump Pills (Clicking smoothly jumps to that dedicated stage) -->
-                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none" id="stage-jumper-pills" aria-label="Filter orders by stage">
-                    <button onclick="setStageScope('all')" data-stage-target="all" aria-pressed="true" class="stage-jump-pill px-3 py-2 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 shadow-xs cursor-pointer whitespace-nowrap transition-all flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                        <span>All orders</span>
-                        <span class="px-2 py-0.2 rounded-full bg-black/20 text-[10px]" id="pill-count-all">0</span>
-                    </button>
-                    <button onclick="setStageScope('stage-unassigned-sub')" data-stage-target="stage-unassigned-sub" class="stage-jump-pill px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 hover:border-amber-500 cursor-pointer whitespace-nowrap transition-all flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                        <span>Needs attention</span>
-                        <span class="px-2 py-0.2 rounded-full bg-amber-100 dark:bg-amber-500/20 text-[10px]" id="pill-count-unassigned">0</span>
-                    </button>
-                    <button onclick="setStageScope('stage-in-progress-sub')" data-stage-target="stage-in-progress-sub" class="stage-jump-pill px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-blue-800 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30 hover:border-blue-500 cursor-pointer whitespace-nowrap transition-all flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                        <span>In production</span>
-                        <span class="px-2 py-0.2 rounded-full bg-blue-100 dark:bg-blue-500/20 text-[10px]" id="pill-count-in-progress">0</span>
-                    </button>
-                    <button onclick="setStageScope('stage-incomplete-sub')" data-stage-target="stage-incomplete-sub" class="stage-jump-pill px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 hover:border-rose-500 cursor-pointer whitespace-nowrap transition-all flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                        <span>Quotes & payment</span>
-                        <span class="px-2 py-0.2 rounded-full bg-rose-100 dark:bg-rose-500/20 text-[10px]" id="pill-count-unpaid">0</span>
-                    </button>
-                    <button onclick="setStageScope('stage-completed-sub')" data-stage-target="stage-completed-sub" class="stage-jump-pill px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 hover:border-emerald-500 cursor-pointer whitespace-nowrap transition-all flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                        <span>Completed</span>
-                        <span class="px-2 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-[10px]" id="pill-count-completed">0</span>
-                    </button>
-                    <!-- Legacy hidden span for pill-count-revisions if referenced -->
-                    <span id="pill-count-revisions" class="hidden">0</span>
-                </div>
-            </div>
-
-            <div class="admin-results-bar"><span id="admin-search-results" role="status" aria-live="polite"></span><button type="button" onclick="setStageScope('all'); clearAdminSearch()">Reset filters</button></div>
-
-            <!-- =============================================================== -->
-            <!-- STAGE 1: ACTION REQUIRED / NEEDS WORKER & ACTIVE REVISIONS      -->
-            <!-- =============================================================== -->
-            <div id="stage-unassigned-sub" class="stage-sub-section border-b border-primary/15 dark:border-primary/20 transition-all scroll-mt-36">
-                <div class="px-5 py-4 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-b border-amber-500/15 flex flex-wrap items-center justify-between gap-2">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-800 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
-                            <span class="material-symbols-outlined text-base">assignment_late</span>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h4 class="text-sm font-black text-slate-900 dark:text-white">Needs attention</h4>
-                                <span id="badge-stage-unassigned" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/30">0 Orders</span>
-                            </div>
-                            <p class="text-[11px] text-slate-600 dark:text-slate-400">Incoming bookings awaiting digitizer dispatch and active client revision requests.</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Cards Container -->
-                <div id="stage-unassigned-cards" class="stage-cards-container p-5 bg-amber-50/20 dark:bg-amber-950/10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    <!-- Rendered by JS -->
-                </div>
-                <!-- Table Container -->
-                <div id="stage-unassigned-table" class="stage-table-container hidden overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-primary/10 dark:border-primary/15 z-10">
-                            <tr>
-                                <th class="px-5 py-3">Order ID</th>
-                                <th class="px-5 py-3">Client & Company</th>
-                                <th class="px-5 py-3">Design Specs</th>
-                                <th class="px-5 py-3">Price & Payment</th>
-                                <th class="px-5 py-3">Status</th>
-                                <th class="px-5 py-3">Worker Dispatch</th>
-                                <th class="px-5 py-3 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="stage-unassigned-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
-                            <!-- Rendered by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- =============================================================== -->
-            <!-- STAGE 2: ACTIVE PIPELINE / IN PRODUCTION                       -->
-            <!-- =============================================================== -->
-            <div id="stage-in-progress-sub" class="stage-sub-section border-b border-primary/15 dark:border-primary/20 transition-all scroll-mt-36">
-                <div class="px-5 py-4 bg-gradient-to-r from-blue-500/10 via-blue-500/5 to-transparent border-b border-blue-500/15 flex flex-wrap items-center justify-between gap-2">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-800 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
-                            <span class="material-symbols-outlined text-base">precision_manufacturing</span>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h4 class="text-sm font-black text-slate-900 dark:text-white">In production</h4>
-                                <span id="badge-stage-in-progress" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-blue-500/20 text-blue-900 dark:text-blue-300 border border-blue-500/30">0 Orders</span>
-                            </div>
-                            <p class="text-[11px] text-slate-600 dark:text-slate-400">Orders actively being digitized, undergoing stitch simulation, and in QA review.</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Cards Container -->
-                <div id="stage-in-progress-cards" class="stage-cards-container p-5 bg-blue-50/20 dark:bg-blue-950/10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    <!-- Rendered by JS -->
-                </div>
-                <!-- Table Container -->
-                <div id="stage-in-progress-table" class="stage-table-container hidden overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-primary/10 dark:border-primary/15 z-10">
-                            <tr>
-                                <th class="px-5 py-3">Order ID</th>
-                                <th class="px-5 py-3">Client & Company</th>
-                                <th class="px-5 py-3">Design Specs</th>
-                                <th class="px-5 py-3">Price & Payment</th>
-                                <th class="px-5 py-3">Status</th>
-                                <th class="px-5 py-3">Assigned Digitizer</th>
-                                <th class="px-5 py-3 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="stage-in-progress-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
-                            <!-- Rendered by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- =============================================================== -->
-            <!-- STAGE 3: INCOMPLETE BOOKINGS, PAYMENT DUE & QUOTES              -->
-            <!-- =============================================================== -->
-            <div id="stage-incomplete-sub" class="stage-sub-section border-b border-primary/15 dark:border-primary/20 transition-all scroll-mt-36">
-                <div class="px-5 py-4 bg-gradient-to-r from-rose-500/10 via-rose-500/5 to-transparent border-b border-rose-500/15 flex flex-wrap items-center justify-between gap-2">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-800 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
-                            <span class="material-symbols-outlined text-base">credit_card_off</span>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h4 class="text-sm font-black text-slate-900 dark:text-white">Quotes & payment due</h4>
-                                <span id="badge-stage-incomplete" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-rose-500/20 text-rose-900 dark:text-rose-300 border border-rose-500/30">0 Orders</span>
-                            </div>
-                            <p class="text-[11px] text-slate-600 dark:text-slate-400">Bookings placed without completed checkout, pending balances, and quote estimates awaiting client clearance.</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Cards Container -->
-                <div id="stage-incomplete-cards" class="stage-cards-container p-5 bg-rose-50/20 dark:bg-rose-950/10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    <!-- Rendered by JS -->
-                </div>
-                <!-- Table Container -->
-                <div id="stage-incomplete-table" class="stage-table-container hidden overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-primary/10 dark:border-primary/15 z-10">
-                            <tr>
-                                <th class="px-5 py-3">Order ID</th>
-                                <th class="px-5 py-3">Client & Company</th>
-                                <th class="px-5 py-3">Design Specs</th>
-                                <th class="px-5 py-3">Outstanding Balance</th>
-                                <th class="px-5 py-3">Payment Status</th>
-                                <th class="px-5 py-3">Digitizer</th>
-                                <th class="px-5 py-3 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="stage-incomplete-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
-                            <!-- Rendered by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- =============================================================== -->
-            <!-- STAGE 4: COMPLETED PRODUCTION ARCHIVE                           -->
-            <!-- =============================================================== -->
-            <div id="stage-completed-sub" class="stage-sub-section transition-all scroll-mt-36">
-                <div class="px-5 py-4 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border-b border-emerald-500/15 flex flex-wrap items-center justify-between gap-2">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-800 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
-                            <span class="material-symbols-outlined text-base">verified</span>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h4 class="text-sm font-black text-slate-900 dark:text-white">Completed</h4>
-                                <span id="badge-stage-completed" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-500/20 text-emerald-900 dark:text-emerald-300 border border-emerald-500/30">0 Orders</span>
-                            </div>
-                            <p class="text-[11px] text-slate-600 dark:text-slate-400">Delivered embroidery files (.DST, .EMB, .PES, etc.), verified stitch-outs, and downloadable tax invoices.</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Cards Container -->
-                <div id="stage-completed-cards" class="stage-cards-container p-5 bg-emerald-50/20 dark:bg-emerald-950/10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    <!-- Rendered by JS -->
-                </div>
-                <!-- Table Container -->
-                <div id="stage-completed-table" class="stage-table-container hidden overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-primary/10 dark:border-primary/15 z-10">
-                            <tr>
-                                <th class="px-5 py-3">Order ID</th>
-                                <th class="px-5 py-3">Client & Company</th>
-                                <th class="px-5 py-3">Design Specs</th>
-                                <th class="px-5 py-3">Total Paid</th>
-                                <th class="px-5 py-3">Status</th>
-                                <th class="px-5 py-3">Completed By</th>
-                                <th class="px-5 py-3 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="stage-completed-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
-                            <!-- Rendered by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
 
         <!-- =================================================================== -->
         <!-- SECTION 2: CLIENTS DIRECTORY & ORDER HISTORY HUB                     -->
@@ -480,7 +158,55 @@
         <!-- =================================================================== -->
         <!-- SECTION 3: MASTER DESIGN & STITCH CATALOG                           -->
         <!-- =================================================================== -->
+        <section id="design-catalog-section" class="bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 rounded-2xl shadow-xs p-5 sm:p-6 mb-10 transition-all scroll-mt-28">
+            <div class="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-primary/15 dark:border-primary/20 mb-6">
+                <div>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">palette</span>
+                        <span>Master Embroidery & Vector Design Catalog</span>
+                    </h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">Visual archive of all digitized embroidery designs, Tajima DST/EMB stitch deliverables, and vector conversions</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-800 dark:text-blue-400 text-xs font-bold border border-blue-300 dark:border-blue-500/30">
+                        <span id="catalog-total-badge">0 Designs</span>
+                    </span>
+                </div>
+            </div>
 
+            <!-- Catalog Search & Filter Controls -->
+            <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 mb-6">
+                <!-- Search Bar -->
+                <div class="relative flex-1 max-w-md">
+                    <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base pointer-events-none">search</span>
+                    <input type="text" id="catalog-search-input" oninput="handleCatalogSearch()" placeholder="Search design name, placement, fabric, client, format..." class="w-full pl-9 pr-8 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-primary shadow-xs" />
+                </div>
+
+                <!-- Category Pills & Format Filter -->
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+                    <button onclick="setCatalogCategory('all')" data-cat="all" class="catalog-cat-pill px-3 py-2 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 shadow-xs cursor-pointer whitespace-nowrap focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                        All Designs
+                    </button>
+                    <button onclick="setCatalogCategory('cap')" data-cat="cap" class="catalog-cat-pill px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 cursor-pointer whitespace-nowrap focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                        Caps & Hats
+                    </button>
+                    <button onclick="setCatalogCategory('chest')" data-cat="chest" class="catalog-cat-pill px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 cursor-pointer whitespace-nowrap focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                        Left Chest
+                    </button>
+                    <button onclick="setCatalogCategory('jacket')" data-cat="jacket" class="catalog-cat-pill px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 cursor-pointer whitespace-nowrap focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                        Jacket Back
+                    </button>
+                    <button onclick="setCatalogCategory('vector')" data-cat="vector" class="catalog-cat-pill px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 cursor-pointer whitespace-nowrap focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                        Vector Art
+                    </button>
+                </div>
+            </div>
+
+            <!-- Catalog Visual Cards Grid -->
+            <div id="catalog-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                <!-- Rendered dynamically by renderDesignCatalog() -->
+            </div>
+        </section>
 
         <!-- =================================================================== -->
         <!-- SECTION 4: DIGITIZER TEAM & CAPACITY HUB                            -->

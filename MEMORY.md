@@ -73,7 +73,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 ## 5. Site Map & Route Architecture
 
 ### Public Marketing Pages
-- `/index.html`: Home page (Hero with Before/After Comparison Slider: zero bounding box or card border around the astronaut patch, allowing the slider divider line to sweep end-to-end across the full artwork; bold typography with gold shine `Dezan Digitizing Service`; all 3 action buttons `Order Now`, `View Pricing`, and `Get Quote` arranged in a proud, touch-friendly side-by-side row on both mobile and desktop below the slider, Services preview, Live Feedback Carousel, Trust stats).
+- `/index.html`: Home page (Hero with Before/After Comparison Slider: zero bounding box or card border around the astronaut patch, allowing the slider divider line to sweep end-to-end across the full artwork; bold typography with gold shine `Dezan Digitizing Service`; all 3 action buttons `Order Now`, `View Pricing`, and `Get Quote` arranged in a proud, touch-friendly side-by-side row on both mobile and desktop below the slider; Live Feedback Carousel; Trust reviews; the dedicated **"Why Choose Dezan Digitizing?"** section highlighting manual craftsmanship, production-ready stitch files, fast turnaround, and free revisions with 4 How-It-Works styled circular icon feature cards; and the modern, interactive **"Frequently Asked Questions" (FAQ) Accordion** at the bottom of the page featuring 5 rows with CSS grid transitions, rotating gold-accented chevrons, accessible `aria-expanded` attributes, and responsive typography).
 - `/about.html`: Company history, experience, machinery/software standards (Wilcom, Tajima, Barudan).
 - `/services.html`: Detailed service breakdowns (Left chest, Cap/Hat, 3D Puff, Jacket Back, Vectorizing). Clean hero without dark background image, side-by-side action buttons in a 2-col grid on mobile, and 2-column grid for Expert Services fitting above the fold on mobile without scrolling.
   - **Brand Color Harmonization**: Eliminated all mismatched dark brown / amber shades (`text-amber-800` on hero eyebrow and "Order Now" links), replacing with brand gold token `text-primary`. Harmonized Card 2 in the Transparent Pricing section (removed jarring solid yellow card and dark brown text `sm:bg-primary sm:text-background-dark`, aligned with clean card styling and 2px primary border), and updated pricing preview figures ($15 Left Chest/Hat, $25 Jacket Back / Large).
@@ -81,13 +81,17 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 - `/pricing.html`: Dedicated flat-rate Pricing showcase in responsive 2-column grid layout, strictly adhering to Dezan's brand color scheme (Dezan Gold `#d4af35` / `#9a7810`, Dark Luxury `#201d12`, Card Dark `#16140c`, Warm Canvas `#f8f7f6`):
   - **Brand Color Harmonization**: Eliminated all mismatched amber/brown shades (`text-amber-800`, `text-amber-950`, `bg-amber-500/10`, `border-amber-400`, `to-amber-600`) in favor of brand tokens `text-primary`, `bg-primary/10`, `border-primary/25`, ensuring 100% aesthetic consistency with `index.html` and `services.html`.
   - **Hero**: "QUALITY DIGITIZING. REAL PEOPLE.", "Simple Flat-Rate Pricing", subtitle "Professional embroidery digitizing with clean, honest pricing.", 3 circular icon badges (Next Day Turnaround, Digitized by hand - no auto conversion, Order history and online downloads), and real stitch proof embroidery patch visual floating freely with zero bounding box or card border.
-  - **Digitizing 2-Column Grid (Compact & Centered)**: Centered `max-w-2xl mx-auto` container with refined proportions (20px padding, 44px icon badges, 32-36px pricing typography) preventing wide/bloated cards:
+  - **Digitizing Pricing Grid & Cards**: Responsive 3-column desktop layout (`max-w-6xl`) and sleek horizontal mobile cards:
     - Card 1: **$15 Hat / Left Chest Logos** (Up to 5.5 inches) with compact bespoke SVG icon featuring baseball cap and collared polo shirt.
     - Card 2: **$25 Larger Designs** (Over 5.5 inches) with compact bespoke SVG icon featuring varsity/bomber jacket and back embroidery emblem.
+    - Card 3: **Realistic / Pet Portrait** ($25 flat for ≤ 5.5" / $40 flat for > 5.5") with custom thread shading and fur icon.
     - Full-width Trust Bar: "Flat rate pricing you can depend on. Zero hidden stitch-count charges."
   - **Vector Art 2-Column Grid (Compact & Centered)**: Centered `max-w-2xl mx-auto` container:
     - Card 1: **$15 Simple Vector Redraw** with bespoke SVG bezier pen tool icon.
     - Card 2: **$25 Complex Vector Redraw** with bespoke SVG multilayer mascot shield icon.
+  - **Price Color Harmonization & Synchronized Hover Micro-Interactions**:
+    - **Dual-Tier Price Normalization**: Fixed color discrepancy in the Realistic / Pet Portrait card where `$25 flat` was dark while `$40 flat` was hardcoded gold. Both tiers now uniformly share default high-contrast styling (`text-slate-900 dark:text-white` with `text-slate-400 dark:text-slate-500` for "flat").
+    - **Synchronized Header + Price Hover**: Added `group-hover:text-primary transition-colors` to all price displays across `pricing.html` and `services.html` so that moving the cursor over any card smoothly transforms both the card title and price together into gold.
   - **Responsive Hero & Above-The-Fold Pricing**:
     - **Mobile First-Screen Parity (`media_1788643251172.png`)**:
       - Hero layout on mobile uses text wrapping around a float-right embroidery visual: The image is sized proportionally (`w-[125px]` with `ml-1.5`) while typography ("Simple Flat-Rate Pricing" with `whitespace-nowrap` on Flat-Rate, subline, and 3 icon badges) wraps cleanly around it without artificial dead space, avoiding unnecessary line breaks and excessive vertical stretching.
@@ -110,8 +114,16 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - Anchor Navigation: Clean `scroll-mt-20` on sections like `#portfolio` and `#custom-quote-section`.
 - **Mobile Compact Component Transformations**:
   - `services.html`:
-    - "Transparent Pricing" preview: Converted from massive stacked vertical boxes into sleek horizontal rows (`p-3 rounded-xl flex items-center justify-between`) on mobile while preserving the 3-column desktop layout (`sm:grid sm:grid-cols-3 sm:gap-4 sm:p-6 sm:flex-col`). Reduces mobile card stack height from ~450px to ~155px.
-    - "How It Works" steps: Converted from bulky `w-16 h-16` circles and `p-6` vertical stack into a compact roadmap (`w-10 h-10` badge, horizontal row per step on mobile, 3-col grid on desktop).
+    - **Hero & Expert Services Vertical Spacing**: Standardized section padding (`pt-6 sm:pt-14 pb-6 sm:pb-10` on Hero, `py-8 sm:py-12` on Expert Services), eliminating awkward vertical compression and establishing consistent spacing across laptop and mobile viewports.
+    - **Transparent Pricing Mobile 3-Column Grid**: Preserved the exact 3-column grid on mobile (`grid grid-cols-3 gap-2 sm:gap-4`) with compact badges and prices ($15 Left Chest/Hat, $25 Jacket Back / Large, $25/$40 Realistic / Pet Portrait), matching the desktop layout without vertical stacking.
+    - **5-Step "How It Works" Sequential Workflow**: Replaced legacy 3-step section with the user's bespoke 5-step workflow matching reference specifications:
+      1. *Upload Artwork* (bespoke folded document with upload arrow SVG)
+      2. *Choose Your Requirements* (bespoke tuning sliders SVG)
+      3. *Pay Securely* (bespoke credit card with magnetic stripe and chip SVG)
+      4. *We Digitize* (bespoke monitor and stylus drawing pen SVG)
+      5. *Download Your Files* (bespoke download tray with downward arrow SVG)
+      - Centered top-border gold numbered badges (`1` to `5`), subtle primary background circular containers, and desktop directional flow arrows (`arrow_forward`).
+    - Expert Services 2-column grid and Side-by-side action buttons on mobile.
   - `about.html`:
     - Converted bloated single-column stats stack into a balanced 2x2 grid on mobile (`grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 p-3.5 sm:p-6 rounded-xl sm:rounded-2xl`).
     - Standardized all `py-16` section padding down to `py-6 sm:py-10`.
@@ -120,16 +132,30 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - `app.js`:
     - Enhanced scroll reveal observer with `rootMargin: 150px` and a 1000ms safety fallback so no element remains stuck invisible (`opacity: 0`).
 
-### Client Authentication Gate & Order / Quote Dispatcher (Implemented)
-- **Universal Order & Quote Authentication Gates (`window.handleOrderClick`, `window.handleQuoteClick`)**:
-  - Both **orders** and **quotes** can strictly only be submitted after client authentication.
-  - All "Order Now" CTAs across the site (`index.html` Hero, `services.html` service cards, `pricing.html` price cards, and `profile.html`) verify client session state before ordering.
-  - All "Get Quote" / "Request a Quote" CTAs (`index.html`, `about.html`, `portfolio.html`, `pricing.html`, `contact.html`) verify client session state before requesting quotes.
-  - **Logged-Out Behavior**: Redirects directly to `portal-login.html?redirect=new_order` or `portal-login.html?redirect=request_quote` with optional `&service=...` and `&plan=...` parameters.
-  - **Contextual Notice on Login**: `portal-login.html` presents a dedicated `#order-intent-banner` dynamically tailored to whether the user is signing in to place an order or request a custom quote.
-  - **Seamless Post-Login Handoff**: Once authenticated (via email/password, new registration, or 1-click demo client), `window.insforgeClient.redirectToDashboard` routes directly to `client-portal.html?action=new_order` or `client-portal.html?action=request_quote`.
-  - **Automatic Modal Launch**: `client-portal.html` detects `action=new_order` or `action=request_quote`, automatically launches the interactive wizard pre-selected to the requested service/plan, and cleans the URL query parameters.
-  - **Logged-In Fast-Track**: If the client is already authenticated, clicking "Order Now" or "Get Quote" on any marketing page bypasses login and goes straight to the portal with the respective wizard open.
+### Instant Guest Checkout Modal & Post-Payment Account Claiming Architecture (Implemented & Live)
+- **Zero Forced Registration Checkout (`window.openGuestCheckoutModal`)**:
+  - Unauthenticated visitors clicking any "Order Now" / "Place Order" button on `index.html`, `pricing.html`, `services.html`, or `profile.html` are presented with an **Instant Guest Checkout Modal** instead of a forced login barrier.
+  - **Dynamic Service & Plan Preselection**:
+    - Supports dynamic service switching between **Embroidery Digitizing** and **Vector Art**.
+    - Intelligent plan name alias normalization (e.g. `'Larger Designs'` -> `'Jacket Back'` $25, `'Simple Vector'` -> `'Simple Vector Redraw'` $15, `'Complex Vector'` -> `'Complex Vector Redraw'` $25, `'Hat / Left Chest Logos'` -> `'Left Chest / Hat'` $15).
+    - Dynamic live price breakdown updating the summary badge, submit buttons, and credit card / PayPal triggers.
+  - **Direct Drag-and-Drop File Upload**:
+    - Integrates file upload with live thumbnail image preview and file size metadata.
+    - Files upload directly to InsForge Storage (`artworks` bucket) or fallback with file metadata.
+  - **Checkout & Payment Methods**:
+    - Simulated SSL Encrypted Credit Card checkout and PayPal integration.
+    - Persists new orders immediately into InsForge PostgreSQL database (`public.orders`) with `client_id: null`, `status: 'pending'`, `payment_status: 'paid'`, and full order details.
+  - **Post-Payment Confirmation (`order-success.html`)**:
+    - Displays full order confirmation details: Order Number (`ORD-XXXX`), Transaction ID, Plan, Service, Delivery Email, Total Paid, and Emerald "Paid & Confirmed" status badge.
+    - **Post-Payment Account Claiming Card**: Pre-fills the customer's delivery email and prompts for a password (`Minimum 6 characters`).
+    - **Automatic Order Claiming (`insforgeClient.claimGuestOrders`)**:
+      - Upon submitting the password, an InsForge authentication account is created via `insforgeClient.signUp(email, password, { name })`.
+      - Automatically executes a database patch linking all unassigned guest orders (`WHERE client_email = lower(?) AND client_id IS NULL`) to the newly registered `auth.uid()`.
+      - Synchronizes local cache and redirects to `client-portal.html?welcome=new_account`, displaying the claimed order directly in their new portal dashboard.
+  - **Quote Submissions**:
+    - "Get Quote" / "Request a Quote" actions continue to route to `portal-login.html?redirect=request_quote` or directly launch `#quote-wizard-modal` for authenticated clients.
+  - **Logged-In Fast-Track**:
+    - If a client is already authenticated, clicking "Order Now" on marketing pages bypasses the guest checkout modal and opens the full 2-stage order wizard in `client-portal.html?action=new_order`.
 
 ### Role-Based Order Portal (Implemented & Live)
 - `/portal-login.html`: Unified authentication page with automatic role routing, order intent banners, and 1-click test switcher.

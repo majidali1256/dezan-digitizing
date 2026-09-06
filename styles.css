@@ -658,3 +658,22 @@ nav.fixed.bottom-0 a:hover {
 .animate-fade-in {
     animation: uploaderFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ============================================
+   FAQ Accordion Component
+   ============================================ */
+.faq-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+    opacity: 0;
+}
+
+.faq-content.open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+.faq-content > div {
+    overflow: hidden;
+}

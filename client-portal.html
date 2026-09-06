@@ -1204,6 +1204,26 @@
                         window.history.replaceState({}, document.title, window.location.pathname);
                     }, 250);
                 }
+
+                if (urlParams.get('welcome') === 'new_account') {
+                    setTimeout(() => {
+                        const toast = document.createElement('div');
+                        toast.className = 'fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-emerald-700 text-white shadow-2xl flex items-center gap-3 border border-emerald-400/40 animate-fade-in transition-all';
+                        toast.innerHTML = `
+                            <span class="material-symbols-outlined text-2xl text-emerald-200">celebration</span>
+                            <div>
+                                <div class="font-black text-xs">Welcome to Dezan Digitizing!</div>
+                                <div class="text-[11px] text-emerald-100">Your account is active and your order is linked below.</div>
+                            </div>
+                        `;
+                        document.body.appendChild(toast);
+                        setTimeout(() => {
+                            toast.style.opacity = '0';
+                            setTimeout(() => toast.remove(), 400);
+                        }, 5500);
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }, 400);
+                }
             } catch (e) {
                 console.warn('Error handling order/quote redirect:', e);
             }

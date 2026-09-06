@@ -81,12 +81,21 @@
 
             <!-- Order Details Card -->
             <div
-                class="bg-white dark:bg-card-dark rounded-2xl p-6 md:p-8 border border-primary/20 dark:border-primary/25 shadow-sm text-left mb-8">
-                <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
-                    <span class="material-symbols-outlined text-primary">receipt_long</span>
-                    Order Summary
-                </h2>
+                class="bg-white dark:bg-card-dark rounded-2xl p-6 md:p-8 border border-primary/20 dark:border-primary/25 shadow-sm text-left mb-6">
+                <div class="flex items-center justify-between pb-3 border-b border-primary/15 mb-4">
+                    <h2 class="text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+                        <span class="material-symbols-outlined text-primary">receipt_long</span>
+                        Order Summary
+                    </h2>
+                    <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-1 border border-emerald-500/20">
+                        <span class="material-symbols-outlined text-sm">check_circle</span> Paid &amp; Confirmed
+                    </span>
+                </div>
                 <div class="space-y-3 text-sm">
+                    <div class="flex justify-between py-2 border-b border-primary/10">
+                        <span class="text-slate-600 dark:text-slate-400">Order Number</span>
+                        <span class="font-mono font-bold text-sm text-primary" id="success-order-id">—</span>
+                    </div>
                     <div class="flex justify-between py-2 border-b border-primary/10">
                         <span class="text-slate-600 dark:text-slate-400">Transaction ID</span>
                         <span class="font-mono font-bold text-xs text-slate-900 dark:text-white" id="success-txn-id">—</span>
@@ -103,11 +112,77 @@
                         <span class="text-slate-600 dark:text-slate-400">Service</span>
                         <span class="font-semibold text-slate-900 dark:text-white" id="success-service">—</span>
                     </div>
+                    <div class="flex justify-between py-2 border-b border-primary/10">
+                        <span class="text-slate-600 dark:text-slate-400">Delivery Email</span>
+                        <span class="font-semibold text-slate-900 dark:text-white" id="success-email">—</span>
+                    </div>
                     <div class="flex justify-between py-2">
                         <span class="font-bold text-slate-900 dark:text-white">Amount Paid</span>
-                        <span class="font-black text-primary text-lg" id="success-amount">$0</span>
+                        <span class="font-black text-primary text-xl" id="success-amount">$0</span>
                     </div>
                 </div>
+            </div>
+
+            <!-- Post-Payment Account Claiming Card (High Conversion Widget) -->
+            <div id="guest-claim-account-card" class="bg-white dark:bg-card-dark rounded-2xl p-6 md:p-8 border-2 border-primary/40 shadow-md text-left mb-8 relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-primary text-background-dark px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-bl-xl">
+                    Optional
+                </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+                        <span class="material-symbols-outlined text-2xl">account_circle</span>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-slate-900 dark:text-white">Track this order &amp; download files anytime</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Set a password to unlock your personal Client Portal with 1 click.</p>
+                    </div>
+                </div>
+
+                <div id="claim-account-form" class="space-y-3 mt-4">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Your Email</label>
+                        <input type="email" id="claim-email" readonly class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-primary/20 text-slate-700 dark:text-slate-300 font-semibold text-xs cursor-not-allowed">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Create Password</label>
+                            <input type="password" id="claim-password" placeholder="At least 6 characters" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20 text-slate-900 dark:text-white text-xs placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Confirm Password</label>
+                            <input type="password" id="claim-password-confirm" placeholder="Re-enter password" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20 text-slate-900 dark:text-white text-xs placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary">
+                        </div>
+                    </div>
+
+                    <div id="claim-error-msg" class="hidden p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold"></div>
+                    <div id="claim-success-msg" class="hidden p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-sm">check_circle</span>
+                        <span>Account activated! Redirecting to your portal...</span>
+                    </div>
+
+                    <button type="button" id="claim-submit-btn" onclick="window.submitGuestAccountClaim()" class="w-full py-3 rounded-xl bg-primary hover:brightness-110 text-background-dark font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer mt-2">
+                        <span class="material-symbols-outlined text-base">lock</span>
+                        <span>Save Password &amp; Open My Client Portal</span>
+                    </button>
+                    <p class="text-[11px] text-slate-500 text-center">
+                        Or keep this Order ID for reference — finished files will arrive in your email.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Authenticated User Portal Shortcut (Shown if already logged in) -->
+            <div id="logged-in-portal-shortcut" class="hidden bg-white dark:bg-card-dark rounded-2xl p-6 border border-primary/25 shadow-sm text-left mb-8 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-3xl text-primary">dashboard</span>
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-900 dark:text-white">Order Added to Your Portal</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Track progress, download stitch files, and request revisions anytime.</p>
+                    </div>
+                </div>
+                <a href="client-portal.html" class="py-2 px-4 rounded-xl bg-primary text-background-dark font-bold text-xs flex items-center gap-1 shrink-0 hover:brightness-110 transition-all">
+                    <span>Open Portal</span>
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
             </div>
 
             <!-- What's Next -->
@@ -119,16 +194,16 @@
                 <ul class="space-y-3 text-sm text-slate-600 dark:text-slate-400">
                     <li class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-primary text-lg mt-0.5 shrink-0">looks_one</span>
-                        <span>Our team will review your artwork and order details within <strong
+                        <span>Our master digitizers review your artwork and stitch settings within <strong
                                 class="text-slate-900 dark:text-slate-100">1 hour</strong>.</span>
                     </li>
                     <li class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-primary text-lg mt-0.5 shrink-0">looks_two</span>
-                        <span>You'll receive a confirmation email with a timeline at the email you provided.</span>
+                        <span>You'll receive a confirmation receipt and timeline at your delivery email.</span>
                     </li>
                     <li class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-primary text-lg mt-0.5 shrink-0">looks_3</span>
-                        <span>Your completed files will be delivered directly to your email.</span>
+                        <span>Completed machine files (DST, EMB, PES, etc.) and high-res stitch proof will be sent directly to you.</span>
                     </li>
                 </ul>
             </div>
@@ -242,6 +317,7 @@
         </div>
     </nav>
 
+    <script src="js/insforge-client.js"></script>
     <script src="app.js"></script>
 </body>
 

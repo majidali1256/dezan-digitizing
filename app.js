@@ -170,11 +170,587 @@ document.addEventListener("DOMContentLoaded", () => {
                 window.location.href = 'worker-portal.html';
             }
         } else {
-            // User is NOT logged in: redirect to login page so they log in before ordering
-            let url = 'portal-login.html?redirect=new_order';
-            if (service) url += `&service=${encodeURIComponent(service)}`;
-            if (plan) url += `&plan=${encodeURIComponent(plan)}`;
-            window.location.href = url;
+            // User is NOT logged in: Open the instant Guest Checkout Modal!
+            window.openGuestCheckoutModal({ service, plan });
+        }
+    };
+
+    // ===================================================================
+    //  INSTANT GUEST CHECKOUT MODAL SYSTEM
+    // ===================================================================
+    const guestOrderState = {
+        service: 'Digitizing',
+        plan: 'Left Chest / Hat',
+        price: 15.00,
+        paymentMethod: 'Credit Card',
+        file: null,
+        fileDataUrl: null
+    };
+
+    function ensureInsforgeClient() {
+        if (typeof window !== 'undefined' && !window.insforgeClient) {
+            const existing = document.querySelector('script[src*="insforge-client.js"]');
+            if (!existing) {
+                const s = document.createElement('script');
+                s.src = 'js/insforge-client.js';
+                s.async = false;
+                document.head.appendChild(s);
+            }
+        }
+    }
+    ensureInsforgeClient();
+
+    function createGuestCheckoutModalElement() {
+        const wrap = document.createElement('div');
+        wrap.id = 'guest-checkout-modal';
+        wrap.className = 'fixed inset-0 z-[100] bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto hidden';
+        wrap.innerHTML = `
+            <div class="relative w-full max-w-xl bg-white dark:bg-[#16140c] border border-slate-200 dark:border-primary/25 rounded-2xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto text-slate-900 dark:text-slate-100">
+                <!-- Modal Header -->
+                <div class="px-5 py-4 border-b border-slate-200 dark:border-primary/20 flex items-center justify-between bg-background-light/60 dark:bg-card-dark/60 backdrop-blur-xs shrink-0">
+                    <div class="flex items-center gap-2.5">
+                        <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-black text-base text-slate-900 dark:text-white">Instant Guest Checkout</h3>
+                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold tracking-wide uppercase border border-emerald-500/20">No Signup Needed</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Receive your production-ready files within 12-24 hours</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="window.closeGuestCheckoutModal()" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 dark:hover:bg-primary/10 text-slate-400 hover:text-slate-600 dark:hover:text-primary transition-colors cursor-pointer" aria-label="Close modal">
+                        <span class="material-symbols-outlined text-xl">close</span>
+                    </button>
+                </div>
+
+                <!-- Scrollable Form Body -->
+                <form id="guest-checkout-form" onsubmit="window.handleGuestCheckoutSubmit(event)" class="p-5 overflow-y-auto space-y-4 text-xs sm:text-sm">
+                    <!-- Existing Account Notice -->
+                    <div class="p-2.5 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-between">
+                        <span class="text-xs text-slate-700 dark:text-slate-300">Have an account with us?</span>
+                        <a href="portal-login.html" class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                            <span>Sign In to Save History</span>
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </a>
+                    </div>
+
+                    <!-- 1. Service & Plan Selection -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">1. Select Service &amp; Plan</label>
+                        <div class="grid grid-cols-2 gap-2 mb-2.5">
+                            <button type="button" id="guest-svc-digitizing" onclick="window.setGuestService('Digitizing')" class="py-2 px-3 rounded-xl border-2 border-primary bg-primary/10 text-slate-900 dark:text-white font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                <span class="material-symbols-outlined text-base text-primary">texture</span>
+                                <span>Embroidery Digitizing</span>
+                            </button>
+                            <button type="button" id="guest-svc-vector" onclick="window.setGuestService('Vector Art')" class="py-2 px-3 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-card-dark text-slate-600 dark:text-slate-400 font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                <span class="material-symbols-outlined text-base">brush</span>
+                                <span>Vector Art Redraw</span>
+                            </button>
+                        </div>
+
+                        <!-- Digitizing Plans -->
+                        <div id="guest-digitizing-plans" class="grid grid-cols-3 gap-2">
+                            <label class="relative flex flex-col p-2.5 rounded-xl border-2 border-primary bg-primary/10 cursor-pointer transition-all guest-plan-option text-center" data-plan="Left Chest / Hat" data-price="15.00">
+                                <input type="radio" name="guest_plan" value="Left Chest / Hat" checked class="sr-only" onchange="window.updateGuestPrice('Left Chest / Hat', 15)">
+                                <span class="text-[11px] font-bold uppercase text-slate-900 dark:text-white">Left Chest / Hat</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">Up to 5.5"</span>
+                                <span class="text-sm font-black text-primary mt-1">$15</span>
+                            </label>
+                            <label class="relative flex flex-col p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-card-dark cursor-pointer transition-all guest-plan-option text-center" data-plan="Jacket Back" data-price="25.00">
+                                <input type="radio" name="guest_plan" value="Jacket Back" class="sr-only" onchange="window.updateGuestPrice('Jacket Back', 25)">
+                                <span class="text-[11px] font-bold uppercase text-slate-900 dark:text-white">Jacket Back</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">Over 5.5"</span>
+                                <span class="text-sm font-black text-primary mt-1">$25</span>
+                            </label>
+                            <label class="relative flex flex-col p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-card-dark cursor-pointer transition-all guest-plan-option text-center" data-plan="Realistic / Pet Portrait" data-price="25.00">
+                                <input type="radio" name="guest_plan" value="Realistic / Pet Portrait" class="sr-only" onchange="window.updateGuestPrice('Realistic / Pet Portrait', 25)">
+                                <span class="text-[11px] font-bold uppercase text-slate-900 dark:text-white">Pet Portrait</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">Complex</span>
+                                <span class="text-sm font-black text-primary mt-1">$25</span>
+                            </label>
+                        </div>
+
+                        <!-- Vector Plans -->
+                        <div id="guest-vector-plans" class="grid grid-cols-2 gap-2 hidden">
+                            <label class="relative flex flex-col p-2.5 rounded-xl border-2 border-primary bg-primary/10 cursor-pointer transition-all guest-vector-option text-center" data-plan="Simple Vector Redraw" data-price="15.00">
+                                <input type="radio" name="guest_vector_plan" value="Simple Vector Redraw" checked class="sr-only" onchange="window.updateGuestPrice('Simple Vector Redraw', 15)">
+                                <span class="text-[11px] font-bold uppercase text-slate-900 dark:text-white">Simple Redraw</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">Basic / 1-2 Colors</span>
+                                <span class="text-sm font-black text-primary mt-1">$15</span>
+                            </label>
+                            <label class="relative flex flex-col p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-card-dark cursor-pointer transition-all guest-vector-option text-center" data-plan="Complex Vector Redraw" data-price="25.00">
+                                <input type="radio" name="guest_vector_plan" value="Complex Vector Redraw" class="sr-only" onchange="window.updateGuestPrice('Complex Vector Redraw', 25)">
+                                <span class="text-[11px] font-bold uppercase text-slate-900 dark:text-white">Complex Redraw</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">Detailed / Mascot</span>
+                                <span class="text-sm font-black text-primary mt-1">$25</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Project Name & Dimensions -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Project / Design Name *</label>
+                            <input type="text" id="guest-project-name" required placeholder="e.g. Apex Gym Hat Logo" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary text-xs sm:text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Target Size / Dimensions</label>
+                            <input type="text" id="guest-dimensions" placeholder="e.g. 3.5 inches wide, or 2.25 inch cap" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary text-xs sm:text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Deliverable Format & Fabric -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Deliverable Format</label>
+                            <select id="guest-file-format" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary text-xs sm:text-sm">
+                                <option value="DST, EMB">DST, EMB (Standard Embroidery)</option>
+                                <option value="DST, PES">DST, PES (Brother / Babylock)</option>
+                                <option value="DST, JEF">DST, JEF (Janome)</option>
+                                <option value="DST, EXP">DST, EXP (Melco / Bernina)</option>
+                                <option value="DST, VP3">DST, VP3 (Husqvarna / Pfaff)</option>
+                                <option value="AI, EPS, PDF, SVG">AI, EPS, PDF, SVG (Vector Only)</option>
+                                <option value="All Formats">All Standard Formats</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Fabric / Material</label>
+                            <input type="text" id="guest-fabric" placeholder="e.g. Structured Cap, Pique Cotton, Denim" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary text-xs sm:text-sm">
+                        </div>
+                    </div>
+
+                    <!-- 2. Drag & Drop Artwork Upload -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">2. Upload Artwork / Logo *</label>
+                        <div id="guest-dropzone" class="border-2 border-dashed border-slate-300 dark:border-primary/30 hover:border-primary rounded-xl p-4 text-center cursor-pointer transition-colors bg-slate-50/50 dark:bg-card-dark/40 relative">
+                            <input type="file" id="guest-file-input" accept="image/*,.pdf,.ai,.eps,.dst,.emb" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="window.handleGuestFileSelect(this)">
+                            
+                            <div id="guest-upload-prompt" class="flex flex-col items-center justify-center gap-1.5">
+                                <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-xl">cloud_upload</span>
+                                </div>
+                                <div class="font-bold text-xs text-slate-800 dark:text-slate-200">
+                                    <span class="text-primary underline">Click to upload</span> or drag and drop artwork
+                                </div>
+                                <p class="text-[11px] text-slate-400">PNG, JPG, PDF, AI, EPS, PSD (Max 25MB)</p>
+                            </div>
+
+                            <div id="guest-upload-preview" class="hidden flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-900 border border-primary/20 text-left">
+                                <div class="flex items-center gap-3 overflow-hidden">
+                                    <img id="guest-preview-thumb" src="" alt="Thumbnail" class="w-12 h-12 rounded object-cover border border-slate-200 dark:border-primary/20 shrink-0">
+                                    <div class="min-w-0">
+                                        <p id="guest-preview-name" class="font-bold text-xs truncate text-slate-900 dark:text-white">logo.png</p>
+                                        <p id="guest-preview-size" class="text-[10px] text-slate-500">1.2 MB</p>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="window.clearGuestFile(event)" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer" title="Remove file">
+                                    <span class="material-symbols-outlined text-base">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Delivery Contact -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">3. Your Delivery Email &amp; Name</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Your Full Name *</label>
+                                <input type="text" id="guest-name" required placeholder="e.g. Sarah Jenkins" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary text-xs sm:text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Delivery Email Address *</label>
+                                <input type="email" id="guest-email" required placeholder="name@company.com" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary text-xs sm:text-sm">
+                                <span class="text-[10px] text-slate-500 block mt-0.5">Files &amp; proof are sent here directly</span>
+                            </div>
+                        </div>
+                        <div class="mt-2.5">
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Special Instructions (Optional)</label>
+                            <textarea id="guest-instructions" rows="2" placeholder="e.g. 3D puff on initials, underlay for pique polo, cap center-out sequencing..." class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/20 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary text-xs"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 4. Payment Section -->
+                    <div class="pt-2 border-t border-slate-200 dark:border-primary/20">
+                        <div class="flex items-center justify-between mb-3 bg-primary/10 dark:bg-primary/15 p-3 rounded-xl border border-primary/25">
+                            <div>
+                                <span class="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-300 block">Total Due (Flat-Rate)</span>
+                                <span id="guest-summary-plan" class="text-xs font-bold text-slate-900 dark:text-white">Digitizing · Left Chest / Hat</span>
+                            </div>
+                            <div class="text-right">
+                                <span id="guest-summary-price" class="text-2xl font-black text-primary">$15.00</span>
+                                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">Zero Hidden Fees</span>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method Tabs -->
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">4. Payment Method</label>
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <button type="button" id="guest-tab-card" onclick="window.setGuestPaymentMethod('Credit Card')" class="p-2.5 rounded-xl border-2 border-primary bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer">
+                                <span class="material-symbols-outlined text-sm text-primary">credit_card</span>
+                                <span>Credit / Debit Card</span>
+                            </button>
+                            <button type="button" id="guest-tab-paypal" onclick="window.setGuestPaymentMethod('PayPal')" class="p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-card-dark text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer">
+                                <span class="material-symbols-outlined text-sm">account_balance_wallet</span>
+                                <span>PayPal</span>
+                            </button>
+                        </div>
+
+                        <!-- Card Form Panel -->
+                        <div id="guest-panel-card" class="space-y-2.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-xl border border-slate-200 dark:border-primary/15">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-600 dark:text-slate-400">Card Number</label>
+                                <input type="text" placeholder="4532 •••• •••• 8821" value="•••• •••• •••• 8821" class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-primary/20 text-xs font-mono text-slate-900 dark:text-white">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-600 dark:text-slate-400">Expires</label>
+                                    <input type="text" placeholder="MM/YY" value="08/28" class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-primary/20 text-xs font-mono text-slate-900 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-600 dark:text-slate-400">CVC</label>
+                                    <input type="text" placeholder="CVC" value="982" class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-primary/20 text-xs font-mono text-slate-900 dark:text-white">
+                                </div>
+                            </div>
+                            
+                            <button type="submit" id="guest-card-submit-btn" class="w-full py-3 rounded-xl bg-primary hover:brightness-110 text-background-dark font-black text-sm flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer mt-2">
+                                <span class="material-symbols-outlined text-base">lock</span>
+                                <span id="guest-card-submit-text">Pay $15.00 Now &amp; Place Order</span>
+                            </button>
+                        </div>
+
+                        <!-- PayPal Panel -->
+                        <div id="guest-panel-paypal" class="hidden text-center bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200 dark:border-primary/15 space-y-3">
+                            <p class="text-xs text-slate-600 dark:text-slate-400">Fast, secure checkout via PayPal balance or linked card.</p>
+                            <button type="submit" id="guest-paypal-submit-btn" class="w-full py-3 rounded-xl bg-[#ffc439] hover:bg-[#f6b92a] text-[#003087] font-black text-sm flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer">
+                                <span class="material-symbols-outlined text-base">payments</span>
+                                <span id="guest-paypal-submit-text">Complete with PayPal ($15.00)</span>
+                            </button>
+                        </div>
+
+                        <div class="mt-3 flex items-center justify-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
+                            <span class="material-symbols-outlined text-xs text-emerald-600 dark:text-emerald-400">verified_user</span>
+                            <span>256-Bit SSL Encrypted · 100% Quality Guaranteed · Free Revisions</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        wrap.addEventListener('click', (e) => {
+            if (e.target === wrap) window.closeGuestCheckoutModal();
+        });
+
+        return wrap;
+    }
+
+    window.openGuestCheckoutModal = function(options = {}) {
+        let modal = document.getElementById('guest-checkout-modal');
+        if (!modal) {
+            modal = createGuestCheckoutModalElement();
+            document.body.appendChild(modal);
+        }
+
+        const reqService = (options.service || 'Digitizing').toLowerCase().includes('vector') ? 'Vector Art' : 'Digitizing';
+        window.setGuestService(reqService);
+
+        let reqPlan = options.plan;
+        if (reqPlan) {
+            const lower = reqPlan.toLowerCase();
+            if (reqService === 'Vector Art') {
+                if (lower.includes('complex')) {
+                    reqPlan = 'Complex Vector Redraw';
+                } else {
+                    reqPlan = 'Simple Vector Redraw';
+                }
+            } else {
+                if (lower.includes('pet') || lower.includes('portrait') || lower.includes('realistic')) {
+                    reqPlan = 'Realistic / Pet Portrait';
+                } else if (lower.includes('large') || lower.includes('jacket') || lower.includes('back')) {
+                    reqPlan = 'Jacket Back';
+                } else {
+                    reqPlan = 'Left Chest / Hat';
+                }
+            }
+        } else {
+            reqPlan = reqService === 'Vector Art' ? 'Simple Vector Redraw' : 'Left Chest / Hat';
+        }
+
+        if (reqPlan) {
+            const digitizingInput = modal.querySelector(`input[name="guest_plan"][value="${reqPlan}"]`);
+            const vectorInput = modal.querySelector(`input[name="guest_vector_plan"][value="${reqPlan}"]`);
+            if (digitizingInput) {
+                digitizingInput.checked = true;
+                const price = parseFloat(digitizingInput.closest('label').getAttribute('data-price')) || 15;
+                window.updateGuestPrice(reqPlan, price);
+            } else if (vectorInput) {
+                vectorInput.checked = true;
+                const price = parseFloat(vectorInput.closest('label').getAttribute('data-price')) || 15;
+                window.updateGuestPrice(reqPlan, price);
+            }
+        }
+
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        setTimeout(() => {
+            const firstInput = document.getElementById('guest-project-name');
+            if (firstInput) firstInput.focus();
+        }, 100);
+    };
+
+    window.closeGuestCheckoutModal = function() {
+        const modal = document.getElementById('guest-checkout-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    };
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            window.closeGuestCheckoutModal();
+        }
+    });
+
+    window.setGuestService = function(serviceType) {
+        guestOrderState.service = serviceType;
+        const digitizingBtn = document.getElementById('guest-svc-digitizing');
+        const vectorBtn = document.getElementById('guest-svc-vector');
+        const digitizingPlans = document.getElementById('guest-digitizing-plans');
+        const vectorPlans = document.getElementById('guest-vector-plans');
+        const formatSelect = document.getElementById('guest-file-format');
+
+        if (serviceType === 'Vector Art') {
+            if (digitizingBtn) digitizingBtn.className = 'py-2 px-3 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-card-dark text-slate-600 dark:text-slate-400 font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer';
+            if (vectorBtn) vectorBtn.className = 'py-2 px-3 rounded-xl border-2 border-primary bg-primary/10 text-slate-900 dark:text-white font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer';
+            if (digitizingPlans) digitizingPlans.classList.add('hidden');
+            if (vectorPlans) vectorPlans.classList.remove('hidden');
+            if (formatSelect) formatSelect.value = 'AI, EPS, PDF, SVG';
+            
+            const activeVector = document.querySelector('input[name="guest_vector_plan"]:checked');
+            const plan = activeVector ? activeVector.value : 'Simple Vector Redraw';
+            const price = activeVector ? parseFloat(activeVector.closest('label').getAttribute('data-price')) : 15;
+            window.updateGuestPrice(plan, price);
+        } else {
+            if (digitizingBtn) digitizingBtn.className = 'py-2 px-3 rounded-xl border-2 border-primary bg-primary/10 text-slate-900 dark:text-white font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer';
+            if (vectorBtn) vectorBtn.className = 'py-2 px-3 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-card-dark text-slate-600 dark:text-slate-400 font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer';
+            if (digitizingPlans) digitizingPlans.classList.remove('hidden');
+            if (vectorPlans) vectorPlans.classList.add('hidden');
+            if (formatSelect) formatSelect.value = 'DST, EMB';
+
+            const activeDigitizing = document.querySelector('input[name="guest_plan"]:checked');
+            const plan = activeDigitizing ? activeDigitizing.value : 'Left Chest / Hat';
+            const price = activeDigitizing ? parseFloat(activeDigitizing.closest('label').getAttribute('data-price')) : 15;
+            window.updateGuestPrice(plan, price);
+        }
+    };
+
+    window.updateGuestPrice = function(planName, price) {
+        guestOrderState.plan = planName;
+        guestOrderState.price = price;
+
+        document.querySelectorAll('.guest-plan-option, .guest-vector-option').forEach(card => {
+            const input = card.querySelector('input');
+            if (input && input.checked) {
+                card.classList.remove('border-slate-200', 'bg-slate-50', 'dark:bg-card-dark');
+                card.classList.add('border-2', 'border-primary', 'bg-primary/10');
+            } else {
+                card.classList.remove('border-2', 'border-primary', 'bg-primary/10');
+                card.classList.add('border', 'border-slate-200', 'bg-slate-50', 'dark:bg-card-dark');
+            }
+        });
+
+        const summaryPlan = document.getElementById('guest-summary-plan');
+        const summaryPrice = document.getElementById('guest-summary-price');
+        const cardSubmitText = document.getElementById('guest-card-submit-text');
+        const paypalSubmitText = document.getElementById('guest-paypal-submit-text');
+
+        const formatted = `$${price.toFixed(2)}`;
+        if (summaryPlan) summaryPlan.textContent = `${guestOrderState.service} · ${planName}`;
+        if (summaryPrice) summaryPrice.textContent = formatted;
+        if (cardSubmitText) cardSubmitText.textContent = `Pay ${formatted} Now & Place Order`;
+        if (paypalSubmitText) paypalSubmitText.textContent = `Complete with PayPal (${formatted})`;
+    };
+
+    window.setGuestPaymentMethod = function(method) {
+        guestOrderState.paymentMethod = method;
+        const tabCard = document.getElementById('guest-tab-card');
+        const tabPaypal = document.getElementById('guest-tab-paypal');
+        const panelCard = document.getElementById('guest-panel-card');
+        const panelPaypal = document.getElementById('guest-panel-paypal');
+
+        if (method === 'PayPal') {
+            if (tabPaypal) tabPaypal.className = 'p-2.5 rounded-xl border-2 border-primary bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer';
+            if (tabCard) tabCard.className = 'p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-card-dark text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
+            if (panelPaypal) panelPaypal.classList.remove('hidden');
+            if (panelCard) panelCard.classList.add('hidden');
+        } else {
+            if (tabCard) tabCard.className = 'p-2.5 rounded-xl border-2 border-primary bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer';
+            if (tabPaypal) tabPaypal.className = 'p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-card-dark text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
+            if (panelCard) panelCard.classList.remove('hidden');
+            if (panelPaypal) panelPaypal.classList.add('hidden');
+        }
+    };
+
+    window.handleGuestFileSelect = function(input) {
+        if (!input || !input.files || input.files.length === 0) return;
+        const file = input.files[0];
+        guestOrderState.file = file;
+
+        const prompt = document.getElementById('guest-upload-prompt');
+        const preview = document.getElementById('guest-upload-preview');
+        const thumb = document.getElementById('guest-preview-thumb');
+        const nameEl = document.getElementById('guest-preview-name');
+        const sizeEl = document.getElementById('guest-preview-size');
+
+        if (nameEl) nameEl.textContent = file.name;
+        if (sizeEl) sizeEl.textContent = (file.size / 1024 < 1024) ? `${(file.size / 1024).toFixed(1)} KB` : `${(file.size / 1048576).toFixed(1)} MB`;
+
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                guestOrderState.fileDataUrl = e.target.result;
+                if (thumb) thumb.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            guestOrderState.fileDataUrl = null;
+            if (thumb) thumb.src = 'logo.png';
+        }
+
+        if (prompt) prompt.classList.add('hidden');
+        if (preview) preview.classList.remove('hidden');
+    };
+
+    window.clearGuestFile = function(e) {
+        if (e) e.stopPropagation();
+        guestOrderState.file = null;
+        guestOrderState.fileDataUrl = null;
+        const input = document.getElementById('guest-file-input');
+        if (input) input.value = '';
+
+        const prompt = document.getElementById('guest-upload-prompt');
+        const preview = document.getElementById('guest-upload-preview');
+        if (prompt) prompt.classList.remove('hidden');
+        if (preview) preview.classList.add('hidden');
+    };
+
+    window.handleGuestCheckoutSubmit = async function(e) {
+        if (e) e.preventDefault();
+
+        const name = (document.getElementById('guest-name')?.value || '').trim();
+        const email = (document.getElementById('guest-email')?.value || '').trim();
+        const projectName = (document.getElementById('guest-project-name')?.value || '').trim();
+        const dimensions = (document.getElementById('guest-dimensions')?.value || '').trim();
+        const format = (document.getElementById('guest-file-format')?.value || 'DST, EMB').trim();
+        const fabric = (document.getElementById('guest-fabric')?.value || '').trim();
+        const instructions = (document.getElementById('guest-instructions')?.value || '').trim();
+
+        if (!name) {
+            alert('Please enter your full name.');
+            document.getElementById('guest-name')?.focus();
+            return;
+        }
+        if (!email || !email.includes('@')) {
+            alert('Please provide a valid delivery email address.');
+            document.getElementById('guest-email')?.focus();
+            return;
+        }
+        if (!projectName) {
+            alert('Please provide a project or logo name.');
+            document.getElementById('guest-project-name')?.focus();
+            return;
+        }
+
+        const cardBtn = document.getElementById('guest-card-submit-btn');
+        const paypalBtn = document.getElementById('guest-paypal-submit-btn');
+        if (cardBtn) {
+            cardBtn.disabled = true;
+            cardBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">progress_activity</span> Processing Secure Payment...';
+        }
+        if (paypalBtn) {
+            paypalBtn.disabled = true;
+            paypalBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">progress_activity</span> Processing PayPal...';
+        }
+
+        let rawArtworkFiles = [];
+        if (guestOrderState.file) {
+            try {
+                if (window.insforgeClient && typeof window.insforgeClient.uploadFile === 'function') {
+                    const uploadResult = await window.insforgeClient.uploadFile('artworks', guestOrderState.file);
+                    rawArtworkFiles.push({
+                        name: uploadResult.name || guestOrderState.file.name,
+                        url: uploadResult.url,
+                        size: uploadResult.size || guestOrderState.file.size,
+                        key: uploadResult.key
+                    });
+                }
+            } catch (upErr) {
+                console.warn('Storage upload notice (falling back to direct file reference):', upErr.message);
+                rawArtworkFiles.push({
+                    name: guestOrderState.file.name,
+                    url: guestOrderState.fileDataUrl || 'logo.png',
+                    size: guestOrderState.file.size
+                });
+            }
+        }
+
+        const combinedInstructions = [
+            dimensions ? `Dimensions: ${dimensions}` : '',
+            fabric ? `Fabric: ${fabric}` : '',
+            instructions ? `Instructions: ${instructions}` : ''
+        ].filter(Boolean).join('\n');
+
+        const orderPayload = {
+            serviceType: guestOrderState.service,
+            planName: guestOrderState.plan,
+            projectName: projectName,
+            placement: dimensions || 'Standard Placement',
+            sizing: dimensions || 'Standard',
+            fileFormat: format,
+            fabricType: fabric,
+            instructions: combinedInstructions,
+            rawArtworkFiles: rawArtworkFiles,
+            price: guestOrderState.price,
+            paymentStatus: 'paid',
+            paymentMethod: guestOrderState.paymentMethod,
+            clientName: name,
+            clientEmail: email
+        };
+
+        try {
+            let createdOrder = null;
+            if (window.insforgeClient && typeof window.insforgeClient.createOrder === 'function') {
+                createdOrder = await window.insforgeClient.createOrder(orderPayload);
+            } else {
+                const orderNum = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+                createdOrder = {
+                    id: 'guest_' + Date.now(),
+                    order_number: orderNum,
+                    ...orderPayload,
+                    created_at: new Date().toISOString()
+                };
+                const existing = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+                existing.unshift(createdOrder);
+                localStorage.setItem('dezan_orders', JSON.stringify(existing));
+            }
+
+            sessionStorage.setItem('dezan_last_guest_order', JSON.stringify(createdOrder));
+
+            const targetUrl = `order-success.html?orderId=${encodeURIComponent(createdOrder.order_number)}&txn=${encodeURIComponent(createdOrder.id ? createdOrder.id.slice(0, 8) : 'TXN-' + Math.floor(100000 + Math.random() * 900000))}&plan=${encodeURIComponent(createdOrder.plan_name)}&project=${encodeURIComponent(createdOrder.project_name)}&service=${encodeURIComponent(createdOrder.service_type)}&amount=${encodeURIComponent(createdOrder.price)}&email=${encodeURIComponent(email)}&guest=true`;
+            window.location.href = targetUrl;
+        } catch (err) {
+            console.error('Order creation error:', err);
+            alert('There was an issue processing your order: ' + err.message);
+            if (cardBtn) {
+                cardBtn.disabled = false;
+                cardBtn.innerHTML = `<span class="material-symbols-outlined text-base">lock</span> Pay $${guestOrderState.price.toFixed(2)} Now & Place Order`;
+            }
+            if (paypalBtn) {
+                paypalBtn.disabled = false;
+                paypalBtn.innerHTML = `<span class="material-symbols-outlined text-base">payments</span> Complete with PayPal ($${guestOrderState.price.toFixed(2)})`;
+            }
         }
     };
 
@@ -209,7 +785,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Global click listener to intercept any "Order Now" / "Place Order" or Quote links
     document.addEventListener('click', (e) => {
-        const target = e.target.closest('a, button');
+        const target = e.target.closest('a, button, [data-action="order-now"], [data-action="request-quote"]');
         if (!target) return;
 
         // Elements explicitly tagged with data-action="order-now"
@@ -244,6 +820,43 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
     });
+
+    // ===== FAQ ACCORDION ENGINE =====
+    window.toggleFaq = function(button) {
+        if (!button) return;
+        const card = button.closest('.faq-item');
+        if (!card) return;
+        const content = card.querySelector('.faq-content');
+        const chevron = card.querySelector('.faq-chevron');
+        const isCurrentlyOpen = button.getAttribute('aria-expanded') === 'true' || (content && content.classList.contains('open'));
+
+        // Close all other items in the same FAQ container
+        const container = card.closest('#faq-accordion') || document;
+        container.querySelectorAll('.faq-item').forEach(item => {
+            if (item !== card) {
+                const btn = item.querySelector('button');
+                const cnt = item.querySelector('.faq-content');
+                const chv = item.querySelector('.faq-chevron');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+                if (cnt) cnt.classList.remove('open');
+                if (chv) chv.classList.remove('rotate-180', 'bg-primary/20', 'text-primary');
+                item.classList.remove('border-primary/60', 'dark:border-primary/50', 'ring-1', 'ring-primary/20');
+            }
+        });
+
+        // Toggle clicked item
+        if (isCurrentlyOpen) {
+            button.setAttribute('aria-expanded', 'false');
+            if (content) content.classList.remove('open');
+            if (chevron) chevron.classList.remove('rotate-180', 'bg-primary/20', 'text-primary');
+            card.classList.remove('border-primary/60', 'dark:border-primary/50', 'ring-1', 'ring-primary/20');
+        } else {
+            button.setAttribute('aria-expanded', 'true');
+            if (content) content.classList.add('open');
+            if (chevron) chevron.classList.add('rotate-180', 'bg-primary/20', 'text-primary');
+            card.classList.add('border-primary/60', 'dark:border-primary/50', 'ring-1', 'ring-primary/20');
+        }
+    };
 
 
     // ===== SCROLL REVEAL ANIMATIONS =====
@@ -1007,18 +1620,138 @@ function sendOrderEmail(orderData) {
 function initSuccessPage() {
     const params = new URLSearchParams(window.location.search);
 
+    let guestOrder = null;
+    try {
+        const stored = sessionStorage.getItem('dezan_last_guest_order');
+        if (stored) guestOrder = JSON.parse(stored);
+    } catch (_) {}
+
+    const orderId = params.get("orderId") || (guestOrder ? guestOrder.order_number : "ORD-" + Math.floor(1000 + Math.random() * 9000));
+    const txnId = params.get("txn") || (guestOrder ? (guestOrder.id ? guestOrder.id.slice(0, 8) : 'TXN-884192') : "TXN-" + Math.floor(100000 + Math.random() * 900000));
+    const plan = params.get("plan") || (guestOrder ? guestOrder.plan_name : "Left Chest / Hat");
+    const project = params.get("project") || (guestOrder ? guestOrder.project_name : "Custom Embroidery Design");
+    const service = params.get("service") || (guestOrder ? guestOrder.service_type : "Digitizing");
+    const amount = params.get("amount") || (guestOrder ? guestOrder.price : "15.00");
+    const email = params.get("email") || (guestOrder ? guestOrder.client_email : "");
+
+    const orderIdEl = document.getElementById("success-order-id");
     const txnEl = document.getElementById("success-txn-id");
     const planEl = document.getElementById("success-plan");
     const projectEl = document.getElementById("success-project");
     const serviceEl = document.getElementById("success-service");
     const amountEl = document.getElementById("success-amount");
+    const emailEl = document.getElementById("success-email");
 
-    if (txnEl) txnEl.textContent = params.get("txn") || "—";
-    if (planEl) planEl.textContent = params.get("plan") || "—";
-    if (projectEl) projectEl.textContent = params.get("project") || "—";
-    if (serviceEl) serviceEl.textContent = params.get("service") || "—";
-    if (amountEl) amountEl.textContent = "$" + (params.get("amount") || "0");
+    if (orderIdEl) orderIdEl.textContent = orderId;
+    if (txnEl) txnEl.textContent = txnId;
+    if (planEl) planEl.textContent = plan;
+    if (projectEl) projectEl.textContent = project;
+    if (serviceEl) serviceEl.textContent = service;
+    if (amountEl) amountEl.textContent = "$" + parseFloat(amount).toFixed(2);
+    if (emailEl) emailEl.textContent = email || "Delivered to your email";
+
+    // Handle Account Claiming Widget vs Logged-In User
+    let session = null;
+    try {
+        const raw = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('dezan_session') : null) || 
+                    (typeof localStorage !== 'undefined' ? localStorage.getItem('dezan_session') : null);
+        if (raw) session = JSON.parse(raw);
+    } catch (_) {}
+
+    const claimCard = document.getElementById("guest-claim-account-card");
+    const loggedInCard = document.getElementById("logged-in-portal-shortcut");
+    const claimEmailInput = document.getElementById("claim-email");
+
+    if (session && session.role === 'client') {
+        if (claimCard) claimCard.classList.add("hidden");
+        if (loggedInCard) loggedInCard.classList.remove("hidden");
+    } else {
+        if (claimCard) claimCard.classList.remove("hidden");
+        if (loggedInCard) loggedInCard.classList.add("hidden");
+        if (claimEmailInput) claimEmailInput.value = email;
+    }
 }
+
+window.submitGuestAccountClaim = async function() {
+    const email = (document.getElementById("claim-email")?.value || '').trim();
+    const pass = document.getElementById("claim-password")?.value || '';
+    const confirm = document.getElementById("claim-password-confirm")?.value || '';
+    const errEl = document.getElementById("claim-error-msg");
+    const succEl = document.getElementById("claim-success-msg");
+    const submitBtn = document.getElementById("claim-submit-btn");
+
+    if (errEl) errEl.classList.add("hidden");
+    if (succEl) succEl.classList.add("hidden");
+
+    if (!email) {
+        if (errEl) {
+            errEl.textContent = "Please enter an email address.";
+            errEl.classList.remove("hidden");
+        }
+        return;
+    }
+    if (pass.length < 6) {
+        if (errEl) {
+            errEl.textContent = "Password must be at least 6 characters long.";
+            errEl.classList.remove("hidden");
+        }
+        return;
+    }
+    if (pass !== confirm) {
+        if (errEl) {
+            errEl.textContent = "Passwords do not match. Please re-enter.";
+            errEl.classList.remove("hidden");
+        }
+        return;
+    }
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">progress_activity</span> Creating Your Account...';
+    }
+
+    try {
+        const displayName = email.split('@')[0];
+        if (window.insforgeClient && typeof window.insforgeClient.signUp === 'function') {
+            const res = await window.insforgeClient.signUp({
+                email: email,
+                password: pass,
+                displayName: displayName,
+                role: 'client'
+            });
+            if (res.error) throw new Error(res.error);
+        } else {
+            const user = {
+                id: 'usr_' + Date.now(),
+                email: email,
+                displayName: displayName,
+                role: 'client',
+                created_at: new Date().toISOString()
+            };
+            localStorage.setItem('dezan_session', JSON.stringify(user));
+            sessionStorage.setItem('dezan_session', JSON.stringify(user));
+        }
+
+        if (succEl) succEl.classList.remove("hidden");
+        if (submitBtn) {
+            submitBtn.className = 'w-full py-3 rounded-xl bg-emerald-600 text-white font-black text-sm flex items-center justify-center gap-2';
+            submitBtn.innerHTML = '<span class="material-symbols-outlined text-base">check_circle</span> Welcome to Dezan Digitizing!';
+        }
+
+        setTimeout(() => {
+            window.location.href = 'client-portal.html?welcome=new_account';
+        }, 1200);
+    } catch (err) {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span class="material-symbols-outlined text-base">lock</span> Save Password & Open My Client Portal';
+        }
+        if (errEl) {
+            errEl.textContent = err.message || "Could not create account. Please try again.";
+            errEl.classList.remove("hidden");
+        }
+    }
+};
 
 // ===================================================================
 //  FEEDBACK SLIDER (index.html — matches dezandigitizing.com design)

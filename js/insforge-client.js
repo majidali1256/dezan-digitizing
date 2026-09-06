@@ -694,6 +694,7 @@ class InsForgeClient {
         const demoUser = Object.values(DEMO_USERS).find(u => u.email.toLowerCase() === email.toLowerCase());
         if (demoUser) {
             this.setSession(demoUser);
+            this.claimGuestOrders(demoUser.email, demoUser.id).catch(() => {});
             return { user: demoUser, error: null };
         }
 
@@ -702,6 +703,7 @@ class InsForgeClient {
         const existing = registered.find(u => u.email.toLowerCase() === email.toLowerCase());
         if (existing) {
             this.setSession(existing);
+            this.claimGuestOrders(existing.email, existing.id).catch(() => {});
             return { user: existing, error: null };
         }
 
@@ -725,6 +727,7 @@ class InsForgeClient {
         localStorage.setItem('dezan_registered_users', JSON.stringify(registered));
 
         this.setSession(user);
+        await this.claimGuestOrders(user.email, user.id).catch(() => {});
         return { user, error: null };
     }
 
@@ -1255,26 +1258,34 @@ class InsForgeClient {
     }
 
     /**
-     * Client Submits a New Order (persisted to PostgreSQL cloud database + local cache + broadcast)
+     * Client or Guest Submits a New Order (persisted to PostgreSQL cloud database + local cache + broadcast)
      * @param {Object} orderData 
      * @returns {Promise<Object>} Created order
      */
     async createOrder(orderData) {
         const user = this.getCurrentUser();
-        if (!user) throw new Error('Must be logged in to create an order');
+        const isGuest = !user;
+        const clientEmail = (user ? user.email : orderData.clientEmail || '').trim();
+        if (isGuest && !clientEmail) {
+            throw new Error('Customer email is required for guest checkout.');
+        }
 
         const isQuote = (orderData.isQuote === true) || (orderData.status === 'quote_requested');
         const orderNumber = (isQuote ? 'QUO-' : 'ORD-') + Math.floor(1000 + Math.random() * 9000);
+        const clientId = user ? user.id : null;
+        const clientName = user ? (user.displayName || user.email) : (orderData.clientName || 'Guest Customer');
+        const clientCompany = user ? (user.company || '') : (orderData.clientCompany || '');
+
         const newOrder = {
             id: this.generateUUID(),
             order_number: orderNumber,
-            client_id: user.id,
-            client_name: user.displayName || user.email,
-            client_email: user.email,
-            client_company: user.company || '',
+            client_id: clientId,
+            client_name: clientName,
+            client_email: clientEmail,
+            client_company: clientCompany,
             service_type: orderData.serviceType || 'Digitizing',
             plan_name: orderData.planName || (isQuote ? 'Custom Quote' : 'Custom Order'),
-            project_name: orderData.projectName,
+            project_name: orderData.projectName || (orderData.serviceType ? `${orderData.serviceType} Order` : 'Embroidery Design'),
             placement: orderData.placement || 'Standard',
             fabric_type: orderData.fabricType || '',
             sizing: orderData.sizing || 'Standard',
@@ -1337,6 +1348,51 @@ class InsForgeClient {
         }
 
         return newOrder;
+    }
+
+    /**
+     * Links any unlinked guest orders with matching clientEmail to an authenticated user
+     * @param {string} clientEmail 
+     * @param {string} userId 
+     * @returns {Promise<Array>} Claimed orders
+     */
+    async claimGuestOrders(clientEmail, userId) {
+        if (!clientEmail || !userId) return [];
+        const normalizedEmail = clientEmail.trim().toLowerCase();
+
+        // 1. Update local storage orders
+        const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+        let claimedCount = 0;
+        allOrders.forEach(ord => {
+            if ((!ord.client_id || ord.client_id === null) && ord.client_email && ord.client_email.toLowerCase() === normalizedEmail) {
+                ord.client_id = userId;
+                claimedCount++;
+            }
+        });
+        if (claimedCount > 0) {
+            localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
+            console.log(`✅ Claimed ${claimedCount} guest order(s) in local storage for user ${userId}`);
+        }
+
+        // 2. Update remote InsForge database records
+        try {
+            const res = await fetch(`${this.baseUrl}/api/database/records/orders?client_email=eq.${encodeURIComponent(normalizedEmail)}&client_id=is.null`, {
+                method: 'PATCH',
+                headers: this.getApiHeaders({ 'Prefer': 'return=representation' }),
+                body: JSON.stringify({
+                    client_id: userId,
+                    updated_at: new Date().toISOString()
+                })
+            });
+            if (res.ok) {
+                const updated = await res.json();
+                console.log(`✅ Claimed ${Array.isArray(updated) ? updated.length : 0} guest order(s) in InsForge database for ${normalizedEmail}`);
+                return updated;
+            }
+        } catch (err) {
+            console.warn('Could not patch claimed guest orders to InsForge remote DB:', err.message);
+        }
+        return [];
     }
 
     /**
