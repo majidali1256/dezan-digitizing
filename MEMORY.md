@@ -185,8 +185,8 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 
 #### Client Portal Suite (Modular Multi-Page Architecture)
 Powered by shared stylesheet [`client-workspace.css`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/client-workspace.css) and shared controller [`js/client-workspace.js`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/js/client-workspace.js):
-- **Sticky Segmented Navigation Bar (`#client-sticky-nav`)**: Sticky top sub-header with horizontal scroll on mobile, active indicator pill with brand gold fill (`#d4af35`), live notification badges, and "+ New Order" primary CTA button.
-- **Fixed Bottom Navigation Dock (Mobile)**: 5 dedicated touch-friendly buttons (`Dashboard`, `Orders`, `Quotes`, `Billing`, `Settings`) with 44x44px minimum touch targets and automatic active state highlighting across all pages.
+- **Sticky Segmented Navigation Bar (`#client-sticky-nav`)**: Sticky top sub-header with active indicator pill with brand gold fill (`#d4af35`), live notification badges, and "+ New Order" primary CTA button. Hidden on mobile view (`hidden sm:block` / `@media (max-width: 639px)`) to avoid duplicate nav bars, matching Admin Portal.
+- **Fixed Bottom Navigation Dock (Mobile)**: 5 dedicated touch-friendly buttons (`Dashboard`, `Orders`, `Quotes`, `Billing`, `Settings`) with 44x44px minimum touch targets and automatic active state highlighting across all pages (exclusive mobile navigation bar).
 - **Dedicated Subpages**:
   1. [`client-portal.html`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/client-portal.html): Executive Dashboard overview with 3 quick-action cards (`Place Order`, `Request Quote`, `Track Order`), 4 metric cards (`Open Orders`, `Completed`, `Quotes`, `Balance Due`), and quick preview queues.
   2. [`client-orders.html`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/client-orders.html): Dedicated My Orders page with status filter pills (`All Orders`, `In Production`, `Delivered / Ready`, `Revisions`, `Payment Due`), live search input, order cards, physical stitch-out revision modal trigger, and order specification drawer.
@@ -196,8 +196,8 @@ Powered by shared stylesheet [`client-workspace.css`](file:///Users/macbookair/V
 
 #### Worker Studio Suite (Modular Multi-Page Architecture)
 Powered by shared stylesheet [`worker-workspace.css`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/worker-workspace.css) and shared controller [`js/worker-workspace.js`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/js/worker-workspace.js):
-- **Sticky Segmented Navigation Bar (`#worker-sticky-nav`)**: Sticky studio sub-header with studio tokens, active indicator pill, and live task counters.
-- **Fixed Bottom Navigation Dock (Mobile)**: 5 dedicated buttons (`Studio`, `Tasks`, `Archive`, `Specs`, `Settings`) with automatic active state highlighting.
+- **Sticky Segmented Navigation Bar (`#worker-sticky-nav`)**: Sticky studio sub-header with studio tokens, active indicator pill, and live task counters. Hidden on mobile view (`hidden sm:block` / `@media (max-width: 639px)`) to avoid duplicate nav bars, matching Admin Portal.
+- **Fixed Bottom Navigation Dock (Mobile)**: 5 dedicated buttons (`Studio`, `Tasks`, `Archive`, `Specs`, `Settings`) with automatic active state highlighting (exclusive mobile navigation bar).
 - **Strict Privacy & Zero-Leakage Compliance**: Client PII (name, email, phone, company) and commercial billing prices are 100% masked from workers across both UI and database layers (`Client #CLI-XXXX`, `[Protected PII]`, `[Confidential - Admin Only]`).
 - **Dedicated Subpages**:
   1. [`worker-portal.html`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/worker-portal.html): Studio Dashboard overview with QC standards, 4 production metric badges, quick navigation links, and active production preview.

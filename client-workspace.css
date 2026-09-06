@@ -246,3 +246,10 @@ body[data-client-page] textarea:focus-visible {
         padding: 0 !important;
     }
 }
+
+/* ===== RESPONSIVE MOBILE NAVIGATION ===== */
+@media (max-width: 639px) {
+    #client-sticky-nav {
+        display: none !important;
+    }
+}

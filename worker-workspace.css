@@ -194,3 +194,10 @@ body[data-worker-page] textarea:focus-visible {
     outline: 2px solid var(--worker-gold);
     outline-offset: 2px;
 }
+
+/* ===== RESPONSIVE MOBILE NAVIGATION ===== */
+@media (max-width: 639px) {
+    #worker-sticky-nav {
+        display: none !important;
+    }
+}
