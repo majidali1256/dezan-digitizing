@@ -303,66 +303,84 @@
     </nav>
 
     <!-- ===== ADAPTIVE PLACE ORDER & REQUEST QUOTE MODAL (2-STAGE SELECTION) ===== -->
-    <div id="new-order-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-        <div class="w-full max-w-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl p-5 sm:p-7 max-h-[92vh] overflow-y-auto relative text-slate-900 dark:text-slate-100 my-auto">
+    <div id="new-order-modal" onclick="if(event.target === this) closeNewOrderModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex flex-col justify-end sm:justify-center sm:items-center p-0 sm:p-4 overflow-hidden">
+        <div class="w-full sm:max-w-2xl bg-white dark:bg-card-dark border-t sm:border border-slate-200 dark:border-primary/30 rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[90vh] text-slate-900 dark:text-slate-100 overflow-hidden relative">
             
-            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-primary/15 mb-4">
-                <div>
-                    <h3 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2" id="order-modal-header-title">
-                        <span class="material-symbols-outlined text-amber-800 dark:text-primary" id="order-modal-header-icon">add_shopping_cart</span>
-                        <span id="order-modal-header-text">Place an Order</span>
+            <!-- Mobile Drag Indicator Bar -->
+            <div class="w-12 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mt-2.5 mb-1 sm:hidden flex-shrink-0"></div>
+
+            <!-- Sticky Modal Header -->
+            <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-3.5 border-b border-slate-200 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex-shrink-0 z-10">
+                <div class="min-w-0 pr-2">
+                    <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2" id="order-modal-header-title">
+                        <span class="material-symbols-outlined text-amber-800 dark:text-primary text-xl sm:text-2xl flex-shrink-0" id="order-modal-header-icon">add_shopping_cart</span>
+                        <span id="order-modal-header-text" class="truncate">Place an Order</span>
                     </h3>
-                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400" id="order-modal-header-desc">Tailored technical specifications for machine embroidery and vectors</p>
+                    <p class="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 truncate" id="order-modal-header-desc">Tailored technical specifications for machine embroidery and vectors</p>
                 </div>
-                <button onclick="closeNewOrderModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:white cursor-pointer">
-                    <span class="material-symbols-outlined text-lg">close</span>
+                <button type="button" onclick="closeNewOrderModal()" class="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer transition-colors flex-shrink-0" title="Close (Esc)">
+                    <span class="material-symbols-outlined text-lg sm:text-xl">close</span>
                 </button>
             </div>
 
             <!-- STAGE 1: SERVICE CHOICE CARDS (Always Clean & Simple First) -->
-            <div id="order-service-selection-view" class="space-y-4">
-                <div class="text-center py-2">
-                    <span class="text-[10px] font-black uppercase text-amber-800 dark:text-primary tracking-widest block mb-1">Step 1 of 2</span>
-                    <h4 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white" id="order-step1-title">What type of work do you need?</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto" id="order-step1-desc">Select a service below to open the specific order requirements. No confusing or unnecessary fields.</p>
+            <div id="order-service-selection-view" class="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-3 sm:space-y-4">
+                <div class="text-center py-1 sm:py-2">
+                    <span class="text-[10px] font-black uppercase text-amber-800 dark:text-primary tracking-widest block mb-0.5 sm:mb-1">Step 1 of 2</span>
+                    <h4 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white" id="order-step1-title">What type of work do you need?</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 max-w-md mx-auto" id="order-step1-desc">Select a service below to open the specific order requirements. No confusing or unnecessary fields.</p>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-1">
                     <!-- Option 1: Embroidery Digitizing -->
-                    <button type="button" onclick="selectOrderService('Digitizing')" class="group p-5 rounded-2xl border-2 border-slate-200/90 dark:border-primary/25 bg-slate-50/70 dark:bg-slate-900/50 hover:border-primary dark:hover:border-primary hover:bg-amber-50/30 dark:hover:bg-primary/10 transition-all text-left flex flex-col justify-between cursor-pointer shadow-xs hover:shadow-md">
+                    <button type="button" onclick="selectOrderService('Digitizing')" class="group p-3.5 sm:p-5 rounded-2xl border-2 border-slate-200/90 dark:border-primary/25 bg-slate-50/70 dark:bg-slate-900/50 hover:border-primary dark:hover:border-primary hover:bg-amber-50/30 dark:hover:bg-primary/10 transition-all text-left flex flex-col justify-between cursor-pointer shadow-xs hover:shadow-md">
                         <div>
-                            <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-800 dark:text-primary flex items-center justify-center mb-3 group-hover:scale-105 transition-transform border border-amber-500/20">
-                                <span class="material-symbols-outlined text-2xl">precision_manufacturing</span>
+                            <div class="flex items-start gap-3 sm:gap-0 sm:flex-col">
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500/10 text-amber-800 dark:text-primary flex items-center justify-center sm:mb-3 group-hover:scale-105 transition-transform border border-amber-500/20 flex-shrink-0">
+                                    <span class="material-symbols-outlined text-xl sm:text-2xl">precision_manufacturing</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between sm:block">
+                                        <h5 class="text-sm sm:text-base font-black text-slate-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">Embroidery Digitizing</h5>
+                                        <span class="material-symbols-outlined text-base text-amber-800 dark:text-primary sm:hidden group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+                                    </div>
+                                    <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 mt-0.5 sm:mt-1 leading-snug sm:leading-relaxed">Industrial stitch files formatted for commercial machines (Tajima, Barudan, Brother, etc.).</p>
+                                </div>
                             </div>
-                            <h5 class="text-base font-black text-slate-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">Embroidery Digitizing</h5>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">Industrial stitch files formatted for commercial machines (Tajima, Barudan, Brother, etc.).</p>
                         </div>
-                        <div class="pt-4 mt-3 border-t border-slate-200/60 dark:border-primary/10 flex flex-wrap gap-1.5">
+                        <div class="pt-2.5 sm:pt-4 mt-2 sm:mt-3 border-t border-slate-200/60 dark:border-primary/10 flex flex-wrap gap-1 sm:gap-1.5">
                             <span class="px-2 py-0.5 rounded-full bg-amber-100/80 dark:bg-primary/15 text-amber-900 dark:text-primary font-bold text-[10px]">DST · EMB · PES</span>
                             <span class="px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[10px]">Left Chest & Caps</span>
                             <span class="px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[10px]">3D Puff</span>
                         </div>
-                        <div class="mt-4 flex items-center gap-1 text-xs font-black text-amber-800 dark:text-primary group-hover:translate-x-1 transition-transform">
+                        <div class="hidden sm:flex mt-4 items-center gap-1 text-xs font-black text-amber-800 dark:text-primary group-hover:translate-x-1 transition-transform">
                             <span>Select Digitizing</span>
                             <span class="material-symbols-outlined text-sm">arrow_forward</span>
                         </div>
                     </button>
 
                     <!-- Option 2: Vector Art -->
-                    <button type="button" onclick="selectOrderService('Vectorizing')" class="group p-5 rounded-2xl border-2 border-slate-200/90 dark:border-primary/25 bg-slate-50/70 dark:bg-slate-900/50 hover:border-primary dark:hover:border-primary hover:bg-amber-50/30 dark:hover:bg-primary/10 transition-all text-left flex flex-col justify-between cursor-pointer shadow-xs hover:shadow-md">
+                    <button type="button" onclick="selectOrderService('Vectorizing')" class="group p-3.5 sm:p-5 rounded-2xl border-2 border-slate-200/90 dark:border-primary/25 bg-slate-50/70 dark:bg-slate-900/50 hover:border-primary dark:hover:border-primary hover:bg-amber-50/30 dark:hover:bg-primary/10 transition-all text-left flex flex-col justify-between cursor-pointer shadow-xs hover:shadow-md">
                         <div>
-                            <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-800 dark:text-blue-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform border border-blue-500/20">
-                                <span class="material-symbols-outlined text-2xl">draw</span>
+                            <div class="flex items-start gap-3 sm:gap-0 sm:flex-col">
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500/10 text-blue-800 dark:text-blue-400 flex items-center justify-center sm:mb-3 group-hover:scale-105 transition-transform border border-blue-500/20 flex-shrink-0">
+                                    <span class="material-symbols-outlined text-xl sm:text-2xl">draw</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between sm:block">
+                                        <h5 class="text-sm sm:text-base font-black text-slate-900 dark:text-white group-hover:text-blue-800 dark:group-hover:text-blue-400 transition-colors">Vector Art Conversion</h5>
+                                        <span class="material-symbols-outlined text-base text-blue-800 dark:text-blue-400 sm:hidden group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+                                    </div>
+                                    <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 mt-0.5 sm:mt-1 leading-snug sm:leading-relaxed">Crisp high-resolution redraws for screen printing, vinyl plotting, decals, and signage.</p>
+                                </div>
                             </div>
-                            <h5 class="text-base font-black text-slate-900 dark:text-white group-hover:text-blue-800 dark:group-hover:text-blue-400 transition-colors">Vector Art Conversion</h5>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">Crisp high-resolution redraws for screen printing, vinyl plotting, decals, and signage.</p>
                         </div>
-                        <div class="pt-4 mt-3 border-t border-slate-200/60 dark:border-primary/10 flex flex-wrap gap-1.5">
+                        <div class="pt-2.5 sm:pt-4 mt-2 sm:mt-3 border-t border-slate-200/60 dark:border-primary/10 flex flex-wrap gap-1 sm:gap-1.5">
                             <span class="px-2 py-0.5 rounded-full bg-blue-100/80 dark:bg-blue-500/15 text-blue-900 dark:text-blue-400 font-bold text-[10px]">AI · EPS · SVG · PDF</span>
                             <span class="px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[10px]">Clean Curves</span>
                             <span class="px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[10px]">Color Separation</span>
                         </div>
-                        <div class="mt-4 flex items-center gap-1 text-xs font-black text-blue-800 dark:text-blue-400 group-hover:translate-x-1 transition-transform">
+                        <div class="hidden sm:flex mt-4 items-center gap-1 text-xs font-black text-blue-800 dark:text-blue-400 group-hover:translate-x-1 transition-transform">
                             <span>Select Vector Art</span>
                             <span class="material-symbols-outlined text-sm">arrow_forward</span>
                         </div>
@@ -371,256 +389,262 @@
             </div>
 
             <!-- STAGE 2: ADAPTIVE FORM (Hidden until service selected) -->
-            <form id="adaptive-order-form" onsubmit="handleAdaptiveOrderSubmit(event)" class="hidden space-y-4 pt-1">
+            <form id="adaptive-order-form" onsubmit="handleAdaptiveOrderSubmit(event)" class="hidden flex-1 flex flex-col overflow-hidden">
                 <input type="hidden" id="selected-service-type" value="Digitizing" />
 
-                <!-- Active Service Banner with Quick Switcher -->
-                <div class="p-3 rounded-xl bg-amber-50/50 dark:bg-slate-900/60 border border-amber-200/80 dark:border-primary/20 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-amber-800 dark:text-primary text-lg" id="service-banner-icon">precision_manufacturing</span>
-                        <div>
-                            <span class="text-[10px] uppercase font-bold text-slate-500 block">Active Service</span>
-                            <strong class="text-xs font-black text-slate-900 dark:text-white" id="service-banner-title">Embroidery Digitizing</strong>
+                <!-- Scrollable Form Fields Body -->
+                <div class="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-3.5 sm:space-y-4">
+                    <!-- Active Service Banner with Quick Switcher -->
+                    <div class="p-2.5 sm:p-3 rounded-xl bg-amber-50/50 dark:bg-slate-900/60 border border-amber-200/80 dark:border-primary/20 flex items-center justify-between">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="material-symbols-outlined text-amber-800 dark:text-primary text-lg flex-shrink-0" id="service-banner-icon">precision_manufacturing</span>
+                            <div class="min-w-0">
+                                <span class="text-[9px] uppercase font-bold text-slate-500 block">Active Service</span>
+                                <strong class="text-xs font-black text-slate-900 dark:text-white truncate block" id="service-banner-title">Embroidery Digitizing</strong>
+                            </div>
                         </div>
-                    </div>
-                    <button type="button" onclick="switchOrderServiceChoice()" class="px-3 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-primary/30 text-xs font-bold text-amber-800 dark:text-primary hover:bg-amber-50 dark:hover:bg-primary/10 transition-colors cursor-pointer flex items-center gap-1">
-                        <span class="material-symbols-outlined text-xs">swap_horiz</span> Change Service
-                    </button>
-                </div>
-
-                <!-- ================= EMBROIDERY DIGITIZING FIELDS ================= -->
-                <div id="digitizing-fields-container" class="space-y-4">
-                    <!-- Job Name & Placement -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Job Name / Reference *</label>
-                            <input type="text" id="dig-job-name" placeholder="e.g. Falcon Polo Left Chest" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary" />
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Target Placement *</label>
-                            <select id="dig-placement" onchange="calculateAdaptivePrice()" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
-                                <option value="Left Chest ($15)">Left Chest ($15.00)</option>
-                                <option value="Cap / Hat Front ($15)">Cap / Hat Front ($15.00)</option>
-                                <option value="Jacket Back ($45)">Jacket Back Large ($45.00)</option>
-                                <option value="Sleeve / Visor ($15)">Sleeve / Visor ($15.00)</option>
-                                <option value="Patches / Badges ($20)">Patches / Badges ($20.00)</option>
-                                <option value="Custom Placement">Custom Placement</option>
-                            </select>
-                        </div>
+                        <button type="button" onclick="switchOrderServiceChoice()" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-primary/30 text-xs font-bold text-amber-800 dark:text-primary hover:bg-amber-50 dark:hover:bg-primary/10 transition-colors cursor-pointer flex items-center gap-1 flex-shrink-0">
+                            <span class="material-symbols-outlined text-xs">swap_horiz</span> Change
+                        </button>
                     </div>
 
-                    <!-- Fabric Material & Sizing -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Fabric / Garment Material *</label>
-                            <select id="dig-fabric" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
-                                <option value="Cotton / Pique Knit">Cotton / Pique Knit (Polos, Tees)</option>
-                                <option value="Structured Cap (6-Panel)">Structured Cap (6-Panel, Center-Out)</option>
-                                <option value="Unstructured Cap / Beanie">Unstructured Cap / Beanie (Knit)</option>
-                                <option value="Fleece / Heavy Hoodie">Fleece / Heavy Hoodie</option>
-                                <option value="Denim / Heavy Twill">Denim / Heavy Twill Workwear</option>
-                                <option value="Leather / Patches">Leather / Heavy Substrate</option>
-                                <option value="Other Fabric">Other / General Purpose</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Target Size (Width & Height) *</label>
-                            <div class="flex items-center gap-2">
-                                <input type="text" id="dig-size-w" placeholder="Width (e.g. 3.5)" class="w-1/2 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary" />
-                                <span class="text-slate-400 font-bold">×</span>
-                                <input type="text" id="dig-size-h" placeholder="Height (e.g. 2.2)" class="w-1/2 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary" />
-                                <select id="dig-size-unit" class="px-2.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary">
-                                    <option value="in">in</option>
-                                    <option value="cm">cm</option>
+                    <!-- ================= EMBROIDERY DIGITIZING FIELDS ================= -->
+                    <div id="digitizing-fields-container" class="space-y-3.5 sm:space-y-4">
+                        <!-- Job Name & Placement -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Job Name / Reference *</label>
+                                <input type="text" id="dig-job-name" placeholder="e.g. Falcon Polo Left Chest" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Target Placement *</label>
+                                <select id="dig-placement" onchange="calculateAdaptivePrice()" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
+                                    <option value="Left Chest ($15)">Left Chest ($15.00)</option>
+                                    <option value="Cap / Hat Front ($15)">Cap / Hat Front ($15.00)</option>
+                                    <option value="Jacket Back ($45)">Jacket Back Large ($45.00)</option>
+                                    <option value="Sleeve / Visor ($15)">Sleeve / Visor ($15.00)</option>
+                                    <option value="Patches / Badges ($20)">Patches / Badges ($20.00)</option>
+                                    <option value="Custom Placement">Custom Placement</option>
                                 </select>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Required Machine Formats -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">Required Machine File Formats *</label>
-                        <div class="flex flex-wrap gap-2" id="machine-format-chips">
-                            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-primary/10 border border-amber-300 dark:border-primary/30 text-xs font-bold text-amber-900 dark:text-primary cursor-pointer">
-                                <input type="checkbox" name="dig-formats" value="DST" checked class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Tajima (.DST)
-                            </label>
-                            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-primary/10 border border-amber-300 dark:border-primary/30 text-xs font-bold text-amber-900 dark:text-primary cursor-pointer">
-                                <input type="checkbox" name="dig-formats" value="EMB" checked class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Wilcom (.EMB)
-                            </label>
-                            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
-                                <input type="checkbox" name="dig-formats" value="PES" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Brother (.PES)
-                            </label>
-                            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
-                                <input type="checkbox" name="dig-formats" value="EXP" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Melco (.EXP)
-                            </label>
-                            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
-                                <input type="checkbox" name="dig-formats" value="CND" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> CND
-                            </label>
-                            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
-                                <input type="checkbox" name="dig-formats" value="JEF" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Janome (.JEF)
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Special Options -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">Special Technical Options (Optional)</label>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:border-primary">
-                                <input type="checkbox" name="dig-special" value="3D Foam Puff" onchange="calculateAdaptivePrice()" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> 3D Puff (+ $5)
-                            </label>
-                            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:border-primary">
-                                <input type="checkbox" name="dig-special" value="Applique" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Applique
-                            </label>
-                            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:border-primary">
-                                <input type="checkbox" name="dig-special" value="Match Sample" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Match Sample
-                            </label>
-                            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:border-primary">
-                                <input type="checkbox" name="dig-special" value="Fire Resistant" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Flame Specs
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ================= VECTOR ART FIELDS ================= -->
-                <div id="vector-fields-container" class="hidden space-y-4">
-                    <!-- Job Name & Output Format -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Job Name / Vector Reference *</label>
-                            <input type="text" id="vec-job-name" placeholder="e.g. Apex Mascot Vector Redraw" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary" />
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Intended Production Use</label>
-                            <select id="vec-use" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
-                                <option value="Screen Printing">Screen Printing (Spot Colors)</option>
-                                <option value="Vinyl / Plotter Cutting">Vinyl / Plotter Cutting (Single Line)</option>
-                                <option value="DTG / Sublimation">DTG / Sublimation (Full Color)</option>
-                                <option value="Signage / Laser Engraving">Signage / Laser Engraving</option>
-                                <option value="General Brand Logo">General Brand Logo (Scalable)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Required Vector Formats -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">Required Vector Formats *</label>
-                        <div class="flex flex-wrap gap-2" id="vector-format-chips">
-                            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-300 dark:border-blue-500/30 text-xs font-bold text-blue-900 dark:text-blue-400 cursor-pointer">
-                                <input type="checkbox" name="vec-formats" value="AI" checked class="rounded text-blue-600 focus:ring-blue-500 h-3.5 w-3.5" /> Adobe Illustrator (.AI)
-                            </label>
-                            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-300 dark:border-blue-500/30 text-xs font-bold text-blue-900 dark:text-blue-400 cursor-pointer">
-                                <input type="checkbox" name="vec-formats" value="EPS" checked class="rounded text-blue-600 focus:ring-blue-500 h-3.5 w-3.5" /> Production .EPS
-                            </label>
-                            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-300 dark:border-blue-500/30 text-xs font-bold text-blue-900 dark:text-blue-400 cursor-pointer">
-                                <input type="checkbox" name="vec-formats" value="PDF" checked class="rounded text-blue-600 focus:ring-blue-500 h-3.5 w-3.5" /> Vector PDF
-                            </label>
-                            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
-                                <input type="checkbox" name="vec-formats" value="SVG" class="rounded text-blue-600 focus:ring-blue-500 h-3.5 w-3.5" /> Scalable SVG
-                            </label>
-                            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
-                                <input type="checkbox" name="vec-formats" value="PNG" class="rounded text-blue-600 focus:ring-blue-500 h-3.5 w-3.5" /> 300 DPI Transparent PNG
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ================= COMMON FIELDS (Artwork, Notes, Turnaround, Payment) ================= -->
-                <!-- Multi-file Drag & Drop Artwork Upload -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Artwork Upload (Drag & Drop or Browse) *</label>
-                    <div id="dropzone" onclick="document.getElementById('artwork-file').click()" class="border-2 border-dashed border-slate-300 dark:border-primary/30 hover:border-primary rounded-xl p-5 text-center cursor-pointer bg-slate-50 dark:bg-slate-950/40 transition-all hover:bg-amber-50/20">
-                        <span class="material-symbols-outlined text-amber-700 dark:text-primary text-3xl mb-1">cloud_upload</span>
-                        <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Click or Drag & Drop artwork file here</p>
-                        <p class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Supports PNG, JPG, PDF, AI, EPS, SVG, or ZIP</p>
-                        <input type="file" id="artwork-file" onchange="handleFileSelected(event)" class="hidden" accept=".ai,.eps,.pdf,.png,.jpg,.jpeg,.svg,.zip" multiple />
-                    </div>
-                    <div id="file-preview-container" class="hidden mt-2 space-y-1.5">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-
-                <!-- Notes / Instructions -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1" id="order-notes-label">Production Notes / Special Instructions</label>
-                    <textarea id="order-notes" rows="2" placeholder="Specific thread colors, underlay preference, color count, or special curve adjustments..." class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary"></textarea>
-                </div>
-
-                <!-- Turnaround Speed Selection -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">Turnaround Speed</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        <label class="flex items-start gap-2.5 p-3 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 cursor-pointer">
-                            <input type="radio" name="order-turnaround" value="standard" checked onchange="calculateAdaptivePrice()" class="text-primary focus:ring-primary h-4 w-4 mt-0.5" />
+                        <!-- Fabric Material & Sizing -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
                             <div>
-                                <strong class="text-xs font-black text-slate-900 dark:text-white block">Standard Turnaround (12-24 Hours)</strong>
-                                <span class="text-[10px] text-slate-500 dark:text-slate-400">Included at standard pricing</span>
+                                <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Fabric / Garment Material *</label>
+                                <select id="dig-fabric" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
+                                    <option value="Cotton / Pique Knit">Cotton / Pique Knit (Polos, Tees)</option>
+                                    <option value="Structured Cap (6-Panel)">Structured Cap (6-Panel, Center-Out)</option>
+                                    <option value="Unstructured Cap / Beanie">Unstructured Cap / Beanie (Knit)</option>
+                                    <option value="Fleece / Heavy Hoodie">Fleece / Heavy Hoodie</option>
+                                    <option value="Denim / Heavy Twill">Denim / Heavy Twill Workwear</option>
+                                    <option value="Leather / Patches">Leather / Heavy Substrate</option>
+                                    <option value="Other Fabric">Other / General Purpose</option>
+                                </select>
                             </div>
-                        </label>
-                        <label class="flex items-start gap-2.5 p-3 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 cursor-pointer hover:border-primary">
-                            <input type="radio" name="order-turnaround" value="rush" onchange="calculateAdaptivePrice()" class="text-primary focus:ring-primary h-4 w-4 mt-0.5" />
                             <div>
-                                <strong class="text-xs font-black text-slate-900 dark:text-white block flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-amber-600 text-xs">bolt</span> ⚡ Rush Service (2-4 Hours)
-                                </strong>
-                                <span class="text-[10px] text-slate-500 dark:text-slate-400">+ $10.00 expedited queue fee</span>
+                                <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Target Size (Width & Height) *</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="text" id="dig-size-w" placeholder="Width (e.g. 3.5)" class="flex-1 min-w-0 px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary" />
+                                    <span class="text-slate-400 font-bold flex-shrink-0">×</span>
+                                    <input type="text" id="dig-size-h" placeholder="Height (e.g. 2.2)" class="flex-1 min-w-0 px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary" />
+                                    <select id="dig-size-unit" class="w-16 flex-shrink-0 px-2.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary">
+                                        <option value="in">in</option>
+                                        <option value="cm">cm</option>
+                                    </select>
+                                </div>
                             </div>
-                        </label>
-                    </div>
-                </div>
+                        </div>
 
-                <!-- Price Summary Bar (Hidden in Quote Mode) -->
-                <div id="order-price-summary-box" class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-primary/20 flex items-center justify-between">
+                        <!-- Required Machine Formats -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">Required Machine File Formats *</label>
+                            <div class="flex flex-wrap gap-1.5 sm:gap-2" id="machine-format-chips">
+                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-primary/10 border border-amber-300 dark:border-primary/30 text-xs font-bold text-amber-900 dark:text-primary cursor-pointer">
+                                    <input type="checkbox" name="dig-formats" value="DST" checked class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Tajima (.DST)
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-primary/10 border border-amber-300 dark:border-primary/30 text-xs font-bold text-amber-900 dark:text-primary cursor-pointer">
+                                    <input type="checkbox" name="dig-formats" value="EMB" checked class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Wilcom (.EMB)
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                                    <input type="checkbox" name="dig-formats" value="PES" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Brother (.PES)
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                                    <input type="checkbox" name="dig-formats" value="EXP" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Melco (.EXP)
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                                    <input type="checkbox" name="dig-formats" value="CND" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> CND
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                                    <input type="checkbox" name="dig-formats" value="JEF" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Janome (.JEF)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Special Options -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">Special Technical Options (Optional)</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                <label class="flex items-center gap-2 p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-[11px] sm:text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:border-primary">
+                                    <input type="checkbox" name="dig-special" value="3D Foam Puff" onchange="calculateAdaptivePrice()" class="rounded text-primary focus:ring-primary h-3.5 w-3.5 flex-shrink-0" /> <span class="truncate">3D Puff (+ $5)</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-[11px] sm:text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:border-primary">
+                                    <input type="checkbox" name="dig-special" value="Applique" class="rounded text-primary focus:ring-primary h-3.5 w-3.5 flex-shrink-0" /> <span class="truncate">Applique</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-[11px] sm:text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:border-primary">
+                                    <input type="checkbox" name="dig-special" value="Match Sample" class="rounded text-primary focus:ring-primary h-3.5 w-3.5 flex-shrink-0" /> <span class="truncate">Match Sample</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-[11px] sm:text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:border-primary">
+                                    <input type="checkbox" name="dig-special" value="Fire Resistant" class="rounded text-primary focus:ring-primary h-3.5 w-3.5 flex-shrink-0" /> <span class="truncate">Flame Specs</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= VECTOR ART FIELDS ================= -->
+                    <div id="vector-fields-container" class="hidden space-y-3.5 sm:space-y-4">
+                        <!-- Job Name & Output Format -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Job Name / Vector Reference *</label>
+                                <input type="text" id="vec-job-name" placeholder="e.g. Apex Mascot Vector Redraw" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Intended Production Use</label>
+                                <select id="vec-use" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
+                                    <option value="Screen Printing">Screen Printing (Spot Colors)</option>
+                                    <option value="Vinyl / Plotter Cutting">Vinyl / Plotter Cutting (Single Line)</option>
+                                    <option value="DTG / Sublimation">DTG / Sublimation (Full Color)</option>
+                                    <option value="Signage / Laser Engraving">Signage / Laser Engraving</option>
+                                    <option value="General Brand Logo">General Brand Logo (Scalable)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Required Vector Formats -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">Required Vector Formats *</label>
+                            <div class="flex flex-wrap gap-1.5 sm:gap-2" id="vector-format-chips">
+                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-300 dark:border-blue-500/30 text-xs font-bold text-blue-900 dark:text-blue-400 cursor-pointer">
+                                    <input type="checkbox" name="vec-formats" value="AI" checked class="rounded text-blue-600 focus:ring-blue-500 h-3.5 w-3.5" /> Adobe Illustrator (.AI)
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-300 dark:border-blue-500/30 text-xs font-bold text-blue-900 dark:text-blue-400 cursor-pointer">
+                                    <input type="checkbox" name="vec-formats" value="EPS" checked class="rounded text-blue-600 focus:ring-blue-500 h-3.5 w-3.5" /> Production .EPS
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-300 dark:border-blue-500/30 text-xs font-bold text-blue-900 dark:text-blue-400 cursor-pointer">
+                                    <input type="checkbox" name="vec-formats" value="PDF" checked class="rounded text-blue-600 focus:ring-blue-500 h-3.5 w-3.5" /> Vector PDF
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                                    <input type="checkbox" name="vec-formats" value="SVG" class="rounded text-blue-600 focus:ring-blue-500 h-3.5 w-3.5" /> Scalable SVG
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                                    <input type="checkbox" name="vec-formats" value="PNG" class="rounded text-blue-600 focus:ring-blue-500 h-3.5 w-3.5" /> 300 DPI Transparent PNG
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= COMMON FIELDS (Artwork, Notes, Turnaround, Payment) ================= -->
+                    <!-- Multi-file Drag & Drop Artwork Upload -->
                     <div>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase block">Estimated Price</span>
-                        <span class="text-xs font-semibold text-slate-600 dark:text-slate-400" id="order-price-breakdown">Standard Digitizing</span>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-2xl font-black text-amber-800 dark:text-primary" id="order-price-display">$15.00</span>
-                        <span class="text-[10px] font-bold text-slate-400 block">USD</span>
-                    </div>
-                </div>
-
-                <!-- Order Payment Notice (Hidden in Quote Mode) -->
-                <div id="order-payment-terms-box" class="p-3.5 rounded-xl bg-amber-500/10 dark:bg-primary/10 border border-amber-400/30 dark:border-primary/25 flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-primary/20 text-amber-900 dark:text-primary flex items-center justify-center flex-shrink-0">
-                            <span class="material-symbols-outlined text-lg">credit_card</span>
+                        <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Artwork Upload (Drag & Drop or Browse) *</label>
+                        <div id="dropzone" onclick="document.getElementById('artwork-file').click()" class="border-2 border-dashed border-slate-300 dark:border-primary/30 hover:border-primary rounded-xl p-3.5 sm:p-5 text-center cursor-pointer bg-slate-50 dark:bg-slate-950/40 transition-all hover:bg-amber-50/20">
+                            <span class="material-symbols-outlined text-amber-700 dark:text-primary text-2xl sm:text-3xl mb-0.5">cloud_upload</span>
+                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Tap to upload or drag artwork file here</p>
+                            <p class="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Supports PNG, JPG, PDF, AI, EPS, SVG, or ZIP</p>
+                            <input type="file" id="artwork-file" onchange="handleFileSelected(event)" class="hidden" accept=".ai,.eps,.pdf,.png,.jpg,.jpeg,.svg,.zip" multiple />
                         </div>
+                        <div id="file-preview-container" class="hidden mt-2 space-y-1.5">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Notes / Instructions -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1" id="order-notes-label">Production Notes / Special Instructions</label>
+                        <textarea id="order-notes" rows="2" placeholder="Specific thread colors, underlay preference, color count, or special curve adjustments..." class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary"></textarea>
+                    </div>
+
+                    <!-- Turnaround Speed Selection -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">Turnaround Speed</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
+                            <label class="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 cursor-pointer">
+                                <input type="radio" name="order-turnaround" value="standard" checked onchange="calculateAdaptivePrice()" class="text-primary focus:ring-primary h-4 w-4 mt-0.5" />
+                                <div>
+                                    <strong class="text-xs font-black text-slate-900 dark:text-white block">Standard Turnaround (12-24 Hours)</strong>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400">Included at standard pricing</span>
+                                </div>
+                            </label>
+                            <label class="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 cursor-pointer hover:border-primary">
+                                <input type="radio" name="order-turnaround" value="rush" onchange="calculateAdaptivePrice()" class="text-primary focus:ring-primary h-4 w-4 mt-0.5" />
+                                <div>
+                                    <strong class="text-xs font-black text-slate-900 dark:text-white block flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-amber-600 text-xs">bolt</span> ⚡ Rush Service (2-4 Hours)
+                                    </strong>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400">+ $10.00 expedited queue fee</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Price Summary Bar (Hidden in Quote Mode) -->
+                    <div id="order-price-summary-box" class="p-3.5 sm:p-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-primary/20 flex items-center justify-between">
                         <div>
-                            <span class="text-xs font-bold text-slate-900 dark:text-white block">Payment Required to Start Production</span>
-                            <span class="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-400">All standard orders require payment upfront. Secure instant checkout via Credit Card or PayPal.</span>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase block">Estimated Price</span>
+                            <span class="text-xs font-semibold text-slate-600 dark:text-slate-400" id="order-price-breakdown">Standard Digitizing</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xl sm:text-2xl font-black text-amber-800 dark:text-primary" id="order-price-display">$15.00</span>
+                            <span class="text-[10px] font-bold text-slate-400 block">USD</span>
                         </div>
                     </div>
-                    <div class="hidden sm:flex items-center gap-1.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 flex-shrink-0">
-                        <span class="material-symbols-outlined text-sm text-emerald-600 dark:text-emerald-400">lock</span>
-                        <span>256-Bit SSL</span>
+
+                    <!-- Order Payment Notice (Hidden in Quote Mode) -->
+                    <div id="order-payment-terms-box" class="p-3 sm:p-3.5 rounded-xl bg-amber-500/10 dark:bg-primary/10 border border-amber-400/30 dark:border-primary/25 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5 sm:gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-primary/20 text-amber-900 dark:text-primary flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-lg">credit_card</span>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold text-slate-900 dark:text-white block">Payment Required to Start Production</span>
+                                <span class="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-400">All standard orders require payment upfront. Secure instant checkout via Credit Card or PayPal.</span>
+                            </div>
+                        </div>
+                        <div class="hidden sm:flex items-center gap-1.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 flex-shrink-0">
+                            <span class="material-symbols-outlined text-sm text-emerald-600 dark:text-emerald-400">lock</span>
+                            <span>256-Bit SSL</span>
+                        </div>
+                    </div>
+
+                    <!-- Quote Mode Notice (Visible ONLY in Quote Mode) -->
+                    <div id="quote-mode-info-box" class="hidden p-3.5 sm:p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-500/30 text-xs text-blue-950 dark:text-blue-200">
+                        <div class="flex items-start gap-2.5 sm:gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-800 dark:text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-blue-500/25">
+                                <span class="material-symbols-outlined text-lg">request_quote</span>
+                            </div>
+                            <div>
+                                <strong class="text-xs font-black block text-blue-950 dark:text-blue-200">No Upfront Payment Required for Quotes</strong>
+                                <p class="text-[10px] sm:text-[11px] text-blue-900/80 dark:text-blue-300/80 mt-1 leading-relaxed">
+                                    Submit your design specs and artwork for free. Our senior digitizer will inspect stitch density, small text complexity, and fabric compatibility to give you an exact price. Once the price is set, you can review and pay to start production.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Quote Mode Notice (Visible ONLY in Quote Mode) -->
-                <div id="quote-mode-info-box" class="hidden p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-500/30 text-xs text-blue-950 dark:text-blue-200">
-                    <div class="flex items-start gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-800 dark:text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-blue-500/25">
-                            <span class="material-symbols-outlined text-lg">request_quote</span>
-                        </div>
-                        <div>
-                            <strong class="text-xs font-black block text-blue-950 dark:text-blue-200">No Upfront Payment Required for Quotes</strong>
-                            <p class="text-[11px] text-blue-900/80 dark:text-blue-300/80 mt-1 leading-relaxed">
-                                Submit your design specs and artwork for free. Our senior digitizer will inspect stitch density, small text complexity, and fabric compatibility to give you an exact price. Once the price is set, you can review and pay to start production.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Form Action Buttons -->
-                <div class="pt-3 border-t border-slate-200 dark:border-primary/15 flex items-center justify-between gap-2">
-                    <button type="button" onclick="switchOrderServiceChoice()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer">
-                        ← Back to Choice
+                <!-- Sticky Form Action Buttons -->
+                <div class="flex-shrink-0 px-4 py-3 sm:px-6 sm:py-3.5 border-t border-slate-200 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex items-center justify-between gap-2 shadow-lg sm:shadow-none pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+                    <button type="button" onclick="switchOrderServiceChoice()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer transition-colors flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">arrow_back</span>
+                        <span class="hidden xs:inline">Back</span>
                     </button>
                     <div class="flex items-center gap-2">
-                        <button type="button" onclick="closeNewOrderModal()" class="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-800 dark:text-slate-300 text-xs font-semibold cursor-pointer">Cancel</button>
-                        <button type="submit" id="adaptive-order-submit-btn" class="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5">
+                        <button type="button" onclick="closeNewOrderModal()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" id="adaptive-order-submit-btn" class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0">
                             <span class="material-symbols-outlined text-sm" id="order-submit-btn-icon">lock</span>
                             <span id="order-submit-btn-text">Pay & Place Order ($15.00)</span>
                         </button>
@@ -631,8 +655,11 @@
     </div>
 
     <!-- ===== REQUEST A REVISION & STITCH-OUT FEEDBACK MODAL ===== -->
-    <div id="revision-request-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-        <div class="w-full max-w-lg bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl p-6 relative text-slate-900 dark:text-slate-100 my-auto">
+    <div id="revision-request-modal" onclick="if(event.target === this) closeRevisionModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex flex-col justify-end sm:justify-center sm:items-center p-0 sm:p-4 overflow-hidden">
+        <div class="w-full sm:max-w-lg bg-white dark:bg-card-dark border-t sm:border border-slate-200 dark:border-primary/30 rounded-t-3xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 flex flex-col max-h-[92dvh] sm:max-h-[90vh] overflow-y-auto overscroll-contain relative text-slate-900 dark:text-slate-100">
+            <!-- Mobile Drag Indicator Bar -->
+            <div class="w-12 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mt-1 mb-2.5 sm:hidden flex-shrink-0"></div>
+
             <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-primary/20 mb-4">
                 <div>
                     <span class="text-[10px] font-black uppercase text-amber-800 dark:text-primary tracking-wider block">Quality Assurance & Modifications</span>
@@ -640,8 +667,8 @@
                         Request a Revision: Order #ORD-0000
                     </h3>
                 </div>
-                <button onclick="closeRevisionModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer">
-                    <span class="material-symbols-outlined text-base">close</span>
+                <button onclick="closeRevisionModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer transition-colors">
+                    <span class="material-symbols-outlined text-lg">close</span>
                 </button>
             </div>
 
@@ -674,10 +701,10 @@
                     <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                         Stitch-Out Photo on Garment / Cap *
                     </label>
-                    <div id="stitch-out-dropzone" onclick="document.getElementById('stitch-out-file').click()" class="border-2 border-dashed border-amber-300/80 dark:border-primary/40 hover:border-primary rounded-xl p-5 text-center cursor-pointer bg-amber-50/30 dark:bg-slate-950/40 transition-all hover:bg-amber-50/60">
-                        <span class="material-symbols-outlined text-amber-700 dark:text-primary text-3xl mb-1">add_a_photo</span>
+                    <div id="stitch-out-dropzone" onclick="document.getElementById('stitch-out-file').click()" class="border-2 border-dashed border-amber-300/80 dark:border-primary/40 hover:border-primary rounded-xl p-4 sm:p-5 text-center cursor-pointer bg-amber-50/30 dark:bg-slate-950/40 transition-all hover:bg-amber-50/60">
+                        <span class="material-symbols-outlined text-amber-700 dark:text-primary text-2xl sm:text-3xl mb-1">add_a_photo</span>
                         <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Upload Photo of Physical Stitch-Out</p>
-                        <p class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Crucial so our digitizer can physically see tension or puckering on your garment.</p>
+                        <p class="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Crucial so our digitizer can physically see tension or puckering on your garment.</p>
                         <input type="file" id="stitch-out-file" onchange="handleStitchOutPhotoSelected(event)" class="hidden" accept="image/*" />
                     </div>
                     
@@ -706,8 +733,8 @@
 
                 <!-- Actions -->
                 <div class="pt-3 border-t border-slate-200 dark:border-primary/15 flex items-center justify-end gap-2">
-                    <button type="button" onclick="closeRevisionModal()" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-300 font-semibold cursor-pointer">Cancel</button>
-                    <button type="submit" id="revision-submit-btn" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black shadow-md shadow-primary/20 cursor-pointer flex items-center gap-1.5 transition-all">
+                    <button type="button" onclick="closeRevisionModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold cursor-pointer">Cancel</button>
+                    <button type="submit" id="revision-submit-btn" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black shadow-md shadow-primary/20 cursor-pointer flex items-center gap-1.5 transition-all">
                         <span class="material-symbols-outlined text-sm">send</span>
                         <span>Submit Revision Request</span>
                     </button>
@@ -717,8 +744,11 @@
     </div>
 
     <!-- ===== CHECKOUT / PAY NOW MODAL ===== -->
-    <div id="checkout-payment-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="w-full max-w-md bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl p-6 relative text-slate-900 dark:text-slate-100">
+    <div id="checkout-payment-modal" onclick="if(event.target === this) closeCheckoutModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex flex-col justify-end sm:justify-center sm:items-center p-0 sm:p-4 overflow-hidden">
+        <div class="w-full sm:max-w-md bg-white dark:bg-card-dark border-t sm:border border-slate-200 dark:border-primary/30 rounded-t-3xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 flex flex-col max-h-[92dvh] sm:max-h-[90vh] overflow-y-auto overscroll-contain relative text-slate-900 dark:text-slate-100">
+            <!-- Mobile Drag Indicator Bar -->
+            <div class="w-12 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mt-1 mb-2.5 sm:hidden flex-shrink-0"></div>
+
             <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-primary/20 mb-4">
                 <div>
                     <span class="text-[10px] font-black uppercase text-amber-800 dark:text-primary tracking-wider block">Secure Payment Checkout</span>
@@ -795,8 +825,10 @@
     </div>
 
     <!-- ===== CLIENT INVOICE & RECEIPT MODAL ===== -->
-    <div id="client-invoice-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-        <div id="client-invoice-print-area" class="w-full max-w-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto relative text-slate-900 dark:text-slate-100">
+    <div id="client-invoice-modal" onclick="if(event.target === this) closeClientInvoiceModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex flex-col justify-end sm:justify-center sm:items-center p-0 sm:p-4 overflow-hidden">
+        <div id="client-invoice-print-area" class="w-full sm:max-w-2xl bg-white dark:bg-card-dark border-t sm:border border-slate-200 dark:border-primary/30 rounded-t-3xl sm:rounded-2xl shadow-2xl p-4 sm:p-8 flex flex-col max-h-[92dvh] sm:max-h-[90vh] overflow-y-auto overscroll-contain relative text-slate-900 dark:text-slate-100">
+            <!-- Mobile Drag Indicator Bar -->
+            <div class="w-12 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mt-1 mb-2.5 sm:hidden flex-shrink-0 no-print"></div>
             
             <!-- Modal Header (no-print actions) -->
             <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-primary/20 mb-6">
@@ -833,8 +865,10 @@
     </div>
 
     <!-- ===== DEDICATED CLIENT PROFILE MODAL ===== -->
-    <div id="client-profile-modal" onclick="if(event.target === this) closeProfileModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-        <div class="w-full max-w-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl p-4 sm:p-6 pb-6 relative text-slate-900 dark:text-slate-100 my-auto flex flex-col max-h-[90vh] overflow-y-auto">
+    <div id="client-profile-modal" onclick="if(event.target === this) closeProfileModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex flex-col justify-end sm:justify-center sm:items-center p-0 sm:p-4 overflow-hidden">
+        <div class="w-full sm:max-w-xl bg-white dark:bg-card-dark border-t sm:border border-slate-200 dark:border-primary/30 rounded-t-3xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 pb-6 relative text-slate-900 dark:text-slate-100 flex flex-col max-h-[92dvh] sm:max-h-[90vh] overflow-y-auto overscroll-contain">
+            <!-- Mobile Drag Indicator Bar -->
+            <div class="w-12 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mt-1 mb-2.5 sm:hidden flex-shrink-0"></div>
             
             <!-- Modal Header -->
             <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-primary/20 mb-4">
@@ -970,8 +1004,10 @@
     </div>
 
     <!-- ===== DEDICATED PORTAL SETTINGS MODAL ===== -->
-    <div id="client-settings-modal" onclick="if(event.target === this) closeSettingsModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-        <div class="w-full max-w-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl p-4 sm:p-5 pb-5 relative text-slate-900 dark:text-slate-100 my-auto flex flex-col max-h-[92vh] overflow-y-auto">
+    <div id="client-settings-modal" onclick="if(event.target === this) closeSettingsModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex flex-col justify-end sm:justify-center sm:items-center p-0 sm:p-4 overflow-hidden">
+        <div class="w-full sm:max-w-xl bg-white dark:bg-card-dark border-t sm:border border-slate-200 dark:border-primary/30 rounded-t-3xl sm:rounded-2xl shadow-2xl p-4 sm:p-5 pb-5 relative text-slate-900 dark:text-slate-100 flex flex-col max-h-[92dvh] sm:max-h-[90vh] overflow-y-auto overscroll-contain">
+            <!-- Mobile Drag Indicator Bar -->
+            <div class="w-12 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mt-1 mb-2.5 sm:hidden flex-shrink-0"></div>
             
             <!-- Modal Header -->
             <div class="flex items-center justify-between pb-2.5 border-b border-slate-200 dark:border-primary/20 mb-3">

@@ -185,12 +185,16 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
     - **Request Quote** & **Track Order**: Clean secondary cards for custom quoting and order tracking.
   - **4 Stat Metric Badges**: Open Orders, Completed, Quotes, **Balance Due** (Dynamically calculates total outstanding balance for unpaid/pending orders; displays rose badge with count `X Due` when > $0, or emerald `All settled` when $0.00; clickable to instantly filter by due payments).
   - **Adaptive 2-Stage Place Order Flow**:
-    - **Step 1 (Clean Choice)**: Modal opens showing *only* "What type of work do you need?" with two large cards: **Embroidery Digitizing** and **Vector Art Conversion**. All detailed form inputs stay completely hidden until a card is selected.
-    - **Step 2 (Tailored Form)**:
-      - **Digitizing Specific Controls**: Job Name/Reference, Target Placement, Fabric/Garment Material (Cotton/Pique, 6-Panel Structured Cap, Beanie, Fleece, Denim, Leather), Target Size ($W \times H$ in/cm), Required Machine File Formats (DST, EMB, PES, EXP, CND, JEF), Special Technical Options (3D Puff $+ \$5$, Applique, Match Sample, Flame Specs), Drag-and-drop artwork uploader, Production Notes, and Turnaround Speed (Standard vs. Rush $+ \$10$).
+    - **Step 1 (Clean Choice & Compact Mobile Cards)**: Modal opens showing *only* "What type of work do you need?" with two choices: **Embroidery Digitizing** and **Vector Art Conversion**. On mobile viewports, cards render as ultra-compact horizontal rows (`p-3.5` with icon + title + description + badges + arrow) ensuring both options fit simultaneously above the fold with zero clipping; on desktop (`sm:`), expands into spacious 2-column bento cards.
+    - **Step 2 (Tailored Form & Pinned Action Bar)**:
+      - **Internal Scroll Container**: Form body scrolls smoothly (`flex-1 overflow-y-auto overscroll-contain`) while header and footer stay pinned.
+      - **Sticky Bottom Action Bar**: Live calculated price (`#order-total-price-display`), itemized fee callout, back button, cancel, and primary CTA (`Pay & Place Order` or `Send Quote Request`) stay anchored at the bottom with safe-area inset padding (`pb-[max(0.75rem,env(safe-area-inset-bottom))]`), preventing submit buttons from being buried or cut off by mobile browser chrome.
+      - **Digitizing Specific Controls**: Job Name/Reference, Target Placement, Fabric/Garment Material (Cotton/Pique, 6-Panel Structured Cap, Beanie, Fleece, Denim, Leather), Target Size ($W \times H$ in/cm with `min-w-0 flex-1` responsive inputs), Required Machine File Formats (DST, EMB, PES, EXP, CND, JEF), Special Technical Options (3D Puff $+ \$5$, Applique, Match Sample, Flame Specs), Drag-and-drop artwork uploader, Production Notes, and Turnaround Speed (Standard vs. Rush $+ \$10$).
       - **Vector Specific Controls**: Job Name, Intended Vector Usage, Formats (AI, EPS, SVG, PDF, CDR, PNG), Drag-and-drop uploader, Production Notes.
       - **Dynamic Price Engine**: Updates price and itemized breakdown live as options and turnaround speeds change.
       - **Service Switcher Banner**: Sticky top banner allowing clients to switch service type instantly without page reload.
+  - **Mobile Bottom-Sheet Architecture (All Modals)**:
+    - Standardized `#new-order-modal`, `#revision-request-modal`, `#checkout-payment-modal`, `#client-invoice-modal`, `#client-profile-modal`, and `#client-settings-modal` to open as ergonomic native bottom-sheets on mobile (`rounded-t-3xl sm:rounded-2xl`, `max-h-[92dvh] sm:max-h-[90vh]`) featuring top drag pill handles, sticky headers, and safe-area padding for zero-clipping on iOS Safari and Android Chrome.
   - **Foolproof Revision & Physical Stitch-Out Feedback Engine**:
     - Completed orders render side-by-side action buttons: Primary `[ Download Files / DST ]` and Secondary `[ Request a Revision ]`.
     - Clicking `[ Request a Revision ]` opens `#revision-request-modal`:
