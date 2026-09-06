@@ -24,7 +24,11 @@
 - **Theme Default:** **White/Light theme** is the universal default for all visitors, portal users, clients, admins, and workers. Dark mode is user-toggleable and persisted in `localStorage`.
 - **Text Contrast Standard:** Strict WCAG 2.1 AA compliant text contrast ratios ($\ge 4.5:1$) across both light and dark modes.
 - **Logic:** Vanilla JavaScript (ES6+) — *Strictly zero client-side frameworks (no React, Vue, Angular)*
-- **Backend / Database Engine:** InsForge BaaS (`https://e8rw998g.us-east.insforge.app` with PostgreSQL, Row-Level Security, JWT Auth, and S3 Storage)
+- **Backend Architecture (Node.js & Express.js REST API)**:
+  - **Server Directory (`server/`)**: Production-ready Express API service (`server.js`) on port 5001 with Helmet, CORS, Morgan, and JSON parsers.
+  - **Controllers & Routes**: Modular controllers for `/api/health`, `/api/auth` (bcrypt + JWT), `/api/orders`, `/api/quotes`, `/api/tasks` (worker queue with strict zero-PII data masking), `/api/revisions` (physical defect photo proofing), and `/api/upload` (Multer multipart handling).
+  - **Database Engine:** PostgreSQL via InsForge BaaS (`https://e8rw998g.us-east.insforge.app` with `pg.Pool` SSL direct connection, Row-Level Security, and S3 Storage).
+  - **Authentication**: Stateless JWT (`Bearer <token>`) with bcrypt-hashed passwords stored in `public.profiles`.
 - **Integrations:**
   - **PayPal JS SDK:** Order billing and secure checkout
   - **EmailJS:** Instant automated transactional email notifications

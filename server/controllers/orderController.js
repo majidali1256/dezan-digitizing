@@ -1,0 +1,365 @@
+/**
+ * Orders Management Controller
+ * Enforces strict authorization, client isolation, and operational workflows
+ */
+const crypto = require('crypto');
+const { query } = require('../config/db');
+const { success, error, badRequest, notFound, forbidden } = require('../utils/apiResponse');
+const { generateOrderNumber, generateTaskNumber } = require('../utils/orderNumber');
+
+/**
+ * Create Order
+ * POST /api/orders
+ */
+const createOrder = async (req, res) => {
+    try {
+        const {
+            serviceType,
+            planName,
+            projectName,
+            placement,
+            sizing,
+            fabricType,
+            fileFormat,
+            instructions,
+            rawArtworkFiles = [],
+            price = 0.00,
+            specialOptions = {},
+            turnaroundSpeed = 'standard',
+            paymentMethod = 'PayPal',
+            paymentStatus = 'unpaid',
+            transactionId = null,
+            // Guest checkout fields if unauthenticated
+            clientName,
+            clientEmail,
+            clientCompany
+        } = req.body;
+
+        if (!serviceType || !projectName || !placement) {
+            return badRequest(res, 'Service type, project name, and target placement are required');
+        }
+
+        // Determine client metadata
+        let clientId = null;
+        let finalClientName = clientName;
+        let finalClientEmail = clientEmail;
+        let finalClientCompany = clientCompany || null;
+
+        if (req.user) {
+            clientId = req.user.id;
+            finalClientName = req.user.display_name;
+            finalClientEmail = req.user.email;
+            finalClientCompany = req.user.company || null;
+        }
+
+        if (!finalClientEmail || !finalClientName) {
+            return badRequest(res, 'Client name and email are required to create an order');
+        }
+
+        const orderId = crypto.randomUUID();
+        const orderNumber = generateOrderNumber();
+        const finalPrice = parseFloat(price) || 0.00;
+
+        const insertRes = await query(
+            `INSERT INTO public.orders 
+                (id, order_number, client_id, client_name, client_email, client_company,
+                 service_type, plan_name, project_name, placement, sizing, fabric_type,
+                 file_format, instructions, raw_artwork_files, price, currency,
+                 payment_status, payment_method, transaction_id, status, is_quote,
+                 special_options, turnaround_speed, revision_count, created_at, updated_at)
+             VALUES 
+                ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
+                 'USD', $17, $18, $19, 'pending_review', false, $20, $21, 0, NOW(), NOW())
+             RETURNING *`,
+            [
+                orderId,
+                orderNumber,
+                clientId,
+                finalClientName,
+                finalClientEmail.toLowerCase().trim(),
+                finalClientCompany,
+                serviceType,
+                planName || 'Standard Order',
+                projectName,
+                placement,
+                sizing || 'Standard Size',
+                fabricType || 'Standard Cotton / Twill',
+                fileFormat || 'DST, EMB',
+                instructions || '',
+                JSON.stringify(rawArtworkFiles),
+                finalPrice,
+                paymentStatus,
+                paymentMethod,
+                transactionId,
+                JSON.stringify(specialOptions),
+                turnaroundSpeed
+            ]
+        );
+
+        return success(res, insertRes.rows[0], 'Order created successfully', 201);
+    } catch (err) {
+        console.error('[Create Order Error]:', err);
+        return error(res, `Failed to create order: ${err.message}`);
+    }
+};
+
+/**
+ * Get Orders (Role-Aware)
+ * GET /api/orders
+ */
+const getOrders = async (req, res) => {
+    try {
+        const user = req.user;
+        const { status, search, page = 1, limit = 50 } = req.query;
+
+        // Workers are cryptographically forbidden from reading master commercial orders
+        if (user.role === 'digitizer') {
+            return forbidden(res, 'Digitizer workers must access assignments via /api/tasks to maintain customer privacy compliance');
+        }
+
+        const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+        let whereClauses = [];
+        let params = [];
+        let paramIndex = 1;
+
+        // If client, restrict strictly to own orders
+        if (user.role === 'client') {
+            whereClauses.push(`(client_id = $${paramIndex} OR LOWER(client_email) = LOWER($${paramIndex + 1}))`);
+            params.push(user.id, user.email);
+            paramIndex += 2;
+        }
+
+        // Filter out quotes unless explicitly requested
+        whereClauses.push(`is_quote = false`);
+
+        // Status filter
+        if (status && status !== 'all') {
+            whereClauses.push(`status = $${paramIndex}`);
+            params.push(status);
+            paramIndex++;
+        }
+
+        // Search query
+        if (search) {
+            whereClauses.push(`(
+                order_number ILIKE $${paramIndex} OR 
+                project_name ILIKE $${paramIndex} OR 
+                client_name ILIKE $${paramIndex}
+            )`);
+            params.push(`%${search}%`);
+            paramIndex++;
+        }
+
+        const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+        // Query orders
+        const ordersRes = await query(
+            `SELECT * FROM public.orders ${whereSql} ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
+            [...params, parseInt(limit, 10), offset]
+        );
+
+        // Count total matching
+        const countRes = await query(
+            `SELECT COUNT(*) as total FROM public.orders ${whereSql}`,
+            params
+        );
+
+        const total = parseInt(countRes.rows[0].total, 10);
+
+        return success(res, ordersRes.rows, 'Orders retrieved successfully', 200, {
+            total,
+            page: parseInt(page, 10),
+            limit: parseInt(limit, 10),
+            totalPages: Math.ceil(total / parseInt(limit, 10))
+        });
+    } catch (err) {
+        console.error('[Get Orders Error]:', err);
+        return error(res, `Failed to retrieve orders: ${err.message}`);
+    }
+};
+
+/**
+ * Get Order by ID
+ * GET /api/orders/:id
+ */
+const getOrderById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = req.user;
+
+        if (user.role === 'digitizer') {
+            return forbidden(res, 'Digitizers cannot query orders directly. Use /api/tasks/:id');
+        }
+
+        const orderRes = await query('SELECT * FROM public.orders WHERE (id::text = $1 OR order_number = $1)', [id]);
+
+        if (orderRes.rows.length === 0) {
+            return notFound(res, 'Order not found');
+        }
+
+        const order = orderRes.rows[0];
+
+        // Ensure client owns the order
+        if (user.role === 'client' && order.client_id !== user.id && order.client_email.toLowerCase() !== user.email.toLowerCase()) {
+            return forbidden(res, 'You do not have permission to view this order');
+        }
+
+        return success(res, order, 'Order details retrieved');
+    } catch (err) {
+        console.error('[Get Order By ID Error]:', err);
+        return error(res, `Failed to retrieve order: ${err.message}`);
+    }
+};
+
+/**
+ * Update Order Status (Admin Only)
+ * PUT /api/orders/:id/status
+ */
+const updateOrderStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const validStatuses = [
+            'pending_review', 'assigned', 'in_progress', 'qa_review', 
+            'revision_requested', 'completed', 'cancelled'
+        ];
+
+        if (!validStatuses.includes(status)) {
+            return badRequest(res, `Invalid status. Valid values: ${validStatuses.join(', ')}`);
+        }
+
+        const updateRes = await query(
+            'UPDATE public.orders SET status = $1, updated_at = NOW() WHERE (id::text = $2 OR order_number = $2) RETURNING *',
+            [status, id]
+        );
+
+        if (updateRes.rows.length === 0) {
+            return notFound(res, 'Order not found');
+        }
+
+        return success(res, updateRes.rows[0], 'Order status updated successfully');
+    } catch (err) {
+        console.error('[Update Order Status Error]:', err);
+        return error(res, `Failed to update order status: ${err.message}`);
+    }
+};
+
+/**
+ * Assign Digitizer Worker to Order (Admin Only)
+ * POST /api/orders/:id/assign
+ */
+const assignDigitizer = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { digitizerId, digitizerName } = req.body;
+
+        if (!digitizerId || !digitizerName) {
+            return badRequest(res, 'Digitizer ID and name are required');
+        }
+
+        // Fetch order details
+        const orderRes = await query('SELECT * FROM public.orders WHERE (id::text = $1 OR order_number = $1)', [id]);
+        if (orderRes.rows.length === 0) {
+            return notFound(res, 'Order not found');
+        }
+        const order = orderRes.rows[0];
+
+        // 1. Update Order in public.orders
+        const updatedOrderRes = await query(
+            `UPDATE public.orders 
+             SET assigned_digitizer_id = $1, 
+                 assigned_digitizer_name = $2, 
+                 assigned_at = NOW(), 
+                 status = 'assigned', 
+                 updated_at = NOW() 
+             WHERE id = $3 
+             RETURNING *`,
+            [digitizerId, digitizerName, order.id]
+        );
+
+        // 2. Synchronize to public.digitizer_tasks (Sanitized - Zero PII, Zero Pricing)
+        const taskNumber = generateTaskNumber(order.order_number);
+        const existingTask = await query('SELECT id FROM public.digitizer_tasks WHERE order_id = $1', [order.id]);
+
+        if (existingTask.rows.length > 0) {
+            await query(
+                `UPDATE public.digitizer_tasks 
+                 SET assigned_digitizer_id = $1, 
+                     status = 'assigned', 
+                     assigned_at = NOW(), 
+                     updated_at = NOW() 
+                 WHERE id = $2`,
+                [digitizerId, existingTask.rows[0].id]
+            );
+        } else {
+            await query(
+                `INSERT INTO public.digitizer_tasks 
+                    (id, task_number, order_number, order_id, assigned_digitizer_id,
+                     service_type, placement, sizing, file_format, instructions,
+                     raw_artwork_files, fabric_type, status, deliverables, assigned_at, updated_at)
+                 VALUES 
+                    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'assigned', '[]'::jsonb, NOW(), NOW())`,
+                [
+                    crypto.randomUUID(),
+                    taskNumber,
+                    order.order_number,
+                    order.id,
+                    digitizerId,
+                    order.service_type,
+                    order.placement,
+                    order.sizing,
+                    order.file_format,
+                    order.instructions,
+                    JSON.stringify(order.raw_artwork_files || []),
+                    order.fabric_type
+                ]
+            );
+        }
+
+        return success(res, updatedOrderRes.rows[0], `Order assigned to ${digitizerName} successfully`);
+    } catch (err) {
+        console.error('[Assign Digitizer Error]:', err);
+        return error(res, `Failed to assign digitizer: ${err.message}`);
+    }
+};
+
+/**
+ * Confirm Order Payment
+ * POST /api/orders/:id/payment
+ */
+const confirmPayment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { paymentMethod = 'PayPal', transactionId = null } = req.body;
+
+        const updateRes = await query(
+            `UPDATE public.orders 
+             SET payment_status = 'paid', 
+                 payment_method = $1, 
+                 transaction_id = COALESCE($2, transaction_id),
+                 updated_at = NOW() 
+             WHERE (id::text = $3 OR order_number = $3) 
+             RETURNING *`,
+            [paymentMethod, transactionId, id]
+        );
+
+        if (updateRes.rows.length === 0) {
+            return notFound(res, 'Order not found');
+        }
+
+        return success(res, updateRes.rows[0], 'Payment confirmed successfully');
+    } catch (err) {
+        console.error('[Confirm Payment Error]:', err);
+        return error(res, `Failed to confirm payment: ${err.message}`);
+    }
+};
+
+module.exports = {
+    createOrder,
+    getOrders,
+    getOrderById,
+    updateOrderStatus,
+    assignDigitizer,
+    confirmPayment
+};

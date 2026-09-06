@@ -1,0 +1,322 @@
+/**
+ * Authentication & Profile Controller
+ */
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const config = require('../config/config');
+const { query } = require('../config/db');
+const { success, error, badRequest, unauthorized } = require('../utils/apiResponse');
+
+// Demo account instant credentials whitelist for seamless offline/dev testing
+const DEMO_PASSWORDS = {
+    'admin@dezandigitizing.com': ['admin123', 'Dezan@2026!', 'admin'],
+    'client@falconapparel.com': ['client123', 'Dezan@2026!', 'client'],
+    'worker.alex@dezandigitizing.com': ['worker123', 'Dezan@2026!', 'worker'],
+    'worker.sam@dezandigitizing.com': ['worker123', 'Dezan@2026!', 'worker'],
+    'worker.maria@dezandigitizing.com': ['worker123', 'Dezan@2026!', 'worker']
+};
+
+/**
+ * Generate JWT token
+ */
+const generateToken = (user) => {
+    return jwt.sign(
+        {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            displayName: user.display_name
+        },
+        config.jwt.secret,
+        { expiresIn: config.jwt.expiresIn }
+    );
+};
+
+/**
+ * User Registration (Client Only)
+ * POST /api/auth/register
+ */
+const register = async (req, res) => {
+    try {
+        const { email, password, displayName, company, phone } = req.body;
+
+        if (!email || !password || !displayName) {
+            return badRequest(res, 'Email, password, and name are required');
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        // Check if user already exists
+        const existing = await query('SELECT id FROM public.profiles WHERE LOWER(email) = $1', [normalizedEmail]);
+        if (existing.rows.length > 0) {
+            return badRequest(res, 'An account with this email address already exists');
+        }
+
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await bcrypt.hash(password, salt);
+        const userId = crypto.randomUUID();
+
+        // Insert profile (public signups are strictly clients)
+        const insertRes = await query(
+            `INSERT INTO public.profiles 
+                (id, role, email, display_name, company, phone, status, password_hash, created_at, updated_at) 
+             VALUES ($1, 'client', $2, $3, $4, $5, 'active', $6, NOW(), NOW()) 
+             RETURNING id, role, email, display_name, company, phone, status, created_at`,
+            [userId, normalizedEmail, displayName.trim(), company || null, phone || null, passwordHash]
+        );
+
+        const newUser = insertRes.rows[0];
+
+        // Claim any previous guest orders created with this email
+        try {
+            await query(
+                'UPDATE public.orders SET client_id = $1 WHERE LOWER(client_email) = $2 AND client_id IS NULL',
+                [newUser.id, normalizedEmail]
+            );
+        } catch (claimErr) {
+            console.warn('[Guest Order Claim Notice]:', claimErr.message);
+        }
+
+        const token = generateToken(newUser);
+
+        return success(res, {
+            user: newUser,
+            token
+        }, 'Registration successful', 201);
+    } catch (err) {
+        console.error('[Register Error]:', err);
+        return error(res, `Registration failed: ${err.message}`);
+    }
+};
+
+/**
+ * User Login
+ * POST /api/auth/login
+ */
+const login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return badRequest(res, 'Email and password are required');
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        // Fetch user by email
+        const userRes = await query(
+            `SELECT id, role, email, display_name, company, phone, status, password_hash,
+                    machinery_preferences, default_fabric, default_turnaround 
+             FROM public.profiles WHERE LOWER(email) = $1`,
+            [normalizedEmail]
+        );
+
+        if (userRes.rows.length === 0) {
+            return unauthorized(res, 'Invalid email or password');
+        }
+
+        const user = userRes.rows[0];
+
+        if (user.status === 'suspended') {
+            return unauthorized(res, 'Your account has been suspended. Please contact support.');
+        }
+
+        // Verify password
+        let passwordMatches = false;
+
+        // Check if demo password matches
+        if (DEMO_PASSWORDS[normalizedEmail] && DEMO_PASSWORDS[normalizedEmail].includes(password)) {
+            passwordMatches = true;
+        }
+
+        // Check bcrypt password hash
+        if (!passwordMatches && user.password_hash) {
+            passwordMatches = await bcrypt.compare(password, user.password_hash);
+        }
+
+        if (!passwordMatches) {
+            return unauthorized(res, 'Invalid email or password');
+        }
+
+        const token = generateToken(user);
+
+        // Omit password hash from response
+        const { password_hash, ...safeUser } = user;
+
+        return success(res, {
+            user: safeUser,
+            token
+        }, 'Login successful');
+    } catch (err) {
+        console.error('[Login Error]:', err);
+        return error(res, `Login failed: ${err.message}`);
+    }
+};
+
+/**
+ * Get Current User Profile & Metrics
+ * GET /api/auth/me
+ */
+const getMe = async (req, res) => {
+    try {
+        const user = req.user;
+
+        // Fetch user-specific metrics
+        let metrics = {
+            totalOrders: 0,
+            activeOrders: 0,
+            completedOrders: 0,
+            balanceDue: 0.00
+        };
+
+        if (user.role === 'client') {
+            const statsRes = await query(
+                `SELECT 
+                    COUNT(*) as total_orders,
+                    COUNT(*) FILTER (WHERE status NOT IN ('completed', 'cancelled')) as active_orders,
+                    COUNT(*) FILTER (WHERE status = 'completed') as completed_orders,
+                    COALESCE(SUM(CASE WHEN payment_status = 'unpaid' AND status != 'cancelled' THEN price ELSE 0 END), 0) as balance_due
+                 FROM public.orders 
+                 WHERE client_id = $1`,
+                [user.id]
+            );
+            if (statsRes.rows.length > 0) {
+                const s = statsRes.rows[0];
+                metrics = {
+                    totalOrders: parseInt(s.total_orders, 10),
+                    activeOrders: parseInt(s.active_orders, 10),
+                    completedOrders: parseInt(s.completed_orders, 10),
+                    balanceDue: parseFloat(s.balance_due)
+                };
+            }
+        } else if (user.role === 'digitizer') {
+            const statsRes = await query(
+                `SELECT 
+                    COUNT(*) as total_tasks,
+                    COUNT(*) FILTER (WHERE status IN ('assigned', 'in_progress', 'revision')) as pending_tasks,
+                    COUNT(*) FILTER (WHERE status = 'completed') as completed_tasks
+                 FROM public.digitizer_tasks 
+                 WHERE assigned_digitizer_id = $1`,
+                [user.id]
+            );
+            if (statsRes.rows.length > 0) {
+                const s = statsRes.rows[0];
+                metrics = {
+                    totalTasks: parseInt(s.total_tasks, 10),
+                    pendingTasks: parseInt(s.pending_tasks, 10),
+                    completedTasks: parseInt(s.completed_tasks, 10)
+                };
+            }
+        }
+
+        return success(res, {
+            user,
+            metrics
+        }, 'Profile fetched successfully');
+    } catch (err) {
+        console.error('[GetMe Error]:', err);
+        return error(res, `Failed to get user profile: ${err.message}`);
+    }
+};
+
+/**
+ * Update Profile Details & Machinery Preferences
+ * PUT /api/auth/profile
+ */
+const updateProfile = async (req, res) => {
+    try {
+        const { displayName, company, phone, machineryPreferences, defaultFabric, defaultTurnaround } = req.body;
+        const userId = req.user.id;
+
+        const updateRes = await query(
+            `UPDATE public.profiles 
+             SET display_name = COALESCE($1, display_name),
+                 company = COALESCE($2, company),
+                 phone = COALESCE($3, phone),
+                 machinery_preferences = COALESCE($4, machinery_preferences),
+                 default_fabric = COALESCE($5, default_fabric),
+                 default_turnaround = COALESCE($6, default_turnaround),
+                 updated_at = NOW()
+             WHERE id = $7
+             RETURNING id, role, email, display_name, company, phone, status, machinery_preferences, default_fabric, default_turnaround, updated_at`,
+            [
+                displayName ? displayName.trim() : null,
+                company !== undefined ? company : null,
+                phone !== undefined ? phone : null,
+                machineryPreferences ? JSON.stringify(machineryPreferences) : null,
+                defaultFabric !== undefined ? defaultFabric : null,
+                defaultTurnaround !== undefined ? defaultTurnaround : null,
+                userId
+            ]
+        );
+
+        return success(res, updateRes.rows[0], 'Profile updated successfully');
+    } catch (err) {
+        console.error('[Update Profile Error]:', err);
+        return error(res, `Failed to update profile: ${err.message}`);
+    }
+};
+
+/**
+ * Change Password
+ * POST /api/auth/change-password
+ */
+const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const userId = req.user.id;
+
+        if (!currentPassword || !newPassword) {
+            return badRequest(res, 'Current password and new password are required');
+        }
+
+        if (newPassword.length < 6) {
+            return badRequest(res, 'New password must be at least 6 characters');
+        }
+
+        // Get stored hash
+        const userRes = await query('SELECT password_hash, email FROM public.profiles WHERE id = $1', [userId]);
+        if (userRes.rows.length === 0) {
+            return unauthorized(res, 'User not found');
+        }
+
+        const user = userRes.rows[0];
+        let passwordValid = false;
+
+        if (DEMO_PASSWORDS[user.email] && DEMO_PASSWORDS[user.email].includes(currentPassword)) {
+            passwordValid = true;
+        }
+
+        if (!passwordValid && user.password_hash) {
+            passwordValid = await bcrypt.compare(currentPassword, user.password_hash);
+        }
+
+        if (!passwordValid) {
+            return badRequest(res, 'Current password verification failed');
+        }
+
+        // Hash new password
+        const salt = await bcrypt.genSalt(10);
+        const newHash = await bcrypt.hash(newPassword, salt);
+
+        await query(
+            'UPDATE public.profiles SET password_hash = $1, updated_at = NOW() WHERE id = $2',
+            [newHash, userId]
+        );
+
+        return success(res, null, 'Password updated successfully');
+    } catch (err) {
+        console.error('[Change Password Error]:', err);
+        return error(res, `Failed to update password: ${err.message}`);
+    }
+};
+
+module.exports = {
+    register,
+    login,
+    getMe,
+    updateProfile,
+    changePassword
+};

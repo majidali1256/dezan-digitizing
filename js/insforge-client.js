@@ -312,12 +312,48 @@ class InsForgeClient {
     }
 
     getApiHeaders(extra = {}) {
+        const token = typeof localStorage !== 'undefined' ? localStorage.getItem('dezan_jwt_token') : null;
         return {
             'apikey': this.anonKey,
-            'Authorization': `Bearer ${this.anonKey}`,
+            'Authorization': token ? `Bearer ${token}` : `Bearer ${this.anonKey}`,
             'Content-Type': 'application/json',
             ...extra
         };
+    }
+
+    getApiBase() {
+        if (typeof window !== 'undefined') {
+            if (window.location.port === '5001') return '/api';
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                return 'http://localhost:5001/api';
+            }
+        }
+        return '/api';
+    }
+
+    async callBackendApi(endpoint, method = 'GET', body = null) {
+        try {
+            const apiBase = this.getApiBase();
+            const token = typeof localStorage !== 'undefined' ? localStorage.getItem('dezan_jwt_token') : null;
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const res = await fetch(`${apiBase}${endpoint}`, {
+                method,
+                headers,
+                body: body ? JSON.stringify(body) : undefined
+            });
+
+            if (res.ok) {
+                const json = await res.json();
+                return { success: true, data: json.data, message: json.message };
+            } else {
+                const errJson = await res.json().catch(() => ({ message: `HTTP ${res.status}` }));
+                return { success: false, error: errJson.message || `HTTP ${res.status}` };
+            }
+        } catch (e) {
+            return { success: false, error: e.message };
+        }
     }
 
     initStorage() {
@@ -692,21 +728,41 @@ class InsForgeClient {
     async signIn(email, password) {
         const rawEmail = (email || '').trim().toLowerCase();
 
-        // 1. Check predefined admin accounts / aliases
+        // 1. Attempt Node.js REST API login first
+        const apiRes = await this.callBackendApi('/auth/login', 'POST', { email: rawEmail, password });
+        if (apiRes.success && apiRes.data && apiRes.data.user) {
+            const apiUser = {
+                id: apiRes.data.user.id,
+                email: apiRes.data.user.email,
+                displayName: apiRes.data.user.display_name,
+                role: apiRes.data.user.role,
+                company: apiRes.data.user.company || '',
+                phone: apiRes.data.user.phone || '',
+                status: apiRes.data.user.status || 'active'
+            };
+            if (apiRes.data.token && typeof localStorage !== 'undefined') {
+                localStorage.setItem('dezan_jwt_token', apiRes.data.token);
+            }
+            this.setSession(apiUser);
+            this.claimGuestOrders(apiUser.email, apiUser.id).catch(() => {});
+            return { user: apiUser, error: null };
+        }
+
+        // 2. Check predefined admin accounts / aliases (Fallback / 1-Click)
         if (rawEmail === 'admin' || rawEmail === 'admin@dezandigitizing.com' || rawEmail === 'admin@dezan.com') {
             const adminUser = DEMO_USERS.admin;
             this.setSession(adminUser);
             return { user: adminUser, error: null };
         }
 
-        // 2. Check predefined digitizer worker accounts / aliases
+        // 3. Check predefined digitizer worker accounts / aliases (Fallback / 1-Click)
         if (rawEmail === 'worker' || rawEmail === 'digitizer' || rawEmail === 'worker.alex@dezandigitizing.com') {
             const workerUser = DEMO_USERS.digitizer;
             this.setSession(workerUser);
             return { user: workerUser, error: null };
         }
 
-        // 3. Check demo client alias
+        // 4. Check demo client alias (Fallback / 1-Click)
         if (rawEmail === 'client' || rawEmail === 'client@falconapparel.com') {
             const clientUser = DEMO_USERS.client;
             this.setSession(clientUser);
@@ -714,7 +770,7 @@ class InsForgeClient {
             return { user: clientUser, error: null };
         }
 
-        // 4. Check all demo users in DEMO_USERS
+        // 5. Check all demo users in DEMO_USERS
         const demoUser = Object.values(DEMO_USERS).find(u => u.email.toLowerCase() === rawEmail);
         if (demoUser) {
             this.setSession(demoUser);
@@ -722,7 +778,7 @@ class InsForgeClient {
             return { user: demoUser, error: null };
         }
 
-        // 5. Check predefined digitizers from team list
+        // 6. Check predefined digitizers from team list
         const digitizers = JSON.parse(localStorage.getItem('dezan_digitizers') || '[]');
         const matchedDigitizer = digitizers.find(d => d.email && d.email.toLowerCase() === rawEmail);
         if (matchedDigitizer) {
@@ -730,7 +786,7 @@ class InsForgeClient {
             return { user: matchedDigitizer, error: null };
         }
 
-        // 6. Check local registered users (all registered users are clients)
+        // 7. Check local registered users (all registered users are clients)
         const registered = JSON.parse(localStorage.getItem('dezan_registered_users') || '[]');
         const existing = registered.find(u => u.email.toLowerCase() === rawEmail);
         if (existing) {
@@ -739,16 +795,38 @@ class InsForgeClient {
             return { user: existing, error: null };
         }
 
-        return { user: null, error: 'Invalid email or password. Please use a predefined staff login or sign up as a client.' };
+        return { user: null, error: apiRes.error || 'Invalid email or password. Please use a predefined staff login or sign up as a client.' };
     }
 
     // Public Sign Up (strictly creates client accounts; staff are predefined)
-    async signUp({ email, password, displayName, role = 'client', company = '' }) {
+    async signUp({ email, password, displayName, role = 'client', company = '', phone = '' }) {
+        // 1. Attempt Node.js REST API registration first
+        const apiRes = await this.callBackendApi('/auth/register', 'POST', {
+            email, password, displayName, company, phone
+        });
+        if (apiRes.success && apiRes.data && apiRes.data.user) {
+            const apiUser = {
+                id: apiRes.data.user.id,
+                email: apiRes.data.user.email,
+                displayName: apiRes.data.user.display_name,
+                role: apiRes.data.user.role || 'client',
+                company: apiRes.data.user.company || '',
+                phone: apiRes.data.user.phone || '',
+                status: apiRes.data.user.status || 'active'
+            };
+            if (apiRes.data.token && typeof localStorage !== 'undefined') {
+                localStorage.setItem('dezan_jwt_token', apiRes.data.token);
+            }
+            this.setSession(apiUser);
+            return { user: apiUser, error: null };
+        }
+
+        // 2. Client-side fallback if server is offline
         const user = {
             id: this.generateUUID(),
             email: (email || '').trim().toLowerCase(),
             displayName: (displayName || '').trim() || (email || '').split('@')[0],
-            role: 'client', // Forced to client; staff/admin have predefined logins
+            role: 'client',
             company: (company || '').trim(),
             status: 'active',
             created_at: new Date().toISOString()
@@ -1390,6 +1468,36 @@ class InsForgeClient {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
+
+        // Attempt Node.js backend order creation
+        try {
+            const endpoint = isQuote ? '/quotes' : '/orders';
+            const apiRes = await this.callBackendApi(endpoint, 'POST', {
+                serviceType: newOrder.service_type,
+                planName: newOrder.plan_name,
+                projectName: newOrder.project_name,
+                placement: newOrder.placement,
+                sizing: newOrder.sizing,
+                fabricType: newOrder.fabric_type,
+                fileFormat: newOrder.file_format,
+                instructions: newOrder.instructions,
+                rawArtworkFiles: newOrder.raw_artwork_files,
+                price: newOrder.price,
+                specialOptions: newOrder.special_options,
+                turnaroundSpeed: newOrder.turnaround_speed,
+                paymentMethod: newOrder.payment_method,
+                paymentStatus: newOrder.payment_status,
+                clientName: newOrder.client_name,
+                clientEmail: newOrder.client_email,
+                clientCompany: newOrder.client_company
+            });
+            if (apiRes.success && apiRes.data) {
+                newOrder.id = apiRes.data.id;
+                newOrder.order_number = apiRes.data.order_number;
+            }
+        } catch (e) {
+            console.warn('[Backend Order Sync Fallback]:', e.message);
+        }
 
         // If auto-assigned, generate sanitized digitizer task immediately
         if (autoAssign) {
