@@ -210,11 +210,11 @@
                     <span class="material-symbols-outlined text-sm">print</span>
                     <span>Print Invoice</span>
                 </button>
-                <div class="flex gap-2">
+                <div class="flex gap-2" id="invoice-actions-container">
                     <button type="button" onclick="window.clientWorkspace.closeClientInvoiceModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-xs cursor-pointer">Close</button>
-                    <a href="https://paypal.me/dezandigitizing" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs flex items-center gap-1.5 shadow-md cursor-pointer">
+                    <a id="invoice-paypal-link" href="https://paypal.me/dezandigitizing" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs flex items-center gap-1.5 shadow-md cursor-pointer">
                         <span class="material-symbols-outlined text-sm">payments</span>
-                        <span>Settle with PayPal</span>
+                        <span id="invoice-paypal-btn-text">Settle with PayPal</span>
                     </a>
                 </div>
             </div>

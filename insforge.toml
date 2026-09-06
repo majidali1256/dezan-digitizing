@@ -1,0 +1,41 @@
+[auth]
+allowed_redirect_urls = [
+  "https://dezan-digitizing.vercel.app/portal-login.html",
+  "https://dezan-digitizing.vercel.app/client-portal.html",
+  "https://majidali1256.github.io/dezan-digitizing/portal-login.html",
+  "https://majidali1256.github.io/dezan-digitizing/client-portal.html",
+  "http://localhost:5001/portal-login.html",
+  "http://localhost:5001/client-portal.html",
+  "http://localhost:3000/portal-login.html",
+  "http://localhost:8080/portal-login.html",
+  "http://127.0.0.1:5500/portal-login.html"
+]
+require_email_verification = true
+verify_email_method = "code"
+reset_password_method = "code"
+disable_signup = false
+
+[auth.password]
+min_length = 6
+require_number = false
+require_lowercase = false
+require_uppercase = false
+require_special_char = false
+
+[auth.smtp]
+enabled = false
+host = ""
+port = 465
+username = ""
+sender_email = ""
+sender_name = ""
+min_interval_seconds = 60
+
+[storage]
+max_file_size_mb = 50
+
+[realtime]
+retention_days = 0
+
+[schedules]
+retention_days = 7

@@ -56,7 +56,7 @@ const submitRevision = async (req, res) => {
             [revisionNotes, JSON.stringify(stitchOutPhotos), order.id]
         );
 
-        return success(res, updatedOrderRes.rows[0], 'Revision request submitted and assigned to digitizer for adjustment');
+        return success(res, updatedOrderRes.rows[0], 'Revision request submitted and assigned to digitizer for adjustment', 201);
     } catch (err) {
         console.error('[Submit Revision Error]:', err);
         return error(res, `Failed to submit revision: ${err.message}`);

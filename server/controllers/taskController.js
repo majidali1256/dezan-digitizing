@@ -4,6 +4,7 @@
  */
 const { query } = require('../config/db');
 const { success, error, badRequest, notFound, forbidden } = require('../utils/apiResponse');
+const emailService = require('../services/emailService');
 
 // Sanitized columns projection ensuring zero client PII or commercial pricing data is selected
 const SANITIZED_TASK_COLUMNS = `
@@ -188,14 +189,21 @@ const uploadDeliverables = async (req, res) => {
         );
 
         // 2. Sync deliverables and completion to master order
-        await query(
+        const updatedOrderRes = await query(
             `UPDATE public.orders 
              SET deliverables = $1, 
                  status = 'completed', 
                  updated_at = NOW() 
-             WHERE id = $2`,
+             WHERE id = $2
+             RETURNING *`,
             [JSON.stringify(deliverables), task.order_id]
         );
+
+        if (updatedOrderRes.rows.length > 0) {
+            const completedOrder = updatedOrderRes.rows[0];
+            emailService.sendDeliverablesReadyAlert(completedOrder, completedOrder.customer_email)
+                .catch(e => console.warn('[Deliverables Email Alert Warning]:', e.message));
+        }
 
         return success(res, updatedTask.rows[0], 'Deliverables submitted and synchronized to order successfully');
     } catch (err) {

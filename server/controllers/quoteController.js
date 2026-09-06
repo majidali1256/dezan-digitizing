@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const { query } = require('../config/db');
 const { success, error, badRequest, notFound, forbidden } = require('../utils/apiResponse');
 const { generateQuoteNumber } = require('../utils/orderNumber');
+const emailService = require('../services/emailService');
 
 /**
  * Request a Free Quote
@@ -83,7 +84,25 @@ const requestQuote = async (req, res) => {
             ]
         );
 
-        return success(res, insertRes.rows[0], 'Quote request submitted successfully. Admin will appraise shortly.', 201);
+        const createdQuote = insertRes.rows[0];
+
+        // Trigger asynchronous email alerts
+        emailService.sendQuoteEstimationAlert(createdQuote, finalClientEmail.toLowerCase().trim())
+            .catch(e => console.warn('[Quote Email Warning]:', e.message));
+        emailService.sendNewOrderAdminAlert({
+            order_number: createdQuote.order_number,
+            customer_name: createdQuote.client_name,
+            customer_email: createdQuote.client_email,
+            service_type: createdQuote.service_type,
+            plan: 'Quote Request',
+            placement: createdQuote.placement,
+            target_size: createdQuote.sizing,
+            price: 0,
+            payment_method: 'N/A (Quote)',
+            payment_status: 'quote_requested'
+        }).catch(e => console.warn('[Quote Admin Alert Warning]:', e.message));
+
+        return success(res, createdQuote, 'Quote request submitted successfully. Admin will appraise shortly.', 201);
     } catch (err) {
         console.error('[Request Quote Error]:', err);
         return error(res, `Failed to submit quote request: ${err.message}`);

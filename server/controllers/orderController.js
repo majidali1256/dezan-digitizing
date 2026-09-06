@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const { query } = require('../config/db');
 const { success, error, badRequest, notFound, forbidden } = require('../utils/apiResponse');
 const { generateOrderNumber, generateTaskNumber } = require('../utils/orderNumber');
+const emailService = require('../services/emailService');
 
 /**
  * Create Order
@@ -96,7 +97,13 @@ const createOrder = async (req, res) => {
             ]
         );
 
-        return success(res, insertRes.rows[0], 'Order created successfully', 201);
+        const createdOrder = insertRes.rows[0];
+
+        // Trigger asynchronous email notifications (non-blocking)
+        emailService.sendOrderConfirmation(createdOrder, finalClientEmail.toLowerCase().trim()).catch(e => console.warn('[Email Trigger Error]:', e.message));
+        emailService.sendNewOrderAdminAlert(createdOrder).catch(e => console.warn('[Admin Alert Trigger Error]:', e.message));
+
+        return success(res, createdOrder, 'Order created successfully', 201);
     } catch (err) {
         console.error('[Create Order Error]:', err);
         return error(res, `Failed to create order: ${err.message}`);
@@ -315,6 +322,24 @@ const assignDigitizer = async (req, res) => {
                     order.fabric_type
                 ]
             );
+        }
+
+        // Trigger notification to worker
+        try {
+            const workerProfileRes = await query('SELECT email FROM public.profiles WHERE id = $1', [digitizerId]);
+            const workerEmail = workerProfileRes.rows.length > 0 ? workerProfileRes.rows[0].email : null;
+            if (workerEmail) {
+                emailService.sendTaskAssignedAlert({
+                    id: taskNumber,
+                    order_number: order.order_number,
+                    fabric_type: order.fabric_type,
+                    placement: order.placement,
+                    format: order.file_format,
+                    target_size: order.sizing
+                }, workerEmail).catch(e => console.warn('[Worker Alert Error]:', e.message));
+            }
+        } catch (mailErr) {
+            console.warn('[Worker Email Trigger Warning]:', mailErr.message);
         }
 
         return success(res, updatedOrderRes.rows[0], `Order assigned to ${digitizerName} successfully`);

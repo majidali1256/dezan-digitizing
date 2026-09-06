@@ -690,13 +690,32 @@
         const order = state.orders.find(o => o.id === orderId || o.order_number === orderId) || state.orders[0];
         if (!order) return;
 
+        const rawPrice = order.price !== undefined ? order.price : (order.amount !== undefined ? order.amount : 15);
+        const amount = parseFloat(rawPrice || 15).toFixed(2);
+        const isPaid = (order.payment_status === 'paid');
+
         setElText('invoice-number-disp', `INV-${order.order_number || '8492'}`);
         setElText('invoice-date-disp', new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }));
         setElText('invoice-order-ref', order.order_number || 'ORD-8492');
-        setElText('invoice-item-desc', `${order.service_type || 'Digitizing'} — ${order.design_name || 'Embroidery Design'}`);
-        setElText('invoice-item-rate', `$${parseFloat(order.amount || 15).toFixed(2)}`);
-        setElText('invoice-item-amount', `$${parseFloat(order.amount || 15).toFixed(2)}`);
-        setElText('invoice-total-disp', `$${parseFloat(order.amount || 15).toFixed(2)}`);
+        setElText('invoice-item-desc', `${order.service_type || 'Digitizing'} — ${order.design_name || order.project_name || 'Embroidery Design'}`);
+        setElText('invoice-item-rate', `$${amount}`);
+        setElText('invoice-item-amount', `$${amount}`);
+        setElText('invoice-total-disp', `$${amount}`);
+
+        const paypalLink = document.getElementById('invoice-paypal-link');
+        const paypalText = document.getElementById('invoice-paypal-btn-text');
+
+        if (paypalLink) {
+            if (isPaid) {
+                paypalLink.href = 'javascript:void(0)';
+                paypalLink.className = 'px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center gap-1.5 cursor-default';
+                if (paypalText) paypalText.textContent = 'Paid · Settled via PayPal';
+            } else {
+                paypalLink.href = `https://paypal.me/dezandigitizing/${amount}USD`;
+                paypalLink.className = 'px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs flex items-center gap-1.5 shadow-md cursor-pointer transition-transform hover:scale-[1.02]';
+                if (paypalText) paypalText.textContent = `Settle $${amount} with PayPal`;
+            }
+        }
 
         const modal = document.getElementById('client-invoice-modal');
         if (modal) modal.classList.remove('hidden');
