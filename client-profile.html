@@ -120,25 +120,31 @@
                     <span class="material-symbols-outlined text-amber-700 dark:text-primary">badge</span>
                     <span>Contact &amp; Commercial Info</span>
                 </h3>
-                <form id="client-profile-form" onsubmit="event.preventDefault(); alert('Profile settings saved successfully!');" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+
+                <div id="profile-contact-status" class="hidden mb-4 p-3 rounded-xl text-xs flex items-center gap-2"></div>
+
+                <form id="client-profile-form" onsubmit="window.clientWorkspace.handleProfileSave(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                     <div>
                         <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Full Name</label>
-                        <input type="text" id="profile-name" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary" />
+                        <input type="text" id="profile-name" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary text-xs" />
                     </div>
                     <div>
                         <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
-                        <input type="email" id="profile-email" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary" />
+                        <input type="email" id="profile-email" required readonly class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-primary/20 text-slate-600 dark:text-slate-400 cursor-not-allowed text-xs" title="Email address is your primary login identifier" />
                     </div>
                     <div>
                         <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Company / Apparel Brand</label>
-                        <input type="text" id="profile-company" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary" />
+                        <input type="text" id="profile-company" placeholder="e.g. Falcon Apparel Co." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary text-xs" />
                     </div>
                     <div>
                         <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Phone Number</label>
-                        <input type="text" id="profile-phone" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary" />
+                        <input type="text" id="profile-phone" placeholder="+1 (555) 019-2834" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary text-xs" />
                     </div>
                     <div class="sm:col-span-2 flex justify-end pt-2">
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs shadow-xs cursor-pointer">Save Contact Info</button>
+                        <button type="submit" id="profile-save-btn" class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer">
+                            <span class="material-symbols-outlined text-sm">save</span>
+                            <span>Save Contact Info</span>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -149,29 +155,40 @@
                     <span class="material-symbols-outlined text-amber-700 dark:text-primary">precision_manufacturing</span>
                     <span>Production Defaults &amp; Machine Presets</span>
                 </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div>
-                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Default Embroidery Format</label>
-                        <select id="profile-default-format" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary">
-                            <option value="DST">DST — Tajima &amp; Commercial Standard</option>
-                            <option value="EMB">EMB — Wilcom Editable Master Source</option>
-                            <option value="PES">PES — Brother &amp; Baby Lock</option>
-                            <option value="EXP">EXP — Melco &amp; Bernina</option>
-                            <option value="JEF">JEF — Janome</option>
-                        </select>
-                        <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">Digitizers will automatically export this file format with every order.</span>
+
+                <div id="profile-defaults-status" class="hidden mb-4 p-3 rounded-xl text-xs flex items-center gap-2"></div>
+
+                <form id="client-defaults-form" onsubmit="window.clientWorkspace.handleDefaultsSave(event)" class="space-y-4 text-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Default Embroidery Format</label>
+                            <select id="profile-default-format" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary text-xs">
+                                <option value="DST">DST — Tajima &amp; Commercial Standard</option>
+                                <option value="EMB">EMB — Wilcom Editable Master Source</option>
+                                <option value="PES">PES — Brother &amp; Baby Lock</option>
+                                <option value="EXP">EXP — Melco &amp; Bernina</option>
+                                <option value="JEF">JEF — Janome</option>
+                            </select>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">Digitizers will automatically export this file format with every order.</span>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Default Target Fabric</label>
+                            <select id="profile-default-fabric" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary text-xs">
+                                <option value="Pique Knit">Cotton / Pique Knit (Polos, T-Shirts)</option>
+                                <option value="Cap Twill">Structured Cap / Hat (Center-Out Stitching)</option>
+                                <option value="Fleece">Heavy Fleece / Hoodies</option>
+                                <option value="Denim">Heavy Denim / Jackets</option>
+                            </select>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">Default underlay and pull compensation will tune to this substrate.</span>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Default Target Fabric</label>
-                        <select id="profile-default-fabric" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary">
-                            <option value="Pique Knit">Cotton / Pique Knit (Polos, T-Shirts)</option>
-                            <option value="Cap Twill">Structured Cap / Hat (Center-Out Stitching)</option>
-                            <option value="Fleece">Heavy Fleece / Hoodies</option>
-                            <option value="Denim">Heavy Denim / Jackets</option>
-                        </select>
-                        <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">Default underlay and pull compensation will tune to this substrate.</span>
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" id="defaults-save-btn" class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer">
+                            <span class="material-symbols-outlined text-sm">tune</span>
+                            <span>Save Machine Presets</span>
+                        </button>
                     </div>
-                </div>
+                </form>
             </div>
 
             <!-- 3. Security -->
@@ -180,16 +197,43 @@
                     <span class="material-symbols-outlined text-amber-700 dark:text-primary">lock</span>
                     <span>Account Security</span>
                 </h3>
-                <form onsubmit="event.preventDefault(); alert('Password updated successfully!');" class="space-y-3 max-w-md text-xs">
+
+                <div id="profile-security-status" class="hidden mb-4 p-3 rounded-xl text-xs flex items-center gap-2"></div>
+
+                <form id="client-security-form" onsubmit="window.clientWorkspace.handlePasswordChange(event)" class="space-y-3.5 max-w-md text-xs">
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Current Password</label>
+                        <div class="relative">
+                            <input type="password" id="profile-current-password" required placeholder="Enter current password" class="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary text-xs" />
+                            <button type="button" onclick="togglePasswordVisibility('profile-current-password', this)" class="absolute right-3 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer" aria-label="Toggle password visibility">
+                                <span class="material-symbols-outlined text-base">visibility</span>
+                            </button>
+                        </div>
+                    </div>
                     <div>
                         <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">New Password</label>
-                        <input type="password" required minlength="6" placeholder="Enter new password" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary" />
+                        <div class="relative">
+                            <input type="password" id="profile-new-password" required minlength="6" placeholder="Enter new password (min. 6 characters)" class="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary text-xs" />
+                            <button type="button" onclick="togglePasswordVisibility('profile-new-password', this)" class="absolute right-3 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer" aria-label="Toggle password visibility">
+                                <span class="material-symbols-outlined text-base">visibility</span>
+                            </button>
+                        </div>
                     </div>
                     <div>
-                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Confirm Password</label>
-                        <input type="password" required minlength="6" placeholder="Re-enter password" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary" />
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Confirm New Password</label>
+                        <div class="relative">
+                            <input type="password" id="profile-confirm-password" required minlength="6" placeholder="Re-enter new password" class="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-slate-900 dark:text-white focus:border-primary text-xs" />
+                            <button type="button" onclick="togglePasswordVisibility('profile-confirm-password', this)" class="absolute right-3 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer" aria-label="Toggle password visibility">
+                                <span class="material-symbols-outlined text-base">visibility</span>
+                            </button>
+                        </div>
                     </div>
-                    <button type="submit" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold cursor-pointer">Update Password</button>
+                    <div class="pt-1">
+                        <button type="submit" id="profile-password-btn" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold transition-all flex items-center gap-1.5 cursor-pointer">
+                            <span class="material-symbols-outlined text-sm">key</span>
+                            <span>Update Password</span>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

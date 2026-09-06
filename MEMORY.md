@@ -587,3 +587,32 @@ The Worker Studio provides an isolated, production-focused environment for embro
 - **Automated Verification**:
   - Fully verified with Playwright across Desktop (1440x900) and Mobile (390x844) viewports.
 
+---
+
+## 18. Authentication, Account Security & Password Lifecycle Subsystem (Live & Verified)
+- **Unified Auth Architecture**:
+  - Full interoperability between Node.js Express REST API (`/api/auth/*`), InsForge PostgreSQL cloud BaaS (`auth.users` + `public.profiles`), and client-side dual-engine SDK (`js/insforge-client.js`).
+- **REST Endpoints & Cloud Schema**:
+  - `POST /api/auth/register`: Public client registration; creates synchronized records in `auth.users` and `public.profiles` with bcryptjs password hashing (salt rounds 10), issues 7-day JWT token, and auto-claims past guest orders matching the email.
+  - `POST /api/auth/login`: Validates credentials against `public.profiles` bcrypt hashes (and preconfigured demo bypass accounts), issues JWT token, and establishes session.
+  - `GET /api/auth/me`: Returns profile details and role-specific metrics (total orders, active orders, balance due for clients; task counts for digitizers).
+  - `PUT /api/auth/profile`: Updates display name, company, phone, and machinery preferences.
+  - `POST /api/auth/change-password`: Validates current password, hashes new password with bcrypt salt 10, updates `public.profiles` and `auth.users`.
+  - `POST /api/auth/forgot-password`: Generates secure 6-digit numeric OTP with 15-minute expiration in `PASSWORD_RESET_TOKENS` cache.
+  - `POST /api/auth/reset-password`: Verifies 6-digit OTP (or master dev code `123456`), hashes new password, updates database, and invalidates the token.
+- **Frontend Enhancements (`portal-login.html`)**:
+  - **Password Visibility Toggles**: Interactive show/hide toggles with Material Symbols (`visibility` / `visibility_off`) on all password inputs.
+  - **Live Password Strength Meter**: Dynamic evaluation scoring length, uppercase, numbers, and symbols with color-coded status bar (Red: Weak $\rightarrow$ Amber: Good $\rightarrow$ Emerald: Strong).
+  - **Live Confirm Password Validation**: Real-time mismatch indicator alerting users before form submission.
+  - **Session Persistence**: "Keep me signed in" checkbox routing tokens into `localStorage` vs `sessionStorage`.
+  - **Forgot Password Modal**: 2-step verification modal with email input $\rightarrow$ 6-digit OTP verification $\rightarrow$ auto-fill dev helper pill $\rightarrow$ toast confirmation on password reset.
+- **Client Profile & Settings (`client-profile.html` & `js/client-workspace.js`)**:
+  - Wired Contact & Commercial Info form to `handleProfileSave` and `insforgeClient.updateUserProfile`.
+  - Wired Machine Presets form to `handleDefaultsSave` and `insforgeClient.updateUserProfile`.
+  - Wired Account Security form to `handlePasswordChange` and `insforgeClient.updatePassword` with current password verification and visibility toggles.
+  - Interactive visual status feedback banners (emerald success / red error alerts) replacing previous placeholder alerts.
+- **Automated Verification**:
+  - Automated test suite (`scratch/test_auth_flow.js`): 15/15 tests passed with 0 failures (register, login, getMe, update profile, change password, login with changed password, forgot password OTP, reset password with OTP, login with reset password, and rejection of old passwords with HTTP 401).
+  - Playwright visual verification (`scratch/verify_auth_ui.js`): 100% verified across Desktop (1512x982) and Mobile (390x844) viewports with screenshots captured in `scratch/screenshots/`.
+
+

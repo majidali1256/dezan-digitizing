@@ -465,13 +465,169 @@
         if (!form) return;
 
         const user = state.session || {};
-        setInputValue('profile-name', user.displayName || 'John Foster');
-        setInputValue('profile-email', user.email || 'john@creativemerch.com');
-        setInputValue('profile-company', user.company || 'Creative Merch & Embroidery');
-        setInputValue('profile-phone', user.phone || '+1 (555) 234-8900');
-        setInputValue('profile-default-format', user.defaultFormat || 'DST');
-        setInputValue('profile-default-fabric', user.defaultFabric || 'Pique Knit');
+        setInputValue('profile-name', user.displayName || user.display_name || 'Valued Client');
+        setInputValue('profile-email', user.email || 'client@dezan.com');
+        setInputValue('profile-company', user.company || '');
+        setInputValue('profile-phone', user.phone || '');
+        setInputValue('profile-default-format', user.preferredFormat || user.defaultFormat || 'DST');
+        setInputValue('profile-default-fabric', user.preferredFabric || user.defaultFabric || 'Pique Knit');
     }
+
+    async function handleProfileSave(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const statusEl = document.getElementById('profile-contact-status');
+        const saveBtn = document.getElementById('profile-save-btn');
+        const nameInput = document.getElementById('profile-name');
+        const companyInput = document.getElementById('profile-company');
+        const phoneInput = document.getElementById('profile-phone');
+
+        const displayName = (nameInput?.value || '').trim();
+        const company = (companyInput?.value || '').trim();
+        const phone = (phoneInput?.value || '').trim();
+
+        if (!displayName) {
+            showProfileStatus(statusEl, 'Full Name is required.', 'error');
+            return;
+        }
+
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">progress_activity</span><span>Saving...</span>';
+        }
+
+        const res = await window.insforgeClient.updateUserProfile({
+            displayName,
+            company,
+            phone
+        });
+
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<span class="material-symbols-outlined text-sm">save</span><span>Save Contact Info</span>';
+        }
+
+        if (res.success) {
+            state.session = res.user;
+            setElText('client-display-name', res.user.displayName || 'Client');
+            showProfileStatus(statusEl, 'Contact and commercial information saved successfully.', 'success');
+            window.insforgeClient.showToast('Profile Updated', 'Your profile details have been saved.', 'check_circle', 'success');
+        } else {
+            showProfileStatus(statusEl, res.error || 'Failed to update profile.', 'error');
+        }
+    }
+
+    async function handleDefaultsSave(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const statusEl = document.getElementById('profile-defaults-status');
+        const saveBtn = document.getElementById('defaults-save-btn');
+        const formatSelect = document.getElementById('profile-default-format');
+        const fabricSelect = document.getElementById('profile-default-fabric');
+
+        const preferredFormat = formatSelect?.value || 'DST';
+        const preferredFabric = fabricSelect?.value || 'Pique Knit';
+
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">progress_activity</span><span>Saving...</span>';
+        }
+
+        const res = await window.insforgeClient.updateUserProfile({
+            preferredFormat,
+            preferredFabric,
+            defaultFormat: preferredFormat,
+            defaultFabric: preferredFabric
+        });
+
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<span class="material-symbols-outlined text-sm">tune</span><span>Save Machine Presets</span>';
+        }
+
+        if (res.success) {
+            state.session = res.user;
+            showProfileStatus(statusEl, 'Production defaults and machine presets saved successfully.', 'success');
+            window.insforgeClient.showToast('Defaults Saved', 'New orders will automatically use these machine presets.', 'check_circle', 'success');
+        } else {
+            showProfileStatus(statusEl, res.error || 'Failed to update defaults.', 'error');
+        }
+    }
+
+    async function handlePasswordChange(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const statusEl = document.getElementById('profile-security-status');
+        const submitBtn = document.getElementById('profile-password-btn');
+        const currentPassInput = document.getElementById('profile-current-password');
+        const newPassInput = document.getElementById('profile-new-password');
+        const confirmPassInput = document.getElementById('profile-confirm-password');
+
+        const currentPassword = currentPassInput?.value || '';
+        const newPassword = newPassInput?.value || '';
+        const confirmPassword = confirmPassInput?.value || '';
+
+        if (!currentPassword) {
+            showProfileStatus(statusEl, 'Please enter your current password.', 'error');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            showProfileStatus(statusEl, 'New password must be at least 6 characters long.', 'error');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            showProfileStatus(statusEl, 'New password and confirmation do not match.', 'error');
+            return;
+        }
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">progress_activity</span><span>Updating...</span>';
+        }
+
+        const res = await window.insforgeClient.updatePassword({
+            currentPassword,
+            newPassword
+        });
+
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span class="material-symbols-outlined text-sm">key</span><span>Update Password</span>';
+        }
+
+        if (res.success) {
+            if (currentPassInput) currentPassInput.value = '';
+            if (newPassInput) newPassInput.value = '';
+            if (confirmPassInput) confirmPassInput.value = '';
+            showProfileStatus(statusEl, 'Account password updated successfully.', 'success');
+            window.insforgeClient.showToast('Security Updated', 'Your password has been changed.', 'check_circle', 'success');
+        } else {
+            showProfileStatus(statusEl, res.error || 'Password update failed.', 'error');
+        }
+    }
+
+    function showProfileStatus(el, msg, type = 'info') {
+        if (!el) return;
+        el.classList.remove('hidden');
+        if (type === 'success') {
+            el.className = 'mb-4 p-3 rounded-xl text-xs flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-semibold';
+            el.innerHTML = `<span class="material-symbols-outlined text-sm">check_circle</span><span>${msg}</span>`;
+        } else {
+            el.className = 'mb-4 p-3 rounded-xl text-xs flex items-center gap-2 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-400 font-semibold';
+            el.innerHTML = `<span class="material-symbols-outlined text-sm">error</span><span>${msg}</span>`;
+        }
+    }
+
+    function togglePasswordVisibility(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        const icon = btn.querySelector('.material-symbols-outlined');
+        if (icon) {
+            icon.textContent = isPassword ? 'visibility_off' : 'visibility';
+        }
+    }
+    window.togglePasswordVisibility = togglePasswordVisibility;
 
     // ----- Modal Controls -----
     function openNewOrderModal(defaultDesignName = '') {
@@ -674,7 +830,10 @@
         openClientInvoiceModal,
         closeClientInvoiceModal,
         openRevisionModal,
-        closeRevisionModal
+        closeRevisionModal,
+        handleProfileSave,
+        handleDefaultsSave,
+        handlePasswordChange
     };
 
     // Auto-init on DOMContentLoaded
