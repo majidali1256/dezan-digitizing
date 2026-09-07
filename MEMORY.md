@@ -892,7 +892,7 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - Expanded the `services.html` portfolio section into a balanced 3x2 grid of 6 items including both new vector comparison artworks.
 - **Active Navigation & Internal Linking**:
   - `app.js`: Enhanced active link detection so visits to `embroidery-digitizing.html` and `vector-art-conversion.html` highlight "Services" in the top navbar and mobile bottom navigation.
-  - Global Footers: Added a dedicated "Dedicated Services" column linking to `embroidery-digitizing.html`, `vector-art-conversion.html`, `services.html`, and `portfolio.html` across all main pages (`index.html`, `services.html`, `pricing.html`, `about.html`, `contact.html`, `portfolio.html`).
+  - Global Footers: Added a dedicated "Dedicated Services" column linking to `embroidery-digitizing.html`, `vector-art-conversion.html`, `services.html`, and `portfolio.html` (labeled "Feedbacks / Reviews") across all main pages (`index.html`, `services.html`, `pricing.html`, `about.html`, `contact.html`, `portfolio.html`, `vector-art-conversion.html`, `embroidery-digitizing.html`, `order-success.html`, `profile.html`).
 - **Visual Verification**:
 
 ---
