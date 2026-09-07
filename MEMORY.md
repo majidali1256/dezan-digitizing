@@ -892,6 +892,10 @@ The Worker Studio provides an isolated, production-focused environment for embro
 - **Active Navigation & Internal Linking**:
   - `app.js`: Enhanced active link detection so visits to `embroidery-digitizing.html` and `vector-art-conversion.html` highlight "Services" in the top navbar and mobile bottom navigation.
   - Global Footers: Added a dedicated "Dedicated Services" column linking to `embroidery-digitizing.html`, `vector-art-conversion.html`, `services.html`, and `portfolio.html` (labeled "Feedbacks / Reviews") across all main pages (`index.html`, `services.html`, `pricing.html`, `about.html`, `contact.html`, `portfolio.html`, `vector-art-conversion.html`, `embroidery-digitizing.html`, `order-success.html`, `profile.html`).
+- **Mobile Image Asset Optimization & Zero-Opacity Blocking**:
+  - Replaced unencoded space filenames with web-standard URL-safe filenames (`images/custom-hats.png`, `images/jacket-backs.png`, `images/left-chest-logos.png`, `images/pet-embroidery.png`) with `?v=4` cache-busting parameters across `services.html`, `index.html`, and `embroidery-digitizing.html`.
+  - Removed nested `.reveal` animation classes from individual portfolio cards on `services.html` that caused mobile WebKit browsers to occasionally leave cards stuck at `opacity: 0`.
+  - Added `loading="eager"` and calibrated `object-[center_35%]` framing on `embroidery-digitizing.html` so hat crowns are never cut off by horizontal aspect ratio crops.
 - **Visual Verification**:
 
 ---

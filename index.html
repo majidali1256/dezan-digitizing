@@ -124,10 +124,10 @@
     <!-- Preload hero gallery images for performance -->
     <link rel="preload" href="images/ai_flower.png" as="image">
     <link rel="preload" href="images/ai_anime_1.png" as="image">
-    <link rel="preload" href="images/Custom Hats.png" as="image">
-    <link rel="preload" href="images/Jacket Backs.png" as="image">
-    <link rel="preload" href="images/Left Chest Logos.png?v=3" as="image">
-    <link rel="preload" href="images/Pet Embroidery.png" as="image">
+    <link rel="preload" href="images/custom-hats.png?v=4" as="image">
+    <link rel="preload" href="images/jacket-backs.png?v=4" as="image">
+    <link rel="preload" href="images/left-chest-logos.png?v=4" as="image">
+    <link rel="preload" href="images/pet-embroidery.png?v=4" as="image">
     <link rel="preload" href="images/ai_fruits.png" as="image">
     <link rel="preload" href="images/ai_anime_2.png" as="image">
     <link rel="preload" href="images/ai_character.png" as="image">
@@ -284,44 +284,48 @@
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <!-- 1. Custom Hats -->
                 <div
-                    class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale block">
+                    class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale block shadow-xs">
                     <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                         alt="3D Puff Embroidery hat"
-                        src="images/Custom Hats.png" />
-                    <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                        loading="eager"
+                        src="images/custom-hats.png?v=4" />
+                    <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
                         <p class="text-white text-xs font-bold">Custom Hats</p>
                         <p class="text-primary text-[10px] uppercase tracking-wider">3D Puff</p>
                     </div>
                 </div>
                 <!-- 2. Jacket Backs -->
                 <div
-                    class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale">
+                    class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale shadow-xs">
                     <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                         alt="Large jacket back embroidery"
-                        src="images/Jacket Backs.png" />
-                    <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                        loading="eager"
+                        src="images/jacket-backs.png?v=4" />
+                    <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
                         <p class="text-white text-xs font-bold">Jacket Backs</p>
                         <p class="text-primary text-[10px] uppercase tracking-wider">Custom Design</p>
                     </div>
                 </div>
                 <!-- 3. Left Chest -->
                 <div
-                    class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale">
+                    class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale shadow-xs">
                     <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                         alt="Left chest logo embroidery"
-                        src="images/Left Chest Logos.png?v=3" />
-                    <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                        loading="eager"
+                        src="images/left-chest-logos.png?v=4" />
+                    <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
                         <p class="text-white text-xs font-bold">Left Chest</p>
                         <p class="text-primary text-[10px] uppercase tracking-wider">Corporate</p>
                     </div>
                 </div>
                 <!-- 4. Pet Portraits -->
                 <div
-                    class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale">
+                    class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale shadow-xs">
                     <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                         alt="Custom embroidered pet portrait"
-                        src="images/Pet Embroidery.png" />
-                    <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                        loading="eager"
+                        src="images/pet-embroidery.png?v=4" />
+                    <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
                         <p class="text-white text-xs font-bold">Pet Portraits</p>
                         <p class="text-primary text-[10px] uppercase tracking-wider">Embroidery</p>
                     </div>
