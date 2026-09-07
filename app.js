@@ -142,6 +142,119 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initHeaderAuthState();
 
+    // ===== STAFF ORDER RESTRICTION MODAL =====
+    // Disallows admin or digitizer staff accounts from placing customer orders or requesting quotes.
+    window.showStaffOrderBlockModal = function(role, email) {
+        let modal = document.getElementById('staff-order-blocked-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'staff-order-blocked-modal';
+            modal.className = 'fixed inset-0 z-[120] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto';
+            modal.setAttribute('role', 'alertdialog');
+            modal.setAttribute('aria-modal', 'true');
+            modal.setAttribute('aria-labelledby', 'staff-block-title');
+
+            modal.innerHTML = `
+                <div class="w-full max-w-md bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-7 relative flex flex-col text-slate-900 dark:text-slate-100 overflow-hidden transform transition-all">
+                    <!-- Subtle Glow Background Accent -->
+                    <div class="absolute -top-16 -right-16 w-36 h-36 bg-amber-500/15 dark:bg-primary/20 rounded-full blur-2xl pointer-events-none"></div>
+
+                    <!-- Close button -->
+                    <button type="button" onclick="window.closeStaffOrderBlockModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer" title="Close">
+                        <span class="material-symbols-outlined text-lg">close</span>
+                    </button>
+
+                    <!-- Icon Banner -->
+                    <div class="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-4.5 shrink-0 shadow-inner">
+                        <span class="material-symbols-outlined text-3xl">shield_lock</span>
+                    </div>
+
+                    <!-- Primary Message -->
+                    <h3 id="staff-block-title" class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
+                        You can't place orders from this account
+                    </h3>
+
+                    <!-- Body Description -->
+                    <div class="mt-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-2">
+                        <p>
+                            You are currently signed in as a <span id="staff-block-role" class="font-bold text-slate-900 dark:text-white uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px]"></span> staff member (<span id="staff-block-email" class="font-semibold text-primary"></span>).
+                        </p>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                            Orders and quote requests can only be placed by client accounts or guest customers. Staff roles are reserved for production management and digitizing workflow.
+                        </p>
+                    </div>
+
+                    <!-- Actions Stack -->
+                    <div class="mt-6 flex flex-col gap-2.5">
+                        <button type="button" id="staff-sign-out-order-btn" onclick="window.signOutStaffToGuestOrder()" class="w-full py-3 px-4 rounded-xl bg-primary hover:bg-[#c49f28] text-background-dark font-extrabold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
+                            <span class="material-symbols-outlined text-base">logout</span>
+                            <span>Sign Out to Order as Guest</span>
+                        </button>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <a id="staff-portal-btn" href="admin-portal.html" class="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-primary/25 bg-slate-50 dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors text-center">
+                                <span class="material-symbols-outlined text-sm">dashboard</span>
+                                <span>My Dashboard</span>
+                            </a>
+
+                            <button type="button" onclick="window.closeStaffOrderBlockModal()" class="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center transition-colors cursor-pointer">
+                                <span>Dismiss</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        const roleText = (role || 'Staff').toUpperCase();
+        const roleEl = modal.querySelector('#staff-block-role');
+        const emailEl = modal.querySelector('#staff-block-email');
+        const portalBtn = modal.querySelector('#staff-portal-btn');
+
+        if (roleEl) roleEl.textContent = roleText;
+        if (emailEl) emailEl.textContent = email || (role === 'digitizer' ? 'digitizer@dezandigitizing.com' : 'admin@dezandigitizing.com');
+        if (portalBtn) {
+            portalBtn.href = (role === 'digitizer') ? 'worker-portal.html' : 'admin-portal.html';
+        }
+
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeStaffOrderBlockModal = function() {
+        const modal = document.getElementById('staff-order-blocked-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        document.body.style.overflow = '';
+    };
+
+    window.signOutStaffToGuestOrder = function() {
+        window.closeStaffOrderBlockModal();
+        try {
+            if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem('dezan_session');
+            if (typeof localStorage !== 'undefined') localStorage.removeItem('dezan_session');
+            if (window.insforgeClient && typeof window.insforgeClient.logout === 'function') {
+                window.insforgeClient.logout();
+            }
+        } catch (e) {}
+
+        if (typeof window.initHeaderAuthState === 'function') {
+            window.initHeaderAuthState();
+        }
+
+        setTimeout(() => {
+            if (typeof window.openOrderQuoteModal === 'function') {
+                window.openOrderQuoteModal({ isQuote: false });
+            } else if (typeof window.openGuestCheckoutModal === 'function') {
+                window.openGuestCheckoutModal();
+            }
+        }, 150);
+    };
+
     // ===== GLOBAL AUTHENTICATED ORDER & QUOTE DISPATCHER =====
     // Directs unauthenticated users to portal-login.html before ordering or requesting quotes.
     // Directs authenticated clients directly to client-portal.html?action=new_order or action=request_quote
@@ -157,21 +270,18 @@ document.addEventListener("DOMContentLoaded", () => {
             session = null;
         }
 
-        if (session && session.role) {
-            // User is already logged in
-            if (session.role === 'client') {
-                let url = 'client-portal.html?action=new_order';
-                if (service) url += `&service=${encodeURIComponent(service)}`;
-                if (plan) url += `&plan=${encodeURIComponent(plan)}`;
-                window.location.href = url;
-            } else if (session.role === 'admin') {
-                window.location.href = 'admin-portal.html';
-            } else if (session.role === 'digitizer') {
-                window.location.href = 'worker-portal.html';
-            }
+        if (session && (session.role === 'admin' || session.role === 'digitizer')) {
+            window.showStaffOrderBlockModal(session.role, session.email);
+            return;
         } else {
-            // User is NOT logged in: Open the instant Guest Checkout Modal!
-            window.openGuestCheckoutModal({ service, plan });
+            // Open the unified Order modal directly on current page
+            if (typeof window.openOrderQuoteModal === 'function') {
+                window.openOrderQuoteModal({ service, plan, isQuote: false });
+            } else if (typeof window.openNewOrderModal === 'function') {
+                window.openNewOrderModal({ service, plan });
+            } else if (typeof window.openGuestCheckoutModal === 'function') {
+                window.openGuestCheckoutModal({ service, plan });
+            }
         }
     };
 
@@ -537,6 +647,9 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     window.openGuestCheckoutModal = function(options = {}) {
+        if (typeof window.openOrderQuoteModal === 'function') {
+            return window.openOrderQuoteModal(options);
+        }
         let modal = document.getElementById('guest-checkout-modal');
         if (!modal) {
             modal = createGuestCheckoutModalElement();
@@ -594,10 +707,18 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     window.closeGuestCheckoutModal = function() {
+        if (typeof window.closeOrderQuoteModal === 'function') {
+            window.closeOrderQuoteModal();
+            return;
+        }
         const modal = document.getElementById('guest-checkout-modal');
         if (modal) {
             modal.classList.add('hidden');
             document.body.style.overflow = '';
+        }
+        const orderModal = document.getElementById('new-order-modal');
+        if (orderModal) {
+            orderModal.classList.add('hidden');
         }
     };
 
@@ -834,8 +955,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const orderNum = (isQuote ? 'QUO-' : 'DZ-') + Math.floor(1000 + Math.random() * 9000);
                 const isAutoAssign = !isQuote && (localStorage.getItem('dezan_auto_assign_worker') === 'true');
                 const primaryWorker = {
-                    id: '00000000-0000-0000-0000-000000000003',
-                    name: 'Alex Miller (Lead Digitizer)'
+                    id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
+                    name: 'Digitizer'
                 };
                 const assignedAt = isAutoAssign ? new Date().toISOString() : null;
                 createdOrder = {
@@ -912,19 +1033,18 @@ document.addEventListener("DOMContentLoaded", () => {
             session = null;
         }
 
-        if (session && session.role) {
-            if (session.role === 'client') {
-                let url = 'client-portal.html?action=request_quote';
-                if (service) url += `&service=${encodeURIComponent(service)}`;
-                window.location.href = url;
-            } else if (session.role === 'admin') {
-                window.location.href = 'admin-portal.html';
-            } else if (session.role === 'digitizer') {
-                window.location.href = 'worker-portal.html';
-            }
+        if (session && (session.role === 'admin' || session.role === 'digitizer')) {
+            window.showStaffOrderBlockModal(session.role, session.email);
+            return;
         } else {
-            // Unauthenticated visitor: Open instant Guest Quote modal!
-            window.openGuestCheckoutModal({ isQuote: true, service });
+            // Open the unified Quote modal directly on current page
+            if (typeof window.openOrderQuoteModal === 'function') {
+                window.openOrderQuoteModal({ service, isQuote: true });
+            } else if (typeof window.openNewQuoteModal === 'function') {
+                window.openNewQuoteModal({ service });
+            } else if (typeof window.openGuestCheckoutModal === 'function') {
+                window.openGuestCheckoutModal({ isQuote: true, service });
+            }
         }
     };
 
@@ -1030,7 +1150,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // ===== ACTIVE NAVIGATION STATE =====
     // Detect current page from the URL
     const currentPath = window.location.pathname;
-    const currentPage = currentPath.substring(currentPath.lastIndexOf("/") + 1) || "index.html";
+    let currentPage = currentPath.substring(currentPath.lastIndexOf("/") + 1) || "index.html";
+    if (currentPage === "embroidery-digitizing.html" || currentPage === "vector-art-conversion.html") {
+        currentPage = "services.html";
+    }
 
     // Highlight active link in desktop header nav
     document.querySelectorAll("nav a[data-nav]").forEach(link => {

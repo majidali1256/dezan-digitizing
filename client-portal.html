@@ -68,23 +68,7 @@
 
 <body data-client-page="dashboard" class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30 transition-colors duration-200">
 
-    <!-- ===== ROLE DEMO SWITCHER BAR ===== -->
-    <div class="bg-slate-100/90 dark:bg-card-dark border-b border-slate-200 dark:border-primary/20 py-2.5 px-4 text-xs">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/10 text-blue-800 dark:text-blue-400 font-bold border border-blue-300 dark:border-blue-500/20 text-[10px]">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></span> CLIENT WORKSPACE
-                </span>
-                <span class="text-slate-700 dark:text-slate-400 font-medium hidden sm:inline">Logged in as: <strong id="top-user-name" class="text-slate-900 dark:text-white font-bold">Client</strong></span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="text-slate-600 dark:text-slate-500 text-[11px] font-semibold hidden md:inline">Switch Workspace:</span>
-                <button onclick="window.insforgeClient.loginAsDemo('admin')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 text-amber-900 dark:text-primary border border-slate-300 dark:border-primary/30 text-[10px] font-bold shadow-sm">Admin</button>
-                <button onclick="window.insforgeClient.loginAsDemo('digitizer')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-[10px] font-bold shadow-sm">Worker</button>
-                <button onclick="window.insforgeClient.signOut()" class="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-[10px] font-bold ml-1 shadow-sm">Sign Out</button>
-            </div>
-        </div>
-    </div>
+
 
     <!-- ===== HEADER ===== -->
     <header class="sticky top-0 z-40 bg-white/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-primary/20 transition-colors">
@@ -346,83 +330,117 @@
             <!-- Mobile Drag Indicator Bar -->
             <div class="w-12 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mt-2.5 mb-1 sm:hidden flex-shrink-0"></div>
 
-            <!-- Sticky Modal Header -->
-            <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-3.5 border-b border-slate-200 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex-shrink-0 z-10">
-                <div class="min-w-0 pr-2">
-                    <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2" id="order-modal-header-title">
-                        <span class="material-symbols-outlined text-amber-800 dark:text-primary text-xl sm:text-2xl flex-shrink-0" id="order-modal-header-icon">add_shopping_cart</span>
-                        <span id="order-modal-header-text" class="truncate">Place an Order</span>
-                    </h3>
-                    <p class="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 truncate" id="order-modal-header-desc">Tailored technical specifications for machine embroidery and vectors</p>
+            <!-- Sticky Modal Header (Image 2 Target Design) -->
+            <div class="flex flex-col px-4 sm:px-6 pt-3 sm:pt-4 pb-2 sm:pb-3 border-b border-slate-200/80 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex-shrink-0 z-10 gap-2.5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3 min-w-0 pr-2">
+                        <span class="material-symbols-outlined text-[#b89218] dark:text-primary text-2xl sm:text-3xl flex-shrink-0" id="order-modal-header-icon">shopping_cart</span>
+                        <div class="min-w-0">
+                            <h3 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white truncate" id="order-modal-header-text">Place an Order</h3>
+                            <p class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 truncate mt-0.5" id="order-modal-header-desc">Choose a service to continue.</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeNewOrderModal()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer flex-shrink-0" title="Close (Esc)">
+                        <span class="material-symbols-outlined text-lg sm:text-xl">close</span>
+                    </button>
                 </div>
-                <button type="button" onclick="closeNewOrderModal()" class="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer transition-colors flex-shrink-0" title="Close (Esc)">
-                    <span class="material-symbols-outlined text-lg sm:text-xl">close</span>
-                </button>
+
+                <!-- Top Segmented Mode Switcher Pill (Place Order vs. Free Quote) -->
+                <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-900/90 rounded-xl border border-slate-200 dark:border-primary/20">
+                    <button type="button" id="modal-mode-order-btn" onclick="if(typeof setModalMode==='function') setModalMode(false)" class="py-1.5 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-primary text-background-dark shadow-xs cursor-pointer">
+                        <span class="material-symbols-outlined text-sm">bolt</span>
+                        <span>Place Order</span>
+                    </button>
+                    <button type="button" id="modal-mode-quote-btn" onclick="if(typeof setModalMode==='function') setModalMode(true)" class="py-1.5 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer">
+                        <span class="material-symbols-outlined text-sm">request_quote</span>
+                        <span>Request Free Quote ($0)</span>
+                    </button>
+                </div>
+
+                <!-- 2-Step Stepper Progress Bar (Image 2 Target Design) -->
+                <div class="w-full max-w-[280px] sm:max-w-[320px] mx-auto pt-1.5 pb-0.5">
+                    <div class="flex items-start justify-between relative">
+                        <!-- Connecting line centered at top-4 (middle of 32px circle) -->
+                        <div class="absolute left-8 right-8 top-4 -translate-y-1/2 h-[2px] bg-slate-200 dark:bg-slate-700 transition-colors" id="step-connector"></div>
+
+                        <!-- Step 1 (Clickable to return to service choice) -->
+                        <button type="button" onclick="switchOrderServiceChoice()" class="relative z-10 flex flex-col items-center cursor-pointer group bg-transparent border-0 p-0 text-center" title="Step 1: Choose Service">
+                            <div id="step-circle-1" class="w-8 h-8 rounded-full bg-[#b89218] text-white font-bold flex items-center justify-center text-xs sm:text-sm shadow-xs transition-all ring-4 ring-white dark:ring-card-dark">
+                                1
+                            </div>
+                            <span id="step-label-1" class="text-[11px] sm:text-xs font-bold text-[#b89218] mt-1 whitespace-nowrap transition-colors">Choose Service</span>
+                        </button>
+
+                        <!-- Step 2 -->
+                        <div class="relative z-10 flex flex-col items-center text-center">
+                            <div id="step-circle-2" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-all ring-4 ring-white dark:ring-card-dark">
+                                2
+                            </div>
+                            <span id="step-label-2" class="text-[11px] sm:text-xs font-medium text-slate-400 mt-1 whitespace-nowrap transition-colors">Order Details</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- STAGE 1: SERVICE CHOICE CARDS (Always Clean & Simple First) -->
-            <div id="order-service-selection-view" class="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-3 sm:space-y-4">
-                <div class="text-center py-1 sm:py-2">
-                    <span class="text-[10px] font-black uppercase text-amber-800 dark:text-primary tracking-widest block mb-0.5 sm:mb-1">Step 1 of 2</span>
-                    <h4 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white" id="order-step1-title">What type of work do you need?</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 max-w-md mx-auto" id="order-step1-desc">Select a service below to open the specific order requirements. No confusing or unnecessary fields.</p>
-                </div>
+            <!-- STAGE 1: SERVICE CHOICE CARDS (Exact match to Image 2) -->
+            <div id="order-service-selection-view" class="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-3.5 sm:space-y-4">
+                
+                <!-- Option 1: Embroidery Digitizing -->
+                <button type="button" onclick="selectOrderService('Digitizing')" class="w-full group p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-[#faedd0] dark:border-primary/25 bg-[#fffdf8] dark:bg-card-dark hover:border-[#b89218] dark:hover:border-primary transition-all text-left flex flex-col gap-3 sm:gap-3.5 cursor-pointer shadow-xs hover:shadow-md">
+                    <div class="flex items-center gap-3 sm:gap-4 w-full">
+                        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#fef5df] dark:bg-primary/15 border border-[#f5dfaa] dark:border-primary/30 text-[#b89218] dark:text-primary flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                            <svg class="w-8 h-8 sm:w-9 sm:h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="3" width="20" height="13" rx="2"></rect>
+                                <path d="M8 20h8"></path>
+                                <path d="M12 16v4"></path>
+                                <circle cx="6" cy="10.5" r="1.2" fill="currentColor"></circle>
+                                <circle cx="9.5" cy="7" r="1.2" fill="currentColor"></circle>
+                                <circle cx="9.5" cy="12.5" r="1.2" fill="currentColor"></circle>
+                                <path d="M6 10.5c1.2-3.5 2.5-3.5 3.5-3.5s2 2 3.5 3.5"></path>
+                                <path d="M14 7h4"></path>
+                                <path d="M14 9.5h4"></path>
+                                <path d="M14 12h4"></path>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white group-hover:text-[#b89218] dark:group-hover:text-primary transition-colors leading-tight">Embroidery Digitizing</h4>
+                            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Stitch files for embroidery machines.</p>
+                        </div>
+                        <span class="material-symbols-outlined text-2xl text-[#b89218] dark:text-primary group-hover:translate-x-1 transition-transform shrink-0 font-bold">chevron_right</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                        <span class="px-3 py-1 rounded-full bg-[#fef3cd] dark:bg-primary/20 text-[#9a7810] dark:text-primary font-bold text-xs">.DST &nbsp;.PES &nbsp;.EXP</span>
+                        <span class="px-3 py-1 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-xs">Left Chest / Hats / Jacket Back</span>
+                        <span class="px-3 py-1 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-xs">3D Puff</span>
+                    </div>
+                </button>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-1">
-                    <!-- Option 1: Embroidery Digitizing -->
-                    <button type="button" onclick="selectOrderService('Digitizing')" class="group p-3.5 sm:p-5 rounded-2xl border-2 border-slate-200/90 dark:border-primary/25 bg-slate-50/70 dark:bg-slate-900/50 hover:border-primary dark:hover:border-primary hover:bg-amber-50/30 dark:hover:bg-primary/10 transition-all text-left flex flex-col justify-between cursor-pointer shadow-xs hover:shadow-md">
-                        <div>
-                            <div class="flex items-start gap-3 sm:gap-0 sm:flex-col">
-                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500/10 text-amber-800 dark:text-primary flex items-center justify-center sm:mb-3 group-hover:scale-105 transition-transform border border-amber-500/20 flex-shrink-0">
-                                    <span class="material-symbols-outlined text-xl sm:text-2xl">precision_manufacturing</span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center justify-between sm:block">
-                                        <h5 class="text-sm sm:text-base font-black text-slate-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">Embroidery Digitizing</h5>
-                                        <span class="material-symbols-outlined text-base text-amber-800 dark:text-primary sm:hidden group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
-                                    </div>
-                                    <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 mt-0.5 sm:mt-1 leading-snug sm:leading-relaxed">Industrial stitch files formatted for commercial machines (Tajima, Barudan, Brother, etc.).</p>
-                                </div>
-                            </div>
+                <!-- Option 2: Vector Art Conversion -->
+                <button type="button" onclick="selectOrderService('Vectorizing')" class="w-full group p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-[#e2eaf4] dark:border-primary/25 bg-[#f8faff] dark:bg-card-dark hover:border-[#1d68d8] dark:hover:border-primary transition-all text-left flex flex-col gap-3 sm:gap-3.5 cursor-pointer shadow-xs hover:shadow-md">
+                    <div class="flex items-center gap-3 sm:gap-4 w-full">
+                        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#e8f1fd] dark:bg-blue-950/40 border border-[#cce0fc] dark:border-blue-800/50 text-[#1d68d8] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                            <svg class="w-8 h-8 sm:w-9 sm:h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 17c3-8 9-8 18 0"></path>
+                                <circle cx="3" cy="17" r="1.4" fill="currentColor"></circle>
+                                <circle cx="12" cy="10" r="1.4" fill="currentColor"></circle>
+                                <circle cx="21" cy="17" r="1.4" fill="currentColor"></circle>
+                                <path d="M12 11l-3 6h6l-3-6z"></path>
+                                <circle cx="12" cy="14.5" r="0.8" fill="currentColor"></circle>
+                                <path d="M10.5 17v4h3v-4"></path>
+                            </svg>
                         </div>
-                        <div class="pt-2.5 sm:pt-4 mt-2 sm:mt-3 border-t border-slate-200/60 dark:border-primary/10 flex flex-wrap gap-1 sm:gap-1.5">
-                            <span class="px-2 py-0.5 rounded-full bg-amber-100/80 dark:bg-primary/15 text-amber-900 dark:text-primary font-bold text-[10px]">DST · EMB · PES</span>
-                            <span class="px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[10px]">Left Chest & Caps</span>
-                            <span class="px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[10px]">3D Puff</span>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white group-hover:text-[#1d68d8] dark:group-hover:text-blue-400 transition-colors leading-tight">Vector Art Conversion</h4>
+                            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Clean vector redraws for print and artwork.</p>
                         </div>
-                        <div class="hidden sm:flex mt-4 items-center gap-1 text-xs font-black text-amber-800 dark:text-primary group-hover:translate-x-1 transition-transform">
-                            <span>Select Digitizing</span>
-                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                        </div>
-                    </button>
+                        <span class="material-symbols-outlined text-2xl text-[#1d68d8] dark:text-blue-400 group-hover:translate-x-1 transition-transform shrink-0 font-bold">chevron_right</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                        <span class="px-3 py-1 rounded-full bg-[#dbeafe] dark:bg-blue-900/30 text-[#1e40af] dark:text-blue-300 font-bold text-xs">.AI &nbsp;.EPS &nbsp;.SVG &nbsp;.PDF</span>
+                        <span class="px-3 py-1 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-xs">Print-ready</span>
+                    </div>
+                </button>
 
-                    <!-- Option 2: Vector Art -->
-                    <button type="button" onclick="selectOrderService('Vectorizing')" class="group p-3.5 sm:p-5 rounded-2xl border-2 border-slate-200/90 dark:border-primary/25 bg-slate-50/70 dark:bg-slate-900/50 hover:border-primary dark:hover:border-primary hover:bg-amber-50/30 dark:hover:bg-primary/10 transition-all text-left flex flex-col justify-between cursor-pointer shadow-xs hover:shadow-md">
-                        <div>
-                            <div class="flex items-start gap-3 sm:gap-0 sm:flex-col">
-                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500/10 text-blue-800 dark:text-blue-400 flex items-center justify-center sm:mb-3 group-hover:scale-105 transition-transform border border-blue-500/20 flex-shrink-0">
-                                    <span class="material-symbols-outlined text-xl sm:text-2xl">draw</span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center justify-between sm:block">
-                                        <h5 class="text-sm sm:text-base font-black text-slate-900 dark:text-white group-hover:text-blue-800 dark:group-hover:text-blue-400 transition-colors">Vector Art Conversion</h5>
-                                        <span class="material-symbols-outlined text-base text-blue-800 dark:text-blue-400 sm:hidden group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
-                                    </div>
-                                    <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 mt-0.5 sm:mt-1 leading-snug sm:leading-relaxed">Crisp high-resolution redraws for screen printing, vinyl plotting, decals, and signage.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="pt-2.5 sm:pt-4 mt-2 sm:mt-3 border-t border-slate-200/60 dark:border-primary/10 flex flex-wrap gap-1 sm:gap-1.5">
-                            <span class="px-2 py-0.5 rounded-full bg-blue-100/80 dark:bg-blue-500/15 text-blue-900 dark:text-blue-400 font-bold text-[10px]">AI · EPS · SVG · PDF</span>
-                            <span class="px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[10px]">Clean Curves</span>
-                            <span class="px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[10px]">Color Separation</span>
-                        </div>
-                        <div class="hidden sm:flex mt-4 items-center gap-1 text-xs font-black text-blue-800 dark:text-blue-400 group-hover:translate-x-1 transition-transform">
-                            <span>Select Vector Art</span>
-                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                        </div>
-                    </button>
-                </div>
             </div>
 
             <!-- STAGE 2: ADAPTIVE FORM (Hidden until service selected) -->
@@ -455,15 +473,19 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Target Placement *</label>
-                                <select id="dig-placement" onchange="calculateAdaptivePrice()" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
-                                    <option value="Left Chest ($15)">Left Chest ($15.00)</option>
-                                    <option value="Cap / Hat Front ($15)">Cap / Hat Front ($15.00)</option>
-                                    <option value="Jacket Back ($45)">Jacket Back Large ($45.00)</option>
-                                    <option value="Sleeve / Visor ($15)">Sleeve / Visor ($15.00)</option>
-                                    <option value="Patches / Badges ($20)">Patches / Badges ($20.00)</option>
-                                    <option value="Custom Placement">Custom Placement</option>
+                                <select id="dig-placement" onchange="handlePlacementChange()" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
+                                    <option value="Left Chest — $15" data-price="15">Left Chest — $15</option>
+                                    <option value="Cap / Hat Front — $15" data-price="15">Cap / Hat Front — $15</option>
+                                    <option value="Jacket Back / Large — $25" data-price="25">Jacket Back / Large — $25</option>
+                                    <option value="Custom Placement" data-price="15">Custom Placement</option>
                                 </select>
                             </div>
+                        </div>
+
+                        <!-- Custom Placement Details (Automatically appears when Custom Placement is selected) -->
+                        <div id="custom-placement-container" class="hidden">
+                            <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Custom Placement Details *</label>
+                            <input type="text" id="dig-custom-placement" placeholder="e.g. patch , visor , apron, tote bag, etc." class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary" />
                         </div>
 
                         <!-- Fabric Material & Sizing -->
@@ -481,59 +503,67 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Target Size (Width & Height) *</label>
+                                <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Target Size *</label>
                                 <div class="flex items-center gap-2">
-                                    <input type="text" id="dig-size-w" placeholder="Width (e.g. 3.5)" class="flex-1 min-w-0 px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary" />
-                                    <span class="text-slate-400 font-bold flex-shrink-0">×</span>
-                                    <input type="text" id="dig-size-h" placeholder="Height (e.g. 2.2)" class="flex-1 min-w-0 px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary" />
-                                    <select id="dig-size-unit" class="w-16 flex-shrink-0 px-2.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary">
-                                        <option value="in">in</option>
+                                    <input type="number" step="0.1" min="0.1" id="dig-size" placeholder="e.g. 4.0" oninput="validatePlacementSize()" class="flex-1 min-w-0 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary" />
+                                    <select id="dig-size-unit" onchange="validatePlacementSize()" class="w-20 flex-shrink-0 px-2.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
+                                        <option value="in" selected>in</option>
                                         <option value="cm">cm</option>
                                     </select>
+                                </div>
+                                <div id="dig-size-error" class="hidden text-[11px] font-semibold text-rose-600 dark:text-rose-400 mt-1 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-xs">error</span>
+                                    <span id="dig-size-error-text">Maximum size for this placement is 5.5 inches.</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Required Machine Formats -->
+                        <!-- Required Machine Formats (No brand names, DST first) -->
                         <div>
                             <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">Required Machine File Formats *</label>
                             <div class="flex flex-wrap gap-1.5 sm:gap-2" id="machine-format-chips">
-                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-primary/10 border border-amber-300 dark:border-primary/30 text-xs font-bold text-amber-900 dark:text-primary cursor-pointer">
-                                    <input type="checkbox" name="dig-formats" value="DST" checked class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Tajima (.DST)
+                                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-primary/10 border border-amber-300 dark:border-primary/30 text-xs font-bold text-amber-900 dark:text-primary cursor-pointer hover:border-primary transition-all">
+                                    <input type="checkbox" name="dig-formats" value=".DST" checked class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> .DST
                                 </label>
-                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-primary/10 border border-amber-300 dark:border-primary/30 text-xs font-bold text-amber-900 dark:text-primary cursor-pointer">
-                                    <input type="checkbox" name="dig-formats" value="EMB" checked class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Wilcom (.EMB)
+                                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer hover:border-primary transition-all">
+                                    <input type="checkbox" name="dig-formats" value=".PES" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> .PES
                                 </label>
-                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
-                                    <input type="checkbox" name="dig-formats" value="PES" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Brother (.PES)
+                                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer hover:border-primary transition-all">
+                                    <input type="checkbox" name="dig-formats" value="EMB" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> EMB
                                 </label>
-                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
-                                    <input type="checkbox" name="dig-formats" value="EXP" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Melco (.EXP)
+                                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer hover:border-primary transition-all">
+                                    <input type="checkbox" name="dig-formats" value=".OFM" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> .OFM
                                 </label>
-                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
-                                    <input type="checkbox" name="dig-formats" value="CND" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> CND
+                                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer hover:border-primary transition-all">
+                                    <input type="checkbox" name="dig-formats" value=".EXP" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> .EXP
                                 </label>
-                                <label class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
-                                    <input type="checkbox" name="dig-formats" value="JEF" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> Janome (.JEF)
+                                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer hover:border-primary transition-all">
+                                    <input type="checkbox" name="dig-formats" value=".JEF" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> .JEF
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer hover:border-primary transition-all">
+                                    <input type="checkbox" name="dig-formats" value=".VP3" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> .VP3
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer hover:border-primary transition-all">
+                                    <input type="checkbox" name="dig-formats" value=".CND" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> .CND
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer hover:border-primary transition-all">
+                                    <input type="checkbox" name="dig-formats" value=".XXX" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" /> .XXX
                                 </label>
                             </div>
                         </div>
 
-                        <!-- Special Options -->
+                        <!-- Special Technical Options (Only 3D Puff, Trims Between All Letters, Applique) -->
                         <div>
                             <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">Special Technical Options (Optional)</label>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                <label class="flex items-center gap-2 p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-[11px] sm:text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:border-primary">
-                                    <input type="checkbox" name="dig-special" value="3D Foam Puff" onchange="calculateAdaptivePrice()" class="rounded text-primary focus:ring-primary h-3.5 w-3.5 flex-shrink-0" /> <span class="truncate">3D Puff (+ $5)</span>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <label class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:border-primary transition-all">
+                                    <input type="checkbox" name="dig-special" value="3D Puff" class="rounded text-primary focus:ring-primary h-3.5 w-3.5 flex-shrink-0" /> <span class="truncate">3D Puff</span>
                                 </label>
-                                <label class="flex items-center gap-2 p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-[11px] sm:text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:border-primary">
+                                <label class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:border-primary transition-all">
+                                    <input type="checkbox" name="dig-special" value="Trims Between All Letters" class="rounded text-primary focus:ring-primary h-3.5 w-3.5 flex-shrink-0" /> <span class="truncate">Trims Between All Letters</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:border-primary transition-all">
                                     <input type="checkbox" name="dig-special" value="Applique" class="rounded text-primary focus:ring-primary h-3.5 w-3.5 flex-shrink-0" /> <span class="truncate">Applique</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-[11px] sm:text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:border-primary">
-                                    <input type="checkbox" name="dig-special" value="Match Sample" class="rounded text-primary focus:ring-primary h-3.5 w-3.5 flex-shrink-0" /> <span class="truncate">Match Sample</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-[11px] sm:text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:border-primary">
-                                    <input type="checkbox" name="dig-special" value="Fire Resistant" class="rounded text-primary focus:ring-primary h-3.5 w-3.5 flex-shrink-0" /> <span class="truncate">Flame Specs</span>
                                 </label>
                             </div>
                         </div>
@@ -618,9 +648,9 @@
                                 <input type="radio" name="order-turnaround" value="rush" onchange="calculateAdaptivePrice()" class="text-primary focus:ring-primary h-4 w-4 mt-0.5" />
                                 <div>
                                     <strong class="text-xs font-black text-slate-900 dark:text-white block flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-amber-600 text-xs">bolt</span> ⚡ Rush Service (2-4 Hours)
+                                        <span class="material-symbols-outlined text-amber-600 text-xs">bolt</span> ⚡ Rush Service (5-8 Hours)
                                     </strong>
-                                    <span class="text-[10px] text-slate-500 dark:text-slate-400">+ $10.00 expedited queue fee</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400">+ $5.00 expedited queue fee</span>
                                 </div>
                             </label>
                         </div>
@@ -1195,6 +1225,7 @@
 
     <!-- Scripts -->
     <script src="js/insforge-client.js"></script>
+    <script src="js/order-quote-modal.js"></script>
     <script>
         // Default to white/light theme; check if user explicitly chose dark
         const savedTheme = localStorage.getItem('theme');
@@ -1845,6 +1876,9 @@
         }
 
         function openNewOrderModal() {
+            if (typeof window.openOrderQuoteModal === 'function') {
+                return window.openOrderQuoteModal({ isQuote: false });
+            }
             currentModalMode = 'order';
             updateModalModeUI();
             const modal = document.getElementById('new-order-modal');
@@ -1856,6 +1890,9 @@
         }
 
         function openNewQuoteModal() {
+            if (typeof window.openOrderQuoteModal === 'function') {
+                return window.openOrderQuoteModal({ isQuote: true });
+            }
             currentModalMode = 'quote';
             updateModalModeUI();
             const modal = document.getElementById('new-order-modal');
@@ -1871,6 +1908,10 @@
         }
 
         function closeNewOrderModal() {
+            if (typeof window.closeOrderQuoteModal === 'function') {
+                window.closeOrderQuoteModal();
+                return;
+            }
             const modal = document.getElementById('new-order-modal');
             if (modal) modal.classList.add('hidden');
         }
@@ -1901,6 +1942,16 @@
             if (selectionView) selectionView.classList.add('hidden');
             if (formView) formView.classList.remove('hidden');
 
+            // Update Stepper to Step 2
+            const stepCircle1 = document.getElementById('step-circle-1');
+            const stepConnector = document.getElementById('step-connector');
+            const stepCircle2 = document.getElementById('step-circle-2');
+            const stepLabel2 = document.getElementById('step-label-2');
+            if (stepCircle1) stepCircle1.innerHTML = '<span class="material-symbols-outlined text-sm font-bold">check</span>';
+            if (stepConnector) stepConnector.className = 'absolute left-8 right-8 top-4 -translate-y-1/2 h-[2px] bg-[#b89218] transition-colors';
+            if (stepCircle2) stepCircle2.className = 'w-8 h-8 rounded-full bg-[#b89218] text-white font-bold flex items-center justify-center text-xs sm:text-sm shadow-xs transition-all ring-4 ring-white dark:ring-card-dark';
+            if (stepLabel2) stepLabel2.className = 'text-[11px] sm:text-xs font-bold text-[#b89218] mt-1 whitespace-nowrap transition-colors';
+
             calculateAdaptivePrice();
         }
 
@@ -1909,6 +1960,73 @@
             const formView = document.getElementById('adaptive-order-form');
             if (selectionView) selectionView.classList.remove('hidden');
             if (formView) formView.classList.add('hidden');
+
+            // Reset Stepper to Step 1
+            const stepCircle1 = document.getElementById('step-circle-1');
+            const stepConnector = document.getElementById('step-connector');
+            const stepCircle2 = document.getElementById('step-circle-2');
+            const stepLabel2 = document.getElementById('step-label-2');
+            if (stepCircle1) stepCircle1.innerHTML = '1';
+            if (stepConnector) stepConnector.className = 'absolute left-8 right-8 top-4 -translate-y-1/2 h-[2px] bg-slate-200 dark:bg-slate-700 transition-colors';
+            if (stepCircle2) stepCircle2.className = 'w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-all ring-4 ring-white dark:ring-card-dark';
+            if (stepLabel2) stepLabel2.className = 'text-[11px] sm:text-xs font-medium text-slate-400 mt-1 whitespace-nowrap transition-colors';
+        }
+
+        function handlePlacementChange() {
+            const placementSelect = document.getElementById('dig-placement');
+            const customContainer = document.getElementById('custom-placement-container');
+            const isCustom = placementSelect && placementSelect.value.includes('Custom Placement');
+
+            if (customContainer) {
+                if (isCustom) {
+                    customContainer.classList.remove('hidden');
+                    document.getElementById('dig-custom-placement')?.focus();
+                } else {
+                    customContainer.classList.add('hidden');
+                }
+            }
+
+            validatePlacementSize();
+            calculateAdaptivePrice();
+        }
+
+        function validatePlacementSize() {
+            const service = document.getElementById('selected-service-type')?.value || 'Digitizing';
+            if (service !== 'Digitizing') return true;
+
+            const placementVal = document.getElementById('dig-placement')?.value || '';
+            const sizeInput = document.getElementById('dig-size');
+            const unitSelect = document.getElementById('dig-size-unit');
+            const errorEl = document.getElementById('dig-size-error');
+            const errorText = document.getElementById('dig-size-error-text');
+
+            if (!sizeInput) return true;
+
+            const rawVal = parseFloat(sizeInput.value);
+            const unit = unitSelect ? unitSelect.value : 'in';
+
+            // Restriction applies to Left Chest and Cap / Hat Front
+            const hasRestriction = placementVal.includes('Left Chest') || placementVal.includes('Cap / Hat');
+
+            if (hasRestriction && !isNaN(rawVal) && rawVal > 0) {
+                const valInInches = unit === 'cm' ? (rawVal / 2.54) : rawVal;
+                if (valInInches > 5.5001) {
+                    if (errorEl) errorEl.classList.remove('hidden');
+                    if (errorText) {
+                        errorText.textContent = unit === 'cm'
+                            ? 'Maximum size for this placement is 5.5 inches (14.0 cm).'
+                            : 'Maximum size for this placement is 5.5 inches.';
+                    }
+                    sizeInput.classList.add('border-rose-500', 'focus:border-rose-500');
+                    sizeInput.classList.remove('border-slate-300', 'dark:border-primary/25');
+                    return false;
+                }
+            }
+
+            if (errorEl) errorEl.classList.add('hidden');
+            sizeInput.classList.remove('border-rose-500', 'focus:border-rose-500');
+            sizeInput.classList.add('border-slate-300', 'dark:border-primary/25');
+            return true;
         }
 
         function calculateAdaptivePrice() {
@@ -1921,32 +2039,30 @@
             let breakdownText = 'Standard Turnaround (12-24h)';
 
             if (service === 'Digitizing') {
-                const placementVal = document.getElementById('dig-placement')?.value || '';
-                if (placementVal.includes('45')) {
-                    basePrice = 45.00;
-                    breakdownText = 'Jacket Back Digitizing';
-                } else if (placementVal.includes('20')) {
-                    basePrice = 20.00;
-                    breakdownText = 'Patch / Badge Digitizing';
-                } else {
-                    basePrice = 15.00;
-                    breakdownText = 'Standard Left Chest / Cap Digitizing';
-                }
+                const placementSelect = document.getElementById('dig-placement');
+                const selectedOpt = placementSelect?.options[placementSelect.selectedIndex];
+                const optPrice = parseFloat(selectedOpt?.getAttribute('data-price') || '15');
+                basePrice = optPrice;
 
-                // Check 3D puff
-                const isPuff = document.querySelector('input[name="dig-special"][value="3D Foam Puff"]')?.checked;
-                if (isPuff) {
-                    basePrice += 5.00;
-                    breakdownText += ' + 3D Foam Puff';
+                const placementVal = selectedOpt?.value || '';
+                if (placementVal.includes('Jacket Back') || placementVal.includes('25')) {
+                    breakdownText = 'Jacket Back / Large ($25.00)';
+                } else if (placementVal.includes('Cap')) {
+                    breakdownText = 'Cap / Hat Front ($15.00)';
+                } else if (placementVal.includes('Custom')) {
+                    breakdownText = 'Custom Placement ($15.00)';
+                } else {
+                    breakdownText = 'Left Chest ($15.00)';
                 }
+                // 3D Puff has NO additional charge (+$0)
             } else {
                 basePrice = 15.00;
                 breakdownText = 'Clean Vector Conversion';
             }
 
             if (isRush) {
-                basePrice += 10.00;
-                breakdownText += ' + ⚡ Rush Priority (2-4h)';
+                basePrice += 5.00;
+                breakdownText += ' + ⚡ Rush Priority (5-8h)';
             }
 
             if (priceDisplay) priceDisplay.textContent = `$${basePrice.toFixed(2)}`;
@@ -2059,15 +2175,36 @@
                     document.getElementById('dig-job-name')?.focus();
                     return;
                 }
-                placement = document.getElementById('dig-placement')?.value || 'Left Chest';
-                fabricType = document.getElementById('dig-fabric')?.value || 'Cotton / Pique';
-                const w = document.getElementById('dig-size-w')?.value.trim();
-                const h = document.getElementById('dig-size-h')?.value.trim();
+
+                const rawPlacement = document.getElementById('dig-placement')?.value || 'Left Chest — $15';
+                if (rawPlacement.includes('Custom')) {
+                    const customVal = (document.getElementById('dig-custom-placement')?.value || '').trim();
+                    if (!customVal) {
+                        alert('Please specify your Custom Placement Details (e.g. patch, visor, apron, tote bag, etc.).');
+                        document.getElementById('dig-custom-placement')?.focus();
+                        return;
+                    }
+                    placement = `Custom Placement: ${customVal}`;
+                } else {
+                    placement = rawPlacement.split('—')[0].trim();
+                }
+
+                fabricType = document.getElementById('dig-fabric')?.value || 'Cotton / Pique Knit';
+
+                // Validate placement size limit (5.5" for Left Chest and Cap / Hat Front)
+                const isSizeValid = validatePlacementSize();
+                if (!isSizeValid) {
+                    alert('Maximum size for this placement is 5.5 inches.');
+                    document.getElementById('dig-size')?.focus();
+                    return;
+                }
+
+                const sizeVal = (document.getElementById('dig-size')?.value || '').trim();
                 const unit = document.getElementById('dig-size-unit')?.value || 'in';
-                sizing = (w && h) ? `${w}" W × ${h}" H` : 'Standard Left Chest (3.5")';
+                sizing = sizeVal ? `${sizeVal} ${unit}` : 'Standard';
 
                 const checkedFormats = Array.from(document.querySelectorAll('input[name="dig-formats"]:checked')).map(cb => cb.value);
-                fileFormat = checkedFormats.length > 0 ? checkedFormats.join(', ') : 'DST, EMB';
+                fileFormat = checkedFormats.length > 0 ? checkedFormats.join(', ') : '.DST';
 
                 specialOptions = Array.from(document.querySelectorAll('input[name="dig-special"]:checked')).map(cb => cb.value);
             } else {

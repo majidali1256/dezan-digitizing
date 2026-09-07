@@ -31,9 +31,9 @@ const DEMO_USERS = {
         status: 'active'
     },
     digitizer: {
-        id: '00000000-0000-0000-0000-000000000003',
-        email: 'worker.alex@dezandigitizing.com',
-        displayName: 'Alex Miller (Lead Digitizer)',
+        id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
+        email: 'digitizer@dezandigitizing.com',
+        displayName: 'Digitizer',
         role: 'digitizer',
         status: 'active'
     }
@@ -63,8 +63,8 @@ const INITIAL_DEMO_ORDERS = [
         currency: 'USD',
         payment_status: 'paid',
         payment_method: 'PayPal',
-        assigned_digitizer_id: '00000000-0000-0000-0000-000000000003',
-        assigned_digitizer_name: 'Alex Miller (Lead Digitizer)',
+        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
+        assigned_digitizer_name: 'Digitizer',
         assigned_at: new Date(Date.now() - 3600000 * 4).toISOString(),
         status: 'completed',
         deliverables: [
@@ -124,8 +124,8 @@ const INITIAL_DEMO_ORDERS = [
         currency: 'USD',
         payment_status: 'paid',
         payment_method: 'PayPal',
-        assigned_digitizer_id: '00000000-0000-0000-0000-000000000003',
-        assigned_digitizer_name: 'Alex Miller (Lead Digitizer)',
+        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
+        assigned_digitizer_name: 'Digitizer',
         assigned_at: new Date(Date.now() - 3600000 * 48).toISOString(),
         status: 'completed',
         deliverables: [
@@ -156,8 +156,8 @@ const INITIAL_DEMO_ORDERS = [
         currency: 'USD',
         payment_status: 'paid',
         payment_method: 'PayPal',
-        assigned_digitizer_id: '00000000-0000-0000-0000-000000000003',
-        assigned_digitizer_name: 'Alex Miller (Lead Digitizer)',
+        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
+        assigned_digitizer_name: 'Digitizer',
         assigned_at: new Date(Date.now() - 3600000 * 68).toISOString(),
         status: 'completed',
         deliverables: [
@@ -188,8 +188,8 @@ const INITIAL_DEMO_ORDERS = [
         currency: 'USD',
         payment_status: 'paid',
         payment_method: 'Credit Card',
-        assigned_digitizer_id: '00000000-0000-0000-0000-000000000005',
-        assigned_digitizer_name: 'Maria Garcia (3D Puff Master)',
+        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
+        assigned_digitizer_name: 'Digitizer',
         assigned_at: new Date(Date.now() - 3600000 * 30).toISOString(),
         status: 'completed',
         deliverables: [
@@ -220,8 +220,8 @@ const INITIAL_DEMO_ORDERS = [
         currency: 'USD',
         payment_status: 'paid',
         payment_method: 'PayPal',
-        assigned_digitizer_id: '00000000-0000-0000-0000-000000000003',
-        assigned_digitizer_name: 'Alex Miller (Lead Digitizer)',
+        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
+        assigned_digitizer_name: 'Digitizer',
         assigned_at: new Date(Date.now() - 3600000 * 110).toISOString(),
         status: 'completed',
         deliverables: [
@@ -252,8 +252,8 @@ const INITIAL_DEMO_ORDERS = [
         currency: 'USD',
         payment_status: 'unpaid',
         payment_method: 'Pending Invoice',
-        assigned_digitizer_id: '00000000-0000-0000-0000-000000000003',
-        assigned_digitizer_name: 'Alex Miller (Lead Digitizer)',
+        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
+        assigned_digitizer_name: 'Digitizer',
         assigned_at: new Date(Date.now() - 3600000 * 14).toISOString(),
         status: 'in_progress',
         deliverables: [],
@@ -281,8 +281,8 @@ const INITIAL_DEMO_ORDERS = [
         currency: 'USD',
         payment_status: 'paid',
         payment_method: 'PayPal',
-        assigned_digitizer_id: '00000000-0000-0000-0000-000000000004',
-        assigned_digitizer_name: 'Sam Chen (Vector Specialist)',
+        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
+        assigned_digitizer_name: 'Digitizer',
         assigned_at: new Date(Date.now() - 3600000 * 140).toISOString(),
         status: 'completed',
         deliverables: [
@@ -298,7 +298,44 @@ class InsForgeClient {
         this.baseUrl = INSFORGE_CONFIG.baseUrl;
         this.anonKey = INSFORGE_CONFIG.anonKey;
         this.initStorage();
+    }
+
+    // ===================================================================
+    //  INITIALIZATION & LOCAL CACHE
+    // ===================================================================
+
+    initStorage() {
+        if (typeof window === 'undefined') return;
+        this.initData();
         this.initRealtime();
+    }
+
+    initData() {
+        if (!localStorage.getItem('dezan_orders')) {
+            localStorage.setItem('dezan_orders', JSON.stringify(INITIAL_DEMO_ORDERS));
+        } else {
+            // Normalize any previously cached demo orders to use the single Digitizer
+            try {
+                const cachedOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+                let modified = false;
+                cachedOrders.forEach(o => {
+                    if (o.assigned_digitizer_name && o.assigned_digitizer_name !== 'Digitizer') {
+                        o.assigned_digitizer_name = 'Digitizer';
+                        o.assigned_digitizer_id = DEMO_USERS.digitizer.id;
+                        modified = true;
+                    }
+                });
+                if (modified) {
+                    localStorage.setItem('dezan_orders', JSON.stringify(cachedOrders));
+                }
+            } catch(e) {}
+        }
+
+        // Strictly enforce that only 1 single Digitizer exists in the platform
+        const storedDigitizers = JSON.parse(localStorage.getItem('dezan_digitizers') || '[]');
+        if (!localStorage.getItem('dezan_digitizers') || storedDigitizers.length !== 1 || storedDigitizers[0].email !== DEMO_USERS.digitizer.email || storedDigitizers[0].displayName !== 'Digitizer') {
+            localStorage.setItem('dezan_digitizers', JSON.stringify([DEMO_USERS.digitizer]));
+        }
     }
 
     generateUUID() {
@@ -362,21 +399,7 @@ class InsForgeClient {
         }
         if (!localStorage.getItem('dezan_digitizers')) {
             localStorage.setItem('dezan_digitizers', JSON.stringify([
-                DEMO_USERS.digitizer,
-                {
-                    id: '00000000-0000-0000-0000-000000000004',
-                    email: 'worker.sam@dezandigitizing.com',
-                    displayName: 'Sam Chen (Vector Specialist)',
-                    role: 'digitizer',
-                    status: 'active'
-                },
-                {
-                    id: '00000000-0000-0000-0000-000000000005',
-                    email: 'worker.maria@dezandigitizing.com',
-                    displayName: 'Maria Garcia (3D Puff Master)',
-                    role: 'digitizer',
-                    status: 'active'
-                }
+                DEMO_USERS.digitizer
             ]));
         }
     }
@@ -760,42 +783,40 @@ class InsForgeClient {
             return { user: apiUser, error: null };
         }
 
-        // 2. Check predefined admin accounts / aliases (Fallback / 1-Click)
-        if (rawEmail === 'admin' || rawEmail === 'admin@dezandigitizing.com' || rawEmail === 'admin@dezan.com') {
+        // If the backend was reachable and returned an explicit authentication error, reject immediately
+        if (apiRes && !apiRes.success && apiRes.error && !apiRes.error.includes('Failed to fetch') && !apiRes.error.includes('NetworkError')) {
+            return { user: null, error: apiRes.error };
+        }
+
+        // 2. Offline / Predefined fallback verification (Strict Password Checks)
+        const OFFLINE_PASSWORDS = {
+            'admin@dezandigitizing.com': 'Wasif8899@@@',
+            'digitizer@dezandigitizing.com': 'Pakistan6677@@@'
+        };
+
+        if (rawEmail === 'admin@dezandigitizing.com') {
+            if (password && password !== OFFLINE_PASSWORDS[rawEmail]) {
+                return { user: null, error: 'Invalid email or password' };
+            }
             const adminUser = DEMO_USERS.admin;
             this.setSession(adminUser);
             return { user: adminUser, error: null };
         }
 
-        // 3. Check predefined digitizer worker accounts / aliases (Fallback / 1-Click)
-        if (rawEmail === 'worker' || rawEmail === 'digitizer' || rawEmail === 'worker.alex@dezandigitizing.com') {
+        if (rawEmail === 'digitizer@dezandigitizing.com') {
+            if (password && password !== OFFLINE_PASSWORDS[rawEmail]) {
+                return { user: null, error: 'Invalid email or password' };
+            }
             const workerUser = DEMO_USERS.digitizer;
             this.setSession(workerUser);
             return { user: workerUser, error: null };
         }
 
-        // 4. Check demo client alias (Fallback / 1-Click)
-        if (rawEmail === 'client' || rawEmail === 'client@falconapparel.com') {
+        if (rawEmail === 'client@falconapparel.com') {
             const clientUser = DEMO_USERS.client;
             this.setSession(clientUser);
             this.claimGuestOrders(clientUser.email, clientUser.id).catch(() => {});
             return { user: clientUser, error: null };
-        }
-
-        // 5. Check all demo users in DEMO_USERS
-        const demoUser = Object.values(DEMO_USERS).find(u => u.email.toLowerCase() === rawEmail);
-        if (demoUser) {
-            this.setSession(demoUser);
-            this.claimGuestOrders(demoUser.email, demoUser.id).catch(() => {});
-            return { user: demoUser, error: null };
-        }
-
-        // 6. Check predefined digitizers from team list
-        const digitizers = JSON.parse(localStorage.getItem('dezan_digitizers') || '[]');
-        const matchedDigitizer = digitizers.find(d => d.email && d.email.toLowerCase() === rawEmail);
-        if (matchedDigitizer) {
-            this.setSession(matchedDigitizer);
-            return { user: matchedDigitizer, error: null };
         }
 
         // 7. Check local registered users (all registered users are clients)
@@ -1608,8 +1629,17 @@ class InsForgeClient {
      */
     async createOrder(orderData) {
         const user = this.getCurrentUser();
+        if (user && (user.role === 'admin' || user.role === 'digitizer')) {
+            throw new Error("You can't place orders from this account");
+        }
+
         const isGuest = !user;
         const clientEmail = (user ? user.email : orderData.clientEmail || '').trim();
+        const normalizedEmail = clientEmail.toLowerCase();
+        if (normalizedEmail === 'admin@dezandigitizing.com' || normalizedEmail === 'digitizer@dezandigitizing.com') {
+            throw new Error("You can't place orders from this account");
+        }
+
         if (isGuest && !clientEmail) {
             throw new Error('Customer email is required for guest checkout.');
         }
@@ -1793,7 +1823,7 @@ class InsForgeClient {
     }
 
     /**
-     * Auto-assign all unassigned pending orders to Alex Miller
+     * Auto-assign all unassigned pending orders to Digitizer
      * @returns {Promise<number>} Number of orders assigned
      */
     async autoAssignAllPendingOrders() {
@@ -2157,11 +2187,11 @@ class InsForgeClient {
         order.updated_at = requestedAt;
         localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
 
-        // Ensure task exists in digitizer_tasks for the assigned digitizer (or default Alex Miller)
+        // Ensure task exists in digitizer_tasks for the assigned digitizer
         const allTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
         let task = allTasks.find(t => t.order_number === order.order_number || t.orderNumber === order.order_number);
 
-        const digitizerId = order.assigned_digitizer_id || '00000000-0000-0000-0000-000000000003';
+        const digitizerId = order.assigned_digitizer_id || DEMO_USERS.digitizer.id;
         const taskNumber = 'TSK-' + order.order_number.replace('ORD-', '');
 
         if (!task) {

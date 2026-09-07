@@ -98,7 +98,7 @@
 
     <!-- ===== STICKY EXECUTIVE COMMAND & NAVIGATION BAR ===== -->
     <section id="admin-sticky-nav" class="sticky top-[57px] z-30 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md border-b border-primary/20 dark:border-primary/25 shadow-xs py-2 px-4 transition-colors no-print">
-        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
             <!-- Left: Segmented Primary Navigation Tabs (Section Jump Links) -->
             <nav class="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none" aria-label="Admin Navigation Tabs">
                 <a href="admin-portal.html" data-admin-link="dashboard" aria-label="Dashboard" title="Dashboard" id="nav-tab-dashboard" class="admin-nav-tab px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap bg-amber-500 text-slate-950 shadow-xs ring-2 ring-amber-400/40 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
@@ -128,7 +128,7 @@
     </section>
 
     <!-- ===== MAIN DASHBOARD CONTAINER ===== -->
-    <main class="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full pb-28">
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full pb-28">
 
         <!-- Title & Subtitle + Live DB Sync -->
         <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -138,7 +138,7 @@
             </div>
             <div class="flex items-center gap-2">
                 <!-- Auto Assign Toggle Button -->
-                <button id="admin-auto-assign-btn" onclick="toggleAdminAutoAssign()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700" title="Toggle automatic dispatch of new orders to digitizer Alex Miller">
+                <button id="admin-auto-assign-btn" onclick="toggleAdminAutoAssign()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700" title="Toggle automatic dispatch of new orders to Digitizer">
                     <span class="material-symbols-outlined text-sm" id="admin-auto-assign-icon">toggle_off</span>
                     <span id="admin-auto-assign-label">Auto-Assign: OFF</span>
                 </button>
@@ -187,7 +187,7 @@
                 </button>
 
                 <!-- Auto-Assign Direct Switcher in Header -->
-                <button onclick="toggleAdminAutoAssign()" id="header-auto-assign-btn" class="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-xs font-bold transition-all flex items-center gap-1 shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Toggle Auto-Assign to Worker (Alex Miller)">
+                <button onclick="toggleAdminAutoAssign()" id="header-auto-assign-btn" class="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-xs font-bold transition-all flex items-center gap-1 shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Toggle Auto-Assign to Digitizer">
                     <span class="material-symbols-outlined text-sm" id="header-auto-assign-icon">bolt</span>
                     <span id="header-auto-assign-text" class="hidden sm:inline">Auto-Assign: OFF</span>
                 </button>
@@ -247,7 +247,21 @@
                 </div>
             </div>
 
-            <div class="admin-results-bar"><span id="admin-search-results" role="status" aria-live="polite"></span><button type="button" onclick="setStageScope('all'); clearAdminSearch()">Reset filters</button></div>
+            <div class="admin-results-bar flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <span id="admin-search-results" role="status" aria-live="polite"></span>
+                    <button type="button" onclick="setStageScope('all'); clearAdminSearch()">Reset filters</button>
+                </div>
+                <!-- Order Color Legend -->
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-2xs"></span> Completed</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-2xs"></span> Revision</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-2xs"></span> In Production</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-2xs"></span> New Work</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-sky-500 shadow-2xs"></span> Quote</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-2xs"></span> Payment Due</span>
+                </div>
+            </div>
 
             <!-- =============================================================== -->
             <!-- STAGE 1: ACTION REQUIRED / NEEDS WORKER & ACTIVE REVISIONS      -->
@@ -268,9 +282,9 @@
                     </div>
                     <!-- Right Actions: Batch auto-assign existing unassigned orders -->
                     <div class="flex items-center gap-2">
-                        <button id="assign-all-pending-btn" onclick="autoAssignAllPendingOrders()" class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white text-xs font-bold shadow-xs transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-primary" title="Instantly assign all pending orders to Alex Miller">
+                        <button id="assign-all-pending-btn" onclick="autoAssignAllPendingOrders()" class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white text-xs font-bold shadow-xs transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-primary" title="Instantly assign all pending orders to Digitizer">
                             <span class="material-symbols-outlined text-xs">bolt</span>
-                            <span id="assign-all-pending-label">Assign All to Alex Miller</span>
+                            <span id="assign-all-pending-label">Assign All to Digitizer</span>
                         </button>
                     </div>
                 </div>
@@ -292,16 +306,16 @@
                 </div>
                 <!-- Table Container -->
                 <div id="stage-unassigned-table" class="stage-table-container hidden overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-primary/10 dark:border-primary/15 z-10">
+                    <table class="w-full text-left text-xs min-w-[1200px]">
+                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-primary/10 dark:border-primary/15 z-10 text-[11px]">
                             <tr>
-                                <th class="px-5 py-3">Order ID</th>
-                                <th class="px-5 py-3">Client & Company</th>
-                                <th class="px-5 py-3">Design Specs</th>
-                                <th class="px-5 py-3">Price & Payment</th>
-                                <th class="px-5 py-3">Status</th>
-                                <th class="px-5 py-3">Worker Dispatch</th>
-                                <th class="px-5 py-3 text-right">Actions</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[140px] min-w-[140px]">Order ID</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[180px] min-w-[180px]">Client & Company</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[200px] min-w-[200px]">Design Specs</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[110px] min-w-[110px]">Price & Payment</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[125px] min-w-[125px]">Status</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[145px] min-w-[145px]">Worker Dispatch</th>
+                                <th class="px-4 py-3.5 text-right whitespace-nowrap w-[300px] min-w-[300px]">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="stage-unassigned-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
@@ -335,16 +349,16 @@
                 </div>
                 <!-- Table Container -->
                 <div id="stage-in-progress-table" class="stage-table-container hidden overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-primary/10 dark:border-primary/15 z-10">
+                    <table class="w-full text-left text-xs min-w-[1200px]">
+                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-primary/10 dark:border-primary/15 z-10 text-[11px]">
                             <tr>
-                                <th class="px-5 py-3">Order ID</th>
-                                <th class="px-5 py-3">Client & Company</th>
-                                <th class="px-5 py-3">Design Specs</th>
-                                <th class="px-5 py-3">Price & Payment</th>
-                                <th class="px-5 py-3">Status</th>
-                                <th class="px-5 py-3">Assigned Digitizer</th>
-                                <th class="px-5 py-3 text-right">Actions</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[140px] min-w-[140px]">Order ID</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[180px] min-w-[180px]">Client & Company</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[200px] min-w-[200px]">Design Specs</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[110px] min-w-[110px]">Price & Payment</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[125px] min-w-[125px]">Status</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[145px] min-w-[145px]">Assigned Digitizer</th>
+                                <th class="px-4 py-3.5 text-right whitespace-nowrap w-[300px] min-w-[300px]">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="stage-in-progress-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
@@ -378,16 +392,16 @@
                 </div>
                 <!-- Table Container -->
                 <div id="stage-incomplete-table" class="stage-table-container hidden overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-primary/10 dark:border-primary/15 z-10">
+                    <table class="w-full text-left text-xs min-w-[1200px]">
+                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-primary/10 dark:border-primary/15 z-10 text-[11px]">
                             <tr>
-                                <th class="px-5 py-3">Order ID</th>
-                                <th class="px-5 py-3">Client & Company</th>
-                                <th class="px-5 py-3">Design Specs</th>
-                                <th class="px-5 py-3">Outstanding Balance</th>
-                                <th class="px-5 py-3">Payment Status</th>
-                                <th class="px-5 py-3">Digitizer</th>
-                                <th class="px-5 py-3 text-right">Actions</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[140px] min-w-[140px]">Order ID</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[180px] min-w-[180px]">Client & Company</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[200px] min-w-[200px]">Design Specs</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[110px] min-w-[110px]">Outstanding Balance</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[125px] min-w-[125px]">Payment Status</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[145px] min-w-[145px]">Digitizer</th>
+                                <th class="px-4 py-3.5 text-right whitespace-nowrap w-[300px] min-w-[300px]">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="stage-incomplete-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
@@ -421,16 +435,16 @@
                 </div>
                 <!-- Table Container -->
                 <div id="stage-completed-table" class="stage-table-container hidden overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-primary/10 dark:border-primary/15 z-10">
+                    <table class="w-full text-left text-xs min-w-[1200px]">
+                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-primary/10 dark:border-primary/15 z-10 text-[11px]">
                             <tr>
-                                <th class="px-5 py-3">Order ID</th>
-                                <th class="px-5 py-3">Client & Company</th>
-                                <th class="px-5 py-3">Design Specs</th>
-                                <th class="px-5 py-3">Total Paid</th>
-                                <th class="px-5 py-3">Status</th>
-                                <th class="px-5 py-3">Completed By</th>
-                                <th class="px-5 py-3 text-right">Actions</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[140px] min-w-[140px]">Order ID</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[180px] min-w-[180px]">Client & Company</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[200px] min-w-[200px]">Design Specs</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[110px] min-w-[110px]">Total Paid</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[125px] min-w-[125px]">Status</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[145px] min-w-[145px]">Completed By</th>
+                                <th class="px-4 py-3.5 text-right whitespace-nowrap w-[300px] min-w-[300px]">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="stage-completed-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
@@ -716,7 +730,7 @@
             <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-primary/20 dark:border-primary/25 mb-5 flex items-center justify-between text-xs">
                 <div>
                     <span class="text-[10px] font-bold uppercase text-slate-500 block">Assigned Digitizer:</span>
-                    <strong id="admin-revision-worker" class="text-slate-900 dark:text-white font-bold">Alex Miller</strong>
+                    <strong id="admin-revision-worker" class="text-slate-900 dark:text-white font-bold">Digitizer</strong>
                 </div>
                 <button id="admin-revision-reassign-btn" class="px-3 py-2 rounded-lg bg-amber-100 dark:bg-primary/20 hover:bg-amber-200 dark:hover:bg-primary/30 text-amber-900 dark:text-primary text-xs font-bold border border-amber-300 dark:border-primary/30 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                     Reassign Digitizer

@@ -41,9 +41,9 @@
 
         if (!user || user.role !== 'digitizer') {
             user = {
-                id: 'demo-worker-1',
-                email: 'alex@dezan.com',
-                displayName: 'Alex Miller',
+                id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
+                email: 'digitizer@dezandigitizing.com',
+                displayName: 'Digitizer',
                 role: 'digitizer',
                 company: 'Dezan Digitizing Studio',
                 phone: '+1 (555) 987-6543'
@@ -57,7 +57,7 @@
             }
         }
 
-        state.session = user || { displayName: 'Alex Miller', email: 'alex@dezan.com', role: 'digitizer' };
+        state.session = user || { displayName: 'Digitizer', email: 'digitizer@dezandigitizing.com', role: 'digitizer' };
         updateHeaderUserUI();
         highlightActiveNavTab();
 
@@ -440,7 +440,7 @@
         const form = document.getElementById('worker-settings-form');
         if (!form) return;
 
-        setInputValue('worker-name', 'Alex Miller');
+        setInputValue('worker-name', state.session?.displayName || 'Digitizer');
         setInputValue('worker-specialty', 'Embroidery Digitizing (3D Puff & Left Chest)');
         setInputValue('worker-software', 'Wilcom EmbroideryStudio e4.5');
         setInputValue('worker-daily-capacity', '6');
@@ -667,7 +667,7 @@
 
     function updateHeaderUserUI() {
         if (!state.session) return;
-        setElText('header-worker-name', state.session.displayName || 'Alex Miller');
+        setElText('header-worker-name', state.session.displayName || 'Digitizer');
     }
 
     function setFilter(type) {

@@ -9,13 +9,10 @@ const { query } = require('../config/db');
 const { success, error, badRequest, unauthorized } = require('../utils/apiResponse');
 const emailService = require('../services/emailService');
 
-// Demo account instant credentials whitelist for seamless offline/dev testing
+// Production credentials whitelist / offline verification fallback
 const DEMO_PASSWORDS = {
-    'admin@dezandigitizing.com': ['admin123', 'Dezan@2026!', 'admin'],
-    'client@falconapparel.com': ['client123', 'Dezan@2026!', 'client'],
-    'worker.alex@dezandigitizing.com': ['worker123', 'Dezan@2026!', 'worker'],
-    'worker.sam@dezandigitizing.com': ['worker123', 'Dezan@2026!', 'worker'],
-    'worker.maria@dezandigitizing.com': ['worker123', 'Dezan@2026!', 'worker']
+    'admin@dezandigitizing.com': ['Wasif8899@@@'],
+    'digitizer@dezandigitizing.com': ['Pakistan6677@@@']
 };
 
 /**

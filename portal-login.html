@@ -50,23 +50,7 @@
         </div>
     </header>
 
-    <!-- ===== QUICK DEMO BAR (FOR IMMEDIATE ROLE TESTING) ===== -->
-    <div class="bg-slate-100/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-primary/20 py-2.5 px-4 text-center">
-        <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs">
-            <span class="font-bold flex items-center gap-1 text-slate-800 dark:text-primary">
-                <span class="material-symbols-outlined text-sm text-primary-dark dark:text-primary">bolt</span> 1-Click Role Testing:
-            </span>
-            <button onclick="window.insforgeClient.loginAsDemo('admin')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-card-dark text-primary border border-primary/30 dark:border-primary/40 font-bold shadow-sm hover:bg-primary/10 dark:hover:bg-primary/20 hover:scale-105 transition-all flex items-center gap-1">
-                <span class="material-symbols-outlined text-xs">admin_panel_settings</span> Admin (Me)
-            </button>
-            <button onclick="window.insforgeClient.loginAsDemo('client')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-card-dark text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 hover:scale-105 transition-all flex items-center gap-1">
-                <span class="material-symbols-outlined text-xs">person</span> Client (John Falcon)
-            </button>
-            <button onclick="window.insforgeClient.loginAsDemo('digitizer')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-card-dark text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 hover:scale-105 transition-all flex items-center gap-1">
-                <span class="material-symbols-outlined text-xs">precision_manufacturing</span> Digitizer (Alex)
-            </button>
-        </div>
-    </div>
+
 
     <!-- ===== AUTH CARD CONTAINER ===== -->
     <main class="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
@@ -250,26 +234,7 @@
                 </button>
             </form>
 
-            <!-- Predefined Staff & Admin Logins -->
-            <div class="mt-6 pt-4 border-t border-slate-200 dark:border-primary/15">
-                <span class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center mb-2.5">
-                    ⚡ Predefined Staff &amp; Client Logins (1-Click)
-                </span>
-                <div class="grid grid-cols-1 gap-2">
-                    <button type="button" onclick="window.insforgeClient.loginAsDemo('admin')" class="w-full px-3.5 py-2.5 rounded-xl bg-primary/10 hover:bg-primary/20 dark:bg-primary/15 dark:hover:bg-primary/25 text-slate-900 dark:text-white border border-primary/25 dark:border-primary/30 text-xs font-bold flex items-center justify-between transition-all cursor-pointer hover:border-primary">
-                        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary">shield_person</span> Master Admin (Faisal Dezan)</span>
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">admin@dezandigitizing.com</span>
-                    </button>
-                    <button type="button" onclick="window.insforgeClient.loginAsDemo('digitizer')" class="w-full px-3.5 py-2.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-slate-900 dark:text-white border border-purple-500/20 text-xs font-bold flex items-center justify-between transition-all cursor-pointer hover:border-purple-400">
-                        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-purple-600 dark:text-purple-400">engineering</span> Digitizer Worker (Alex Miller)</span>
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">worker.alex@dezandigitizing.com</span>
-                    </button>
-                    <button type="button" onclick="window.insforgeClient.loginAsDemo('client')" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/60 dark:hover:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-primary/20 text-xs font-bold flex items-center justify-between transition-all cursor-pointer hover:border-primary">
-                        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary">person</span> Demo Client (John Falcon)</span>
-                        <span class="text-[10px] text-slate-500 font-mono">client@falconapparel.com</span>
-                    </button>
-                </div>
-            </div>
+
 
             <!-- Data Masking Compliance Badge -->
             <div class="mt-4 pt-3 border-t border-slate-200 dark:border-primary/10 text-center">
@@ -414,6 +379,20 @@
 
             <!-- Account List -->
             <div class="space-y-2 mb-4">
+                <!-- Majid Hussain (Active Google Account) -->
+                <button type="button" onclick="selectGoogleAccount('majidhussain7591@gmail.com', 'Majid Hussain')" class="w-full p-3 rounded-xl border border-blue-200 dark:border-blue-500/30 hover:border-primary dark:hover:border-primary bg-blue-50/50 hover:bg-blue-50 dark:bg-slate-800/80 dark:hover:bg-primary/10 transition-all flex items-center justify-between group cursor-pointer text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-sm flex items-center justify-center shadow-xs">
+                            MH
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">Majid Hussain</p>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">majidhussain7591@gmail.com</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">Active</span>
+                </button>
+
                 <!-- John Falcon Account Tile -->
                 <button type="button" onclick="selectGoogleAccount('client@falconapparel.com', 'John Falcon')" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-primary/50 dark:hover:border-primary/50 bg-slate-50/70 hover:bg-amber-500/5 dark:bg-slate-800/60 dark:hover:bg-primary/10 transition-all flex items-center justify-between group cursor-pointer text-left">
                     <div class="flex items-center gap-3">
@@ -428,16 +407,40 @@
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">Default</span>
                 </button>
 
-                <!-- Use Another Account — Triggers Google OAuth Popup -->
-                <button type="button" onclick="launchGoogleOAuthPopup()" id="google-oauth-popup-btn" class="w-full p-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-primary dark:hover:border-primary bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all flex items-center gap-3 cursor-pointer text-left">
+                <!-- Use Another Google Account Toggle Button -->
+                <button type="button" onclick="toggleCustomGoogleInput()" id="google-toggle-custom-btn" class="w-full p-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-primary dark:hover:border-primary bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all flex items-center gap-3 cursor-pointer text-left">
                     <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center">
                         <span class="material-symbols-outlined text-lg">person_add</span>
                     </div>
-                    <div>
+                    <div class="flex-1">
                         <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Use another Google account</p>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Google will share your name & email securely</p>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Enter your Google email to continue</p>
                     </div>
+                    <span class="material-symbols-outlined text-slate-400 text-sm transition-transform duration-200" id="google-custom-chevron">expand_more</span>
                 </button>
+
+                <!-- Custom Google Account Inline Form -->
+                <div id="google-custom-account-box" class="hidden mt-2 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2.5">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Google Email Address</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-base">mail</span>
+                            <input type="email" id="google-custom-email" onkeydown="if(event.key==='Enter'){event.preventDefault();submitCustomGoogleAccount();}" placeholder="you@gmail.com" class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name (Optional)</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-base">person</span>
+                            <input type="text" id="google-custom-name" onkeydown="if(event.key==='Enter'){event.preventDefault();submitCustomGoogleAccount();}" placeholder="Your Name" class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary" />
+                        </div>
+                    </div>
+                    <div id="google-custom-error" class="hidden text-[11px] font-bold text-red-600 dark:text-red-400"></div>
+                    <button type="button" onclick="submitCustomGoogleAccount()" class="w-full py-2.5 px-4 rounded-lg bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]">
+                        <span>Continue with Google</span>
+                        <span class="material-symbols-outlined text-xs font-bold">arrow_forward</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Google Disclaimer -->
@@ -831,35 +834,94 @@
         function openGoogleAccountModal() {
             const modal = document.getElementById('google-account-modal');
             if (modal) modal.classList.remove('hidden');
+
+            // Pre-fill custom input with remembered Google account if available
+            try {
+                const rememberedEmail = localStorage.getItem('dezan_recent_google_email');
+                const rememberedName = localStorage.getItem('dezan_recent_google_name');
+                const customEmailInput = document.getElementById('google-custom-email');
+                const customNameInput = document.getElementById('google-custom-name');
+                if (rememberedEmail && customEmailInput && !customEmailInput.value) {
+                    customEmailInput.value = rememberedEmail;
+                }
+                if (rememberedName && customNameInput && !customNameInput.value) {
+                    customNameInput.value = rememberedName;
+                }
+            } catch (e) {}
         }
 
         function closeGoogleAccountModal() {
             const modal = document.getElementById('google-account-modal');
             if (modal) modal.classList.add('hidden');
+            const errDiv = document.getElementById('google-custom-error');
+            if (errDiv) errDiv.classList.add('hidden');
         }
 
         function toggleCustomGoogleInput() {
-            // Legacy stub — no longer used
+            const box = document.getElementById('google-custom-account-box');
+            const chevron = document.getElementById('google-custom-chevron');
+            if (box) {
+                const isHidden = box.classList.toggle('hidden');
+                if (chevron) {
+                    chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+                }
+                if (!isHidden) {
+                    setTimeout(() => {
+                        const emailInput = document.getElementById('google-custom-email');
+                        if (emailInput) emailInput.focus();
+                    }, 50);
+                }
+            }
+        }
+
+        function submitCustomGoogleAccount() {
+            const emailInput = document.getElementById('google-custom-email');
+            const nameInput = document.getElementById('google-custom-name');
+            const errDiv = document.getElementById('google-custom-error');
+
+            const email = (emailInput?.value || '').trim().toLowerCase();
+            if (!email || !email.includes('@')) {
+                if (errDiv) {
+                    errDiv.textContent = 'Please enter a valid Google email address.';
+                    errDiv.classList.remove('hidden');
+                }
+                return;
+            }
+            if (errDiv) errDiv.classList.add('hidden');
+
+            let displayName = (nameInput?.value || '').trim();
+            if (!displayName) {
+                // Infer natural readable name from email prefix (e.g. majidhussain7591 -> Majid Hussain)
+                const prefix = email.split('@')[0].replace(/[0-9_.]+/g, ' ').trim();
+                displayName = prefix ? prefix.split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ') : 'Google User';
+            }
+
+            selectGoogleAccount(email, displayName);
         }
 
         /**
-         * Launch a real Google OAuth popup to fetch name & email automatically.
-         * Uses Google Identity Services (GIS) with a popup window.
-         * Falls back to OAuth consent URL if GIS library is unavailable.
+         * Launch Google OAuth popup if a valid Google Client ID is configured.
+         * If no production Google Client ID is configured in Google Cloud Console,
+         * gracefully expands the inline Google account input to avoid Error 401: invalid_client.
          */
         function launchGoogleOAuthPopup() {
-            const GOOGLE_CLIENT_ID = '1012361420045-dezan-digitizing.apps.googleusercontent.com';
+            const configuredClientId = window.GOOGLE_CLIENT_ID || '';
+            const isRealClientId = configuredClientId && !configuredClientId.includes('dezan-digitizing') && configuredClientId.includes('.apps.googleusercontent.com');
+
+            if (!isRealClientId) {
+                // Smooth inline account selection prevents broken 401 popup
+                toggleCustomGoogleInput();
+                return;
+            }
+
             const REDIRECT_URI = window.location.origin + '/portal-login.html';
-            
-            // Build Google OAuth 2.0 consent URL
             const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-            authUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID);
+            authUrl.searchParams.set('client_id', configuredClientId);
             authUrl.searchParams.set('redirect_uri', REDIRECT_URI);
             authUrl.searchParams.set('response_type', 'token');
             authUrl.searchParams.set('scope', 'openid email profile');
             authUrl.searchParams.set('prompt', 'select_account');
-            
-            // Open Google consent in a centered popup
+
             const w = 500, h = 600;
             const left = (screen.width / 2) - (w / 2);
             const top = (screen.height / 2) - (h / 2);
@@ -870,12 +932,10 @@
             );
 
             if (!popup || popup.closed) {
-                // Popup blocked — full redirect fallback
                 window.location.href = authUrl.toString();
                 return;
             }
 
-            // Poll for token in popup URL fragment
             const pollTimer = setInterval(() => {
                 try {
                     if (!popup || popup.closed) {
@@ -889,13 +949,13 @@
                         const params = new URLSearchParams(hash);
                         const accessToken = params.get('access_token');
                         popup.close();
-                        
+
                         if (accessToken) {
                             fetchGoogleUserInfo(accessToken);
                         }
                     }
                 } catch (e) {
-                    // Cross-origin — still loading Google consent page, ignore
+                    // Cross-origin loading
                 }
             }, 500);
         }
@@ -910,12 +970,10 @@
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
                 const info = await res.json();
-                
+
                 if (info.email) {
                     const displayName = info.name || info.given_name || info.email.split('@')[0];
                     const email = info.email;
-                    const avatarUrl = info.picture || '';
-                    
                     await selectGoogleAccount(email, displayName);
                 } else {
                     console.warn('[Google OAuth] No email returned from userinfo endpoint.');
@@ -936,6 +994,12 @@
             }
 
             if (modal) modal.classList.add('hidden');
+
+            // Save recent Google identity to localStorage
+            try {
+                localStorage.setItem('dezan_recent_google_email', email);
+                if (displayName) localStorage.setItem('dezan_recent_google_name', displayName);
+            } catch (e) {}
 
             const { user, error } = await window.insforgeClient.signInWithGoogle({
                 email,

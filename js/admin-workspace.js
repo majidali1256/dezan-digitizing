@@ -385,7 +385,7 @@
                     updateAdminAutoAssignUI();
                     window.insforgeClient.showToast(
                         payload.enabled ? '⚡ Auto-Assign Enabled' : 'Auto-Assign Disabled',
-                        payload.enabled ? 'New orders directly route to worker Alex Miller.' : 'Orders now require manual admin approval.',
+                        payload.enabled ? 'New orders directly route to Digitizer.' : 'Orders now require manual admin approval.',
                         payload.enabled ? 'smart_toy' : 'tune',
                         'info'
                     );
@@ -601,32 +601,108 @@
         }
 
         /**
+         * Dynamic Order Color Theme System
+         * Gives distinct, identifiable background tints and accents based on order type:
+         * - Completed: Fresh Emerald Green
+         * - Revisions: High-visibility Purple/Violet
+         * - Quotes: Crisp Sky Blue / Cyan
+         * - Payment Due / Unpaid: Gentle Rose / Coral
+         * - In Production / Assigned: Cool Royal Blue
+         * - New Work / Needs Attention: Warm Amber / Gold
+         */
+        function getOrderColorTheme(order) {
+            const isCompleted = order.status === 'completed';
+            const isRevision = order.status === 'revision_requested';
+            const isQuote = order.is_quote === true || order.status === 'quote_requested' || (order.order_number && order.order_number.startsWith('QUO-'));
+            const isUnpaid = (order.payment_status === 'unpaid' || order.payment_status === 'pending') && !isQuote && !isCompleted;
+            const isInProgress = order.status === 'in_progress' || order.status === 'assigned' || (order.assigned_digitizer_id && !isRevision && !isCompleted);
+
+            if (isCompleted) {
+                return {
+                    type: 'completed',
+                    label: 'Completed',
+                    rowClass: 'bg-emerald-50/70 hover:bg-emerald-100/75 dark:bg-emerald-950/25 dark:hover:bg-emerald-900/40 border-l-4 border-l-emerald-500 dark:border-l-emerald-400',
+                    cardClass: 'border-emerald-300 dark:border-emerald-500/40 bg-emerald-50/40 dark:bg-emerald-950/25 ring-1 ring-emerald-500/20',
+                    orderIdClass: 'text-emerald-800 dark:text-emerald-300',
+                    accentBadge: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/40'
+                };
+            }
+
+            if (isRevision) {
+                return {
+                    type: 'revision',
+                    label: 'Revision',
+                    rowClass: 'bg-purple-50/80 hover:bg-purple-100/85 dark:bg-purple-950/30 dark:hover:bg-purple-900/45 border-l-4 border-l-purple-500 dark:border-l-purple-400',
+                    cardClass: 'border-purple-300 dark:border-purple-500/50 bg-purple-50/40 dark:bg-purple-950/30 ring-1 ring-purple-500/30',
+                    orderIdClass: 'text-purple-900 dark:text-purple-300',
+                    accentBadge: 'bg-purple-100 text-purple-900 dark:bg-purple-500/25 dark:text-purple-200 border-purple-300 dark:border-purple-500/40'
+                };
+            }
+
+            if (isQuote) {
+                return {
+                    type: 'quote',
+                    label: 'Quote',
+                    rowClass: 'bg-sky-50/75 hover:bg-sky-100/80 dark:bg-sky-950/25 dark:hover:bg-sky-900/40 border-l-4 border-l-sky-500 dark:border-l-sky-400',
+                    cardClass: 'border-sky-300 dark:border-sky-500/40 bg-sky-50/40 dark:bg-sky-950/25 ring-1 ring-sky-500/20',
+                    orderIdClass: 'text-sky-800 dark:text-sky-300',
+                    accentBadge: 'bg-sky-100 text-sky-900 dark:bg-sky-500/20 dark:text-sky-300 border-sky-300 dark:border-sky-500/35'
+                };
+            }
+
+            if (isUnpaid) {
+                return {
+                    type: 'unpaid',
+                    label: 'Payment Due',
+                    rowClass: 'bg-rose-50/75 hover:bg-rose-100/80 dark:bg-rose-950/25 dark:hover:bg-rose-900/40 border-l-4 border-l-rose-500 dark:border-l-rose-400',
+                    cardClass: 'border-rose-300 dark:border-rose-500/40 bg-rose-50/40 dark:bg-rose-950/25 ring-1 ring-rose-500/20',
+                    orderIdClass: 'text-rose-800 dark:text-rose-300',
+                    accentBadge: 'bg-rose-100 text-rose-900 dark:bg-rose-500/20 dark:text-rose-300 border-rose-300 dark:border-rose-500/35'
+                };
+            }
+
+            if (isInProgress) {
+                return {
+                    type: 'in_progress',
+                    label: 'In Production',
+                    rowClass: 'bg-blue-50/70 hover:bg-blue-100/75 dark:bg-blue-950/25 dark:hover:bg-blue-900/40 border-l-4 border-l-blue-500 dark:border-l-blue-400',
+                    cardClass: 'border-blue-300 dark:border-blue-500/40 bg-blue-50/40 dark:bg-blue-950/25 ring-1 ring-blue-500/20',
+                    orderIdClass: 'text-blue-800 dark:text-blue-300',
+                    accentBadge: 'bg-blue-100 text-blue-900 dark:bg-blue-500/20 dark:text-blue-300 border-blue-300 dark:border-blue-500/35'
+                };
+            }
+
+            // Default: New Work / Needs Attention / Unassigned
+            return {
+                type: 'new_work',
+                label: 'New Work',
+                rowClass: 'bg-amber-50/75 hover:bg-amber-100/80 dark:bg-amber-950/25 dark:hover:bg-amber-900/40 border-l-4 border-l-amber-500 dark:border-l-amber-400',
+                cardClass: 'border-amber-300 dark:border-amber-500/40 bg-amber-50/40 dark:bg-amber-950/25 ring-1 ring-amber-500/20',
+                orderIdClass: 'text-amber-800 dark:text-primary',
+                accentBadge: 'bg-amber-100 text-amber-950 dark:bg-amber-500/20 dark:text-amber-300 border-amber-300 dark:border-amber-500/35'
+            };
+        }
+
+        /**
          * Modular Visual Bento Card Renderer
          */
         function renderAdminOrderCard(order, stageKey) {
             const isPaid = order.payment_status === 'paid';
             const isRevision = order.status === 'revision_requested';
             const isUnassigned = !order.assigned_digitizer_id;
+            const theme = getOrderColorTheme(order);
 
             const assignedText = order.assigned_digitizer_name
                 ? `<span class="inline-flex items-center gap-1 font-semibold text-slate-800 dark:text-slate-200"><span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">badge</span> ${order.assigned_digitizer_name}</span>`
                 : '<span class="inline-flex items-center gap-1 font-bold text-amber-800 dark:text-amber-400"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Unassigned</span>';
 
-            // Border styling based on stage context
-            let borderStyle = 'border-primary/20 dark:border-primary/25 bg-white dark:bg-card-dark';
-            if (isRevision) {
-                borderStyle = 'border-orange-300 dark:border-orange-500/40 bg-orange-50/20 dark:bg-orange-950/15 ring-1 ring-orange-400/40';
-            } else if (stageKey === 'incomplete' || !isPaid) {
-                borderStyle = 'border-rose-300/80 dark:border-rose-500/30 bg-rose-50/15 dark:bg-rose-950/10';
-            }
-
             return `
-                <div class="admin-order-card p-5 rounded-2xl ${borderStyle} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
+                <div class="admin-order-card p-5 rounded-2xl ${theme.cardClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
                     <div>
                         <!-- Header Bar: ID, Date, Status & Payment Badges -->
                         <div class="flex items-start justify-between gap-2 mb-3">
                             <div>
-                                <span class="font-mono text-xs font-black text-amber-800 dark:text-primary tracking-wide">${order.order_number}</span>
+                                <span class="font-mono text-xs font-black ${theme.orderIdClass} tracking-wide whitespace-nowrap" style="white-space: nowrap !important; word-break: keep-all !important;">${String(order.order_number || '').replace(/-/g, '&#8209;')}</span>
                                 <span class="text-[11px] text-slate-500 block font-medium">${order.created_at ? formatTimeAgo(order.created_at) : 'Recent'}</span>
                             </div>
                             <div class="flex flex-col items-end gap-1.5">
@@ -761,75 +837,103 @@
 
         /**
          * Modular Table Row Renderer
+         * Enforces strict non-wrapping layout, dedicated color shades, and responsive single-row action toolbars.
          */
         function renderAdminOrderTableRow(order, stageKey) {
             const isPaid = order.payment_status === 'paid';
             const isRevision = order.status === 'revision_requested';
-            const assignedText = order.assigned_digitizer_name
-                ? `<span class="text-slate-800 dark:text-slate-200 font-semibold">${order.assigned_digitizer_name}</span>`
-                : '<span class="text-amber-800 dark:text-amber-400 font-bold">Unassigned</span>';
+            const theme = getOrderColorTheme(order);
+            
+            // Format worker display (Primary name + secondary specialty subtitle or neat unassigned pill)
+            let assignedMarkup = '';
+            if (order.assigned_digitizer_name) {
+                const match = order.assigned_digitizer_name.match(/^(.*?)\s*\((.*?)\)$/);
+                if (match) {
+                    assignedMarkup = `
+                        <div class="leading-tight">
+                            <span class="text-slate-800 dark:text-slate-200 font-bold block text-xs whitespace-nowrap">${match[1]}</span>
+                            <span class="text-slate-500 dark:text-slate-400 text-[10px] font-medium block whitespace-nowrap">${match[2]}</span>
+                        </div>
+                    `;
+                } else {
+                    assignedMarkup = `<span class="text-slate-800 dark:text-slate-200 font-bold block text-xs whitespace-nowrap">${order.assigned_digitizer_name}</span>`;
+                }
+            } else {
+                assignedMarkup = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap leading-none">Unassigned</span>`;
+            }
+
+            // Clean Non-Breaking Order Number (prevents breaking at hyphens across multiple lines)
+            const safeOrderNumber = String(order.order_number || '').replace(/-/g, '&#8209;');
 
             return `
-                <tr class="hover:bg-amber-50/50 dark:hover:bg-slate-800/40 transition-colors ${isRevision ? 'bg-amber-50/30 dark:bg-amber-950/20' : ''}">
-                    <td class="px-5 py-4 font-mono font-bold text-amber-800 dark:text-primary">${order.order_number}</td>
-                    <td class="px-5 py-4">
-                        <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="group/client flex items-center gap-1.5 text-left cursor-pointer hover:text-amber-700 dark:hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                            <strong class="text-slate-900 dark:text-white font-bold group-hover/client:text-amber-700 dark:group-hover/client:text-primary">${order.client_name}</strong>
-                            <span class="material-symbols-outlined text-[13px] text-amber-700 dark:text-primary opacity-70 group-hover/client:opacity-100">history</span>
-                        </button>
-                        <span class="text-slate-600 dark:text-slate-400 text-[11px] font-medium block mt-0.5">${order.client_company || 'Independent'} · ${order.client_email}</span>
+                <tr class="transition-colors ${theme.rowClass}">
+                    <td class="px-4 py-3.5 w-[140px] min-w-[140px] whitespace-nowrap font-mono font-bold">
+                        <span class="inline-block whitespace-nowrap select-all font-mono font-black ${theme.orderIdClass}" style="white-space: nowrap !important; word-break: keep-all !important; letter-spacing: -0.01em;">
+                            ${safeOrderNumber}
+                        </span>
                     </td>
-                    <td class="px-5 py-4">
-                        <span class="text-slate-900 dark:text-white font-semibold block">${order.project_name}</span>
-                        <span class="text-slate-600 dark:text-slate-400 text-[11px] font-medium block mb-1">${order.placement || 'Standard'} (${order.sizing || 'Default'})</span>
+                    <td class="px-4 py-3.5 w-[180px] min-w-[180px]">
+                        <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="group/client inline-flex items-center gap-1.5 text-left cursor-pointer hover:text-amber-700 dark:hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                            <strong class="text-slate-900 dark:text-white font-bold group-hover/client:text-amber-700 dark:group-hover/client:text-primary leading-tight">${order.client_name}</strong>
+                            <span class="material-symbols-outlined text-[13px] text-amber-700 dark:text-primary opacity-70 group-hover/client:opacity-100 shrink-0">history</span>
+                        </button>
+                        <span class="text-slate-600 dark:text-slate-400 text-[11px] font-medium block mt-0.5 whitespace-nowrap truncate max-w-[170px]" title="${order.client_company || 'Independent'} · ${order.client_email}">${order.client_company || 'Independent'} · ${order.client_email}</span>
+                    </td>
+                    <td class="px-4 py-3.5 w-[200px] min-w-[200px]">
+                        <span class="text-slate-900 dark:text-white font-semibold block leading-tight truncate max-w-[190px]" title="${order.project_name}">${order.project_name}</span>
+                        <span class="text-slate-600 dark:text-slate-400 text-[11px] font-medium block mt-0.5 mb-1 whitespace-nowrap">${order.placement || 'Standard'} (${order.sizing || 'Default'})</span>
                         <div class="flex flex-wrap items-center gap-1.5 mt-1">
                             ${order.raw_artwork_files && order.raw_artwork_files.length > 0 ? `
-                                <a href="${order.raw_artwork_files[0].url}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 dark:bg-primary/10 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/20 text-[10px] font-bold hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                                    <span class="material-symbols-outlined text-[12px]">attach_file</span> Artwork
+                                <a href="${order.raw_artwork_files[0].url}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/80 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-[10px] font-bold hover:bg-slate-100 dark:hover:bg-slate-700 shadow-2xs shrink-0">
+                                    <span class="material-symbols-outlined text-[12px] text-amber-600 dark:text-primary">attach_file</span> Artwork
                                 </a>
                             ` : ''}
                             ${order.deliverables && order.deliverables.length > 0 ? order.deliverables.map(d => `
-                                <a href="${d.url}" target="_blank" class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                                <a href="${d.url}" target="_blank" class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-emerald-100/90 dark:bg-emerald-500/20 text-emerald-900 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 text-[10px] font-bold hover:bg-emerald-200 shadow-2xs shrink-0">
                                     <span class="material-symbols-outlined text-[11px]">download</span> ${d.format}
                                 </a>
                             `).join('') : ''}
                         </div>
                     </td>
-                    <td class="px-5 py-4">
-                        <span class="font-black text-slate-900 dark:text-slate-100 text-sm block">$${Number(order.price || 0).toFixed(2)}</span>
+                    <td class="px-4 py-3.5 w-[110px] min-w-[110px] whitespace-nowrap">
+                        <span class="font-black text-slate-900 dark:text-slate-100 text-sm block leading-tight">$${Number(order.price || 0).toFixed(2)}</span>
                         <div class="mt-1">${getPaymentBadge(order.payment_status)}</div>
                     </td>
-                    <td class="px-5 py-4">${getStatusBadge(order.status)}</td>
-                    <td class="px-5 py-4 text-xs">${assignedText}</td>
-                    <td class="px-5 py-4 text-right">
-                        <div class="flex items-center justify-end gap-1.5 flex-wrap">
-                            <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="px-3 py-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="View complete lifetime client order history">
-                                <span class="material-symbols-outlined text-xs">history</span>
+                    <td class="px-4 py-3.5 w-[125px] min-w-[125px] whitespace-nowrap">
+                        ${getStatusBadge(order.status)}
+                    </td>
+                    <td class="px-4 py-3.5 w-[145px] min-w-[145px] whitespace-nowrap text-xs">
+                        ${assignedMarkup}
+                    </td>
+                    <td class="px-4 py-3.5 w-[300px] min-w-[300px] text-right whitespace-nowrap">
+                        <div class="inline-flex items-center justify-end gap-1 flex-nowrap shrink-0">
+                            <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="px-2 py-1.5 rounded-lg bg-white/90 hover:bg-white dark:bg-slate-800/90 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-2xs shrink-0 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="View lifetime client order history">
+                                <span class="material-symbols-outlined text-xs text-slate-500 dark:text-slate-400">history</span>
                                 <span>History</span>
                             </button>
                             ${(order.is_quote || (order.order_number && order.order_number.startsWith('QUO-'))) ? `
-                                <button onclick="openSetQuotePriceModal('${order.order_number}')" class="px-3 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/15 text-blue-900 dark:text-blue-300 border border-blue-300 dark:border-blue-500/30 font-black text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs" title="Give or update price quote">
+                                <button onclick="openSetQuotePriceModal('${order.order_number}')" class="px-2 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-2xs shrink-0" title="Give or update price quote">
                                     <span class="material-symbols-outlined text-xs">price_change</span>
                                     <span>${order.price ? 'Update Price' : 'Give Price'}</span>
                                 </button>
                             ` : ''}
                             ${isRevision ? `
-                                <button onclick="openAdminRevisionModal('${order.order_number}')" class="px-3 py-2 rounded-lg bg-orange-100 hover:bg-orange-200 dark:bg-orange-500/20 dark:hover:bg-orange-500/30 text-orange-950 dark:text-orange-300 border border-orange-300 dark:border-orange-500/40 font-black text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                                    <span class="material-symbols-outlined text-xs text-orange-600 dark:text-orange-400">rate_review</span>
+                                <button onclick="openAdminRevisionModal('${order.order_number}')" class="px-2 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-2xs shrink-0 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Review revision specs & defect photos">
+                                    <span class="material-symbols-outlined text-xs">rate_review</span>
                                     <span>Specs</span>
                                 </button>
                             ` : ''}
                             ${(!isPaid && !order.is_quote && !(order.order_number && order.order_number.startsWith('QUO-'))) ? `
-                                <button onclick="openPaymentReminderModal('${order.order_number}')" class="px-3 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/15 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                                <button onclick="openPaymentReminderModal('${order.order_number}')" class="px-2 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-2xs shrink-0 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Send payment reminder">
                                     <span class="material-symbols-outlined text-xs">forward_to_inbox</span>
                                     <span>Remind</span>
                                 </button>
                             ` : ''}
-                            <button onclick="openInvoiceModal('${order.order_number}')" class="px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                                <span class="material-symbols-outlined text-sm text-amber-700 dark:text-primary">receipt</span>
+                            <button onclick="openInvoiceModal('${order.order_number}')" class="px-2 py-1.5 rounded-lg bg-white/90 hover:bg-white dark:bg-slate-800/90 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-2xs shrink-0 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="View printable tax invoice">
+                                <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">receipt</span>
                                 <span>Invoice</span>
                             </button>
-                            <button onclick="openAssignModal('${order.order_number}')" class="px-3 py-2 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 dark:hover:bg-primary text-amber-900 dark:text-primary hover:text-amber-950 dark:hover:text-background-dark border border-amber-300 dark:border-primary/30 font-bold text-[11px] transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                            <button onclick="openAssignModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-500 text-slate-950 border border-amber-500/40 font-black text-[11px] transition-all cursor-pointer shadow-2xs shrink-0 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                                 ${order.assigned_digitizer_id ? 'Reassign' : 'Assign'}
                             </button>
                         </div>
@@ -1241,21 +1345,18 @@
             if (!container) return;
 
             const specs = {
-                'Alex Miller': { title: 'Lead Digitizer', specialty: 'Tajima & Barudan Master', icon: 'military_tech' },
-                'Sam Chen': { title: 'Vector Specialist', specialty: 'SVG & CorelDraw AI', icon: 'brush' },
-                'Maria Garcia': { title: '3D Puff Master', specialty: 'Heavy Fabric & Foam 3D', icon: 'layers' }
+                'Digitizer': { title: 'Lead Embroidery & Vector Digitizer', specialty: 'Industrial Machine & Vector Master', icon: 'military_tech' }
             };
 
             const teamActiveCount = document.getElementById('team-active-count');
-            if (teamActiveCount) teamActiveCount.textContent = `${digitizers.length} Digitizers On Duty`;
+            if (teamActiveCount) teamActiveCount.textContent = digitizers.length === 1 ? '1 Digitizer On Duty' : `${digitizers.length} Digitizers On Duty`;
 
             container.innerHTML = digitizers.map(d => {
                 const assignedOrders = allOrders.filter(o => o.assigned_digitizer_id === d.id);
                 const activeOrders = assignedOrders.filter(o => o.status === 'in_progress' || o.status === 'assigned' || o.status === 'revision_requested');
                 const completedOrders = assignedOrders.filter(o => o.status === 'completed');
-                const shortName = d.displayName.split(' ')[0] + ' ' + (d.displayName.split(' ')[1] || '');
-                const spec = specs[shortName] || { title: 'Embroidery Specialist', specialty: 'Industrial Machine Files', icon: 'badge' };
-                const initials = d.displayName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+                const spec = specs[d.displayName] || { title: 'Lead Embroidery & Vector Digitizer', specialty: 'Industrial Machine & Vector Master', icon: 'military_tech' };
+                const initials = d.displayName === 'Digitizer' ? 'DZ' : d.displayName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
                 return `
                     <div class="p-5 rounded-2xl bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
@@ -1314,9 +1415,9 @@
 
         function getPaymentBadge(status) {
             if (status === 'paid') {
-                return '<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold"><span class="material-symbols-outlined text-[11px]">check_circle</span> Paid</span>';
+                return '<span class="whitespace-nowrap inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold leading-none shrink-0" style="white-space: nowrap !important;"><span class="material-symbols-outlined text-[12px]">check_circle</span> Paid</span>';
             } else {
-                return '<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/15 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 text-[10px] font-black"><span class="material-symbols-outlined text-[11px]">schedule</span> Payment Due</span>';
+                return '<span class="whitespace-nowrap inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/15 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 text-[10px] font-black leading-none shrink-0" style="white-space: nowrap !important;"><span class="material-symbols-outlined text-[12px]">schedule</span> Payment Due</span>';
             }
         }
 
@@ -1335,15 +1436,17 @@
         function getStatusBadge(status) {
             switch(status) {
                 case 'completed':
-                    return '<span class="px-3 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 text-[11px] font-bold">Completed</span>';
+                    return '<span class="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;">Completed</span>';
                 case 'in_progress':
-                    return '<span class="px-3 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30 text-[11px] font-bold">In Production</span>';
+                    return '<span class="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-900 dark:text-blue-300 border border-blue-300 dark:border-blue-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;">In Production</span>';
                 case 'assigned':
-                    return '<span class="px-3 py-0.5 rounded-full bg-purple-100 dark:bg-purple-500/15 text-purple-800 dark:text-purple-400 border border-purple-300 dark:border-purple-500/30 text-[11px] font-bold">Assigned</span>';
+                    return '<span class="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;">Assigned</span>';
                 case 'revision_requested':
-                    return '<span class="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 text-[11px] font-black animate-pulse"><span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-ping"></span> Revision</span>';
+                    return '<span class="whitespace-nowrap inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-500/25 text-purple-950 dark:text-purple-200 border border-purple-300 dark:border-purple-500/40 text-[11px] font-black leading-none animate-pulse shrink-0" style="white-space: nowrap !important;"><span class="w-1.5 h-1.5 rounded-full bg-purple-600 animate-ping"></span> Revision</span>';
+                case 'quote_requested':
+                    return '<span class="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-sky-100 dark:bg-sky-500/20 text-sky-900 dark:text-sky-300 border border-sky-300 dark:border-sky-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;">Quote Requested</span>';
                 default:
-                    return '<span class="px-3 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/15 text-amber-900 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 text-[11px] font-bold">Needs Review</span>';
+                    return '<span class="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;">Needs Review</span>';
             }
         }
 
@@ -1653,7 +1756,7 @@ Email: fdezan91@gmail.com`;
         function updateAdminAutoAssignUI() {
             if (!window.insforgeClient) return;
             const isEnabled = window.insforgeClient.isAutoAssignWorkerEnabled();
-            const primaryWorker = window.insforgeClient.getPrimaryWorker ? window.insforgeClient.getPrimaryWorker() : { displayName: 'Alex Miller' };
+            const primaryWorker = window.insforgeClient.getPrimaryWorker ? window.insforgeClient.getPrimaryWorker() : { displayName: 'Digitizer' };
 
             // 1. Top bar button (#admin-auto-assign-btn)
             const topBtn = document.getElementById('admin-auto-assign-btn');
@@ -1713,13 +1816,13 @@ Email: fdezan91@gmail.com`;
 
             // 4. Batch Assign Button (#assign-all-pending-btn)
             const allOrders = (window.insforgeClient.getOrders ? window.insforgeClient.getOrders() : []);
-            const unassignedOrders = allOrders.filter(o => !o.is_quote && (!o.assigned_digitizer_id || o.status === 'pending_review'));
+            const unassignedOrders = allOrders.filter(o => !o.is_quote && o.status !== 'completed' && o.status !== 'cancelled' && (!o.assigned_digitizer_id || o.status === 'pending_review'));
             const batchBtn = document.getElementById('assign-all-pending-btn');
             const batchLabel = document.getElementById('assign-all-pending-label');
             if (batchBtn && batchLabel) {
                 if (unassignedOrders.length > 0) {
                     batchBtn.classList.remove('hidden');
-                    batchLabel.textContent = `Assign ${unassignedOrders.length} to Alex Miller`;
+                    batchLabel.textContent = unassignedOrders.length > 1 ? `Assign ${unassignedOrders.length} to Digitizer` : 'Assign All to Digitizer';
                 } else {
                     batchBtn.classList.add('hidden');
                 }
@@ -1732,7 +1835,7 @@ Email: fdezan91@gmail.com`;
             const next = !current;
             window.insforgeClient.setAutoAssignWorkerEnabled(next);
             updateAdminAutoAssignUI();
-            const worker = window.insforgeClient.getPrimaryWorker ? window.insforgeClient.getPrimaryWorker() : { displayName: 'Alex Miller' };
+            const worker = window.insforgeClient.getPrimaryWorker ? window.insforgeClient.getPrimaryWorker() : { displayName: 'Digitizer' };
             if (next) {
                 window.insforgeClient.showToast(
                     '⚡ Auto-Assign Activated',
@@ -1761,7 +1864,7 @@ Email: fdezan91@gmail.com`;
 
             try {
                 const count = await window.insforgeClient.autoAssignAllPendingOrders();
-                const worker = window.insforgeClient.getPrimaryWorker ? window.insforgeClient.getPrimaryWorker() : { displayName: 'Alex Miller' };
+                const worker = window.insforgeClient.getPrimaryWorker ? window.insforgeClient.getPrimaryWorker() : { displayName: 'Digitizer' };
                 if (count > 0) {
                     window.insforgeClient.showToast(
                         'Orders Dispatched',
@@ -2081,3 +2184,17 @@ function renderAdminInsights(orders, stages) {
 function openAdminChartStage(stage) {
     window.location.href = adminPages.orders + '?stage=' + encodeURIComponent(stage);
 }
+
+// Global Window Exposures for Testing & Inline HTML Callbacks
+window.setAdminLayout = setAdminLayout;
+window.renderAdminOrders = renderAdminOrders;
+window.renderAllAdminData = renderAllAdminData;
+window.openClientHistoryModal = openClientHistoryModal;
+window.openSetQuotePriceModal = openSetQuotePriceModal;
+window.openAdminRevisionModal = openAdminRevisionModal;
+window.closeAdminRevisionModal = closeAdminRevisionModal;
+window.openPaymentReminderModal = openPaymentReminderModal;
+window.openInvoiceModal = openInvoiceModal;
+window.openAssignModal = openAssignModal;
+window.closeAssignModal = closeAssignModal;
+window.toggleAdminAutoAssign = toggleAdminAutoAssign;

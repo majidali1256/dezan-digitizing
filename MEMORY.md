@@ -72,14 +72,63 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - Nested within `<div class="flex flex-col text-left leading-none">` alongside the circular emblem `logo.png` (`w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover`).
   - Gives the brand a refined, high-fashion horology/atelier lockup with optimal visual hierarchy and enhanced horizontal clearance on mobile viewports.
 
+### 4.3 Admin Orders Color Theme System & Table Layout Stabilization (`admin-orders.html` & `admin-workspace.js`)
+- **Problem**:
+  - Every order row and card previously shared an identical white/transparent background, making it impossible to visually distinguish order stages and types at a glance.
+  - In Table View, Order IDs containing hyphens (`QUO-4769`) wrapped onto two lines (`QUO-` on line 1, `4769` on line 2).
+  - Status badges like `Needs Review` wrapped into two lines, clipping outside the rounded pill boundary.
+  - Action buttons (`History`, `Update Price`, `Specs`, `Remind`, `Invoice`, `Assign`) used `flex-wrap` inside an unconstrained cell, wrapping haphazardly into 2-3 vertical lines and overflowing across row borders.
+  - Stage tables lacked `min-w-[1080px]`, causing columns to crush and overlap on narrower viewports.
+- **Solution & Token Contract**:
+  1. **Dynamic 6-Tier Order Color Theme Engine (`getOrderColorTheme`)**:
+     - **Completed**: Fresh emerald green (`bg-emerald-50/70 hover:bg-emerald-100/75 dark:bg-emerald-950/25 dark:hover:bg-emerald-900/40 border-l-4 border-l-emerald-500 dark:border-l-emerald-400`).
+     - **Revision Requested**: High-visibility purple/violet (`bg-purple-50/80 hover:bg-purple-100/85 dark:bg-purple-950/30 dark:hover:bg-purple-900/45 border-l-4 border-l-purple-500 dark:border-l-purple-400`).
+     - **Quotes (`QUO-...`, `quote_requested`, `is_quote`)**: Crisp sky blue/cyan (`bg-sky-50/75 hover:bg-sky-100/80 dark:bg-sky-950/25 dark:hover:bg-sky-900/40 border-l-4 border-l-sky-500 dark:border-l-sky-400`).
+     - **Payment Due / Unpaid**: Gentle rose/coral (`bg-rose-50/75 hover:bg-rose-100/80 dark:bg-rose-950/25 dark:hover:bg-rose-900/40 border-l-4 border-l-rose-500 dark:border-l-rose-400`).
+     - **In Production / Assigned**: Cool royal blue (`bg-blue-50/70 hover:bg-blue-100/75 dark:bg-blue-950/25 dark:hover:bg-blue-900/40 border-l-4 border-l-blue-500 dark:border-l-blue-400`).
+     - **New Work / Needs Attention**: Warm signature amber (`bg-amber-50/75 hover:bg-amber-100/80 dark:bg-amber-950/25 dark:hover:bg-amber-900/40 border-l-4 border-l-amber-500 dark:border-l-amber-400`).
+     - Applied to both **Table View** (`tr` background + `border-l-4`) and **Bento Cards View** (`cardClass` ring & subtle tint) 
+   2. **Strict Non-Wrapping Order ID, Status, and Worker Metrics**:
+      - **Order IDs**: Enforce `w-[140px] min-w-[140px] whitespace-nowrap font-mono font-black` with non-breaking hyphens (`&#8209;`) and inline styles `white-space: nowrap !important; word-break: keep-all !important; letter-spacing: -0.01em;`, preventing ASCII soft-hyphen breaks across lines.
+      - **Status Badges**: Enforce `w-[125px] min-w-[125px] whitespace-nowrap inline-flex items-center justify-center leading-none px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0` with `white-space: nowrap !important;`.
+      - **Worker Dispatch**: Enforce `w-[145px] min-w-[145px] whitespace-nowrap` displaying primary name in bold and secondary specialty title in a subtle 10px muted subtitle (`Digitizer\nLead Embroidery & Vector Digitizer`), or a clean `Unassigned` badge.
+      - **Payment Badges**: Enforce `whitespace-nowrap inline-flex items-center gap-1 leading-none shrink-0` with `white-space: nowrap !important;`.
+   3. **Streamlined Single-Line Action Toolbar**:
+      - Action buttons styled with compact `px-2 py-1.5 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 shadow-2xs shrink-0 whitespace-nowrap`.
+      - Container uses `inline-flex items-center justify-end gap-1 flex-nowrap shrink-0` inside `w-[300px] min-w-[300px] text-right whitespace-nowrap`, fitting up to 4 full action buttons (`History`, `Update Price`/`Specs`/`Remind`, `Invoice`, `Assign`/`Reassign`) cleanly in a single horizontal row without vertical wrapping or clipping.
+   4. **Table Minimum Width & Calibrated Grid Architecture**:
+      - All 4 stage tables updated to `<table class="w-full text-left text-xs min-w-[1200px]">` with `px-4 py-3.5` padding on all `<th>` and `<td>` cells.
+   5. **Interactive Color Legend**:
+      - Added an executive color key indicator to the search results bar displaying all 6 color dots (Completed, Revision, In Production, New Work, Quote, Payment Due).
+
+### 4.4 Staff Account Order & Quote Restriction Policy (Admin & Digitizer)
+- **Problem & Requirement**:
+  - Administrative and digitizer production staff members must not create customer orders or quote appraisals under their staff credentials or staff email addresses (`admin@dezandigitizing.com`, `digitizer@dezandigitizing.com`).
+  - When an authenticated admin or digitizer attempts to order or request a quote from any button across the marketing website or portals, show: **"You can't place orders from this account"**.
+- **Implementation & Architecture**:
+  1. **Frontend Dispatcher Guard (`app.js`)**:
+     - `window.showStaffOrderBlockModal(role, email)`: Dynamically generates an accessible dialog (`#staff-order-blocked-modal`) with radiant shield icon, role indicator pill, "You can't place orders from this account" headline, and actionable choices ("Sign Out to Order as Guest", "My Dashboard", "Dismiss").
+     - `window.handleOrderClick` & `window.handleQuoteClick`: Intercepts `session.role === 'admin'` and `session.role === 'digitizer'`, invoking `showStaffOrderBlockModal` instead of silently bouncing.
+     - `window.signOutStaffToGuestOrder()`: Clears storage sessions and opens the order modal cleanly for guest checkout.
+  2. **Unified Modal Guard (`js/order-quote-modal.js`)**:
+     - `window.openOrderQuoteModal()`: Aborts immediately and triggers `showStaffOrderBlockModal` if current session has role `admin` or `digitizer`.
+     - `window.submitOrderQuoteForm()`: Fallback guard intercepting form submissions with staff session or staff emails (`admin@dezandigitizing.com` / `digitizer@dezandigitizing.com`).
+  3. **Client SDK Guard (`js/insforge-client.js`)**:
+     - `createOrder()`: Throws an explicit `Error("You can't place orders from this account")` if `user.role === 'admin' || user.role === 'digitizer'` or matching staff email addresses.
+  4. **Client Workspace Protection (`js/client-workspace.js`)**:
+     - Automatically redirects staff users visiting `client-portal.html` back to `admin-portal.html` or `worker-portal.html` rather than overwriting their staff session with a demo client.
+  5. **Backend Database & API Controller Enforcement (`server/controllers/orderController.js` & `quoteController.js`)**:
+     - `POST /api/orders` & `POST /api/quotes`: Strict 403 Forbidden rejection with `"You can't place orders from this account"` if `req.user.role` is `admin` or `digitizer`, or if client email equals `admin@dezandigitizing.com` or `digitizer@dezandigitizing.com`.
+
 ---
 
 ## 5. Site Map & Route Architecture
 
 ### Public Marketing Pages
-- `/index.html`: Home page (Hero with Before/After Comparison Slider: zero bounding box or card border around the astronaut patch, allowing the slider divider line to sweep end-to-end across the full artwork; bold typography with gold shine `Dezan Digitizing Service`; all 3 action buttons `Order Now`, `View Pricing`, and `Get Quote` arranged in a proud, touch-friendly side-by-side row on both mobile and desktop below the slider; Live Feedback Carousel; Trust reviews; the dedicated **"Why Choose Dezan Digitizing?"** section highlighting manual craftsmanship, production-ready stitch files, fast turnaround, and free revisions with 4 How-It-Works styled circular icon feature cards; and the modern, interactive **"Frequently Asked Questions" (FAQ) Accordion** at the bottom of the page featuring 5 rows with CSS grid transitions, rotating gold-accented chevrons, accessible `aria-expanded` attributes, and responsive typography).
+- `/index.html`: Home page (Title: `Embroidery Digitizing Services | Dezan Digitizing®️`; Hero with Before/After Comparison Slider: zero bounding box or card border around the astronaut patch, allowing the slider divider line to sweep end-to-end across the full artwork; prominent gold brand eyebrow `DEZAN`, 2-line headline `Professional Embroidery Digitizing` & `and Vector Art Service`, subtitle `Production-ready embroidery files at just $15. | Fast turnaround | Premium quality`; bespoke 3-button horizontal row matching reference design: 1. Solid Gold Primary `Order Now` + `Flat Rates` with shopping bag icon badge, 2. Soft-tinted `View Pricing` with tag icon badge, 3. Soft-tinted `Get Quote` with document icon badge; Live Feedback Carousel; Trust reviews; Portfolio section (`#portfolio`) sequence: 1. Custom Hats (`images/Custom Hats.png`), 2. Jacket Backs (`images/Jacket Backs.png`), 3. Left Chest (`images/Left Chest Logos.png` - updated St. Patrick's parade jackets photo), 4. Pet Portraits (`images/Pet Embroidery.png`); the dedicated **"Why Choose Dezan Digitizing?"** section highlighting manual craftsmanship, production-ready stitch files, fast turnaround, and free revisions with 4 How-It-Works styled circular icon feature cards; and the modern, interactive **"Frequently Asked Questions" (FAQ) Accordion** at the bottom of the page featuring 5 rows with CSS grid transitions, rotating gold-accented chevrons, accessible `aria-expanded` attributes, and responsive typography).
 - `/about.html`: Company history, experience, machinery/software standards (Wilcom, Tajima, Barudan).
 - `/services.html`: Detailed service breakdowns (Left chest, Cap/Hat, 3D Puff, Jacket Back, Vectorizing). Clean hero without dark background image, side-by-side action buttons in a 2-col grid on mobile, and 2-column grid for Expert Services fitting above the fold on mobile without scrolling.
+  - **Portfolio Section Order (`#portfolio`)**: 1. Custom Hats, 2. Jacket Backs, 3. Left Chest (updated image), 4. Pet Portraits, 5. Vector Logo Trace.
   - **Brand Color Harmonization**: Eliminated all mismatched dark brown / amber shades (`text-amber-800` on hero eyebrow and "Order Now" links), replacing with brand gold token `text-primary`. Harmonized Card 2 in the Transparent Pricing section (removed jarring solid yellow card and dark brown text `sm:bg-primary sm:text-background-dark`, aligned with clean card styling and 2px primary border), and updated pricing preview figures ($15 Left Chest/Hat, $25 Jacket Back / Large).
 - `/portfolio.html`: High-resolution gallery and customer feedback showcase.
 - `/pricing.html`: Dedicated flat-rate Pricing showcase in responsive 2-column grid layout, strictly adhering to Dezan's brand color scheme (Dezan Gold `#d4af35` / `#9a7810`, Dark Luxury `#201d12`, Card Dark `#16140c`, Warm Canvas `#f8f7f6`):
@@ -181,7 +230,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
     - If a client is already authenticated, clicking "Order Now" on marketing pages opens the full 2-stage order wizard in `client-portal.html?action=new_order`, and clicking "Get Quote" opens `client-portal.html?action=request_quote`.
 
 ### Role-Based Order Portal (Implemented & Live)
-- `/portal-login.html`: Unified authentication page with automatic role routing, order intent banners, simplified client-only registration (role field removed; all public signups are assigned `role: 'client'`), **Continue with Google** social auth (official multi-color Google SVG icon, centered divider, Google Account Chooser modal `#google-account-modal`, and backend endpoint `POST /api/auth/google` with auto-client registration and guest order claiming), and 1-click predefined staff & client logins (Master Admin: `admin@dezandigitizing.com`, Digitizer Worker: `worker.alex@dezandigitizing.com`, Demo Client: `client@falconapparel.com`).
+- `/portal-login.html`: Unified authentication page with automatic role routing, order intent banners, simplified client-only registration (role field removed; all public signups are assigned `role: 'client'`), **Continue with Google** social auth (official multi-color Google SVG icon, centered divider, Google Account Chooser modal `#google-account-modal`, and backend endpoint `POST /api/auth/google` with auto-client registration and guest order claiming), and strict staff & client authentication (Master Admin: `admin@dezandigitizing.com` / `Wasif8899@@@`, Digitizer: `digitizer@dezandigitizing.com` / `Pakistan6677@@@`, Demo Client: `client@falconapparel.com`).
 
 #### Client Portal Suite (Modular Multi-Page Architecture)
 Powered by shared stylesheet [`client-workspace.css`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/client-workspace.css) and shared controller [`js/client-workspace.js`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/js/client-workspace.js):
@@ -392,7 +441,7 @@ To prevent data leakage via browser DevTools:
   - Redesigned to match the warm Dezan gold (`#d4af35`) theme and clean `#f8f7f6` default light layout (with user-toggleable dark luxury mode).
 - **Navigation & IA Hierarchy**:
   - **Top Switcher Bar**: Persistent `RESTRICTED WORKER WORKSPACE` banner with fast role switcher.
-  - **Header**: Logo, `Digitizer Studio` gold badge, `Client PII & Price Masked` security pill, Alex Miller profile trigger, and theme toggle.
+  - **Header**: Logo, `Digitizer Studio` gold badge, `Client PII & Price Masked` security pill, Digitizer profile trigger, and theme toggle.
   - **3 Quick-Action Navigation Cards**: `Active Tasks` (scrolls/filters active queue), `Completed Archive` (scrolls/filters archive), `Format Specs` (opens cheatsheet modal).
   - **4 Stat Metric Badges (Interactive)**: `Active Jobs` (clickable filter), `Completed` (clickable filter), `Supported Formats` (`DST · EMB · PES · EXP`), `QC Standard` (`100% Wilcom ES Calibrated`).
   - **Search & Filter Toolbar**: Real-time debounced text search (by order #, task #, placement, format) + status filter (`all`, `active`, `completed`) + format filter (`all`, `DST`, `EMB`, `PES`).
@@ -403,7 +452,7 @@ To prevent data leakage via browser DevTools:
 - **Modals**:
   - `#task-details-modal`: Full technical work order parameters, stitch density calibrations, needle sequence guidance, raw art downloader, and printable sheet.
   - `#format-specs-modal`: Embroidery machine specifications for Tajima (`.dst`), Wilcom (`.emb`), Brother (`.pes`), and Melco (`.exp`).
-  - `#worker-account-modal`: Alex Miller profile, Master Level 4 status, licensed workstation tools (Wilcom e4.5, Tajima Pulse), masking privacy contract status, and sign out.
+  - `#worker-account-modal`: Digitizer profile, Master Level 4 status, licensed workstation tools (Wilcom e4.5, Tajima Pulse), masking privacy contract status, and sign out.
 - **Strict Data Masking (100% Verified)**:
   - Zero presence of client name, client email, client phone, client company, or pricing in the DOM.
 - **Automated Verification**:
@@ -426,9 +475,9 @@ To prevent data leakage via browser DevTools:
     - **Bento Card Grid Mode (`#admin-orders-cards-container`)**: Visual 3-column bento card grid with direct artwork thumbnail previews, deliverable download chips, technical tag badges, client contact pills, and full-width action bars.
     - Automatically persists active user mode in `localStorage['dezan_admin_layout']`.
   - **Digitizer Team Hub (`#digitizer-team-section`)**:
-    - Visual team performance and workload oversight cards for **Alex Miller**, **Sam Chen**, and **Maria Garcia**.
+    - Visual workload oversight card for single dedicated **Digitizer** (`Lead Embroidery & Vector Digitizer`).
     - Displays active assignment counts, completed project totals, and core technical proficiencies.
-    - Interactive **"View Assigned Orders"** button instantly isolates orders assigned to that specific worker in the main queue.
+    - Interactive **"View Assigned Orders"** button instantly isolates orders assigned to the digitizer in the main queue.
   - **Interactive 1-Click Metric Cards**:
     - All master KPI summary cards (`Total Orders`, `Needs Worker`, `Revision Queue`, `Realized Revenue`, `Balance Due`) feature click listeners with glowing golden active ring states that activate the corresponding queue tab and auto-scroll smoothly.
   - **Instant Live Search & Keyboard Shortcuts**:
@@ -450,30 +499,34 @@ To prevent data leakage via browser DevTools:
   - Mobile: Added 3rd compact horizontal card with `$25 / $40` price chip and subtext `Left Chest $25 • Larger $40 Flat`.
   - Aligned `services.html` Pet Portrait card with `$25 / $40` pricing.
   - Verified via Playwright across Desktop (1512x982), Mobile Light (390x844), and Mobile Dark (390x844).
+- **Commercial Embroidery Specializations Card Refinement (`embroidery-digitizing.html`)**:
+  - Removed placement price pills (`$15`, `$25`, `$0 Extra`, etc.) from the 6 technical specialization cards.
+  - Keeps the focus 100% on stitch engineering specifications, underlay calibrations, and fabric craftsmanship. Full transparent pricing is housed exclusively in the dedicated **Pricing & Turnaround** section below.
 - **Brand Text Update to "DEZAN DIGITIZING" Across All Headers & Footers**:
   - Replaced standalone "DEZAN" brand title with full name **"DEZAN DIGITIZING"** across all 8 marketing and client-facing pages (`index.html`, `about.html`, `services.html`, `portfolio.html`, `pricing.html`, `contact.html`, `order-success.html`, `profile.html`).
   - Added `whitespace-nowrap text-base sm:text-lg font-black tracking-tight` ensuring zero layout wrapping on compact mobile devices (390px) while maintaining bold desktop presence.
   - Verified with Playwright visual screenshots on mobile and desktop.
 - **Admin Orders Auto-Assign Worker Engine (`admin-orders.html`, `admin-portal.html`, `js/insforge-client.js`, `js/admin-workspace.js`)**:
-  - **Single Digitizer Scope**: Directs all auto-assigned production tickets to primary digitizer **Alex Miller (Lead Digitizer)** (`id: '00000000-0000-0000-0000-000000000003'`, `worker.alex@dezandigitizing.com`).
+  - **Single Digitizer Scope**: Directs all auto-assigned production tickets to primary in-house digitizer **Digitizer** (`id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1'`, `digitizer@dezandigitizing.com`).
   - **Interactive Auto-Assign Toggle**:
     - Prominent action button in top bar (`#admin-auto-assign-btn`), header bar (`#header-auto-assign-btn`), and Stage 1 "Needs attention" banner (`#stage-auto-assign-strip`) across both `admin-orders.html` and `admin-portal.html`.
     - **When ON**:
-      - Incoming customer orders (guest checkout or authenticated client portal) skip manual admin review and directly assign to Alex Miller (`assigned_digitizer_id = '00000000-0000-0000-0000-000000000003'`, `status = 'in_progress'`).
+      - Incoming customer orders (guest checkout or authenticated client portal) skip manual admin review and directly assign to Digitizer (`assigned_digitizer_id = '3210bcc5-defd-40fe-b843-d0a57b0e12e1'`, `status = 'in_progress'`).
       - Sanitized technical task is automatically upserted into `dezan_digitizer_tasks` (and remote InsForge PostgreSQL `digitizer_tasks`).
       - Realtime event `order_assigned` broadcasts across open tabs so worker portal (`worker-portal.html`) immediately receives the task without page reload.
       - Emerald active pill state with robot/lightning icon and live confirmation toasts.
     - **When OFF**:
       - Incoming bookings pause in `pending_review` with `assigned_digitizer_id = null`, requiring manual admin assignment.
     - **1-Click Batch Dispatch**:
-      - Inside Stage 1 ("Needs attention"), added `#assign-all-pending-btn` displaying exact count (e.g. `Assign 7 to Alex Miller`) to dispatch all accumulated unassigned orders to Alex Miller in one click.
+      - Inside Stage 1 ("Needs attention"), added `#assign-all-pending-btn` displaying exact count (e.g. `Assign 7 to Digitizer`) to dispatch all accumulated unassigned orders to Digitizer in one click.
     - **Automated Verification**:
-      - 100% verified with automated Playwright headless test (`scratch/test_auto_assign.js`): verified toggle ON, direct auto-assignment to Alex Miller, immediate presence in worker portal active queue, toggle OFF, and 1-click batch assignment.
-- **Public Signup Role Restriction & Predefined Staff Logins (`portal-login.html`, `js/insforge-client.js`)**:
-  - Removed user-facing account role dropdown from registration form on `portal-login.html`.
-  - Public registration automatically and unconditionally assigns `role: 'client'`.
-  - Admin (`admin@dezandigitizing.com`) and worker (`worker.alex@dezandigitizing.com`) accounts use predefined logins.
-  - Enhanced `signIn()` in `js/insforge-client.js` with demo alias matching for instant staff access.
+      - 100% verified with automated Playwright headless test (`scratch/test_single_digitizer_workflow.js`): verified toggle ON, direct auto-assignment to Digitizer, immediate presence in worker portal active queue, toggle OFF, and 1-click batch assignment.
+- **Strict Staff Credentials & Role-Based Authentication (`portal-login.html`, `server/controllers/authController.js`, `js/insforge-client.js`)**:
+  - Only two internal staff accounts exist:
+    1. **Master Admin**: `admin@dezandigitizing.com` / `Wasif8899@@@`
+    2. **Digitizer**: `digitizer@dezandigitizing.com` / `Pakistan6677@@@` (display name: strictly **Digitizer**)
+  - All old demo worker accounts (`worker.alex@...`, `worker.sam@...`, `worker.maria@...`) permanently removed from PostgreSQL DB and client-side code.
+  - Password enforcement strictly verified: only the given password functions for the Digitizer account; invalid passwords return HTTP 401.
 - **Optional Account Convenience & Automatic Guest Order Claiming**:
   - Customer checkout is completely frictionless: client can upload logo, specify details, pay, and receive instant confirmation without creating an account.
   - On `order-success.html`, guest customers can optionally create a password with 1 click.
@@ -693,7 +746,167 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - Increased navigation links font size from `14px` (`text-sm`) to `15px` / `16.5px` (`md:text-[15px] lg:text-[16.5px] font-bold`) on laptop and desktop screens.
   - Added dedicated button-like padding (`6px 12px` up to `7px 15px`) and 9px rounded pills with interactive gold background hover state (`rgba(212, 175, 53, 0.08)` / dark `0.14`).
   - Active page links feature a crisp 2.5px golden underline indicator.
-  - Symmetrically scaled the header login button (`px-4 py-2 text-sm`) and theme toggle button for balanced desktop and laptop ergonomics.
 
+---
 
+## 22. Unified Order & Quote Modal Architecture (`js/order-quote-modal.js`)
+- **Universal Form Parity Mandate**:
+  - Previously, the main marketing website used a single-step guest modal (`#guest-checkout-modal` in `app.js`), while the client portal used a 2-stage adaptive modal (`#new-order-modal` in `client-portal.html`), creating visual, functional, and UX discrepancies.
+  - Built a centralized, standalone modal engine in `js/order-quote-modal.js` that mounts the **identical 2-stage adaptive modal** across the entire website ecosystem:
+    - **Public Marketing Pages**: `index.html`, `pricing.html`, `services.html`, `contact.html`, `portfolio.html`, `about.html`, `order-success.html`, `profile.html`.
+    - **Client Portal & Workspaces**: `client-portal.html`, `client-orders.html`, `client-quotes.html`, `client-invoices.html`, `client-profile.html`.
+- **Top Segmented Mode Switcher Pill**:
+  - Prominently positioned in the sticky modal header: `[ ⚡ Place Order ]` and `[ 📄 Request Free Quote ($0) ]`.
+  - Enables instant toggling at any time, in both Stage 1 and Stage 2:
+    - **Order Mode**: Displays real-time calculated price (e.g. `$15.00`), payment selection tabs, and checkout CTA (`Pay & Place Order ($15.00)`).
+    - **Quote Mode**: Dynamically switches headers ("Request a Free Quote"), adapts step subtitles, displays a $0 upfront explanation box, and sets CTA to `Submit Free Custom Quote`.
+- **2-Stage Adaptive Specification Workflow**:
+  - **Stage 1 (Clean Service Choice)**: Visual interactive cards for `Embroidery Digitizing` (DST, EMB, PES, Left Chest, Caps, 3D Puff) and `Vector Art Conversion` (AI, EPS, SVG, PDF, Clean Curves, Color Separation).
+  - **Stage 2 (Adaptive Technical Requirements)**:
+    - **Target Placement & Pricing**:
+      - Options: `Left Chest — $15`, `Cap / Hat Front — $15`, `Jacket Back / Large — $25`, and `Custom Placement`.
+      - Removed options: `Sleeve / Visor` and `Patches / Badges` completely removed.
+      - **Custom Placement**: Dynamically reveals extra text input field `#dig-custom-placement` ("Custom Placement Details", placeholder: `e.g. patch , visor , apron, tote bag, etc.`) for manual entry.
+    - **Target Size (Single Manual Dimension & Validation)**:
+      - Single manual size input: `Target Size: [ 4.0 ] [ in ]` (with `in` / `cm` unit toggle). Separate W × H boxes completely eliminated.
+      - **Placement Size Limits**:
+        - `Left Chest`: maximum 5.5 inches (or 14.0 cm).
+        - `Cap / Hat Front`: maximum 5.5 inches (or 14.0 cm).
+        - `Jacket Back / Large`: no maximum restriction.
+        - `Custom Placement`: no maximum restriction.
+      - Automated live validation blocks submission and displays: *"Maximum size for this placement is 5.5 inches."*
+    - **Required Machine File Formats**:
+      - All machine brand names removed (no Tajima, Wilcom, Brother, Melco, Janome, etc.). Only file extensions displayed.
+      - Exact sequence with `.DST` first and checked: `.DST | .PES | EMB | .OFM | .EXP | .JEF | .VP3 | .CND | .XXX`. Multiple formats remain selectable.
+    - **Special Technical Options (Optional)**:
+      - Cleaned down to only: `3D Puff`, `Trims Between All Letters`, `Applique`.
+      - Removed `Match Sample`, `Flame Specs`, and removed the `+$5` surcharge from 3D Puff (so 3D Puff carries $0 extra charge).
+    - **Vector Art**: Job Name, Vector Complexity tier selection, Format chips (AI, EPS, SVG, PDF, CDR, Hi-Res PNG), and Color Separation checkboxes.
+    - **Multi-File Upload Zone**: Drag & drop or browse with support for up to 5 files (images, PDFs, documents, stitch files, vectors, archives) featuring live thumbnail chips, format detection, individual removal, and limit badges.
+    - **Turnaround Speed & Rush Fee**:
+      - Standard Turnaround: 12-24 Hours (included).
+      - Rush Service: **5-8 Hours** (previously 2-4h).
+      - Rush Queue Fee: **$5.00 USD** (previously $10.00).
+    - **Smart Delivery Contact Block**: Automatically detects authenticated client sessions and displays a verified user badge (`Marcus Vance` / `client.vip@embroiderypro.com`), or reveals guest contact inputs (`Full Name`, `Email Address`, `Phone Number`) for unauthenticated visitors.
+- **Backend & Cloud Integration**:
+  - Direct file upload to InsForge Cloud Storage (`artworks` bucket) via `@insforge/sdk`.
+  - Order / Quote persistence directly to InsForge PostgreSQL `orders` table.
+  - Dispatches cross-tab live synchronization via `BroadcastChannel('dezan_realtime_sync')`.
+- **Backwards Compatibility & Global Aliases**:
+  - Modal container exposes dual IDs `#new-order-modal` and `#guest-checkout-modal`.
+  - Exposes synchronized price labels: `#order-price-display`, `#guest-summary-price`, and `#guest-summary-plan`.
+  - Full suite of global API functions: `window.openOrderQuoteModal`, `window.openNewOrderModal`, `window.openNewQuoteModal`, `window.openGuestCheckoutModal`, `window.closeOrderQuoteModal`, `window.closeNewOrderModal`, `window.closeGuestCheckoutModal`, `window.setModalMode`, `window.selectOrderService`.
+- **Verification**:
+  - Verified via Playwright automated suites `scratch/test_modal_triggers.js` and `scratch/test_unified_order_quote_workflow.js` across Desktop (1440x900), Tablet (834x1112), and Mobile (390x844) viewports.
 
+---
+
+## 23. Production Readiness & Authentication Credentials Provisioning
+- **Complete Elimination of Demo Elements**:
+  - Removed all demo switchers, demo bypass banners, and quick 1-click test credential cards across the entire platform:
+    - `portal-login.html`: Stripped out quick demo credential cards and test buttons; streamlined for pure production credentials & Google OAuth.
+    - Client portal suite (`client-portal.html`, `client-orders.html`, `client-quotes.html`, `client-invoices.html`, `client-profile.html`): Removed top `ROLE DEMO SWITCHER BAR`.
+    - Digitizer / Worker portal suite (`worker-portal.html`, `worker-tasks.html`, `worker-settings.html`, `worker-specs.html`, `worker-archive.html`): Removed top `ROLE DEMO SWITCHER BAR`.
+- **Production User Accounts Provisioned & Verified**:
+  - **Master Admin**:
+    - Email: `ADMIN@dezandigitizing.com`
+    - Password: `Wasif8899@@@`
+    - Role: `admin` (Full access to admin dashboard, live orders, invoicing, worker assignments, rates, customer tracking).
+  - **Head Digitizer**:
+    - Email: `DIGITIZER@dezandigitizing.com`
+    - Password: `Pakistan6677@@@`
+    - Role: `digitizer` (Full access to worker portal, active tasks, stitch specs, file production upload, download archives).
+  - Authenticated and verified via bcrypt hash in PostgreSQL `auth.users` and `public.profiles` (`scratch/test_prod_logins.js`).
+  - Whitelist updated in `server/controllers/authController.js` and local fallback resolver in `js/insforge-client.js`.
+
+---
+
+## 24. Redesigned 2-Step Progress Stepper Modal (Image 2 Target Specification)
+- **Visual Design Parity with Target Mockup**:
+  - Replaced the legacy step header text block with an ultra-clean, modern modal header and interactive progress stepper matching the user's reference mockup:
+    - **Header**: Gold cart icon (`shopping_cart`), bold title `Place an Order`, subtitle `Choose a service to continue.`, circular close button `✕` on top right, mobile drag handle.
+    - **Interactive 2-Step Stepper**:
+      - Step 1: Solid gold circle (`#b89218`) with white numeral `1` and ring halo, bold label `Choose Service`. Clickable to return from Step 2 at any time.
+      - Connector line: Absolute centered connector bar running behind circles; dynamically transitions to gold (`#b89218`) on Step 2.
+      - Step 2: Soft slate-100 circle (`2`), adaptive label (`Order Details` in order mode, `Quote Details` in quote mode); transitions to solid gold when active.
+    - **Horizontal Full-Width Service Choice Cards**:
+      - **Card 1 (`Embroidery Digitizing`)**: Warm ivory background (`#fffdf8`), subtle gold border (`#faedd0`), squircle icon with monitor stitch path SVG, title, subtitle (`Stitch files for embroidery machines.`), gold chevron `>`, and exact pills: `.DST .PES .EXP` (gold badge), `Left Chest / Hats / Jacket Back` (slate badge), `3D Puff` (slate badge).
+      - **Card 2 (`Vector Art Conversion`)**: Cool ice-blue background (`#f8faff`), subtle blue border (`#e2eaf4`), squircle icon with bezier pen tool SVG, title, subtitle (`Clean vector redraws for print and artwork.`), blue chevron `>`, and exact pills: `.AI .EPS .SVG .PDF` (blue badge), `Print-ready` (slate badge).
+    - **Accessibility & Compatibility**: Built using semantic, accessible `<button type="button">` containers with WCAG 2.1 AA keyboard navigation and focus rings.
+    - **Dual Synchronization**: Unified across `js/order-quote-modal.js` and `client-portal.html`, ensuring identical rendering and functionality on public pages and authenticated portal workspaces.
+    - **Multi-Viewport Testing**: Verified across 1440x900 Desktop, 834x1112 Tablet, and 390x844 Mobile viewports in both Light and Dark themes.
+
+---
+
+## 25. Portfolio Left Chest Artwork Asset Update
+- **Image Replacement**:
+  - Replaced the previous multi-colored shirts Beacon Home Group photo (`Left Chest / CORPORATE`) with the official high-resolution **Philadelphia St. Patrick's Day Parade** embroidered softshell jackets photo (`images/Left Chest Logos.png` and `images/Left Chest Logos.jpg`).
+  - The new image prominently showcases 6 black zip jackets with high-definition green and gold Celtic clover left chest embroidery crests.
+- **Cache Invalidation & Display Guarantee**:
+  - Updated image references in `index.html` (including `<link rel="preload">` and `<img>`) and `services.html` with cache-busting query parameter `images/Left Chest Logos.png?v=3` to guarantee instantaneous rendering without stale browser caching.
+  - Retained the strict 4-item portfolio sequence:
+    1. Custom Hats (`images/Custom Hats.png` - 3D Puff)
+    2. Jacket Backs (`images/Jacket Backs.png` - Custom Design)
+    3. Left Chest (`images/Left Chest Logos.png?v=3` - Corporate)
+    4. Pet Portraits (`images/Pet Embroidery.png` - Embroidery)
+- **Visual Verification**:
+  - Verified via Playwright headless testing across Desktop (1280x900) and Mobile (390x844) viewports for both `index.html` and `services.html`. Labels (`Left Chest` and gold `CORPORATE`) render with crisp contrast and optical alignment.
+
+---
+
+## 26. Global Navigation Link Sequence
+- **Standardized Header Navigation Sequence**:
+  - Updated the global top navigation bar sequence across all 9 public and marketing pages (`index.html`, `services.html`, `portfolio.html`, `pricing.html`, `about.html`, `contact.html`, `order-success.html`, `profile.html`, and `track-order.html`) to:
+    1. **Home** (`index.html`)
+    2. **Services** (`services.html`)
+    3. **Feedbacks** (`portfolio.html`)
+    4. **Pricing** (`pricing.html`)
+    5. **About** (`about.html`)
+    6. **Contact** (`contact.html`)
+- **Theme & Active State Consistency**:
+  - Preserved `.nav-link-gold` active highlight pill, `data-nav` page matching in `app.js`, and seamless Light/Dark mode rendering.
+  - Verified via Playwright visual captures on Desktop (`1440x900`).
+
+---
+
+## 27. Dedicated Service Landing Pages & Vector Art Assets Integration
+- **Dedicated SEO Service Landing Pages**:
+  - **`embroidery-digitizing.html`**:
+    - **Target Keywords & Focus**: Custom commercial embroidery digitizing, 3D puff caps, left chest logos, jacket backs, realistic pet portraits, Tajima `.DST`, Wilcom `.EMB`, Brother `.PES`.
+    - **Technical Breakdown**: Machine compatibility strip (DST, EMB, PES, EXP, DAT, JEF, VP3, PDF worksheets), 6 capability bento cards (Caps, Left Chest, Jacket Backs, 3D Puff with $0 extra upcharge, Realistic Pet Portraits, Patches & Applique), 4-step quality assurance standard (Artwork Deconstruction, Directional Underlay, Push/Pull Calibration, Virtual Sewout Simulation), transparent pricing table ($15 / $25 / $25-$40), interactive FAQ accordion with schema.
+    - **Structured Data**: JSON-LD `Service`, `ProfessionalService`, `FAQPage`, `BreadcrumbList`.
+  - **`vector-art-conversion.html`**:
+    - **Target Keywords & Focus**: 100% manual vector art conversion, raster redraw, low-res JPG/PNG to AI, EPS, SVG, PDF, CDR, print-ready screen printing separations, vinyl cut paths, laser engraving.
+    - **User Vector Assets Prominently Integrated**:
+      1. `images/vector-art-fish-comparison.jpg`: Full-color detailed Rainbow Trout water splash illustration comparison (Raster vs Vector) displaying format badges (JPG, AI, EPS, PNG, PDF, CDR) and "All file formats available upon request".
+      2. `images/vector-art-senior-comparison.png`: Napkin/paper hand-drawn pencil concept sketch ("SENIOR 2024 HOLCOMB HIGH SCHOOL") converted into production-ready vibrant colored vector artwork ("SENIOR 2024 AFSIVA HIGH SCHOOL") with format badges.
+    - **Production Capabilities (6 Bento Cards)**: Screen Printing & Color Separation, DTF & Heat Transfers, Vinyl Cut Paths & Plotters, Laser Engraving & CNC, Vehicle Wraps & Billboards, Embroidery Art Prep.
+    - **Structured Data**: JSON-LD `Service`, `ProfessionalService`, `FAQPage`, `BreadcrumbList`.
+- **Expert Services Click Routing in `services.html`**:
+  - Transformed both "Expert Services" cards into full-surface clickable links (`<a href="embroidery-digitizing.html">` and `<a href="vector-art-conversion.html">`) with hover scale, gold border illumination, "Explore Page →" indicators, and quick "Order Now" modal triggers.
+  - Expanded the `services.html` portfolio section into a balanced 3x2 grid of 6 items including both new vector comparison artworks.
+- **Active Navigation & Internal Linking**:
+  - `app.js`: Enhanced active link detection so visits to `embroidery-digitizing.html` and `vector-art-conversion.html` highlight "Services" in the top navbar and mobile bottom navigation.
+  - Global Footers: Added a dedicated "Dedicated Services" column linking to `embroidery-digitizing.html`, `vector-art-conversion.html`, `services.html`, and `portfolio.html` across all main pages (`index.html`, `services.html`, `pricing.html`, `about.html`, `contact.html`, `portfolio.html`).
+- **Visual Verification**:
+
+---
+
+## 28. Google Sign-In Architecture & 401 Error Prevention (Live & Verified)
+- **Root Cause of Error 401 `invalid_client`**:
+  - `portal-login.html` previously held a fictional placeholder Google Client ID (`1012361420045-dezan-digitizing.apps.googleusercontent.com`) within `launchGoogleOAuthPopup()`.
+  - When users clicked "Use another Google account", the browser opened Google's OAuth consent endpoint `https://accounts.google.com/o/oauth2/v2/auth`, which Google rejected with `Access blocked: Authorization Error - The OAuth client was not found (Error 401: invalid_client)`.
+- **Architectural Solution & Safeguards**:
+  - **Majid Hussain 1-Click Tile**: Added user tile for `majidhussain7591@gmail.com` (Display Name: "Majid Hussain", Avatar "MH" in rich blue gradient, "Active" badge) for instant 1-click authentication.
+  - **Default Client Demo Tile**: Maintained John Falcon (`client@falconapparel.com`) tile for sandbox testing.
+  - **Inline Google Account Entry**:
+    - Replaced the direct external popup trigger with an intuitive, expandable inline form within the Google modal (`#google-custom-account-box`).
+    - Features dedicated fields: Google Email Address (`#google-custom-email`), Full Name Optional (`#google-custom-name`), keyboard Enter support, and clear input validation.
+  - **Zero-Crash Popup Safeguard**:
+    - `launchGoogleOAuthPopup()` now strictly validates whether `window.GOOGLE_CLIENT_ID` is a genuine production client ID (non-empty and not containing placeholder string).
+    - If unconfigured, it gracefully falls back to the inline account form instead of launching an invalid Google popup.
+  - **Identity Session & Auto-Memory**:
+    - Saves recent Google account credentials in `localStorage` (`dezan_recent_google_email`, `dezan_recent_google_name`) so the user's active Google account is remembered on subsequent visits.
+    - Synchronized with backend `POST /api/auth/google`, PostgreSQL `public.profiles` database record, JWT token persistence, and guest order claiming.
+- **Verification**:
+  - Headless Playwright integration test verified full handshake: Google modal display $\rightarrow$ expandable custom input toggle $\rightarrow$ Majid Hussain 1-click sign-in $\rightarrow$ successful HTTP 200 backend handshake $\rightarrow$ automatic redirection to `client-portal.html` with active session.

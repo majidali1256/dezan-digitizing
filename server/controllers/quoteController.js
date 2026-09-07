@@ -40,10 +40,18 @@ const requestQuote = async (req, res) => {
         let finalClientCompany = clientCompany || null;
 
         if (req.user) {
+            if (req.user.role === 'admin' || req.user.role === 'digitizer') {
+                return forbidden(res, "You can't place orders from this account");
+            }
             clientId = req.user.id;
             finalClientName = req.user.display_name;
             finalClientEmail = req.user.email;
             finalClientCompany = req.user.company || null;
+        }
+
+        const normalizedCheckEmail = (finalClientEmail || '').trim().toLowerCase();
+        if (normalizedCheckEmail === 'admin@dezandigitizing.com' || normalizedCheckEmail === 'digitizer@dezandigitizing.com') {
+            return forbidden(res, "You can't place orders from this account");
         }
 
         if (!finalClientEmail || !finalClientName) {

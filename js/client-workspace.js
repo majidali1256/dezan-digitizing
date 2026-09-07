@@ -46,6 +46,15 @@
             console.warn('Session check warning:', e);
         }
 
+        if (user && (user.role === 'admin' || user.role === 'digitizer')) {
+            if (user.role === 'digitizer') {
+                window.location.href = 'worker-portal.html';
+            } else {
+                window.location.href = 'admin-portal.html';
+            }
+            return;
+        }
+
         if (!user || user.role !== 'client') {
             user = {
                 id: 'demo-client-1',
@@ -631,11 +640,14 @@
 
     // ----- Modal Controls -----
     function openNewOrderModal(defaultDesignName = '') {
+        if (typeof window.openOrderQuoteModal === 'function') {
+            return window.openOrderQuoteModal({ plan: defaultDesignName, isQuote: false });
+        }
         const modal = document.getElementById('new-order-modal');
         if (modal) {
             modal.classList.remove('hidden');
             if (defaultDesignName) {
-                const input = document.getElementById('adaptive-job-name');
+                const input = document.getElementById('dig-job-name') || document.getElementById('adaptive-job-name');
                 if (input) input.value = defaultDesignName;
             }
         } else {
@@ -646,18 +658,23 @@
     }
 
     function closeNewOrderModal() {
+        if (typeof window.closeOrderQuoteModal === 'function') {
+            window.closeOrderQuoteModal();
+            return;
+        }
         const modal = document.getElementById('new-order-modal');
         if (modal) modal.classList.add('hidden');
     }
 
     function openNewQuoteModal() {
+        if (typeof window.openOrderQuoteModal === 'function') {
+            return window.openOrderQuoteModal({ isQuote: true });
+        }
         const modal = document.getElementById('new-order-modal');
         if (modal) {
             openNewOrderModal();
-            const quoteRadio = document.querySelector('input[name="order_mode"][value="quote"]');
-            if (quoteRadio) {
-                quoteRadio.checked = true;
-                quoteRadio.dispatchEvent(new Event('change'));
+            if (typeof window.setModalMode === 'function') {
+                window.setModalMode(true);
             }
         } else {
             window.location.href = 'client-portal.html?action=request_quote';
