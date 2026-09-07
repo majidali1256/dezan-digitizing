@@ -1042,6 +1042,10 @@
         window.openNewQuoteModal(options);
     };
 
+    window.openQuoteModal = function(options = {}) {
+        window.openNewQuoteModal(options);
+    };
+
     window.closeOrderQuoteModal = function() {
         const modal = document.getElementById('new-order-modal');
         if (modal) {
