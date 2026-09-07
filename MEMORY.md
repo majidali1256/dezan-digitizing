@@ -888,8 +888,7 @@ The Worker Studio provides an isolated, production-focused environment for embro
     - **Production Capabilities (6 Bento Cards)**: Screen Printing & Color Separation, DTF & Heat Transfers, Vinyl Cut Paths & Plotters, Laser Engraving & CNC, Vehicle Wraps & Billboards, Embroidery Art Prep.
     - **Structured Data**: JSON-LD `Service`, `ProfessionalService`, `FAQPage`, `BreadcrumbList`.
 - **Expert Services Click Routing in `services.html`**:
-  - Transformed both "Expert Services" cards into full-surface clickable links (`<a href="embroidery-digitizing.html">` and `<a href="vector-art-conversion.html">`) with hover scale, gold border illumination, "Explore Page →" indicators, and quick "Order Now" modal triggers.
-  - Expanded the `services.html` portfolio section into a balanced 3x2 grid of 6 items including both new vector comparison artworks.
+  - Configured the `services.html` portfolio section with 5 balanced items (Custom Hats, Jacket Backs, Left Chest Logos, Pet Portraits, and Hand-Drawn Sketch to Vector), with symmetrically centered lower row on desktop and full-width 16:10 comparison banner on mobile; preserved the Rainbow Trout vector comparison artwork exclusively on `vector-art-conversion.html` as requested.
 - **Active Navigation & Internal Linking**:
   - `app.js`: Enhanced active link detection so visits to `embroidery-digitizing.html` and `vector-art-conversion.html` highlight "Services" in the top navbar and mobile bottom navigation.
   - Global Footers: Added a dedicated "Dedicated Services" column linking to `embroidery-digitizing.html`, `vector-art-conversion.html`, `services.html`, and `portfolio.html` (labeled "Feedbacks / Reviews") across all main pages (`index.html`, `services.html`, `pricing.html`, `about.html`, `contact.html`, `portfolio.html`, `vector-art-conversion.html`, `embroidery-digitizing.html`, `order-success.html`, `profile.html`).
