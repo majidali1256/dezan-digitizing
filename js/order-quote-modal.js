@@ -57,6 +57,21 @@
         modal.setAttribute('aria-modal', 'true');
 
         modal.innerHTML = `
+            <style>
+                @media screen and (max-width: 768px) {
+                    #new-order-modal input:not([type="checkbox"]):not([type="radio"]),
+                    #new-order-modal select,
+                    #new-order-modal textarea {
+                        font-size: 16px !important;
+                    }
+                }
+                #new-order-modal input,
+                #new-order-modal select,
+                #new-order-modal textarea,
+                #new-order-modal button {
+                    touch-action: manipulation;
+                }
+            </style>
             <!-- Dual ID compatibility wrapper for test suites -->
             <div id="guest-checkout-modal" class="w-full flex flex-col justify-end sm:justify-center sm:items-center">
                 <div class="w-full sm:max-w-2xl bg-white dark:bg-card-dark border-t sm:border border-slate-200 dark:border-primary/30 rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[90vh] text-slate-900 dark:text-slate-100 overflow-hidden relative">

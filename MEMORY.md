@@ -835,6 +835,10 @@ The Worker Studio provides an isolated, production-focused environment for embro
       - **Card 2 (`Vector Art Conversion`)**: Cool ice-blue background (`#f8faff`), subtle blue border (`#e2eaf4`), squircle icon with bezier pen tool SVG, title, subtitle (`Clean vector redraws for print and artwork.`), blue chevron `>`, and exact pills: `.AI .EPS .SVG .PDF` (blue badge), `Print-ready` (slate badge).
     - **Accessibility & Compatibility**: Built using semantic, accessible `<button type="button">` containers with WCAG 2.1 AA keyboard navigation and focus rings.
     - **Dual Synchronization**: Unified across `js/order-quote-modal.js` and `client-portal.html`, ensuring identical rendering and functionality on public pages and authenticated portal workspaces.
+    - **Mobile Input Focus Auto-Zoom Elimination**:
+      - Enforced strict `font-size: 16px !important` on mobile viewports (`<= 768px`) for all inputs, selects, and textareas across `styles.css`, `js/order-quote-modal.js`, and `client-portal.html`.
+      - Prevents iOS Safari / WebKit from triggering an automatic viewport zoom when any field in the order form is tapped or clicked, while preserving crisp 12px desktop typography.
+      - Applied `touch-action: manipulation` across interactive controls to eliminate tap delays and disable double-tap zoom.
     - **Multi-Viewport Testing**: Verified across 1440x900 Desktop, 834x1112 Tablet, and 390x844 Mobile viewports in both Light and Dark themes.
 
 ---
