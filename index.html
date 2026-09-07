@@ -121,6 +121,10 @@
             },
         }
     </script>
+    <!-- Preload critical brand assets & hero comparison images to eliminate reload glitch -->
+    <link rel="preload" href="logo.png" as="image" />
+    <link rel="preload" href="Hero%20Page/Embroidery.png" as="image" />
+    <link rel="preload" href="Hero%20Page/Vector.png" as="image" />
     <!-- Preload hero gallery images for performance -->
     <link rel="preload" href="images/ai_flower.png" as="image">
     <link rel="preload" href="images/ai_anime_1.png" as="image">
@@ -145,7 +149,7 @@
         class="sticky top-0 z-50 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-primary/20">
         <div class="flex items-center justify-between px-4 py-3 max-w-6xl mx-auto">
             <a href="index.html" class="flex items-center gap-2.5">
-                <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover">
+                <img src="logo.png" alt="Dezan Digitizing" width="36" height="36" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover">
                 <div class="flex flex-col text-left leading-none">
                     <span class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN</span>
                     <span class="text-[9.5px] sm:text-[10.5px] font-extrabold tracking-[0.18em] text-primary uppercase mt-1">Digitizing</span>
@@ -241,12 +245,13 @@
               <div id="hero-compare-slider" class="relative w-full max-w-[285px] xs:max-w-[320px] sm:max-w-[365px] md:max-w-none md:w-[430px] lg:w-[494px] aspect-square select-none touch-manipulation cursor-col-resize">
                 <!-- After layer (Embroidery) — full background -->
                 <img src="Hero Page/Embroidery.png" alt="Embroidery digitizing result"
+                     width="1057" height="1100"
                      class="absolute inset-0 w-full h-full object-contain pointer-events-none" draggable="false" />
-                <!-- Before layer (Vector) — clipped by JS -->
-                <div id="compare-before" class="absolute inset-0 overflow-hidden" style="width: 50%;">
-                  <img src="Hero Page/Vector.png" alt="Vector art design"
-                       class="absolute inset-0 w-full h-full object-contain pointer-events-none" style="min-width: 100%;" draggable="false" />
-                </div>
+                <!-- Before layer (Vector) — zero-glitch 100% scale, clipped via clip-path -->
+                <img id="compare-before-img" src="Hero Page/Vector.png" alt="Vector art design"
+                     width="1057" height="1100"
+                     class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                     style="clip-path: inset(0 50% 0 0); -webkit-clip-path: inset(0 50% 0 0);" draggable="false" />
                 <!-- Divider line moving end to end -->
                 <div id="compare-divider" class="absolute top-0 bottom-0 flex flex-col items-center pointer-events-none drop-shadow-[0_0_4px_rgba(0,0,0,0.3)]" style="left: 50%; transform: translateX(-50%);">
                   <!-- Top Line -->

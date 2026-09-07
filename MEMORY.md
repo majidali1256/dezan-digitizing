@@ -120,6 +120,20 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   5. **Backend Database & API Controller Enforcement (`server/controllers/orderController.js` & `quoteController.js`)**:
      - `POST /api/orders` & `POST /api/quotes`: Strict 403 Forbidden rejection with `"You can't place orders from this account"` if `req.user.role` is `admin` or `digitizer`, or if client email equals `admin@dezandigitizing.com` or `digitizer@dezandigitizing.com`.
 
+### 4.5 Hero Comparison Slider & Brand Logo Refresh Glitch Elimination
+- **Problem**:
+  - On mobile and desktop reloads/refreshes, the hero astronaut comparison graphic momentarily appeared glitched/distorted: the vector half was squished horizontally to 50% width and misaligned with the embroidery background behind it for 100–300ms until `app.js` executed `syncBeforeImageWidth()`.
+  - The header `logo.png` lacked explicit dimension attributes and static CSS rules, risking minor FOUC/layout shift before runtime CDN compilation.
+- **Solution & Architecture**:
+  1. **Zero-FOUC CSS `clip-path` Slider**:
+     - Converted `#hero-compare-slider` from an `overflow: hidden; width: 50%` wrapper to two identical 100% scale sibling `<img>` tags (`Hero Page/Embroidery.png` and `Hero Page/Vector.png` with `clip-path: inset(0 50% 0 0)` and `-webkit-clip-path: inset(0 50% 0 0)`).
+     - Renders with 100% pixel alignment across vector and embroidery halves from the initial HTML paint frame without requiring JavaScript execution.
+     - Updated `initCompareSlider()` in `app.js` to dynamically adjust `clipPath: inset(0 (100 - pct)% 0 0)` during mouse and touch drag events with zero layout thrashing or resize listeners.
+  2. **Brand Asset Preloading & Dimension Locking**:
+     - Preloaded `logo.png`, `Hero%20Page/Embroidery.png`, and `Hero%20Page/Vector.png` in the `<head>` of `index.html`.
+     - Explicitly specified `width="36" height="36"` on `logo.png` and `width="1057" height="1100"` on the hero comparison images.
+     - Added CSS rules in `styles.css` locking `header a img[src*="logo.png"]` dimensions to 32px (mobile) and 36px (desktop) with `aspect-ratio: 1 / 1`.
+
 ---
 
 ## 5. Site Map & Route Architecture

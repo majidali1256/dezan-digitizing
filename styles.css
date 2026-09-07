@@ -734,3 +734,33 @@ button,
 a {
     touch-action: manipulation;
 }
+
+/* ==========================================================================
+   Header Logo & Hero Before/After Slider Glitch Stabilization
+   Ensures zero layout shifts and instant pixel alignment on initial refresh.
+   ========================================================================== */
+header a img[src*="logo.png"] {
+    width: 2rem;
+    height: 2rem;
+    aspect-ratio: 1 / 1;
+}
+
+@media (min-width: 640px) {
+    header a img[src*="logo.png"] {
+        width: 2.25rem;
+        height: 2.25rem;
+    }
+}
+
+#hero-compare-slider {
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: pan-y;
+}
+
+#compare-before-img {
+    clip-path: inset(0 50% 0 0);
+    -webkit-clip-path: inset(0 50% 0 0);
+    will-change: clip-path;
+}

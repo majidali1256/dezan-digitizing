@@ -1505,20 +1505,10 @@ function initStickyHeader() {
 // ===================================================================
 function initCompareSlider() {
     const slider = document.getElementById('hero-compare-slider');
-    const beforeDiv = document.getElementById('compare-before');
     const divider = document.getElementById('compare-divider');
-    const beforeImg = beforeDiv.querySelector('img');
-    if (!slider || !beforeDiv || !divider) return;
-
-    // Keep the before image sized to the full container width and height
-    function syncBeforeImageWidth() {
-        if (!slider || !beforeImg) return;
-        beforeImg.style.width = slider.offsetWidth + 'px';
-        beforeImg.style.height = slider.offsetHeight + 'px';
-        beforeImg.style.minWidth = slider.offsetWidth + 'px';
-    }
-    syncBeforeImageWidth();
-    window.addEventListener('resize', syncBeforeImageWidth);
+    const beforeImg = document.getElementById('compare-before-img');
+    const beforeDiv = document.getElementById('compare-before');
+    if (!slider || !divider || (!beforeImg && !beforeDiv)) return;
 
     let isDragging = false;
 
@@ -1527,7 +1517,14 @@ function initCompareSlider() {
         let x = clientX - rect.left;
         x = Math.max(0, Math.min(x, rect.width));
         const pct = (x / rect.width) * 100;
-        beforeDiv.style.width = pct + '%';
+
+        if (beforeImg) {
+            const rightInset = 100 - pct;
+            beforeImg.style.clipPath = `inset(0 ${rightInset}% 0 0)`;
+            beforeImg.style.webkitClipPath = `inset(0 ${rightInset}% 0 0)`;
+        } else if (beforeDiv) {
+            beforeDiv.style.width = pct + '%';
+        }
         divider.style.left = pct + '%';
     }
 
