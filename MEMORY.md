@@ -769,7 +769,7 @@ The Worker Studio provides an isolated, production-focused environment for embro
       - Removed options: `Sleeve / Visor` and `Patches / Badges` completely removed.
       - **Custom Placement**: Dynamically reveals extra text input field `#dig-custom-placement` ("Custom Placement Details", placeholder: `e.g. patch , visor , apron, tote bag, etc.`) for manual entry.
     - **Target Size (Single Manual Dimension & Validation)**:
-      - Single manual size input: `Target Size: [ 4.0 ] [ in ]` (with `in` / `cm` unit toggle). Separate W × H boxes completely eliminated.
+      - Single manual size input: `Target Size: [ e.g. 4.0 Tall / Wide ] [ in ]` (with `in` / `cm` unit toggle). Separate W × H boxes completely eliminated. Accepts both direct numbers and dimensional qualifiers (e.g. 4.0, 4.0 Tall, 4.0 Wide) with robust parsing and validation against maximum placement limits.
       - **Placement Size Limits**:
         - `Left Chest`: maximum 5.5 inches (or 14.0 cm).
         - `Cap / Hat Front`: maximum 5.5 inches (or 14.0 cm).
