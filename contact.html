@@ -203,59 +203,59 @@
                 <!-- Dynamic Authentication Banners -->
                 <div class="mb-3.5 sm:mb-6">
                     <!-- Logged-out state -->
-                    <div id="quote-login-prompt" class="p-3 sm:p-4 rounded-xl bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4 text-left shadow-xs">
-                        <div class="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm text-slate-800 dark:text-slate-200 min-w-0">
-                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+                    <div id="quote-login-prompt" class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 text-left shadow-xs">
+                        <div class="flex items-start sm:items-center gap-2.5 sm:gap-3 text-xs sm:text-sm text-slate-800 dark:text-slate-200 w-full min-w-0">
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-0">
                                 <span class="material-symbols-outlined text-base sm:text-xl">bolt</span>
                             </div>
-                            <div class="min-w-0">
+                            <div class="min-w-0 flex-1">
                                 <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white leading-tight">Instant Free Quote — No Sign-in Needed</h4>
-                                <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 mt-0.5 truncate">Drag-and-drop artwork &bull; 100% free estimation &bull; 12-24h delivery</p>
+                                <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 mt-1 leading-snug break-words">Drag-and-drop artwork &bull; 100% free estimation &bull; 12-24h delivery</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <div class="flex items-center gap-2 w-full sm:w-auto shrink-0 pt-0.5 sm:pt-0">
                             <a href="portal-login.html" class="hidden sm:inline-flex text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors whitespace-nowrap">Sign In</a>
-                            <button type="button" onclick="window.handleQuoteClick(event)" data-action="request-quote" class="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer flex-shrink-0 whitespace-nowrap">
+                            <button type="button" onclick="window.handleQuoteClick(event)" data-action="request-quote" class="w-full sm:w-auto px-4 py-2.5 sm:px-5 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer flex-shrink-0">
                                 <span>Request Free Quote</span>
-                                <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                                <span class="material-symbols-outlined text-xs sm:text-sm">arrow_forward</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- Logged-in state -->
-                    <div id="quote-client-banner" class="hidden p-3 sm:p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4 text-left shadow-xs">
-                        <div class="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm text-emerald-900 dark:text-emerald-200 min-w-0">
-                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+                    <div id="quote-client-banner" class="hidden p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 text-left shadow-xs">
+                        <div class="flex items-start sm:items-center gap-2.5 sm:gap-3 text-xs sm:text-sm text-emerald-900 dark:text-emerald-200 w-full min-w-0">
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-0">
                                 <span class="material-symbols-outlined text-base sm:text-xl">verified_user</span>
                             </div>
-                            <div class="min-w-0">
+                            <div class="min-w-0 flex-1">
                                 <h4 class="font-bold text-emerald-950 dark:text-emerald-100 leading-tight">Welcome, <span id="quote-client-name" class="text-emerald-700 dark:text-emerald-300">Client</span></h4>
-                                <p class="text-[11px] sm:text-xs text-emerald-700/80 dark:text-emerald-300/80 mt-0.5 truncate">Click below to open your interactive quote builder.</p>
+                                <p class="text-[11px] sm:text-xs text-emerald-700/80 dark:text-emerald-300/80 mt-1 leading-snug break-words">Click below to open your interactive quote builder.</p>
                             </div>
                         </div>
-                        <button type="button" onclick="window.handleQuoteClick(event)" data-action="request-quote" class="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition-all flex items-center justify-center gap-1.5 shadow-xs flex-shrink-0 cursor-pointer whitespace-nowrap">
+                        <button type="button" onclick="window.handleQuoteClick(event)" data-action="request-quote" class="w-full sm:w-auto px-4 py-2.5 sm:px-5 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 shadow-xs flex-shrink-0 cursor-pointer whitespace-nowrap">
                             <span>Open Quote Builder</span>
-                            <span class="material-symbols-outlined text-xs">add</span>
+                            <span class="material-symbols-outlined text-xs sm:text-sm">add</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- 3 Steps Feature Row (3-Column Grid on Mobile & Desktop) -->
-                <div class="grid grid-cols-3 gap-2 sm:gap-4 pt-3 sm:pt-4 border-t border-primary/15">
-                    <div class="p-2 sm:p-3.5 rounded-xl bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 text-center sm:text-left shadow-xs">
-                        <span class="text-primary font-black text-[9px] sm:text-xs block mb-0.5">STEP 01</span>
-                        <h4 class="text-[11px] sm:text-sm font-bold text-slate-900 dark:text-white leading-tight mb-0.5">Submit Specs</h4>
-                        <p class="text-[9.5px] sm:text-xs text-slate-600 dark:text-slate-400 leading-tight">Size, fabric &amp; artwork</p>
+                <div class="grid grid-cols-3 gap-1.5 xs:gap-2 sm:gap-4 pt-3 sm:pt-4 border-t border-primary/15">
+                    <div class="p-2 xs:p-2.5 sm:p-3.5 rounded-xl bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 text-center sm:text-left shadow-xs">
+                        <span class="text-primary font-black text-[9px] xs:text-[10px] sm:text-xs block mb-0.5">STEP 01</span>
+                        <h4 class="text-[11px] xs:text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight mb-0.5">Submit Specs</h4>
+                        <p class="text-[9px] xs:text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 leading-snug">Size, fabric &amp; artwork</p>
                     </div>
-                    <div class="p-2 sm:p-3.5 rounded-xl bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 text-center sm:text-left shadow-xs">
-                        <span class="text-primary font-black text-[9px] sm:text-xs block mb-0.5">STEP 02</span>
-                        <h4 class="text-[11px] sm:text-sm font-bold text-slate-900 dark:text-white leading-tight mb-0.5">Master Review</h4>
-                        <p class="text-[9.5px] sm:text-xs text-slate-600 dark:text-slate-400 leading-tight">Stitches &amp; flat pricing</p>
+                    <div class="p-2 xs:p-2.5 sm:p-3.5 rounded-xl bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 text-center sm:text-left shadow-xs">
+                        <span class="text-primary font-black text-[9px] xs:text-[10px] sm:text-xs block mb-0.5">STEP 02</span>
+                        <h4 class="text-[11px] xs:text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight mb-0.5">Master Review</h4>
+                        <p class="text-[9px] xs:text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 leading-snug">Stitches &amp; flat pricing</p>
                     </div>
-                    <div class="p-2 sm:p-3.5 rounded-xl bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 text-center sm:text-left shadow-xs">
-                        <span class="text-primary font-black text-[9px] sm:text-xs block mb-0.5">STEP 03</span>
-                        <h4 class="text-[11px] sm:text-sm font-bold text-slate-900 dark:text-white leading-tight mb-0.5">1-Click Start</h4>
-                        <p class="text-[9.5px] sm:text-xs text-slate-600 dark:text-slate-400 leading-tight">Approve &amp; digitize</p>
+                    <div class="p-2 xs:p-2.5 sm:p-3.5 rounded-xl bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 text-center sm:text-left shadow-xs">
+                        <span class="text-primary font-black text-[9px] xs:text-[10px] sm:text-xs block mb-0.5">STEP 03</span>
+                        <h4 class="text-[11px] xs:text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight mb-0.5">1-Click Start</h4>
+                        <p class="text-[9px] xs:text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 leading-snug">Approve &amp; digitize</p>
                     </div>
                 </div>
             </div>

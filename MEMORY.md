@@ -169,7 +169,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
     - **Desktop Grid Parity**: Larger screens (`md:`) seamlessly render the full 2-column feature checklist cards with action buttons and spacious trust bars.
   - **Strictly Pricing Only**: Zero embedded order forms or quote submission inputs. Authenticated client banners and action buttons route to `client-portal.html` (for logged-in clients) or `portal-login.html?redirect=...` (for unauthenticated visitors).
   - **Instant Visibility & Zero CLS**: Removed `.reveal` opacity blocking so all cards and sections render immediately across all devices, with full light/dark mode contrast parity verified via Playwright visual verification across Desktop (1440x900), Tablet (834x1112), and Mobile (390x844).
-- `/contact.html`: Contact form for general inquiries, and authenticated "Request a Custom Quote" portal showcase. Legacy unauthenticated quote submission forms have been removed.
+- `/contact.html`: Contact form for general inquiries, and interactive "Request a Custom Quote" portal showcase (`#custom-quote-section`). Features mobile-optimized `#quote-login-prompt` and `#quote-client-banner` with strict `items-stretch sm:items-center` flex alignment, full-width wrapping copy, nested emerald bolt icon badge (curing horizontal centering displacement outside container), responsive `grid-cols-3` step cards with proportional micro-padding, and full touch-target buttons.
 - `/order-success.html`: Order confirmation receipt page with transaction lookup parameters.
 
 ### Spacing Harmonization & Mobile Compact Layouts (Implemented Across All 6 Outer Pages)
