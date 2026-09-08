@@ -6,11 +6,29 @@
 
 # Dependencies
 node_modules/
+package-lock.json.bak
 
 # OS metadata
 .DS_Store
+**/.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
 
-# Temporary build archives
-scratch/
-dezan_website_*.zip
+# Archives & Temporary files
+*.zip
+*.tar.gz
+*.rar
+scratch/*
+!scratch/.gitkeep
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Skills lock
 skills-lock.json
+

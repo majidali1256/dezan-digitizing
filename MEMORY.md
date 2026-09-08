@@ -1380,5 +1380,54 @@ The Worker Studio provides an isolated, production-focused environment for embro
     - Responsive Mobile Viewport (iPhone 15 Pro 390x844): Verified clean layout, touch targets, and zero horizontal scroll.
     - Verified artifacts: `worker_portal_desktop.png`, `worker_artwork_lightbox.png`, `worker_staged_files_ready.png`, `worker_portal_mobile.png`, `admin_orders_desktop.png`, `admin_order_details_deliverables.png`, and `admin_deliverables_lightbox.png`.
 
+---
 
+## 27. Codebase Cleanliness, Dead Code Pruning & Automated Test Standardization
 
+### 27.1 Architecture & Code Hygiene Audit
+- **Objective**: Maintain a clean, safe, robust, and well-maintained project by eliminating dead code, obsolete archives, duplicate scripts, legacy mock forms, and untracked debris, without adding unnecessary complexity.
+- **Key Removals & Prunings**:
+  1. **Legacy Binary Archives & Bloat**:
+     - Removed tracked `dezan_website_final.zip` (11.3 MB) and untracked `dezan_website_godaddy_ready.zip` (5.4 MB) from repository.
+     - Cleaned out all `.DS_Store` macOS metadata files across all subdirectories and updated `.gitignore` with strict rules for `.DS_Store`, `**/.DS_Store`, `._*`, and `*.zip`.
+     - Purged 34 MB of temporary visual regression screenshots in `scratch/`, maintaining `scratch/.gitkeep` with `.gitignore` exclusion for transient files.
+  2. **Legacy PHP & Form Scripts**:
+     - Removed `process_form.php` (old GoDaddy cURL mailer script replaced by Web3Forms and Express REST backend).
+     - Directly pointed `contact.html` form action to `https://api.web3forms.com/submit` with active access key.
+     - Pruned client-side URL rewrite hack in `app.js` that previously rerouted `process_form.php` to Web3Forms.
+  3. **Page Consolidation**:
+     - Converted `profile.html` into a lightweight, instantaneous redirect forwarder to `client-profile.html`.
+     - Completely eliminated ~130 lines of dead `profile.html` demo localStorage handlers (`#btn-edit-profile`, `#btn-notifications`, `#btn-security`, `#btn-logout`) from `app.js`.
+  4. **`app.js` Massive Dead Code Pruning (~1,340 lines removed)**:
+     - **Removed Obsolete Single-Step Guest Modal**: Pruned ~800 lines of obsolete single-step guest modal markup and event listeners in `app.js` that were superseded by `js/order-quote-modal.js`.
+     - **Removed Dead File Upload Listeners**: Pruned ~280 lines of `initFileUploads()` in `app.js` targeting nonexistent `#quote-form` and `#order-form` and pointing to `tmpfiles.org`.
+     - **Pruned Dead Inline Order Form Logic**: Removed `validateOrderForm()`, `showFormError()`, `hideFormError()`, and dummy `sendOrderEmail()` using placeholder EmailJS credentials.
+     - **Streamlined `selectPlan`**: Delegates unauthenticated users cleanly to `window.openOrderQuoteModal({ service, plan, price, mode: 'order' })`, client accounts to `client-portal.html?action=new_order...`, and blocks staff accounts with `window.showStaffOrderBlockModal`.
+     - **File Size Reduction**: `app.js` reduced from **2,749 lines** (130 KB) down to **1,410 lines** (69 KB) with 0 syntax warnings (`node -c app.js` passes cleanly).
+
+### 27.2 Automated Test Suite Standardization
+- **Native Test Runner (`tests/api.test.js`)**:
+  - Implemented an automated test suite utilizing Node 24 native `node:test`, `node:assert/strict`, and native `fetch`.
+  - Configured `"test": "node --test tests/api.test.js"` in `package.json` to enable 1-command verification via `npm test`.
+  - Integrated graceful server startup on ephemeral test ports with clean PostgreSQL connection pool draining (`await pool.end()`) upon test completion.
+- **Coverage Areas (10/10 Tests Passing)**:
+  1. **System Health & Discovery**:
+     - `GET /api/health`: Validates HTTP 200, operational status, and active PostgreSQL connection.
+     - `GET /api/`: Validates HTTP 200 and complete endpoint registry discovery metadata.
+  2. **Authentication & RBAC**:
+     - `POST /api/auth/login` (Invalid): Validates HTTP 401 on unauthorized credentials.
+     - `POST /api/auth/login` (Admin): Validates HTTP 200, JWT token generation, and `admin` role authorization.
+     - `POST /api/auth/login` (Digitizer): Validates HTTP 200, JWT token generation, and `digitizer` role authorization.
+  3. **Order Management & Access Control**:
+     - `GET /api/orders` (Unauthenticated): Validates HTTP 401 gatekeeping.
+     - `GET /api/orders` (Admin Authenticated): Validates HTTP 200 and authorized commercial orders array.
+  4. **Worker Studio Queue & Zero-PII Enforcement**:
+     - `GET /api/tasks` (Unauthenticated): Validates HTTP 401 gatekeeping.
+     - `GET /api/tasks` (Digitizer Authenticated): Validates HTTP 200, task queue accessibility, and **strict zero-PII masking** (asserts `client_email`, `client_phone`, `billing_address`, and `price` are strictly `undefined`).
+  5. **Quotes & Public Inquiries**:
+     - `POST /api/quotes`: Validates HTTP 201 Created and quote order number generation (`QUO-...`).
+
+### 27.3 Documentation Alignment
+- **`ARCHITECTURE.md`**: Updated to reflect current Express.js 5.x + PostgreSQL (InsForge BaaS) backend with JWT authentication and Zero-PII worker protection, removing outdated Firebase references.
+- **`ROADMAP.md`**: Updated to mark Phases 1–7 complete, transitioning the project into active production maintenance with automated testing.
+- **`MEMORY.md`**: Synchronized as the authoritative single source of truth for the cleaned and hardened codebase.
