@@ -1,0 +1,6 @@
+# Exclude heavy temporary archives and test scratch folders
+*.zip
+scratch/
+fiverr_portfolio_mockups/
+*.log
+.DS_Store
