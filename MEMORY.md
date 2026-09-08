@@ -135,6 +135,23 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
      - Explicitly specified `width="36" height="36"` on `logo.png` and `width="1057" height="1100"` on the hero comparison images.
      - Added CSS rules in `styles.css` locking `header a img[src*="logo.png"]` dimensions to 32px (mobile) and 36px (desktop) with `aspect-ratio: 1 / 1`.
 
+### 4.6 Stage 1 Order Modal Optimization & Viewport Fit (`js/order-quote-modal.js` & `client-portal.html`)
+- **Problem**:
+  - In the "Place an Order / Request Quote" modal (Stage 1: Choose Service), the second card (*Realistic / Pet Portrait Digitizing*) contained an oversized warning/note box (`~70px` height) that repeated redundant copy already present in its subtitle.
+  - Large button paddings (`p-4 sm:p-5`), large icon boxes (`w-14 h-14 sm:w-16 sm:h-16`), and container gaps caused the modal body to bloat past 430px height, pushing the 3rd service option (*Vector Art Conversion*) below the fold and forcing vertical scrolling.
+- **Solution & Architecture**:
+  1. **Removed Redundant Note Box**:
+     - Stripped the redundant clarification callout box from Card 2, leaving clean, concise copy in the subtitle (*"Pet portraits, realistic animals, faces, fur, detailed shading."*).
+  2. **Harmonized Card Dimensions & Compact Token Scale**:
+     - Standardized padding across all 3 cards to `p-2.5 sm:p-3` with rounded radius `rounded-xl sm:rounded-2xl`.
+     - Scaled icon containers to `w-10 h-10 sm:w-11 sm:h-11` with SVGs sized `w-5 h-5 sm:w-6 sm:h-6`.
+     - Compacted title typography to `text-sm sm:text-base font-bold` with `text-[10px] sm:text-[11px]` pricing pills.
+     - Scaled subtitle copy to `text-[11px] sm:text-xs` and file type badges to `text-[10.5px] px-2.5 py-0.5`.
+     - Compacted outer container spacing from `p-4 sm:p-6 space-y-3.5` to `p-3 sm:p-4 space-y-2 sm:space-y-2.5`.
+  3. **Zero-Scroll Viewport Parity**:
+     - All 3 service options (*Embroidery Digitizing*, *Realistic / Pet Portrait Digitizing*, and *Vector Art Conversion*) sit comfortably inside the viewport simultaneously on desktop, tablet, and mobile (390px) with zero vertical scrolling needed.
+     - Changes synchronized across both public modal (`js/order-quote-modal.js`) and embedded client portal order flow (`client-portal.html`). Verified via automated Playwright visual screenshots.
+
 ---
 
 ## 5. Site Map & Route Architecture
