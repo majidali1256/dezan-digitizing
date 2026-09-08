@@ -69,7 +69,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 - **Solution & Token Contract**:
   - Implemented a 2-line stacked architectural lockup across all 8 public pages (`index.html`, `about.html`, `services.html`, `portfolio.html`, `pricing.html`, `contact.html`, `order-success.html`, `profile.html`):
     - **Top Line (Brand Root)**: `<span class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN</span>` (or `text-white` in dark footers).
-    - **Bottom Line (Craft Subtitle)**: `<span class="text-[9.5px] sm:text-[10.5px] font-extrabold tracking-[0.18em] text-primary uppercase mt-1">Digitizing</span>`.
+    - **Bottom Line (Craft Subtitle)**: `<span class="text-[9.5px] sm:text-[10.5px] font-extrabold tracking-[0.18em] text-primary uppercase mt-0">Digitizing</span>`.
   - Nested within `<div class="flex flex-col text-left leading-none">` alongside the circular emblem `logo.png` (`w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover`).
   - Gives the brand a refined, high-fashion horology/atelier lockup with optimal visual hierarchy and enhanced horizontal clearance on mobile viewports.
 
