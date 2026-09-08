@@ -11,10 +11,16 @@
 ---
 
 ## 2. Live Deployments & Hosting
-- **Vercel Production:** `https://dezan-digitizing.vercel.app/`
-- **GitHub Pages Production:** `https://majidali1256.github.io/dezan-digitizing/`
+- **Vercel Production (Full-Stack Frontend + Backend):** `https://dezan-digitizing.vercel.app/`
+  - **Frontend Pages:** `https://dezan-digitizing.vercel.app/` (clean URLs, SSL, global CDN edge caching)
+  - **Express REST API Backend:** `https://dezan-digitizing.vercel.app/api` (Vercel Serverless Functions via `api/[[...slug]].js` and `api/index.js` routing to `server/server.js`)
+  - **API Health Endpoint:** `https://dezan-digitizing.vercel.app/api/health` (Reports live database status, latency, order counts)
+- **Database Engine (Cloud):** PostgreSQL on InsForge BaaS (`e8rw998g.us-east.database.insforge.app:5432` with SSL)
+- **Cloud Storage (Cloud):** InsForge S3 Object Storage (`https://e8rw998g.us-east.insforge.app/api/storage`)
+- **GitHub Pages Production (Frontend Mirror):** `https://majidali1256.github.io/dezan-digitizing/`
 - **GitHub Repository:** `https://github.com/majidali1256/dezan-digitizing.git` (Branch: `main`)
-- **Configuration:** `vercel.json` (cleans URLs, sets caching, routes `/` to `index.html`)
+- **Configuration:** `vercel.json` (clean URLs, `/api/(.*)` rewrites to `/api`)
+
 
 ---
 
