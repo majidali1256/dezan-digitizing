@@ -1074,3 +1074,21 @@ The Worker Studio provides an isolated, production-focused environment for embro
     7. Worker portal task queue contains 0 quotes, with strict physical data masking confirmed on all properties.
     8. Screenshots captured: `scratch/admin_portal_quote_isolation.png` and `scratch/worker_portal_quote_isolation.png`.
 
+---
+
+## 32. Homepage "Why Choose Dezan Digitizing" Feature Card Update (Files Stay in Your Account)
+- **Problem & Requirement**:
+  - In `index.html`, the second feature card under *"Why Choose Dezan Digitizing?"* previously read:
+    - Title: *"Production-Ready"*
+    - Subtitle: *"Calibrated density & pull compensation for clean, break-free runs."*
+  - The client requested replacing this card with account storage and re-download messaging:
+    - Title: **"Files Stay in Your Account"**
+    - Subtitle: **"Re-download previous orders whenever you need them."**
+- **Implementation**:
+  - In `index.html` (lines 602–616):
+    - Replaced the title with `"Files Stay in Your Account"`.
+    - Replaced description with `"Re-download previous orders whenever you need them."`.
+    - Replaced the previous shield icon with a folder-download SVG icon matching the stroke weight (`stroke-width="2.2"`), dimensions (`w-6 h-6 sm:w-7 sm:h-7`), and gold circular badge container of the surrounding cards.
+- **Visual QA Verification (`scratch/verify_files_stay_in_account.js`)**:
+  - Captured Desktop Light (`scratch/why_choose_pillars_desktop_light.png`), Desktop Dark (`scratch/why_choose_pillars_desktop_dark.png`), and Mobile 390px (`scratch/why_choose_pillars_mobile.png`).
+  - Confirmed 4-card desktop layout and 2x2 mobile grid alignment with zero overflow or text clipping.
