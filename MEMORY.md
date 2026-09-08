@@ -1171,3 +1171,35 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - Results: 0 broken images (`naturalWidth === 0`), 0 HTTP 404 network errors, 0 missing alt tags, 0 generic alt tags.
   - Multi-viewport visual screenshots verified on Desktop (`1512x982`) and Mobile (`390x844`).
 
+---
+
+## 33. End-to-End PayPal Payment Integration & Payoneer B2B Option (Implemented & Verified)
+- **Problem & Requirement**:
+  - Clients in the U.S. (embroidery shops, apparel decorators) required a trusted, instant payment method to settle orders ($15 flat-rate, $25 jacket back, pet portraits) and convert approved custom quotes into active production orders.
+  - As a Pakistani digital export business, PayPal is the #1 choice for front-end customer conversion (allowing U.S. clients to pay via PayPal balance or direct Debit/Credit cards), while Payoneer serves as the secondary channel for batch invoicing and direct U.S. bank ACH deposits.
+- **Architecture & Implementation**:
+  - **Dynamic PayPal SDK Loader (`js/paypal-config.js`)**:
+    - Centralized configuration module managing `PAYPAL_CLIENT_ID` (configurable via `window.DEZAN_PAYPAL_CLIENT_ID` or `window.ENV.PAYPAL_CLIENT_ID`, defaulting to sandbox test mode).
+    - Dynamically injects the official PayPal JS SDK once per session (`https://www.paypal.com/sdk/js?client-id=...&currency=USD&intent=capture&components=buttons`).
+  - **Interactive Checkout Modal (`client-portal.html`)**:
+    - Upgraded `#checkout-payment-modal` with PayPal Smart Buttons (`#paypal-button-container`).
+    - Smart buttons automatically render both the **Yellow PayPal Button** and the **Debit or Credit Card Button** (for users without a PayPal account).
+    - Tab 2 provides **Payoneer & Direct U.S. Bank ACH** receiving details (Community Federal Savings Bank) with a 1-click invoice request generator.
+  - **Approval & Settlement Flow (`initPayPalForOrder` & `completeSuccessfulPayment`)**:
+    - Dynamic amount calculation based on order price (`order.price || 15`).
+    - `onApprove` captures order reference and gateway transaction ID (`details.id`).
+    - Calls `insforgeClient.updateOrderPayment(order.id, 'paid', 'PayPal', transactionId)` to update local state and PostgreSQL database.
+    - Syncs to REST backend `/api/orders/:id/payment` (or `/api/quotes/:id/convert` for quote promotions).
+    - Closes checkout modal, re-renders orders with green `Paid` status badge, decrements balance due, and triggers emerald confirmation toast.
+  - **Backend & Email Automation (`server/controllers/orderController.js` & `quoteController.js`)**:
+    - `confirmPayment`: Sets `payment_status = 'paid'`, `payment_method = 'PayPal'`, `transaction_id = $2`.
+    - `convertQuoteToOrder`: Converts approved quote to active production order (`is_quote = false`, `status = 'pending_review'`).
+    - Both endpoints automatically dispatch asynchronous customer confirmation receipt emails and admin queue alerts via `emailService`.
+  - **Guest Checkout Auto-Loader (`app.js`)**:
+    - Auto-injects `paypal-config.js` if not already present.
+    - Captures `transactionId` on direct order submissions.
+- **Verification**:
+  - Automated unit test suite `scratch/test_paypal_workflow.js`: 6/6 tests passed.
+  - Playwright visual tests `scratch/verify_paypal_modal.js`: Verified clean rendering of PayPal, Pay Later, and Debit/Credit card buttons on Desktop (1280px) and Mobile (390px).
+
+

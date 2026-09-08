@@ -251,7 +251,20 @@ const convertQuoteToOrder = async (req, res) => {
             [paymentMethod, transactionId, quote.id]
         );
 
-        return success(res, convertedRes.rows[0], 'Quote converted to active production order successfully');
+        const convertedOrder = convertedRes.rows[0];
+
+        // Dispatch customer confirmation email and admin dispatch notification asynchronously
+        try {
+            const clientEmail = convertedOrder.client_email || (user && user.email);
+            if (clientEmail) {
+                emailService.sendOrderConfirmation(convertedOrder, clientEmail).catch(e => console.warn('[Email Warning]:', e.message));
+            }
+            emailService.sendNewOrderAdminAlert(convertedOrder).catch(e => console.warn('[Email Warning]:', e.message));
+        } catch (e) {
+            console.warn('[Email Dispatch Warning]:', e.message);
+        }
+
+        return success(res, convertedOrder, 'Quote converted to active production order successfully');
     } catch (err) {
         console.error('[Convert Quote Error]:', err);
         return error(res, `Failed to convert quote to order: ${err.message}`);

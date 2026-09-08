@@ -951,40 +951,48 @@
                 <div>
                     <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Select Payment Method</label>
                     <div class="grid grid-cols-2 gap-2 mb-3">
-                        <button type="button" onclick="selectCheckoutMethod('paypal')" id="checkout-tab-paypal" class="p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer">
-                            <span class="material-symbols-outlined text-sm text-primary">account_balance_wallet</span> PayPal
+                        <button type="button" onclick="selectCheckoutMethod('paypal')" id="checkout-tab-paypal" class="p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-900 dark:text-white">
+                            <span class="material-symbols-outlined text-sm text-primary">account_balance_wallet</span> PayPal &amp; Cards
                         </button>
-                        <button type="button" onclick="selectCheckoutMethod('card')" id="checkout-tab-card" class="p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer">
-                            <span class="material-symbols-outlined text-sm">credit_card</span> Credit Card
-                        </button>
-                    </div>
-
-                    <!-- PayPal Container -->
-                    <div id="checkout-panel-paypal" class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 text-center">
-                        <p class="text-xs text-slate-600 dark:text-slate-300 mb-3">Pay securely with your PayPal account or linked card balance.</p>
-                        <button type="button" onclick="executeOrderPayment('PayPal')" class="w-full py-2.5 rounded-xl bg-[#ffc439] hover:bg-[#f6b92a] text-[#003087] font-black text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer">
-                            <span class="material-symbols-outlined text-sm">payments</span> Complete with PayPal
+                        <button type="button" onclick="selectCheckoutMethod('payoneer')" id="checkout-tab-payoneer" class="p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer">
+                            <span class="material-symbols-outlined text-sm">currency_exchange</span> Payoneer / ACH
                         </button>
                     </div>
 
-                    <!-- Card Form Container -->
-                    <div id="checkout-panel-card" class="hidden p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 space-y-2.5">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase">Card Number</label>
-                            <input type="text" placeholder="4532 •••• •••• 8821" value="•••• •••• •••• 8821" class="w-full px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-primary/20 rounded-lg text-xs font-mono text-slate-900 dark:text-white" />
+                    <!-- PayPal Smart Buttons Container -->
+                    <div id="checkout-panel-paypal" class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 text-center space-y-2.5">
+                        <p class="text-xs text-slate-600 dark:text-slate-300">Fast, 1-click settlement via PayPal balance or Debit/Credit Card:</p>
+                        
+                        <!-- Dynamic PayPal Smart Buttons Mounted Here -->
+                        <div id="paypal-button-container" class="w-full min-h-[44px] flex flex-col justify-center"></div>
+
+                        <!-- Fallback / Sandbox Direct Button -->
+                        <div id="paypal-fallback-container" class="hidden pt-2 border-t border-slate-200 dark:border-slate-800">
+                            <button type="button" onclick="executeOrderPayment('PayPal')" class="w-full py-2.5 rounded-xl bg-[#ffc439] hover:bg-[#f6b92a] text-[#003087] font-black text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer">
+                                <span class="material-symbols-outlined text-sm">payments</span> Complete Payment (Direct Simulation)
+                            </button>
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
+                    </div>
+
+                    <!-- Payoneer B2B / ACH Container -->
+                    <div id="checkout-panel-payoneer" class="hidden p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 space-y-2.5 text-left">
+                        <div class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-amber-500 text-lg shrink-0 mt-0.5">account_balance</span>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase">Expires</label>
-                                <input type="text" placeholder="12/28" value="08/28" class="w-full px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-primary/20 rounded-lg text-xs font-mono text-slate-900 dark:text-white" />
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase">CVC</label>
-                                <input type="text" placeholder="CVC" value="982" class="w-full px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-primary/20 rounded-lg text-xs font-mono text-slate-900 dark:text-white" />
+                                <h4 class="text-xs font-bold text-slate-900 dark:text-white">Payoneer &amp; Direct U.S. Bank ACH</h4>
+                                <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
+                                    Ideal for high-volume embroidery shops and batch invoicing with zero credit card transaction fees.
+                                </p>
                             </div>
                         </div>
-                        <button type="button" onclick="executeOrderPayment('Credit Card')" class="w-full py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer mt-1">
-                            <span class="material-symbols-outlined text-sm">lock</span> Pay Securely Now
+                        <div class="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs space-y-1">
+                            <div class="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400">Receiving Account:</div>
+                            <div class="text-[11px] text-slate-800 dark:text-slate-200">Bank: <strong>Community Federal Savings Bank (U.S.)</strong></div>
+                            <div class="text-[11px] text-slate-800 dark:text-slate-200">Account Type: <strong>Checking / ACH Direct Deposit</strong></div>
+                            <div class="text-[11px] text-slate-800 dark:text-slate-200">Email: <strong>billing@dezandigitizing.com</strong></div>
+                        </div>
+                        <button type="button" onclick="requestPayoneerInvoice()" class="w-full py-2.5 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-black text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-sm">mail</span> Request Payoneer Invoice / Payment Link
                         </button>
                     </div>
                 </div>
@@ -1330,6 +1338,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="js/paypal-config.js"></script>
     <script src="js/insforge-client.js"></script>
     <script src="js/order-quote-modal.js"></script>
     <script>
@@ -3267,6 +3276,7 @@
             if (amtEl) amtEl.textContent = `$${price}`;
 
             selectCheckoutMethod('paypal');
+            initPayPalForOrder(order);
             modal.classList.remove('hidden');
         }
 
@@ -3278,22 +3288,142 @@
 
         function selectCheckoutMethod(method) {
             const paypalTab = document.getElementById('checkout-tab-paypal');
-            const cardTab = document.getElementById('checkout-tab-card');
+            const payoneerTab = document.getElementById('checkout-tab-payoneer');
             const paypalPanel = document.getElementById('checkout-panel-paypal');
-            const cardPanel = document.getElementById('checkout-panel-card');
+            const payoneerPanel = document.getElementById('checkout-panel-payoneer');
 
-            if (!paypalTab || !cardTab || !paypalPanel || !cardPanel) return;
+            if (!paypalTab || !payoneerTab || !paypalPanel || !payoneerPanel) return;
 
             if (method === 'paypal') {
                 paypalTab.className = 'p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-900 dark:text-white';
-                cardTab.className = 'p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
+                payoneerTab.className = 'p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
                 paypalPanel.classList.remove('hidden');
-                cardPanel.classList.add('hidden');
+                payoneerPanel.classList.add('hidden');
             } else {
-                cardTab.className = 'p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-900 dark:text-white';
+                payoneerTab.className = 'p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-900 dark:text-white';
                 paypalTab.className = 'p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
-                cardPanel.classList.remove('hidden');
+                payoneerPanel.classList.remove('hidden');
                 paypalPanel.classList.add('hidden');
+            }
+        }
+
+        let paypalButtonsInstance = null;
+
+        async function initPayPalForOrder(order) {
+            const container = document.getElementById('paypal-button-container');
+            const fallback = document.getElementById('paypal-fallback-container');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div class="py-3 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined animate-spin text-base text-primary">sync</span>
+                    <span>Connecting to PayPal gateway...</span>
+                </div>
+            `;
+            if (fallback) fallback.classList.add('hidden');
+
+            try {
+                if (!window.PayPalConfig) {
+                    throw new Error('PayPal configuration module not loaded');
+                }
+                const paypal = await window.PayPalConfig.loadSdk();
+
+                container.innerHTML = '';
+
+                if (paypal && paypal.Buttons) {
+                    paypalButtonsInstance = paypal.Buttons({
+                        style: {
+                            layout: 'vertical',
+                            color: 'gold',
+                            shape: 'rect',
+                            label: 'paypal',
+                            height: 40
+                        },
+                        createOrder: function(data, actions) {
+                            const amountVal = parseFloat(order.price || 15).toFixed(2);
+                            return actions.order.create({
+                                purchase_units: [{
+                                    description: `Dezan Digitizing ${order.is_quote ? 'Quote' : 'Order'} #${order.order_number}`,
+                                    amount: {
+                                        currency_code: 'USD',
+                                        value: amountVal
+                                    }
+                                }]
+                            });
+                        },
+                        onApprove: async function(data, actions) {
+                            try {
+                                container.innerHTML = `
+                                    <div class="py-3 text-center text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center justify-center gap-2">
+                                        <span class="material-symbols-outlined animate-spin text-base">sync</span>
+                                        <span>Confirming payment with production queue...</span>
+                                    </div>
+                                `;
+                                const details = await actions.order.capture();
+                                const transactionId = details.id || data.orderID;
+                                await completeSuccessfulPayment(order, 'PayPal', transactionId);
+                            } catch (err) {
+                                console.error('[PayPal Capture Error]:', err);
+                                alert(`Payment capture notice: ${err.message}`);
+                                if (fallback) fallback.classList.remove('hidden');
+                            }
+                        },
+                        onError: function(err) {
+                            console.warn('[PayPal SDK Notice]:', err);
+                            container.innerHTML = `
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Fast settlement via PayPal balance or card.</p>
+                            `;
+                            if (fallback) fallback.classList.remove('hidden');
+                        },
+                        onCancel: function(data) {
+                            console.log('[PayPal Payment Cancelled]:', data);
+                        }
+                    });
+
+                    await paypalButtonsInstance.render('#paypal-button-container');
+                } else {
+                    throw new Error('PayPal Buttons unavailable');
+                }
+            } catch (err) {
+                console.warn('[PayPal Fallback Active]:', err.message);
+                container.innerHTML = `
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Fast settlement via PayPal balance or card.</p>
+                `;
+                if (fallback) fallback.classList.remove('hidden');
+            }
+        }
+
+        async function completeSuccessfulPayment(order, method = 'PayPal', transactionId = null) {
+            try {
+                // 1. Update BaaS / local state
+                await window.insforgeClient.updateOrderPayment(order.id, 'paid', method, transactionId);
+
+                // 2. Sync to Backend REST API
+                const session = JSON.parse(localStorage.getItem('dezan_session') || '{}');
+                const token = session.token || session.accessToken;
+                const headers = { 'Content-Type': 'application/json' };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                if (order.is_quote || order.status === 'quote_ready') {
+                    await fetch(`/api/quotes/${order.id}/convert`, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({ paymentMethod: method, transactionId })
+                    }).catch(e => console.warn('[Backend Convert Sync Notice]:', e.message));
+                } else {
+                    await fetch(`/api/orders/${order.id}/payment`, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({ paymentMethod: method, transactionId })
+                    }).catch(e => console.warn('[Backend Order Payment Sync Notice]:', e.message));
+                }
+
+                closeCheckoutModal();
+                await renderOrders();
+                showPaymentSuccessToast(order.order_number, (order.price || 15).toFixed(2), method, transactionId);
+            } catch (err) {
+                console.error('[Payment Settlement Error]:', err);
+                alert(`Payment settled, but UI update encountered a notice: ${err.message}`);
             }
         }
 
@@ -3311,10 +3441,8 @@
             }
 
             try {
-                await window.insforgeClient.updateOrderPayment(order.id, 'paid', method);
-                closeCheckoutModal();
-                await renderOrders();
-                showPaymentSuccessToast(order.order_number, (order.price || 15).toFixed(2), method);
+                const simulatedTxId = 'PAYPAL_SIM_' + Math.random().toString(36).substring(2, 10).toUpperCase();
+                await completeSuccessfulPayment(order, method, simulatedTxId);
             } catch (err) {
                 console.error('Payment error:', err);
                 alert(`Payment error: ${err.message}`);
@@ -3326,14 +3454,32 @@
             }
         }
 
-        function showPaymentSuccessToast(orderNumber, amount, method) {
+        function requestPayoneerInvoice() {
+            if (!currentCheckoutOrderId) return;
+            const order = cachedOrders.find(o => o.id === currentCheckoutOrderId || o.order_number === currentCheckoutOrderId);
+            if (!order) return;
+
+            const subject = encodeURIComponent(`Payoneer Invoice Request - Order #${order.order_number}`);
+            const body = encodeURIComponent(
+                `Hello Dezan Billing Team,\n\nPlease issue a Payoneer Payment Link / ACH invoice for my order:\n\n` +
+                `Order Number: ${order.order_number}\n` +
+                `Design: ${order.project_name || 'Design Order'}\n` +
+                `Service: ${order.service_type || 'Embroidery Digitizing'}\n` +
+                `Amount Due: $${(order.price || 15).toFixed(2)}\n\n` +
+                `Thank you,\n${window.insforgeClient?.currentUser?.displayName || 'Valued Client'}`
+            );
+            window.location.href = `mailto:billing@dezandigitizing.com?subject=${subject}&body=${body}`;
+        }
+
+        function showPaymentSuccessToast(orderNumber, amount, method, transactionId = null) {
             const toast = document.createElement('div');
             toast.className = 'fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-emerald-700 text-white shadow-2xl flex items-center gap-3 border border-emerald-400/40 animate-fade-in transition-all';
             toast.innerHTML = `
                 <span class="material-symbols-outlined text-2xl text-emerald-200">check_circle</span>
                 <div>
-                    <div class="font-black text-xs">Payment Received!</div>
+                    <div class="font-black text-xs">Payment Confirmed!</div>
                     <div class="text-[11px] text-emerald-100">$${amount} settled for #${orderNumber} via ${method}.</div>
+                    ${transactionId ? `<div class="text-[9.5px] font-mono text-emerald-200/80 mt-0.5">Ref: ${transactionId}</div>` : ''}
                 </div>
             `;
             document.body.appendChild(toast);

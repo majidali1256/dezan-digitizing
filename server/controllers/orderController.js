@@ -388,7 +388,20 @@ const confirmPayment = async (req, res) => {
             return notFound(res, 'Order not found');
         }
 
-        return success(res, updateRes.rows[0], 'Payment confirmed successfully');
+        const paidOrder = updateRes.rows[0];
+
+        // Dispatch customer confirmation email and admin dispatch notification asynchronously
+        try {
+            const clientEmail = paidOrder.client_email || (req.user && req.user.email);
+            if (clientEmail) {
+                emailService.sendOrderConfirmation(paidOrder, clientEmail).catch(e => console.warn('[Email Warning]:', e.message));
+            }
+            emailService.sendNewOrderAdminAlert(paidOrder).catch(e => console.warn('[Email Warning]:', e.message));
+        } catch (e) {
+            console.warn('[Email Dispatch Warning]:', e.message);
+        }
+
+        return success(res, paidOrder, 'Payment confirmed successfully');
     } catch (err) {
         console.error('[Confirm Payment Error]:', err);
         return error(res, `Failed to confirm payment: ${err.message}`);

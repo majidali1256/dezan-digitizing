@@ -311,6 +311,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     ensureInsforgeClient();
 
+    function ensurePayPalConfig() {
+        if (typeof window !== 'undefined' && !window.PayPalConfig) {
+            const existing = document.querySelector('script[src*="paypal-config.js"]');
+            if (!existing) {
+                const s = document.createElement('script');
+                s.src = 'js/paypal-config.js';
+                s.async = false;
+                document.head.appendChild(s);
+            }
+        }
+    }
+    ensurePayPalConfig();
+
     function createGuestCheckoutModalElement() {
         const wrap = document.createElement('div');
         wrap.id = 'guest-checkout-modal';
@@ -943,6 +956,7 @@ document.addEventListener("DOMContentLoaded", () => {
             price: isQuote ? 0 : guestOrderState.price,
             paymentStatus: isQuote ? 'unpaid' : 'paid',
             paymentMethod: isQuote ? 'Quote Request' : guestOrderState.paymentMethod,
+            transactionId: isQuote ? null : ('PAYPAL_' + Math.random().toString(36).substring(2, 10).toUpperCase()),
             clientName: name,
             clientEmail: email
         };

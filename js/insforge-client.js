@@ -1946,10 +1946,11 @@ class InsForgeClient {
      * Updates an order's payment status (e.g. completes due payment, marks as paid)
      * @param {string} orderIdOrNumber 
      * @param {string} paymentStatus - 'paid' | 'unpaid' | 'pending'
-     * @param {string} paymentMethod - 'PayPal' | 'Credit Card' | 'Stripe'
+     * @param {string} paymentMethod - 'PayPal' | 'Credit Card' | 'Payoneer'
+     * @param {string|null} transactionId - Gateway transaction/capture reference ID
      * @returns {Promise<boolean>}
      */
-    async updateOrderPayment(orderIdOrNumber, paymentStatus = 'paid', paymentMethod = 'PayPal') {
+    async updateOrderPayment(orderIdOrNumber, paymentStatus = 'paid', paymentMethod = 'PayPal', transactionId = null) {
         const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
         const order = allOrders.find(o => o.id === orderIdOrNumber || o.order_number === orderIdOrNumber);
         if (!order) {
@@ -1959,6 +1960,9 @@ class InsForgeClient {
 
         order.payment_status = paymentStatus;
         order.payment_method = paymentMethod;
+        if (transactionId) {
+            order.transaction_id = transactionId;
+        }
 
         // If this was a quote, paying converts it directly into an active production order
         if (order.is_quote || order.status === 'quote_ready' || order.status === 'quote_requested') {
@@ -1976,22 +1980,27 @@ class InsForgeClient {
             orderNumber: order.order_number,
             paymentStatus,
             paymentMethod,
+            transactionId: order.transaction_id,
             price: order.price
         });
 
         // Persist to InsForge PostgreSQL
         try {
             const queryParam = order.id ? `id=eq.${order.id}` : `order_number=eq.${order.order_number}`;
+            const patchBody = {
+                payment_status: paymentStatus,
+                payment_method: paymentMethod,
+                status: order.status,
+                is_quote: order.is_quote,
+                updated_at: order.updated_at
+            };
+            if (order.transaction_id) {
+                patchBody.transaction_id = order.transaction_id;
+            }
             const res = await fetch(`${this.baseUrl}/api/database/records/orders?${queryParam}`, {
                 method: 'PATCH',
                 headers: this.getApiHeaders({ 'Prefer': 'return=representation' }),
-                body: JSON.stringify({
-                    payment_status: paymentStatus,
-                    payment_method: paymentMethod,
-                    status: order.status,
-                    is_quote: order.is_quote,
-                    updated_at: order.updated_at
-                })
+                body: JSON.stringify(patchBody)
             });
             if (res.ok) {
                 console.log(`✅ Order ${order.order_number} payment status updated live in PostgreSQL: ${paymentStatus}`);
