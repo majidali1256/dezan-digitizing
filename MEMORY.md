@@ -1431,3 +1431,28 @@ The Worker Studio provides an isolated, production-focused environment for embro
 - **`ARCHITECTURE.md`**: Updated to reflect current Express.js 5.x + PostgreSQL (InsForge BaaS) backend with JWT authentication and Zero-PII worker protection, removing outdated Firebase references.
 - **`ROADMAP.md`**: Updated to mark Phases 1–7 complete, transitioning the project into active production maintenance with automated testing.
 - **`MEMORY.md`**: Synchronized as the authoritative single source of truth for the cleaned and hardened codebase.
+
+---
+
+## 34. Comprehensive Site-Wide Button, Action, and Navigation Link Audit & Hardening
+- **Requirement & Scope**:
+  - The user requested that every button and link across the entire website and client/admin/worker portals performs its respective work and connects to its respective target page.
+  - Required systematic, automated testing and verification across all 30 HTML pages and 6 JavaScript controllers.
+- **Audit Process & Tools Developed**:
+  - `scripts/deep_button_link_validator.js`: Full AST/DOM scanner checking:
+    1. Every `<a href="...">` target exists on disk or resolves to a valid protocol/anchor.
+    2. Every `<button>` is bound via inline `onclick`, `type="submit"`, `id`, `data-*` handler, or global class listener.
+    3. Every JavaScript function referenced in HTML `onclick` handlers exists and is exposed in script scopes (`window.*` or file scope).
+  - `scripts/audit_buttons_and_links.js`: Secondary link/button health auditor.
+- **Key Fixes & Validations**:
+  1. **Pricing Action Buttons (`pricing.html`)**:
+     - Wired 5 desktop action buttons (`Order Left Chest / Hat`, `Order Larger Design`, `Order Pet / Portrait`, `Order Simple Vector`, `Order Complex Vector`) to `window.handleOrderClick(event, service, plan)`.
+  2. **Admin Workspace Scope Verification (`js/admin-workspace.js`)**:
+     - Verified modal openers/closers (`openAdminAccountModal`, `closeAdminAccountModal`, `closeSetQuotePriceModal`, `closePaymentReminderModal`, `closeInvoiceModal`, `closeClientHistoryModal`, `isolateCurrentClientInQueue`, `setModalHistoryFilter`, `setCatalogCategory`) reside at top-level script scope and execute cleanly from inline handlers.
+  3. **Theme Toggle Consistency**:
+     - Verified all 28 `.theme-toggle-btn` instances across marketing and portal pages are wired to dark/light theme toggle event listeners in `app.js`, `client-workspace.js`, `worker-workspace.js`, and `admin-workspace.js`.
+  4. **Backend Test Suite Green**:
+     - All 10/10 backend API tests in `tests/api.test.js` pass with 0 failures, validating RBAC, zero-PII task leakage, and order/quote endpoints.
+- **Verification Result**:
+  - 30 HTML files scanned, 0 broken links, 0 unbound buttons.
+
