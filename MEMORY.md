@@ -1289,3 +1289,41 @@ The Worker Studio provides an isolated, production-focused environment for embro
     - Verified `client-orders.html` renders both buttons and handles removal synchronously.
     - Screenshots captured: `desktop_two_uncompleted_orders.png`, `desktop_after_order_removed.png`, `mobile_orders_visible_scrolled.png`, and `client_orders_page_verified.png`.
 
+---
+
+## 36. Comprehensive Admin Order Details Dossier & In-Dashboard Artwork Preview Lightbox (Implemented & Verified)
+- **Problem Statement**:
+  - Previously on the Admin Orders dashboards (`admin-orders.html` and `admin-portal.html`), admins could only see truncated summaries on order cards and table rows.
+  - Crucial customer specifications were hidden from admin inspection: target placement, fabric/garment material, target stitched dimensions & unit, required machine embroidery formats, special options/modifiers (3D Puff, trims between letters, applique), complete customer production notes, turnaround speed (Standard 12–24h vs Rush 5–8h), the $5.00 rush fee breakdown, and payment details.
+  - Furthermore, clicking artwork files either forced external browser tab navigation, attempted whole-page navigation away from the dashboard, or triggered automatic raw downloads, disrupting admin workflow. There was also no unified multi-file viewer when clients submitted multiple design assets (e.g. PNG + AI + PDF).
+- **Architecture & UI Design Implementation**:
+  1. **Two Cohesive Modal Structures Added to Admin Pages (`admin-orders.html` & `admin-portal.html`)**:
+     - `#admin-order-details-modal`: Full-screen glassmorphism backdrop with an ultra-clean, structured 5-section bento dossier:
+       - **Bento 1: Design & Embroidery Specifications**: Service & Plan, Placement on garment, Target Size & Unit (e.g. `3.5" W x 2.2" H (Scaled for 4x4 hoop)`), Fabric / Garment Material (with underlay/density callouts), Required Machine Formats (.DST, .PES, .EXP, .EMB pill chips), Special Options & Modifiers (3D Puff Foam, Trims Between All Letters, Applique Fabric Outline with gold checkmark badges).
+       - **Bento 2: Turnaround Priority & Rush Breakdown**: Highlights Rush 5–8h delivery with an amber highlight card, and clearly breaks down the `+$5.00 USD` Rush Priority fee alongside the base service price.
+       - **Bento 3: Client Production Notes & Instructions**: Distinct container displaying full customer instructions, jump-stitch requests, and fabrication nuances in high-contrast typography.
+       - **Bento 4: Client Uploaded Artwork & Files Hub**: Displays each uploaded file individually with thumbnail preview, format badge (PNG, JPG, AI, EPS, PDF, ZIP), humanized file size, and smart action buttons (Preview for images/PDFs, Download for production archives).
+       - **Bento 5: Client Profile, Financial Summary & Digitizer Deliverables**: Client company/name/email, payment method (PayPal / Stripe Card), transaction ID, assigned digitizer, and production status.
+     - `#admin-artwork-preview-modal`: Dedicated In-Dashboard Lightbox:
+       - **Transparent dark checkerboard canvas** (`bg-[#0b0f17]`) to inspect transparent PNG embroidery underlays and cut lines with maximum optical clarity.
+       - **Browser-previewable formats (PNG, JPG, JPEG, WEBP, SVG)**: Rendered inside a high-res responsive image container with zoom-friendly framing.
+       - **PDF Documents**: Rendered inside an interactive embedded PDF viewer container.
+       - **Non-previewable production archives (AI, EPS, CDR, PSD, DST, PES, ZIP)**: Rendered with a dedicated luxury fallback card explaining the file format and providing a prominent direct download button (`⬇ Download AI File`).
+       - **Multi-File Navigation & Pager**: Lightbox header includes a persistent multi-file pager (`1 / 3`), prev/next arrow buttons, filename, file size, direct Download button, and Close button.
+  2. **JavaScript Engine (`js/admin-workspace.js`)**:
+     - Added file inspection utilities: `getFileExtension(filename)`, `isBrowserPreviewable(url, name)`, `formatFileSize(bytes)`, `getOrderArtworkFiles(order)`.
+     - Smart artwork chips `renderAdminArtworkChips(order)`: Single-file preview button, multi-file badge (`📎 X Files · Preview`), or fallback download button for vector archives.
+     - `renderAdminOrderCard(order, stageKey)`: Added prominent `Details` button (`openAdminOrderDetailsModal('${order.order_number}')`), `⚡ Rush 5-8h` badge, and fabric/format badges without cluttering resting cards.
+     - `renderAdminOrderTableRow(order, stageKey)`: Expanded action cell to `w-[360px] min-w-[360px]` with non-wrapping alignment, adding `Details` button and smart preview chips.
+     - Implemented `openAdminOrderDetailsModal(orderNumber)` and `closeAdminOrderDetailsModal()`.
+     - Implemented `openArtworkPreviewModal(orderNumber, fileIndex)`, `closeArtworkPreviewModal()`, `navigateArtworkPreview(direction)`, and `updateArtworkLightboxDisplay()`.
+     - Added full keyboard accessibility (`Escape` key closes topmost active modal; Left/Right arrow keys navigate multi-file artwork in lightbox) and backdrop click-to-close handlers.
+     - Updated table headers across all 4 operational columns in `admin-orders.html` to `w-[360px] min-w-[360px]` for exact alignment.
+- **Visual & Functional Verification**:
+  - Automated Playwright verification script `scratch/verify_admin_order_details.js` executed using local Google Chrome:
+    - **Desktop (1512x982)**: Verified resting cards, Table View, Order Details Dossier for `DZ-9101` (showing Rush 5–8h banner, +$5.00 rush fee breakdown, 3D Puff chips, 4 format chips, and 3 artwork files: PNG, AI, PDF).
+    - **Lightbox Tests**: Verified in-dashboard PNG rendering on dark checkerboard, Pager `1 / 3` $\rightarrow$ `2 / 3` (AI vector fallback card with direct download), and `3 / 3` (PDF embedded container). Verified `Escape` key closes lightbox and details modal cleanly.
+    - **Mobile Viewport (390x844)**: Verified responsive card stacking, touch targets, and scrolling modal dossier.
+    - Captured artifacts: `admin_orders_cards_resting.png`, `admin_order_details_modal_dz9101_desktop.png`, `admin_artwork_lightbox_png.png`, `admin_artwork_lightbox_ai_fallback.png`, `admin_artwork_lightbox_pdf.png`, `admin_orders_mobile_cards.png`, and `admin_orders_mobile_details_modal.png`.
+
+

@@ -683,6 +683,82 @@
             };
         }
 
+        // ===== ARTWORK & MULTI-FILE PREVIEW UTILITIES =====
+        function getFileExtension(filename) {
+            if (!filename || typeof filename !== 'string') return '';
+            const clean = filename.split('?')[0].split('#')[0];
+            const parts = clean.split('.');
+            return parts.length > 1 ? parts.pop().toLowerCase() : '';
+        }
+
+        function isBrowserPreviewable(url, name) {
+            const ext = getFileExtension(name) || getFileExtension(url);
+            const previewable = ['png', 'jpg', 'jpeg', 'webp', 'svg', 'gif', 'bmp', 'ico', 'pdf'];
+            return previewable.includes(ext);
+        }
+
+        function formatFileSize(bytes) {
+            if (!bytes || isNaN(bytes) || bytes <= 0) return '';
+            const kb = bytes / 1024;
+            if (kb < 1024) return kb.toFixed(1) + ' KB';
+            return (kb / 1024).toFixed(1) + ' MB';
+        }
+
+        function getOrderArtworkFiles(order) {
+            if (!order) return [];
+            if (Array.isArray(order.raw_artwork_files) && order.raw_artwork_files.length > 0) {
+                return order.raw_artwork_files.map((f, idx) => ({
+                    name: f.name || (typeof f === 'string' ? f.split('/').pop() : `Artwork_${idx + 1}`),
+                    url: f.url || (typeof f === 'string' ? f : '#'),
+                    size: f.size || 0,
+                    type: f.mimeType || f.type || ''
+                }));
+            }
+            if (order.artwork_url) {
+                return [{
+                    name: order.artwork_url.split('/').pop().split('?')[0] || `Artwork_${order.order_number || '1'}`,
+                    url: order.artwork_url,
+                    size: 0,
+                    type: ''
+                }];
+            }
+            return [];
+        }
+
+        function renderAdminArtworkChips(order) {
+            const files = getOrderArtworkFiles(order);
+            if (!files || files.length === 0) return '';
+
+            if (files.length === 1) {
+                const file = files[0];
+                const ext = (getFileExtension(file.name) || getFileExtension(file.url) || 'file').toUpperCase();
+                const canPreview = isBrowserPreviewable(file.url, file.name);
+
+                if (canPreview) {
+                    return `
+                        <button type="button" onclick="openArtworkPreviewModal('${order.order_number}', 0)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-900 dark:text-primary border border-amber-500/30 text-[10px] font-black hover:bg-amber-500/25 transition-colors cursor-pointer shadow-2xs" title="Preview artwork inside dashboard without leaving page">
+                            <span class="material-symbols-outlined text-xs">visibility</span>
+                            <span>Artwork (${ext})</span>
+                        </button>
+                    `;
+                } else {
+                    return `
+                        <a href="${file.url}" download="${file.name}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-[10px] font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer shadow-2xs" title="Download source file">
+                            <span class="material-symbols-outlined text-xs">download</span>
+                            <span>${ext} File</span>
+                        </a>
+                    `;
+                }
+            }
+
+            return `
+                <button type="button" onclick="openArtworkPreviewModal('${order.order_number}', 0)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-950 dark:text-amber-200 border border-amber-500/40 text-[10px] font-black hover:bg-amber-500/30 transition-colors cursor-pointer shadow-2xs" title="Preview all ${files.length} artwork files inside dashboard">
+                    <span class="material-symbols-outlined text-xs">collections</span>
+                    <span>📎 ${files.length} Files · Preview</span>
+                </button>
+            `;
+        }
+
         /**
          * Modular Visual Bento Card Renderer
          */
@@ -690,6 +766,7 @@
             const isPaid = order.payment_status === 'paid';
             const isRevision = order.status === 'revision_requested';
             const isUnassigned = !order.assigned_digitizer_id;
+            const isRush = order.turnaround_speed === 'rush';
             const theme = getOrderColorTheme(order);
 
             const assignedText = order.assigned_digitizer_name
@@ -713,9 +790,19 @@
 
                         <!-- Project Information -->
                         <div class="mb-3">
-                            <h4 class="font-black text-slate-900 dark:text-white text-sm group-hover:text-amber-800 dark:group-hover:text-primary transition-colors">${order.project_name}</h4>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">${order.placement || 'Standard'} · ${order.sizing || 'Default Size'}</p>
-                            ${order.fabric_type ? `<span class="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Fabric: ${order.fabric_type}</span>` : ''}
+                            <div class="flex items-start justify-between gap-2">
+                                <h4 class="font-black text-slate-900 dark:text-white text-sm group-hover:text-amber-800 dark:group-hover:text-primary transition-colors leading-tight">${order.project_name}</h4>
+                                ${isRush ? `
+                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/35 shrink-0 whitespace-nowrap" title="Expedited 5-8h delivery (+$5 rush fee included)">
+                                        <span class="material-symbols-outlined text-[11px] text-amber-600 dark:text-amber-400">bolt</span> Rush 5-8h
+                                    </span>
+                                ` : ''}
+                            </div>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">${order.placement || 'Standard'} · ${order.sizing || 'Default Size'}</p>
+                            <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                ${order.fabric_type ? `<span class="inline-block text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60">Fabric: ${order.fabric_type}</span>` : ''}
+                                ${order.file_format ? `<span class="inline-block text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 font-mono">Format: ${order.file_format}</span>` : ''}
+                            </div>
                         </div>
 
                         <!-- STAGE 3 SPECIAL: Outstanding Payment / Quote Alert Box -->
@@ -780,11 +867,7 @@
 
                         <!-- Attachments & Deliverables -->
                         <div class="flex flex-wrap items-center gap-1.5 mb-4">
-                            ${order.raw_artwork_files && order.raw_artwork_files.length > 0 ? `
-                                <a href="${order.raw_artwork_files[0].url}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-50 dark:bg-primary/10 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/20 text-[10px] font-bold hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                                    <span class="material-symbols-outlined text-xs">attach_file</span> Artwork
-                                </a>
-                            ` : ''}
+                            ${renderAdminArtworkChips(order)}
                             ${order.deliverables && order.deliverables.length > 0 ? order.deliverables.map(d => `
                                 <a href="${d.url}" target="_blank" class="inline-flex items-center gap-0.5 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                                     <span class="material-symbols-outlined text-xs">download</span> ${d.format}
@@ -800,6 +883,10 @@
                             <span class="text-base font-black text-slate-900 dark:text-white">$${Number(order.price || 0).toFixed(2)}</span>
                         </div>
                         <div class="flex items-center gap-1.5 flex-wrap">
+                            <button onclick="openAdminOrderDetailsModal('${order.order_number}')" class="px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[11px] cursor-pointer inline-flex items-center gap-1 shadow-xs transition-all focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Inspect complete client specifications, production notes, and artwork">
+                                <span class="material-symbols-outlined text-xs">visibility</span>
+                                <span>Details</span>
+                            </button>
                             <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="px-3 py-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 font-bold text-[11px] cursor-pointer inline-flex items-center gap-1 shadow-xs focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="View client's complete historical dossier">
                                 <span class="material-symbols-outlined text-xs">history</span>
                                 <span>History</span>
@@ -844,6 +931,7 @@
         function renderAdminOrderTableRow(order, stageKey) {
             const isPaid = order.payment_status === 'paid';
             const isRevision = order.status === 'revision_requested';
+            const isRush = order.turnaround_speed === 'rush';
             const theme = getOrderColorTheme(order);
             
             // Format worker display (Primary name + secondary specialty subtitle or neat unassigned pill)
@@ -881,15 +969,18 @@
                         </button>
                         <span class="text-slate-600 dark:text-slate-400 text-[11px] font-medium block mt-0.5 whitespace-nowrap truncate max-w-[170px]" title="${order.client_company || 'Independent'} · ${order.client_email}">${order.client_company || 'Independent'} · ${order.client_email}</span>
                     </td>
-                    <td class="px-4 py-3.5 w-[200px] min-w-[200px]">
-                        <span class="text-slate-900 dark:text-white font-semibold block leading-tight truncate max-w-[190px]" title="${order.project_name}">${order.project_name}</span>
+                    <td class="px-4 py-3.5 w-[220px] min-w-[220px]">
+                        <div class="flex items-center justify-between gap-1.5">
+                            <span class="text-slate-900 dark:text-white font-semibold block leading-tight truncate max-w-[155px]" title="${order.project_name}">${order.project_name}</span>
+                            ${isRush ? `
+                                <span class="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9px] font-black bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/35 shrink-0" title="Expedited 5-8h delivery (+$5 rush fee included)">
+                                    <span class="material-symbols-outlined text-[10px] text-amber-600 dark:text-amber-400">bolt</span> Rush
+                                </span>
+                            ` : ''}
+                        </div>
                         <span class="text-slate-600 dark:text-slate-400 text-[11px] font-medium block mt-0.5 mb-1 whitespace-nowrap">${order.placement || 'Standard'} (${order.sizing || 'Default'})</span>
                         <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                            ${order.raw_artwork_files && order.raw_artwork_files.length > 0 ? `
-                                <a href="${order.raw_artwork_files[0].url}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/80 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-[10px] font-bold hover:bg-slate-100 dark:hover:bg-slate-700 shadow-2xs shrink-0">
-                                    <span class="material-symbols-outlined text-[12px] text-amber-600 dark:text-primary">attach_file</span> Artwork
-                                </a>
-                            ` : ''}
+                            ${renderAdminArtworkChips(order)}
                             ${order.deliverables && order.deliverables.length > 0 ? order.deliverables.map(d => `
                                 <a href="${d.url}" target="_blank" class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-emerald-100/90 dark:bg-emerald-500/20 text-emerald-900 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 text-[10px] font-bold hover:bg-emerald-200 shadow-2xs shrink-0">
                                     <span class="material-symbols-outlined text-[11px]">download</span> ${d.format}
@@ -907,8 +998,12 @@
                     <td class="px-4 py-3.5 w-[145px] min-w-[145px] whitespace-nowrap text-xs">
                         ${assignedMarkup}
                     </td>
-                    <td class="px-4 py-3.5 w-[300px] min-w-[300px] text-right whitespace-nowrap">
+                    <td class="px-4 py-3.5 w-[360px] min-w-[360px] text-right whitespace-nowrap">
                         <div class="inline-flex items-center justify-end gap-1 flex-nowrap shrink-0">
+                            <button onclick="openAdminOrderDetailsModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-2xs shrink-0 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Inspect complete client specifications, production notes, and artwork">
+                                <span class="material-symbols-outlined text-xs">visibility</span>
+                                <span>Details</span>
+                            </button>
                             <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="px-2 py-1.5 rounded-lg bg-white/90 hover:bg-white dark:bg-slate-800/90 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-bold text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 shadow-2xs shrink-0 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="View lifetime client order history">
                                 <span class="material-symbols-outlined text-xs text-slate-500 dark:text-slate-400">history</span>
                                 <span>History</span>
@@ -1174,11 +1269,7 @@
                         <!-- Technical Specs & Deliverable Download Chips -->
                         <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-primary/10 dark:border-primary/15">
                             <div class="flex flex-wrap items-center gap-1.5">
-                                ${order.raw_artwork_files && order.raw_artwork_files.length > 0 ? `
-                                    <a href="${order.raw_artwork_files[0].url}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-amber-50 dark:bg-primary/10 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/20 text-[10px] font-bold hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                                        <span class="material-symbols-outlined text-xs">attach_file</span> Artwork
-                                    </a>
-                                ` : ''}
+                                ${renderAdminArtworkChips(order)}
                                 ${order.deliverables && order.deliverables.length > 0 ? order.deliverables.map(d => `
                                     <a href="${d.url}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                                         <span class="material-symbols-outlined text-xs">download</span> ${d.format} (${d.name || 'Stitch'})
@@ -1186,8 +1277,11 @@
                                 `).join('') : '<span class="text-[10px] text-slate-400 italic">No deliverables uploaded yet</span>'}
                             </div>
 
-                            <div class="flex items-center gap-2">
-                                <span class="font-black text-slate-900 dark:text-white text-sm">$${Number(order.price || 0).toFixed(2)}</span>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="font-black text-slate-900 dark:text-white text-sm mr-1">$${Number(order.price || 0).toFixed(2)}</span>
+                                <button onclick="openAdminOrderDetailsModal('${order.order_number}')" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-black cursor-pointer inline-flex items-center gap-1 shadow-xs">
+                                    <span class="material-symbols-outlined text-xs">visibility</span> Details
+                                </button>
                                 <button onclick="openInvoiceModal('${order.order_number}')" class="px-3 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-[11px] font-bold cursor-pointer inline-flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                                     <span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">receipt</span> Invoice
                                 </button>
@@ -2056,6 +2150,511 @@ Email: fdezan91@gmail.com`;
             document.getElementById('invoice-modal').classList.add('hidden');
         }
 
+        // ===== COMPREHENSIVE ADMIN ORDER DETAILS & IN-DASHBOARD ARTWORK LIGHTBOX =====
+        let currentPreviewOrder = null;
+        let currentPreviewFileIndex = 0;
+        let currentPreviewFiles = [];
+
+        function openArtworkPreviewModal(orderNumber, fileIndex = 0) {
+            const allOrders = window.insforgeClient ? window.insforgeClient.getOrders() : [];
+            const order = allOrders.find(o => o.order_number === orderNumber);
+            if (!order) {
+                console.warn('Order not found for artwork preview:', orderNumber);
+                return;
+            }
+
+            const files = getOrderArtworkFiles(order);
+            if (!files || files.length === 0) {
+                if (window.insforgeClient && typeof window.insforgeClient.showToast === 'function') {
+                    window.insforgeClient.showToast('No Artwork', 'No artwork files are attached to this order.', 'info', 'info');
+                } else {
+                    alert('No artwork files attached to this order.');
+                }
+                return;
+            }
+
+            currentPreviewOrder = order;
+            currentPreviewFiles = files;
+            currentPreviewFileIndex = Math.max(0, Math.min(fileIndex, files.length - 1));
+
+            updateArtworkLightboxDisplay();
+
+            const modal = document.getElementById('admin-artwork-preview-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function updateArtworkLightboxDisplay() {
+            if (!currentPreviewFiles || currentPreviewFiles.length === 0) return;
+            const file = currentPreviewFiles[currentPreviewFileIndex];
+            if (!file) return;
+
+            const fileName = file.name || ('Artwork_' + (currentPreviewFileIndex + 1));
+            const fileUrl = file.url || '#';
+            const ext = (getFileExtension(fileName) || getFileExtension(fileUrl) || 'FILE').toUpperCase();
+            const fileSizeText = file.size ? formatFileSize(file.size) : '';
+
+            // Update UI elements
+            const modalFilename = document.getElementById('artwork-preview-modal-filename');
+            const modalFilesize = document.getElementById('artwork-preview-modal-filesize');
+            const formatBadge = document.getElementById('artwork-preview-format-badge');
+            const counter = document.getElementById('artwork-preview-counter');
+            const prevBtn = document.getElementById('artwork-preview-prev-btn');
+            const nextBtn = document.getElementById('artwork-preview-next-btn');
+            const downloadBtn = document.getElementById('artwork-preview-download-btn');
+            const navControls = document.getElementById('artwork-preview-nav-controls');
+
+            const imgContainer = document.getElementById('artwork-preview-image-container');
+            const previewImg = document.getElementById('artwork-preview-img');
+            const pdfContainer = document.getElementById('artwork-preview-pdf-container');
+            const pdfIframe = document.getElementById('artwork-preview-pdf-iframe');
+            const fallbackContainer = document.getElementById('artwork-preview-fallback-container');
+            const fallbackFilename = document.getElementById('artwork-fallback-filename');
+            const fallbackExt = document.getElementById('artwork-fallback-ext');
+            const fallbackBtnExt = document.getElementById('artwork-fallback-btn-ext');
+            const fallbackDownloadBtn = document.getElementById('artwork-fallback-download-btn');
+
+            if (modalFilename) modalFilename.textContent = fileName;
+            if (modalFilesize) {
+                const orderInfo = currentPreviewOrder?.order_number ? ` · Order ${currentPreviewOrder.order_number}` : '';
+                modalFilesize.textContent = (fileSizeText ? `${fileSizeText}${orderInfo}` : (orderInfo.replace(/^ · /, '') || 'Artwork Asset'));
+            }
+            if (formatBadge) formatBadge.textContent = ext;
+            if (downloadBtn) {
+                downloadBtn.href = fileUrl;
+                downloadBtn.download = fileName;
+            }
+
+            // Pager controls
+            if (currentPreviewFiles.length > 1) {
+                if (navControls) navControls.classList.remove('hidden');
+                if (counter) counter.textContent = `${currentPreviewFileIndex + 1} / ${currentPreviewFiles.length}`;
+                if (prevBtn) prevBtn.disabled = currentPreviewFileIndex === 0;
+                if (nextBtn) nextBtn.disabled = currentPreviewFileIndex === currentPreviewFiles.length - 1;
+            } else {
+                if (navControls) navControls.classList.add('hidden');
+            }
+
+            // Decide renderer
+            const isImg = ['PNG', 'JPG', 'JPEG', 'WEBP', 'SVG', 'GIF', 'BMP', 'ICO'].includes(ext);
+            const isPdf = ext === 'PDF';
+
+            if (imgContainer) imgContainer.classList.add('hidden');
+            if (pdfContainer) pdfContainer.classList.add('hidden');
+            if (fallbackContainer) fallbackContainer.classList.add('hidden');
+
+            if (isImg) {
+                if (previewImg) {
+                    previewImg.src = fileUrl;
+                    previewImg.alt = fileName;
+                }
+                if (imgContainer) imgContainer.classList.remove('hidden');
+            } else if (isPdf) {
+                if (pdfIframe) {
+                    pdfIframe.src = fileUrl;
+                }
+                if (pdfContainer) pdfContainer.classList.remove('hidden');
+            } else {
+                // Non-previewable formats (AI, EPS, CDR, PSD, ZIP, DST, EMB, PES, etc.)
+                if (fallbackFilename) fallbackFilename.textContent = fileName;
+                if (fallbackExt) fallbackExt.textContent = ext;
+                if (fallbackBtnExt) fallbackBtnExt.textContent = ext;
+                if (fallbackDownloadBtn) {
+                    fallbackDownloadBtn.href = fileUrl;
+                    fallbackDownloadBtn.download = fileName;
+                }
+                if (fallbackContainer) fallbackContainer.classList.remove('hidden');
+            }
+        }
+
+        function navigateArtworkPreview(direction) {
+            if (!currentPreviewFiles || currentPreviewFiles.length <= 1) return;
+            const newIndex = currentPreviewFileIndex + direction;
+            if (newIndex >= 0 && newIndex < currentPreviewFiles.length) {
+                currentPreviewFileIndex = newIndex;
+                updateArtworkLightboxDisplay();
+            }
+        }
+
+        function closeArtworkPreviewModal() {
+            const modal = document.getElementById('admin-artwork-preview-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+            const pdfIframe = document.getElementById('artwork-preview-pdf-iframe');
+            if (pdfIframe) pdfIframe.src = '';
+            const previewImg = document.getElementById('artwork-preview-img');
+            if (previewImg) previewImg.src = '';
+
+            const orderModal = document.getElementById('admin-order-details-modal');
+            if (!orderModal || orderModal.classList.contains('hidden')) {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function openAdminOrderDetailsModal(orderNumber) {
+            const allOrders = window.insforgeClient ? window.insforgeClient.getOrders() : [];
+            const order = allOrders.find(o => o.order_number === orderNumber);
+            if (!order) {
+                console.warn('Order not found for details modal:', orderNumber);
+                return;
+            }
+
+            const modal = document.getElementById('admin-order-details-modal');
+            if (!modal) return;
+
+            const isPaid = order.payment_status === 'paid';
+            const isRush = order.turnaround_speed === 'rush';
+            const orderPrice = Number(order.price || 0);
+            const basePrice = isRush ? Math.max(0, orderPrice - 5) : orderPrice;
+
+            // Header Elements
+            const titleEl = document.getElementById('order-details-modal-title');
+            if (titleEl) titleEl.textContent = order.order_number || 'Order Details';
+
+            const statusBadgeEl = document.getElementById('order-details-status-badge');
+            if (statusBadgeEl) statusBadgeEl.innerHTML = getStatusBadge(order.status);
+
+            const paymentBadgeEl = document.getElementById('order-details-payment-badge');
+            if (paymentBadgeEl) paymentBadgeEl.innerHTML = getPaymentBadge(order.payment_status);
+
+            const turnaroundBadgeEl = document.getElementById('order-details-turnaround-badge');
+            if (turnaroundBadgeEl) {
+                if (isRush) {
+                    turnaroundBadgeEl.innerHTML = `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/25 text-amber-900 dark:text-amber-300 border border-amber-500/40 inline-flex items-center gap-1"><span class="material-symbols-outlined text-xs text-amber-600 dark:text-amber-400">bolt</span> Rush (5–8h) · +$5</span>`;
+                } else {
+                    turnaroundBadgeEl.innerHTML = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 inline-flex items-center gap-1"><span class="material-symbols-outlined text-xs text-slate-500">schedule</span> Standard (12–24h)</span>`;
+                }
+            }
+
+            const subtitleEl = document.getElementById('order-details-subtitle');
+            if (subtitleEl) {
+                const orderDate = order.created_at ? new Date(order.created_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'Recent Submission';
+                subtitleEl.textContent = `Submitted ${orderDate} · ${order.service_type || 'Digitizing'}`;
+            }
+
+            // Section 1: Specifications Bento
+            const servicePlanEl = document.getElementById('order-details-service-plan');
+            if (servicePlanEl) servicePlanEl.textContent = `${order.service_type || 'Digitizing'}${order.plan_name ? ' — ' + order.plan_name : ''}`;
+
+            const projectNameEl = document.getElementById('order-details-project-name');
+            if (projectNameEl) projectNameEl.textContent = order.project_name || 'Embroidery Design';
+
+            const placementEl = document.getElementById('order-details-placement');
+            if (placementEl) placementEl.textContent = order.placement || 'Standard / Left Chest';
+
+            const sizingEl = document.getElementById('order-details-sizing');
+            if (sizingEl) sizingEl.textContent = order.sizing || 'Standard Dimensions';
+
+            const fabricEl = document.getElementById('order-details-fabric');
+            if (fabricEl) fabricEl.textContent = order.fabric_type || 'Standard Garment Fabric';
+
+            // Required Machine Formats
+            const formatsContainer = document.getElementById('order-details-formats-container');
+            if (formatsContainer) {
+                let rawFormats = order.file_format || '.DST, .EMB';
+                let formatsList = [];
+                if (Array.isArray(rawFormats)) {
+                    formatsList = rawFormats;
+                } else if (typeof rawFormats === 'string') {
+                    formatsList = rawFormats.split(/[,/ ]+/).map(s => s.trim()).filter(Boolean);
+                }
+                if (formatsList.length === 0) formatsList = ['.DST'];
+                formatsContainer.innerHTML = formatsList.map(f => {
+                    const cleanF = f.startsWith('.') ? f : ('.' + f);
+                    return `<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono text-[11px] font-black border border-slate-200 dark:border-slate-700 shadow-2xs">${cleanF}</span>`;
+                }).join('');
+            }
+
+            // Special Options (3D Puff, Trims Between Letters, Applique, etc.)
+            const specialContainer = document.getElementById('order-details-special-options-container');
+            if (specialContainer) {
+                let opts = [];
+                if (Array.isArray(order.special_options)) {
+                    opts = order.special_options;
+                } else if (typeof order.special_options === 'string' && order.special_options.trim()) {
+                    try {
+                        const parsed = JSON.parse(order.special_options);
+                        opts = Array.isArray(parsed) ? parsed : [order.special_options];
+                    } catch(e) {
+                        opts = order.special_options.split(',').map(s => s.trim()).filter(Boolean);
+                    }
+                }
+                if (opts.length > 0) {
+                    specialContainer.innerHTML = opts.map(opt => `
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-900 dark:text-amber-200 border border-amber-500/30 text-[11px] font-bold shadow-2xs">
+                            <span class="material-symbols-outlined text-[13px] text-amber-600 dark:text-primary">check_circle</span>
+                            <span>${opt}</span>
+                        </span>
+                    `).join('');
+                } else {
+                    specialContainer.innerHTML = `<span class="text-slate-400 italic text-[11px]">None specified (Standard Flat Stitch)</span>`;
+                }
+            }
+
+            // Section 2: Turnaround Priority & Rush Fee Box
+            const turnaroundDisplay = document.getElementById('order-details-turnaround-display');
+            if (turnaroundDisplay) {
+                if (isRush) {
+                    turnaroundDisplay.innerHTML = `
+                        <div class="p-3 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-950 dark:text-amber-100">
+                            <div class="flex items-center gap-1.5 font-black text-xs">
+                                <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-base">bolt</span>
+                                <span>⚡ Rush Service (5–8 Hours Priority Delivery)</span>
+                            </div>
+                            <p class="text-[11px] text-amber-900 dark:text-amber-300 mt-1 leading-snug">Dispatched directly to the priority express digitizing queue.</p>
+                        </div>
+                    `;
+                } else {
+                    turnaroundDisplay.innerHTML = `
+                        <div class="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200">
+                            <div class="flex items-center gap-1.5 font-bold text-xs">
+                                <span class="material-symbols-outlined text-slate-500 text-base">schedule</span>
+                                <span>Standard Turnaround (12–24 Hours)</span>
+                            </div>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">Standard queue timeline for precision digitizing review.</p>
+                        </div>
+                    `;
+                }
+            }
+
+            const rushFeeBox = document.getElementById('order-details-rush-fee-box');
+            if (rushFeeBox) {
+                if (isRush) {
+                    rushFeeBox.classList.remove('hidden');
+                } else {
+                    rushFeeBox.classList.add('hidden');
+                }
+            }
+
+            // Client instructions & notes
+            const instructionsBox = document.getElementById('order-details-instructions-box');
+            if (instructionsBox) {
+                if (order.instructions && order.instructions.trim()) {
+                    instructionsBox.textContent = order.instructions;
+                    instructionsBox.classList.remove('italic', 'text-slate-400');
+                } else {
+                    instructionsBox.innerHTML = '<span class="text-slate-400 italic">No specific production notes or custom instructions entered by client.</span>';
+                }
+            }
+
+            // Section 3: Uploaded Artwork Assets Hub
+            const files = getOrderArtworkFiles(order);
+            const filesCountEl = document.getElementById('order-details-files-count');
+            if (filesCountEl) filesCountEl.textContent = files.length;
+
+            const filesGrid = document.getElementById('order-details-artwork-files-grid');
+            if (filesGrid) {
+                if (files.length === 0) {
+                    filesGrid.innerHTML = `
+                        <div class="col-span-full p-6 text-center text-slate-400 border border-dashed border-slate-300 dark:border-slate-700 rounded-xl">
+                            <span class="material-symbols-outlined text-2xl text-slate-400 mb-1 block">image_not_supported</span>
+                            <span class="text-xs">No artwork files were attached to this order.</span>
+                        </div>
+                    `;
+                } else {
+                    filesGrid.innerHTML = files.map((file, idx) => {
+                        const ext = (getFileExtension(file.name) || getFileExtension(file.url) || 'FILE').toUpperCase();
+                        const canPreview = isBrowserPreviewable(file.url, file.name);
+                        const isPdf = ext === 'PDF';
+                        const fileSizeText = file.size ? formatFileSize(file.size) : '';
+
+                        let thumbMarkup = '';
+                        if (['PNG', 'JPG', 'JPEG', 'WEBP', 'SVG', 'GIF'].includes(ext)) {
+                            thumbMarkup = `
+                                <div onclick="openArtworkPreviewModal('${order.order_number}', ${idx})" class="w-14 h-14 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-900 cursor-pointer flex-shrink-0 group/th relative shadow-2xs" title="Click to view large preview">
+                                    <img src="${file.url}" alt="${file.name}" class="w-full h-full object-cover group-hover/th:scale-105 transition-transform" />
+                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/th:opacity-100 flex items-center justify-center transition-opacity">
+                                        <span class="material-symbols-outlined text-white text-base">visibility</span>
+                                    </div>
+                                </div>
+                            `;
+                        } else if (isPdf) {
+                            thumbMarkup = `
+                                <div onclick="openArtworkPreviewModal('${order.order_number}', ${idx})" class="w-14 h-14 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-500 flex flex-col items-center justify-center cursor-pointer flex-shrink-0 group/th shadow-2xs" title="Click to preview PDF document">
+                                    <span class="material-symbols-outlined text-xl">picture_as_pdf</span>
+                                    <span class="text-[9px] font-black uppercase">PDF</span>
+                                </div>
+                            `;
+                        } else {
+                            thumbMarkup = `
+                                <div class="w-14 h-14 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 flex flex-col items-center justify-center flex-shrink-0 shadow-2xs">
+                                    <span class="material-symbols-outlined text-xl">folder_zip</span>
+                                    <span class="text-[9px] font-black uppercase">${ext}</span>
+                                </div>
+                            `;
+                        }
+
+                        return `
+                            <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/15 flex items-center justify-between gap-3 shadow-2xs">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    ${thumbMarkup}
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-[9px] font-black font-mono uppercase text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">${ext}</span>
+                                            <h5 class="text-xs font-bold text-slate-900 dark:text-white truncate" title="${file.name}">${file.name}</h5>
+                                        </div>
+                                        <span class="text-[11px] text-slate-500 block mt-0.5">${fileSizeText ? fileSizeText + ' · ' : ''}${canPreview ? 'Interactive Preview Available' : 'Vector / Production Source'}</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-1.5 flex-shrink-0">
+                                    ${canPreview ? `
+                                        <button type="button" onclick="openArtworkPreviewModal('${order.order_number}', ${idx})" class="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center gap-1 shadow-2xs cursor-pointer" title="Preview inside dashboard">
+                                            <span class="material-symbols-outlined text-xs">visibility</span>
+                                            <span>Preview</span>
+                                        </button>
+                                    ` : ''}
+                                    <a href="${file.url}" download="${file.name}" class="px-2.5 py-1.5 rounded-lg ${canPreview ? 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700' : 'bg-primary hover:bg-primary-hover text-slate-950 font-black'} text-xs font-bold flex items-center gap-1 shadow-2xs cursor-pointer" title="Download directly to disk">
+                                        <span class="material-symbols-outlined text-xs">download</span>
+                                        <span>${canPreview ? '' : 'Download ' + ext}</span>
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // Section 4: Client Profile & Financials
+            const clientNameEl = document.getElementById('order-details-client-name');
+            if (clientNameEl) clientNameEl.textContent = order.client_name || 'Guest User';
+
+            const clientEmailEl = document.getElementById('order-details-client-email');
+            if (clientEmailEl) {
+                clientEmailEl.textContent = order.client_email || 'No email';
+                clientEmailEl.href = order.client_email ? `mailto:${order.client_email}` : '#';
+            }
+
+            const clientCompanyEl = document.getElementById('order-details-client-company');
+            if (clientCompanyEl) clientCompanyEl.textContent = order.client_company || 'Independent Business / Individual';
+
+            const clientHistoryBtn = document.getElementById('order-details-client-history-btn');
+            if (clientHistoryBtn) {
+                clientHistoryBtn.onclick = () => openClientHistoryModal(order.client_email || order.client_name);
+            }
+
+            // Financial Breakdown
+            const basePriceEl = document.getElementById('order-details-base-price');
+            if (basePriceEl) basePriceEl.textContent = `$${basePrice.toFixed(2)}`;
+
+            const rushLineEl = document.getElementById('order-details-rush-line');
+            if (rushLineEl) {
+                if (isRush) {
+                    rushLineEl.classList.remove('hidden');
+                } else {
+                    rushLineEl.classList.add('hidden');
+                }
+            }
+
+            const totalPriceEl = document.getElementById('order-details-total-price');
+            if (totalPriceEl) totalPriceEl.textContent = `$${orderPrice.toFixed(2)}`;
+
+            const paymentMethodEl = document.getElementById('order-details-payment-method');
+            if (paymentMethodEl) {
+                paymentMethodEl.textContent = order.payment_method || (isPaid ? 'PayPal / Card' : 'Pending Invoice');
+            }
+
+            const transactionIdEl = document.getElementById('order-details-transaction-id');
+            if (transactionIdEl) {
+                transactionIdEl.textContent = order.paypal_order_id || order.transaction_id || order.stripe_session_id || 'Direct / Pending';
+            }
+
+            // Section 5: Digitizer Assignment & Deliverables
+            const digitizerNameEl = document.getElementById('order-details-digitizer-name');
+            if (digitizerNameEl) {
+                digitizerNameEl.textContent = order.assigned_digitizer_name || 'Unassigned (Awaiting Assignment)';
+            }
+
+            const assignmentActionsEl = document.getElementById('order-details-assignment-actions');
+            if (assignmentActionsEl) {
+                assignmentActionsEl.innerHTML = `
+                    <button type="button" onclick="openAssignModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs border border-amber-500/40 cursor-pointer shadow-2xs">
+                        ${order.assigned_digitizer_id ? 'Reassign Digitizer' : 'Assign Digitizer'}
+                    </button>
+                `;
+            }
+
+            const deliverablesContainer = document.getElementById('order-details-deliverables-container');
+            if (deliverablesContainer) {
+                if (order.deliverables && order.deliverables.length > 0) {
+                    deliverablesContainer.innerHTML = `
+                        <div class="space-y-2">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Production Deliverables (${order.deliverables.length}):</span>
+                            <div class="flex flex-wrap gap-2">
+                                ${order.deliverables.map(d => `
+                                    <a href="${d.url}" download="${d.name || 'deliverable'}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-500/30 text-xs font-bold hover:bg-emerald-100 shadow-2xs cursor-pointer">
+                                        <span class="material-symbols-outlined text-xs">download</span>
+                                        <span>${d.name || d.format}</span>
+                                        <span class="font-mono text-[10px] opacity-75">(${d.format})</span>
+                                    </a>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    deliverablesContainer.innerHTML = `
+                        <div class="p-3 text-center text-slate-400 text-xs italic bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200/60 dark:border-slate-800">
+                            No deliverables uploaded by digitizer yet. Production is ${order.status === 'completed' ? 'ready' : 'in progress'}.
+                        </div>
+                    `;
+                }
+            }
+
+            // Modal footer dynamic actions
+            const footerActionsEl = document.getElementById('order-details-footer-status-actions');
+            if (footerActionsEl) {
+                let actions = [];
+                if (!isPaid && !order.is_quote && !(order.order_number && order.order_number.startsWith('QUO-'))) {
+                    actions.push(`
+                        <button type="button" onclick="openPaymentReminderModal('${order.order_number}')" class="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-1 shadow-2xs cursor-pointer">
+                            <span class="material-symbols-outlined text-xs">forward_to_inbox</span>
+                            <span>Send Payment Reminder</span>
+                        </button>
+                    `);
+                }
+                if (order.is_quote || (order.order_number && order.order_number.startsWith('QUO-'))) {
+                    actions.push(`
+                        <button type="button" onclick="openSetQuotePriceModal('${order.order_number}')" class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1 shadow-2xs cursor-pointer">
+                            <span class="material-symbols-outlined text-xs">price_change</span>
+                            <span>${order.price ? 'Update Quote Price' : 'Provide Quote Price'}</span>
+                        </button>
+                    `);
+                }
+                if (order.status === 'revision_requested') {
+                    actions.push(`
+                        <button type="button" onclick="openAdminRevisionModal('${order.order_number}')" class="px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1 shadow-2xs cursor-pointer">
+                            <span class="material-symbols-outlined text-xs">rate_review</span>
+                            <span>Review Revision Specs</span>
+                        </button>
+                    `);
+                }
+                actions.push(`
+                    <button type="button" onclick="openInvoiceModal('${order.order_number}')" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center gap-1 border border-slate-300 dark:border-slate-700 shadow-2xs cursor-pointer">
+                        <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">receipt</span>
+                        <span>Tax Invoice</span>
+                    </button>
+                `);
+                footerActionsEl.innerHTML = actions.join('');
+            }
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAdminOrderDetailsModal() {
+            const modal = document.getElementById('admin-order-details-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+            const artworkModal = document.getElementById('admin-artwork-preview-modal');
+            if (!artworkModal || artworkModal.classList.contains('hidden')) {
+                document.body.style.overflow = '';
+            }
+        }
+
         // ===== 1-CLICK FINANCIAL LEDGER CSV EXPORTER =====
         function exportOrdersCSV() {
             const allOrders = window.insforgeClient.getOrders();
@@ -2218,3 +2817,61 @@ window.openInvoiceModal = openInvoiceModal;
 window.openAssignModal = openAssignModal;
 window.closeAssignModal = closeAssignModal;
 window.toggleAdminAutoAssign = toggleAdminAutoAssign;
+window.openAdminOrderDetailsModal = openAdminOrderDetailsModal;
+window.closeAdminOrderDetailsModal = closeAdminOrderDetailsModal;
+window.openArtworkPreviewModal = openArtworkPreviewModal;
+window.closeArtworkPreviewModal = closeArtworkPreviewModal;
+window.navigateArtworkPreview = navigateArtworkPreview;
+
+// Global Keyboard & Backdrop Listeners for Admin Modals
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const artworkModal = document.getElementById('admin-artwork-preview-modal');
+        if (artworkModal && !artworkModal.classList.contains('hidden')) {
+            closeArtworkPreviewModal();
+            return;
+        }
+        const orderModal = document.getElementById('admin-order-details-modal');
+        if (orderModal && !orderModal.classList.contains('hidden')) {
+            closeAdminOrderDetailsModal();
+            return;
+        }
+    }
+    if (e.key === 'ArrowLeft') {
+        const artworkModal = document.getElementById('admin-artwork-preview-modal');
+        if (artworkModal && !artworkModal.classList.contains('hidden')) {
+            navigateArtworkPreview(-1);
+        }
+    }
+    if (e.key === 'ArrowRight') {
+        const artworkModal = document.getElementById('admin-artwork-preview-modal');
+        if (artworkModal && !artworkModal.classList.contains('hidden')) {
+            navigateArtworkPreview(1);
+        }
+    }
+});
+
+// Setup Backdrop Click-To-Close for Modals
+function attachModalBackdropListeners() {
+    const artworkModal = document.getElementById('admin-artwork-preview-modal');
+    if (artworkModal) {
+        artworkModal.addEventListener('click', (e) => {
+            if (e.target === artworkModal) {
+                closeArtworkPreviewModal();
+            }
+        });
+    }
+    const orderModal = document.getElementById('admin-order-details-modal');
+    if (orderModal) {
+        orderModal.addEventListener('click', (e) => {
+            if (e.target === orderModal) {
+                closeAdminOrderDetailsModal();
+            }
+        });
+    }
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachModalBackdropListeners);
+} else {
+    attachModalBackdropListeners();
+}

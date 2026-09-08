@@ -622,6 +622,287 @@
         </div>
     </div>
 
+    <!-- ===== COMPREHENSIVE ADMIN ORDER DETAILS MODAL ===== -->
+    <div id="admin-order-details-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="order-details-modal-title">
+        <div class="w-full max-w-4xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl overflow-hidden relative my-auto max-h-[92vh] flex flex-col text-slate-900 dark:text-slate-100">
+            <!-- Modal Header -->
+            <div class="p-5 sm:p-6 bg-slate-50/90 dark:bg-slate-900/90 border-b border-primary/20 dark:border-primary/25 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-primary flex items-center justify-center font-black text-xl flex-shrink-0">
+                        <span class="material-symbols-outlined text-2xl">receipt_long</span>
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h3 id="order-details-modal-title" class="text-lg font-black text-slate-900 dark:text-white font-mono">DZ-9101</h3>
+                            <span id="order-details-status-badge"></span>
+                            <span id="order-details-payment-badge"></span>
+                            <span id="order-details-turnaround-badge"></span>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" id="order-details-subtitle">Design Specs & Production Dossier</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="closeAdminOrderDetailsModal()" class="p-2 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Close modal">
+                        <span class="material-symbols-outlined text-lg">close</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scrollable Content Body -->
+            <div class="p-5 sm:p-6 overflow-y-auto flex-1 space-y-5">
+                <!-- Section 1: Design & Embroidery Specifications Bento -->
+                <div class="rounded-2xl border border-slate-200 dark:border-primary/20 bg-slate-50/50 dark:bg-slate-900/40 p-4 sm:p-5">
+                    <h4 class="text-xs font-black uppercase tracking-wider text-amber-800 dark:text-primary mb-3 flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-base">tune</span>
+                        <span>Design & Embroidery Specifications</span>
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs">
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Service & Plan</span>
+                            <strong id="order-details-service-plan" class="text-slate-900 dark:text-white text-sm font-black block">-</strong>
+                            <span id="order-details-project-name" class="text-[11px] text-slate-600 dark:text-slate-300 font-medium truncate block mt-0.5">-</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Target Placement</span>
+                            <strong id="order-details-placement" class="text-slate-900 dark:text-white text-sm font-black block">-</strong>
+                            <span class="text-[11px] text-slate-500 mt-0.5 block">Position on garment</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Target Size & Unit</span>
+                            <strong id="order-details-sizing" class="text-slate-900 dark:text-white text-sm font-black block">-</strong>
+                            <span class="text-[11px] text-slate-500 mt-0.5 block">Target stitched dimensions</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Fabric / Garment Material</span>
+                            <strong id="order-details-fabric" class="text-slate-900 dark:text-white text-sm font-black block">-</strong>
+                            <span class="text-[11px] text-slate-500 mt-0.5 block">Optimizes density & push-pull underlay</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Required Machine Formats</span>
+                            <div id="order-details-formats-container" class="flex flex-wrap gap-1 mt-1">
+                                <!-- Machine format badges -->
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Special Options & Modifiers</span>
+                            <div id="order-details-special-options-container" class="flex flex-wrap gap-1 mt-1">
+                                <!-- 3D Puff, Trims, Applique badges -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Turnaround Priority & Client Production Notes -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Turnaround Priority Card -->
+                    <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-primary/20 bg-slate-50/50 dark:bg-slate-900/40 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-xs font-black uppercase tracking-wider text-amber-800 dark:text-primary mb-2 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-base">timer</span>
+                                <span>Turnaround Priority</span>
+                            </h4>
+                            <div id="order-details-turnaround-display" class="my-2">
+                                <!-- Dynamic turnaround banner -->
+                            </div>
+                        </div>
+                        <div id="order-details-rush-fee-box" class="mt-3 p-2.5 rounded-xl bg-amber-100/70 dark:bg-amber-500/15 border border-amber-300 dark:border-amber-500/30 text-xs">
+                            <div class="flex justify-between items-center font-black text-amber-900 dark:text-amber-200">
+                                <span>⚡ Rush Priority Fee:</span>
+                                <span>+$5.00 USD</span>
+                            </div>
+                            <span class="text-[10px] text-amber-800 dark:text-amber-300 font-medium block mt-0.5">Dispatched to priority digitizer queue for 5–8 hour delivery.</span>
+                        </div>
+                    </div>
+
+                    <!-- Client Instructions & Notes -->
+                    <div class="md:col-span-2 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-primary/20 bg-slate-50/50 dark:bg-slate-900/40">
+                        <h4 class="text-xs font-black uppercase tracking-wider text-amber-800 dark:text-primary mb-2 flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-base">notes</span>
+                            <span>Client Production Notes & Instructions</span>
+                        </h4>
+                        <div id="order-details-instructions-box" class="p-3.5 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/15 text-xs text-slate-800 dark:text-slate-200 font-medium min-h-[90px] whitespace-pre-wrap leading-relaxed shadow-2xs">
+                            <!-- Injected notes -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Uploaded Artwork Assets Hub -->
+                <div class="rounded-2xl border border-slate-200 dark:border-primary/20 bg-slate-50/50 dark:bg-slate-900/40 p-4 sm:p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-xs font-black uppercase tracking-wider text-amber-800 dark:text-primary flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-base">attach_file</span>
+                            <span>Client Uploaded Artwork & Files (<span id="order-details-files-count">0</span>)</span>
+                        </h4>
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400">Preview images/PDF inside dashboard without leaving page</span>
+                    </div>
+                    <div id="order-details-artwork-files-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Dynamic Artwork Cards with In-Dashboard Preview buttons and direct Download buttons -->
+                    </div>
+                </div>
+
+                <!-- Section 4: Client Information & Financials -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Client Info -->
+                    <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-primary/20 bg-slate-50/50 dark:bg-slate-900/40">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-xs font-black uppercase tracking-wider text-amber-800 dark:text-primary flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-base">person</span>
+                                <span>Client Profile</span>
+                            </h4>
+                            <button type="button" id="order-details-client-history-btn" class="text-[10px] font-bold text-amber-700 dark:text-primary hover:underline flex items-center gap-0.5 cursor-pointer">
+                                <span>View History</span>
+                                <span class="material-symbols-outlined text-xs">history</span>
+                            </button>
+                        </div>
+                        <div class="space-y-1.5 text-xs">
+                            <div class="flex justify-between py-1 border-b border-slate-200/60 dark:border-primary/10">
+                                <span class="text-slate-500">Name:</span>
+                                <strong id="order-details-client-name" class="text-slate-900 dark:text-white">-</strong>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-200/60 dark:border-primary/10">
+                                <span class="text-slate-500">Email:</span>
+                                <a id="order-details-client-email" href="#" class="text-amber-800 dark:text-primary font-bold hover:underline">-</a>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-200/60 dark:border-primary/10">
+                                <span class="text-slate-500">Company:</span>
+                                <span id="order-details-client-company" class="font-medium text-slate-800 dark:text-slate-200">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financials & Payment Breakdown -->
+                    <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-primary/20 bg-slate-50/50 dark:bg-slate-900/40">
+                        <h4 class="text-xs font-black uppercase tracking-wider text-amber-800 dark:text-primary mb-2 flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-base">payments</span>
+                            <span>Financials & Payment Breakdown</span>
+                        </h4>
+                        <div class="space-y-1.5 text-xs">
+                            <div class="flex justify-between py-1 border-b border-slate-200/60 dark:border-primary/10">
+                                <span class="text-slate-500">Base Service Price:</span>
+                                <span id="order-details-base-price" class="font-bold text-slate-800 dark:text-slate-200">$15.00</span>
+                            </div>
+                            <div id="order-details-rush-line" class="flex justify-between py-1 border-b border-slate-200/60 dark:border-primary/10 text-amber-800 dark:text-amber-300">
+                                <span>⚡ Rush Priority Fee:</span>
+                                <span class="font-bold">+$5.00</span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-200/60 dark:border-primary/10">
+                                <span class="text-slate-500">Total Order Price:</span>
+                                <strong id="order-details-total-price" class="text-sm font-black text-slate-900 dark:text-white">$20.00</strong>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-200/60 dark:border-primary/10">
+                                <span class="text-slate-500">Payment Gateway:</span>
+                                <span id="order-details-payment-method" class="font-semibold text-slate-800 dark:text-slate-200">PayPal</span>
+                            </div>
+                            <div class="flex justify-between py-1">
+                                <span class="text-slate-500">Transaction Ref:</span>
+                                <span id="order-details-transaction-id" class="font-mono text-[11px] text-slate-600 dark:text-slate-300">None</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Digitizer Assignment & Deliverables -->
+                <div class="rounded-2xl border border-slate-200 dark:border-primary/20 bg-slate-50/50 dark:bg-slate-900/40 p-4 sm:p-5">
+                    <h4 class="text-xs font-black uppercase tracking-wider text-amber-800 dark:text-primary mb-3 flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-base">badge</span>
+                        <span>Digitizer Production & Deliverables</span>
+                    </h4>
+                    <div class="flex flex-wrap items-center justify-between gap-3 text-xs mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-slate-500">Assigned Digitizer:</span>
+                            <span id="order-details-digitizer-name" class="font-bold text-slate-900 dark:text-white">-</span>
+                        </div>
+                        <div id="order-details-assignment-actions">
+                            <!-- Quick Assign / Reassign Button -->
+                        </div>
+                    </div>
+                    <div id="order-details-deliverables-container" class="mt-2 pt-2 border-t border-slate-200/60 dark:border-primary/10">
+                        <!-- Deliverables List or Empty State -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer Actions -->
+            <div class="p-4 sm:p-5 bg-slate-50/90 dark:bg-slate-900/90 border-t border-primary/20 dark:border-primary/25 flex flex-wrap items-center justify-between gap-2">
+                <div id="order-details-footer-status-actions" class="flex items-center gap-2 flex-wrap">
+                    <!-- Dynamic action buttons (Send Payment Reminder, Invoice Modal, etc.) -->
+                </div>
+                <button type="button" onclick="closeAdminOrderDetailsModal()" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-300 text-xs font-semibold cursor-pointer">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== IN-DASHBOARD ARTWORK PREVIEW LIGHTBOX MODAL ===== -->
+    <div id="admin-artwork-preview-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-2 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="artwork-preview-modal-filename">
+        <div class="w-full max-w-5xl h-[92vh] max-h-[92vh] bg-slate-950 border border-slate-800 dark:border-primary/30 rounded-2xl shadow-2xl overflow-hidden flex flex-col relative text-white">
+            <!-- Top Lightbox Bar -->
+            <div class="px-4 py-3 bg-slate-900/95 border-b border-slate-800 flex items-center justify-between gap-3 flex-shrink-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span id="artwork-preview-format-badge" class="px-2 py-0.5 rounded-md bg-amber-500/20 text-primary border border-amber-500/40 text-[10px] font-black uppercase">PNG</span>
+                    <div class="min-w-0">
+                        <h4 id="artwork-preview-modal-filename" class="text-sm font-bold text-white truncate max-w-xs sm:max-w-md">artwork_sample.png</h4>
+                        <span id="artwork-preview-modal-filesize" class="text-[11px] text-slate-400">142 KB</span>
+                    </div>
+                </div>
+
+                <!-- Lightbox Navigation & Action Controls -->
+                <div class="flex items-center gap-2">
+                    <div id="artwork-preview-nav-controls" class="hidden sm:flex items-center gap-1.5 mr-2">
+                        <button type="button" id="artwork-preview-prev-btn" onclick="navigateArtworkPreview(-1)" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed" title="Previous File (Left Arrow)">
+                            <span class="material-symbols-outlined text-base">arrow_back</span>
+                        </button>
+                        <span id="artwork-preview-counter" class="text-xs font-mono font-bold text-slate-400 px-1">1 / 1</span>
+                        <button type="button" id="artwork-preview-next-btn" onclick="navigateArtworkPreview(1)" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed" title="Next File (Right Arrow)">
+                            <span class="material-symbols-outlined text-base">arrow_forward</span>
+                        </button>
+                    </div>
+
+                    <a id="artwork-preview-download-btn" href="#" download class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-sm">download</span>
+                        <span>Download</span>
+                    </a>
+
+                    <button type="button" onclick="closeArtworkPreviewModal()" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer" aria-label="Close preview">
+                        <span class="material-symbols-outlined text-lg">close</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lightbox Main Display Area -->
+            <div class="flex-1 w-full h-full overflow-hidden flex items-center justify-center p-4 relative bg-[#0d0f12]">
+                <!-- Dark checkerboard background for transparent PNG graphics -->
+                <div class="absolute inset-0 opacity-15 pointer-events-none" style="background-image: linear-gradient(45deg, #1e293b 25%, transparent 25%), linear-gradient(-45deg, #1e293b 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1e293b 75%), linear-gradient(-45deg, transparent 75%, #1e293b 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px;"></div>
+
+                <!-- 1. Image Viewer Container -->
+                <div id="artwork-preview-image-container" class="relative max-w-full max-h-full flex items-center justify-center z-10 hidden">
+                    <img id="artwork-preview-img" src="" alt="Client Artwork Preview" class="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl transition-transform duration-200" />
+                </div>
+
+                <!-- 2. PDF Viewer Container -->
+                <div id="artwork-preview-pdf-container" class="w-full h-full relative z-10 hidden">
+                    <iframe id="artwork-preview-pdf-iframe" src="" class="w-full h-full rounded-lg border-0 bg-white shadow-2xl"></iframe>
+                </div>
+
+                <!-- 3. Non-Previewable File Fallback Container (AI, EPS, CDR, PSD, ZIP, DST) -->
+                <div id="artwork-preview-fallback-container" class="relative z-10 max-w-md text-center p-8 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-2xl hidden">
+                    <div class="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-500 flex items-center justify-center font-black text-2xl mx-auto mb-4">
+                        <span class="material-symbols-outlined text-3xl">folder_zip</span>
+                    </div>
+                    <h3 id="artwork-fallback-filename" class="text-base font-bold text-white mb-1 truncate">source_vector_file.ai</h3>
+                    <p class="text-xs text-slate-400 mb-4" id="artwork-fallback-desc">
+                        This is a source vector / production archive format (<span id="artwork-fallback-ext" class="uppercase font-bold text-amber-400">AI</span>). Download the file directly to open it in Adobe Illustrator, CorelDRAW, or embroidery production software.
+                    </p>
+                    <a id="artwork-fallback-download-btn" href="#" download class="w-full py-2.5 px-4 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-sm">download</span>
+                        <span>Download <span id="artwork-fallback-btn-ext">AI</span> File</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== FIXED BOTTOM NAVIGATION DOCK (MOBILE) ===== -->
     <nav class="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-primary/20 dark:border-primary/25 py-2 px-2 shadow-xl transition-colors no-print">
         <div class="max-w-md mx-auto flex items-center justify-between">
