@@ -746,6 +746,9 @@
     function openRevisionModal(orderNumber) {
         state.currentOrderId = orderNumber;
         setElText('revision-order-id-disp', orderNumber);
+        clearRevisionPhoto();
+        const notesInput = document.getElementById('revision-notes-input');
+        if (notesInput) notesInput.value = '';
         const modal = document.getElementById('revision-modal');
         if (modal) modal.classList.remove('hidden');
     }
@@ -753,6 +756,98 @@
     function closeRevisionModal() {
         const modal = document.getElementById('revision-modal');
         if (modal) modal.classList.add('hidden');
+        clearRevisionPhoto();
+    }
+
+    function handleRevisionPhotoSelected(event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        state.stitchOutPhoto = file;
+        const previewCard = document.getElementById('revision-photo-preview-card');
+        const previewImg = document.getElementById('revision-photo-preview-img');
+        const previewName = document.getElementById('revision-photo-preview-name');
+        if (previewCard && previewImg && previewName) {
+            previewName.textContent = `${file.name} (${(file.size / 1024).toFixed(0)} KB)`;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                previewCard.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function clearRevisionPhoto() {
+        state.stitchOutPhoto = null;
+        const fileInput = document.getElementById('revision-photo-file');
+        if (fileInput) fileInput.value = '';
+        const previewCard = document.getElementById('revision-photo-preview-card');
+        if (previewCard) previewCard.classList.add('hidden');
+    }
+
+    async function submitRevision() {
+        const orderNumber = state.currentOrderId;
+        const notesInput = document.getElementById('revision-notes-input');
+        const notes = notesInput ? notesInput.value.trim() : '';
+
+        if (!notes) {
+            alert('Please provide specific feedback describing what needs to be revised.');
+            return;
+        }
+
+        const submitBtn = document.getElementById('revision-modal-submit-btn');
+        const origBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+
+        try {
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">sync</span> Submitting...';
+            }
+
+            let stitchOutPhotos = [];
+            if (state.stitchOutPhoto) {
+                if (window.insforgeClient && typeof window.insforgeClient.uploadFile === 'function') {
+                    const uploaded = await window.insforgeClient.uploadFile('artworks', state.stitchOutPhoto);
+                    stitchOutPhotos.push({
+                        name: uploaded.name,
+                        url: uploaded.url,
+                        key: uploaded.key,
+                        size: uploaded.size
+                    });
+                }
+            }
+
+            if (window.insforgeClient && typeof window.insforgeClient.submitOrderRevision === 'function') {
+                await window.insforgeClient.submitOrderRevision(orderNumber, notes, stitchOutPhotos);
+            }
+
+            closeRevisionModal();
+            clearRevisionPhoto();
+            if (notesInput) notesInput.value = '';
+            await loadClientData();
+            renderActivePage();
+
+            if (window.insforgeClient && typeof window.insforgeClient.showToast === 'function') {
+                window.insforgeClient.showToast(
+                    'Revision Request Routed',
+                    stitchOutPhotos.length > 0 
+                        ? `Order #${orderNumber} has been returned to your digitizer with technical notes & reference photo.`
+                        : `Order #${orderNumber} has been returned to your digitizer with technical notes.`,
+                    'rate_review',
+                    'success'
+                );
+            } else {
+                alert('Revision request sent to digitizer studio. Estimated turnaround: 4-8 hours.');
+            }
+        } catch (err) {
+            console.error('Failed to submit revision:', err);
+            alert('Failed to submit revision: ' + err.message);
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = origBtnHtml;
+            }
+        }
     }
 
     // ----- UI Utilities -----
@@ -867,6 +962,9 @@
         closeClientInvoiceModal,
         openRevisionModal,
         closeRevisionModal,
+        handleRevisionPhotoSelected,
+        clearRevisionPhoto,
+        submitRevision,
         handleProfileSave,
         handleDefaultsSave,
         handlePasswordChange

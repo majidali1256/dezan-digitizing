@@ -782,15 +782,16 @@
                     <span class="text-[10px] text-slate-500 mt-1 block">Your assigned digitizer reads this feedback directly to reprogram the stitch sequence.</span>
                 </div>
 
-                <!-- 2. The Picture Submission Button (Physical Stitch-Out Photo) -->
+                <!-- 2. The Picture Submission (Physical Stitch-Out Photo or Reference Image - Optional) -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                        Stitch-Out Photo on Garment / Cap *
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center justify-between">
+                        <span>Reference Photo or Problem Picture</span>
+                        <span class="text-[10px] font-normal lowercase text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">(optional)</span>
                     </label>
-                    <div id="stitch-out-dropzone" onclick="document.getElementById('stitch-out-file').click()" class="border-2 border-dashed border-amber-300/80 dark:border-primary/40 hover:border-primary rounded-xl p-4 sm:p-5 text-center cursor-pointer bg-amber-50/30 dark:bg-slate-950/40 transition-all hover:bg-amber-50/60">
-                        <span class="material-symbols-outlined text-amber-700 dark:text-primary text-2xl sm:text-3xl mb-1">add_a_photo</span>
-                        <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Upload Photo of Physical Stitch-Out</p>
-                        <p class="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Crucial so our digitizer can physically see tension or puckering on your garment.</p>
+                    <div id="stitch-out-dropzone" onclick="document.getElementById('stitch-out-file').click()" class="border-2 border-dashed border-slate-300 dark:border-primary/30 hover:border-primary rounded-xl p-3.5 sm:p-4 text-center cursor-pointer bg-slate-50/50 dark:bg-slate-950/40 transition-all hover:bg-slate-100/60 dark:hover:bg-slate-900/60">
+                        <span class="material-symbols-outlined text-amber-600 dark:text-primary text-2xl sm:text-3xl mb-1">add_a_photo</span>
+                        <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Upload Photo or Screenshot</p>
+                        <p class="text-[10px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">Attach a photo of the stitch-out, garment, or marked-up artwork to show what needs fixing. (Optional)</p>
                         <input type="file" id="stitch-out-file" onchange="handleStitchOutPhotoSelected(event)" class="hidden" accept="image/*" />
                     </div>
                     
@@ -2406,14 +2407,18 @@
         let selectedStitchOutFile = null;
 
         function openRevisionModal(orderNumber) {
-            const order = cachedOrders.find(o => o.order_number === orderNumber || o.id === orderNumber);
+            let order = cachedOrders.find(o => o.order_number === orderNumber || o.id === orderNumber);
+            if (!order) {
+                const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+                order = allOrders.find(o => o.order_number === orderNumber || o.id === orderNumber);
+            }
             if (!order) return;
 
             currentRevisionOrderNumber = order.order_number;
             document.getElementById('revision-target-order-number').value = order.order_number;
             document.getElementById('revision-modal-order-number').textContent = `Request a Revision: Order #${order.order_number}`;
-            document.getElementById('revision-modal-project-name').textContent = order.project_name;
-            document.getElementById('revision-modal-specs').textContent = `${order.placement} · ${order.file_format || 'DST, EMB'}`;
+            document.getElementById('revision-modal-project-name').textContent = order.project_name || 'Project Details';
+            document.getElementById('revision-modal-specs').textContent = `${order.placement || 'Standard'} · ${order.file_format || 'DST, EMB'}`;
             
             document.getElementById('revision-feedback-notes').value = '';
             clearStitchOutPhoto();
@@ -2426,6 +2431,9 @@
             currentRevisionOrderNumber = null;
             clearStitchOutPhoto();
         }
+
+        window.openRevisionModal = openRevisionModal;
+        window.closeRevisionModal = closeRevisionModal;
 
         function handleStitchOutPhotoSelected(e) {
             const file = e.target.files[0];
@@ -2484,13 +2492,6 @@
                         key: uploadedPhoto.key,
                         size: uploadedPhoto.size
                     });
-                } else {
-                    // Sample fallback test stitch-out photo
-                    stitchOutPhotos.push({
-                        name: 'stitch_out_sample.jpg',
-                        url: 'logo.png',
-                        size: 98000
-                    });
                 }
 
                 await window.insforgeClient.submitOrderRevision(orderNumber, notes, stitchOutPhotos);
@@ -2499,7 +2500,9 @@
 
                 window.insforgeClient.showToast(
                     'Revision Request Routed',
-                    `Order #${orderNumber} has been returned to your digitizer with technical notes & stitch-out photo.`,
+                    stitchOutPhotos.length > 0 
+                        ? `Order #${orderNumber} has been returned to your digitizer with technical notes & reference photo.`
+                        : `Order #${orderNumber} has been returned to your digitizer with technical notes.`,
                     'rate_review',
                     'success'
                 );

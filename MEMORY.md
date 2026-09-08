@@ -992,5 +992,8 @@ The Worker Studio provides an isolated, production-focused environment for embro
 - **Home Page Hero Copy Update (`index.html`)**:
   - Added primary value proposition under headline: `"We provide professional, high-quality embroidery digitizing and vector art services for embroidery shops across the U.S."`
   - Calibrated typography (`text-xs xs:text-[13px] sm:text-sm md:text-base text-slate-600 dark:text-slate-300 font-normal leading-relaxed max-w-xl`) to maintain visual balance and zero layout shifts on desktop and mobile.
-
-
+- **Optional Picture Upload in Revision Requests (`client-portal.html`, `client-orders.html`, `js/client-workspace.js`)**:
+  - Clients can provide a text description of adjustments required, with an optional picture/photo upload to illustrate problem areas (puckering, fabric pull, stitch density, or marked-up artwork).
+  - Explicitly labeled as `(optional)` with non-mandatory UI styling and helper text.
+  - Eliminated mock/fallback photo insertions; submissions without an image cleanly persist an empty `stitch_out_photos: []` array.
+  - Added full live preview, file details, delete trigger, and cross-platform submit integration in both `client-portal.html` and `client-orders.html`.

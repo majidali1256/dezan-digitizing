@@ -169,11 +169,42 @@
                 </div>
                 <div>
                     <label class="block font-bold mb-1">Correction Instructions *</label>
-                    <textarea id="revision-notes-input" rows="4" placeholder="Explain the adjustments needed..." class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs focus:border-primary"></textarea>
+                    <textarea id="revision-notes-input" rows="4" placeholder="Explain the adjustments needed (e.g. stitch density, pull comp, size tweaks)..." class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs focus:border-primary"></textarea>
+                </div>
+                <!-- Optional Picture Upload Section -->
+                <div>
+                    <label class="block font-bold mb-1 flex items-center justify-between">
+                        <span>Reference Photo or Problem Picture</span>
+                        <span class="text-[10px] font-normal lowercase text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">(optional)</span>
+                    </label>
+                    <div id="revision-photo-dropzone" onclick="document.getElementById('revision-photo-file').click()" class="border-2 border-dashed border-slate-300 dark:border-primary/30 hover:border-primary rounded-xl p-3.5 sm:p-4 text-center cursor-pointer bg-slate-50/50 dark:bg-slate-950/40 transition-all hover:bg-slate-100/60 dark:hover:bg-slate-900/60">
+                        <span class="material-symbols-outlined text-amber-600 dark:text-primary text-2xl mb-1">add_a_photo</span>
+                        <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Upload Photo or Screenshot</p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Attach a photo of the stitch-out, garment, or marked-up artwork to show what needs fixing. (Optional)</p>
+                        <input type="file" id="revision-photo-file" onchange="window.clientWorkspace.handleRevisionPhotoSelected(event)" class="hidden" accept="image/*" />
+                    </div>
+                    <!-- Live Thumbnail Preview -->
+                    <div id="revision-photo-preview-card" class="hidden mt-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/20 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <img id="revision-photo-preview-img" src="" alt="Revision reference photo" class="w-11 h-11 object-cover rounded-lg border border-slate-300 dark:border-primary/30" />
+                            <div>
+                                <span class="font-bold text-slate-900 dark:text-white block text-xs" id="revision-photo-preview-name">photo.jpg</span>
+                                <span class="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
+                                    <span class="material-symbols-outlined text-xs">check_circle</span> Ready to attach
+                                </span>
+                            </div>
+                        </div>
+                        <button type="button" onclick="window.clientWorkspace.clearRevisionPhoto()" class="p-1 rounded text-slate-400 hover:text-rose-600 cursor-pointer">
+                            <span class="material-symbols-outlined text-sm">delete</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="window.clientWorkspace.closeRevisionModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-xs">Cancel</button>
-                    <button type="button" onclick="alert('Revision request sent to digitizer studio. Estimated turnaround: 4-8 hours.'); window.clientWorkspace.closeRevisionModal();" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-xs">Submit Revision Request</button>
+                    <button type="button" onclick="window.clientWorkspace.closeRevisionModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-xs cursor-pointer">Cancel</button>
+                    <button type="button" onclick="window.clientWorkspace.submitRevision()" id="revision-modal-submit-btn" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-xs cursor-pointer flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-sm">send</span>
+                        <span>Submit Revision Request</span>
+                    </button>
                 </div>
             </div>
         </div>
