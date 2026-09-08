@@ -6,12 +6,17 @@ const path = require('path');
 const fs = require('fs');
 const config = require('../config/config');
 
-// Ensure upload directories exist
+// Ensure upload directories exist safely
 [config.uploads.artworksDir, config.uploads.deliverablesDir].forEach((dir) => {
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
+    try {
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+    } catch (err) {
+        console.warn(`[Upload Dir Warning for ${dir}]:`, err.message);
     }
 });
+
 
 const sanitizeFilename = (filename) => {
     return filename

@@ -42,11 +42,14 @@ if (config.nodeEnv !== 'test') {
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
-// 2. Static File Serving
-const rootDir = path.resolve(__dirname, '..');
-const uploadsDir = path.resolve(rootDir, 'uploads');
-app.use('/uploads', express.static(uploadsDir));
-app.use(express.static(rootDir));
+// 2. Static File Serving (Standalone server mode only; Vercel serves static files at edge)
+if (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    const rootDir = path.resolve(__dirname, '..');
+    const uploadsDir = path.resolve(rootDir, 'uploads');
+    app.use('/uploads', express.static(uploadsDir));
+    app.use(express.static(rootDir));
+}
+
 
 // 3. API Routes Mount
 app.use('/api/health', healthRoutes);

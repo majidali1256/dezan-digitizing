@@ -30,9 +30,14 @@ const config = {
             '.dst', '.emb', '.pxf', '.pes', '.exp', '.cnd', '.jef', 
             '.zip', '.rar'
         ],
-        artworksDir: path.resolve(__dirname, '../../uploads/artworks'),
-        deliverablesDir: path.resolve(__dirname, '../../uploads/deliverables')
+        artworksDir: (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME)
+            ? '/tmp/uploads/artworks'
+            : path.resolve(__dirname, '../../uploads/artworks'),
+        deliverablesDir: (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME)
+            ? '/tmp/uploads/deliverables'
+            : path.resolve(__dirname, '../../uploads/deliverables')
     }
 };
+
 
 module.exports = config;
