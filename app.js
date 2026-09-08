@@ -2139,7 +2139,7 @@ function initFeedbackSlider() {
 
         const img = document.createElement('img');
         img.src = src;
-        img.alt = 'Client Feedback ' + (i + 1);
+        img.alt = 'Client Stitchout ' + (i + 1);
         img.className = 'w-full h-full object-contain';
         img.draggable = false;
         slide.appendChild(img);

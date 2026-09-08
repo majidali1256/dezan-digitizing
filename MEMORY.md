@@ -982,4 +982,7 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - **Scenario H**: Rush priority (+ $5) with large design $\rightarrow$ $30.00 total.
   - **Client Portal**: Verified identical behaviors in `client-portal.html` order builder.
   - **Screenshots**: Multi-viewport visual QA verified for desktop light (`large_design_modal_light.png`), desktop dark (`large_design_modal_dark.png`), and mobile (`large_design_modal_mobile.png`).
-
+- **Section Heading Update (Client Stitchouts)**:
+  - Renamed the section heading from `Client's Feedback` to `Client Stitchouts` in `index.html` and `portfolio.html`.
+  - Maintained brand styling (`text-xl font-bold mb-6 border-l-4 border-primary pl-3`).
+  - Updated image alt attributes from `Client Feedback` to `Client Stitchout`.
