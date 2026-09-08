@@ -6,6 +6,7 @@
 - **Tagline:** High-Precision Stitch Craftsmanship & Vector Artwork
 - **Primary Contacts:** `fdezan91@gmail.com`
 - **Social Presence:** Facebook (`fdezan91`), Instagram (`dezan.digitizing`), TikTok (`@dezandigitizing`)
+- **Homepage Meta Description:** "We provide professional embroidery digitizing services for embroidery shops across the U.S. Get production-ready files for hats, left chest, 3D puff, jacket backs and more, from $15."
 
 ---
 
