@@ -997,3 +997,43 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - Explicitly labeled as `(optional)` with non-mandatory UI styling and helper text.
   - Eliminated mock/fallback photo insertions; submissions without an image cleanly persist an empty `stitch_out_photos: []` array.
   - Added full live preview, file details, delete trigger, and cross-platform submit integration in both `client-portal.html` and `client-orders.html`.
+
+---
+
+## 30. Realistic / Pet Portrait Digitizing Service Option & Dedicated Pricing Engine (Implemented & Verified)
+- **Problem & Requirement**:
+  - Previously, selecting Embroidery Digitizing applied standard pricing based on Left Chest ($15), Cap ($15), Jacket Back ($25), etc. While accurate for standard commercial logos and lettering, pet portraits and photorealistic/complex artwork require specialized stitch techniques (dense feathering, layered fur shading, complex facial blending) with separate flat-rate pricing.
+  - The client required:
+    1. A dedicated service option on Stage 1 (Choose Service) called **"Realistic / Pet Portrait Digitizing"** with subtitle *"For pet portraits, realistic animals, faces, fur, detailed shading and complex photorealistic artwork."*
+    2. Stage 1 cards presented as 3 clear, distinct choices:
+       - **Embroidery Digitizing** (From $15) — Regular logos, text, hats, left chest, jacket backs.
+       - **Realistic / Pet Portrait Digitizing** (From $25) — Pets, faces, fur, realistic shading, complex artwork.
+       - **Vector Art Conversion** (From $15) — Clean vector artwork for printing/cutting.
+    3. An explicit clarification note on the Pet Portrait card:
+       `“Choose this service for pet portraits, realistic animals, human portraits, fur, faces, detailed shading, or other highly complex realistic artwork. For regular business logos/text, choose Embroidery Digitizing.”`
+    4. Dedicated flat pricing independent of placement:
+       - **Up to 5.5” — $25 flat**
+       - **Over 5.5” — $40 flat**
+    5. Placement (`Left Chest`, `Cap / Hat Front`, `Jacket Back`, `Other / Custom Placement`) is asked separately, but does NOT alter the base price (e.g. a 5-inch jacket back pet portrait is $25, not inflated by placement).
+    6. Order form copy uses *"Up to 5.5 inches — $25"* instead of legacy left chest/hat nomenclature.
+    7. Active Service banner reflects **Realistic / Pet Portrait Digitizing** with the `pets` icon.
+    8. Checkout button dynamically updates to `Pay & Place Order ($25.00)` or `Pay & Place Order ($40.00)`.
+- **Architectural Implementation**:
+  - **Stage 1 (Service Selection)**:
+    - Added Option 2 button in `js/order-quote-modal.js` and `client-portal.html` with gold border, custom pet embroidery hoop SVG icon, `From $25` badge, descriptive note, and format pills (`.DST .PES .EXP .EMB`).
+  - **Stage 2 (Order Details & Pricing)**:
+    - Added `#pet-pricing-tier-block` with two interactive radio cards:
+      - `Up to 5.5″` ($25.00)
+      - `Over 5.5″` ($40.00)
+    - Added `#pet-placement` select (`Left Chest`, `Cap / Hat Front`, `Jacket Back`, `Other / Custom Placement`) decoupled from pricing.
+    - Created `handlePetTierChange(tier)` to dynamically manage active card borders, radio states, and price calculations.
+    - Updated `calculateAdaptivePrice()` to evaluate Pet Portrait rates, with automatic tier synchronization if customer inputs size (e.g., typing `6.5 in` auto-upgrades to $40 tier; typing `4.0 in` restores to $25 tier).
+    - Updated `selectOrderService(service)` to toggle between normal placement and pet placement selects.
+    - Updated `handleAdaptiveOrderSubmit` to record `serviceType: 'Realistic / Pet Portrait'` and descriptive plan names (e.g., `Realistic / Pet Portrait - Jacket Back (Up to 5.5″ ($25))`).
+  - **Pricing Page (`pricing.html`)**:
+    - Mobile & Desktop Card 3 click handlers bound to `window.handleOrderClick(event, 'PetPortrait', 'Realistic / Pet Portrait')`.
+    - Copy explicitly formatted: `Up to 5.5 Inches (Standard) — $25 flat` and `Over 5.5 Inches (Large) — $40 flat`.
+- **Automated Playwright Verification (`scratch/test_pet_portrait_order.js`)**:
+  - Desktop (1512x982), Tablet/Laptop (1440x900), and Mobile (390x844) tests passed 100%.
+  - Confirmed 3 service cards, default $25.00 price, $40.00 toggle, placement decoupling, size auto-syncing, custom placement reveal, and dual-modal parity in both public modals and authenticated client portal.
+  - Visual QA screenshots saved in artifact directory: `pet_portrait_step1_cards_desktop.png`, `pet_portrait_step2_tier25_desktop.png`, `pet_portrait_step2_tier40_desktop.png`, `pet_portrait_mobile_step1.png`, `pet_portrait_mobile_step2.png`, `pet_portrait_portal_step1.png`, `pet_portrait_portal_step2.png`.

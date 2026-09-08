@@ -131,7 +131,7 @@
                         </div>
                     </div>
 
-                    <!-- STAGE 1: SERVICE CHOICE CARDS (Exact match to Image 2) -->
+                    <!-- STAGE 1: SERVICE CHOICE CARDS (3 Dedicated Service Options) -->
                     <div id="order-service-selection-view" class="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-3.5 sm:space-y-4">
                         
                         <!-- Option 1: Embroidery Digitizing -->
@@ -152,8 +152,11 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <h4 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white group-hover:text-[#b89218] dark:group-hover:text-primary transition-colors leading-tight">Embroidery Digitizing</h4>
-                                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Stitch files for embroidery machines.</p>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h4 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white group-hover:text-[#b89218] dark:group-hover:text-primary transition-colors leading-tight">Embroidery Digitizing</h4>
+                                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#fef3cd] dark:bg-primary/20 text-[#9a7810] dark:text-primary border border-amber-300/60 dark:border-primary/30">From $15</span>
+                                    </div>
+                                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 leading-snug">Regular logos, text, hats, left chest, jacket backs.</p>
                                 </div>
                                 <span class="material-symbols-outlined text-2xl text-[#b89218] dark:text-primary group-hover:translate-x-1 transition-transform shrink-0 font-bold">chevron_right</span>
                             </div>
@@ -164,7 +167,44 @@
                             </div>
                         </button>
 
-                        <!-- Option 2: Vector Art Conversion -->
+                        <!-- Option 2: Realistic / Pet Portrait Digitizing -->
+                        <button type="button" onclick="window.selectOrderService('PetPortrait')" class="w-full group p-4 sm:p-5 rounded-2xl sm:rounded-3xl border-2 border-amber-300/80 dark:border-primary/40 bg-[#fffdf5] dark:bg-card-dark hover:border-[#b89218] dark:hover:border-primary transition-all text-left flex flex-col gap-3 sm:gap-3.5 cursor-pointer shadow-xs hover:shadow-lg">
+                            <div class="flex items-center gap-3 sm:gap-4 w-full">
+                                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-100/70 dark:bg-primary/20 border border-amber-300 dark:border-primary/35 text-amber-800 dark:text-primary flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs">
+                                    <svg class="w-8 h-8 sm:w-9 sm:h-9" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="28" cy="28" r="23" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                                        <circle cx="28" cy="28" r="20" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 2" stroke-opacity="0.4"/>
+                                        <path d="M20 17C18 13 14 15 15 21C16 25 18 28 20 31C22 35 24 37 28 37C32 37 34 35 36 31C38 28 40 25 41 21C42 15 38 13 36 17C33 15 31 15 28 15C25 15 23 15 20 17Z" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                        <ellipse cx="23.5" cy="24" rx="2" ry="2.4" fill="currentColor"/>
+                                        <ellipse cx="32.5" cy="24" rx="2" ry="2.4" fill="currentColor"/>
+                                        <path d="M26.2 29H29.8L28 31.5L26.2 29Z" fill="currentColor"/>
+                                        <path d="M28 31.5V33.5M26 33.5C26.8 34.3 28 34.3 28 34.3C28 34.3 29.2 34.3 30 33.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                                        <path d="M44 10L38 16M46 8L44 10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h4 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white group-hover:text-[#b89218] dark:group-hover:text-primary transition-colors leading-tight">Realistic / Pet Portrait Digitizing</h4>
+                                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wide bg-amber-200/80 dark:bg-primary/25 text-amber-950 dark:text-primary border border-amber-300 dark:border-primary/40">From $25</span>
+                                    </div>
+                                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 leading-snug">For pet portraits, realistic animals, faces, fur, detailed shading and complex photorealistic artwork.</p>
+                                </div>
+                                <span class="material-symbols-outlined text-2xl text-amber-700 dark:text-primary group-hover:translate-x-1 transition-transform shrink-0 font-bold">chevron_right</span>
+                            </div>
+                            
+                            <!-- Clarification Note -->
+                            <div class="p-2.5 sm:p-3 rounded-xl bg-amber-50/90 dark:bg-primary/10 border border-amber-200 dark:border-primary/20 text-[11px] sm:text-xs text-amber-900 dark:text-slate-200 leading-snug">
+                                <span class="font-bold text-amber-950 dark:text-primary">Note:</span> Choose this service for pet portraits, realistic animals, human portraits, fur, faces, detailed shading, or other highly complex realistic artwork. For regular business logos/text, choose Embroidery Digitizing.
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                                <span class="px-3 py-1 rounded-full bg-[#fef3cd] dark:bg-primary/20 text-[#9a7810] dark:text-primary font-bold text-xs">.DST &nbsp;.PES &nbsp;.EXP &nbsp;.EMB</span>
+                                <span class="px-3 py-1 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-xs">Pets, Animals &amp; Fur</span>
+                                <span class="px-3 py-1 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-xs">Photorealistic Shading</span>
+                            </div>
+                        </button>
+
+                        <!-- Option 3: Vector Art Conversion -->
                         <button type="button" onclick="window.selectOrderService('Vectorizing')" class="w-full group p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-[#e2eaf4] dark:border-primary/25 bg-[#f8faff] dark:bg-card-dark hover:border-[#1d68d8] dark:hover:border-primary transition-all text-left flex flex-col gap-3 sm:gap-3.5 cursor-pointer shadow-xs hover:shadow-md">
                             <div class="flex items-center gap-3 sm:gap-4 w-full">
                                 <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#e8f1fd] dark:bg-blue-950/40 border border-[#cce0fc] dark:border-blue-800/50 text-[#1d68d8] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -179,8 +219,11 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <h4 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white group-hover:text-[#1d68d8] dark:group-hover:text-blue-400 transition-colors leading-tight">Vector Art Conversion</h4>
-                                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Clean vector redraws for print and artwork.</p>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h4 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white group-hover:text-[#1d68d8] dark:group-hover:text-blue-400 transition-colors leading-tight">Vector Art Conversion</h4>
+                                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#dbeafe] dark:bg-blue-900/30 text-[#1e40af] dark:text-blue-300 border border-blue-200 dark:border-blue-800/50">From $15</span>
+                                    </div>
+                                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 leading-snug">Clean vector artwork for printing/cutting.</p>
                                 </div>
                                 <span class="material-symbols-outlined text-2xl text-[#1d68d8] dark:text-blue-400 group-hover:translate-x-1 transition-transform shrink-0 font-bold">chevron_right</span>
                             </div>
@@ -212,8 +255,43 @@
                                 </button>
                             </div>
 
-                            <!-- ================= EMBROIDERY DIGITIZING FIELDS ================= -->
+                            <!-- ================= EMBROIDERY DIGITIZING & PET PORTRAIT FIELDS ================= -->
                             <div id="digitizing-fields-container" class="space-y-3.5 sm:space-y-4">
+                                <!-- Dedicated Pet Portrait Sizing & Flat-Rate Pricing Block -->
+                                <div id="pet-pricing-tier-block" class="hidden p-3.5 sm:p-4 rounded-2xl bg-amber-50/80 dark:bg-primary/10 border-2 border-amber-300/80 dark:border-primary/30 space-y-2.5">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-xs font-black text-amber-950 dark:text-primary uppercase tracking-wider">
+                                            Artwork Size / Pricing *
+                                        </label>
+                                        <span class="text-[10px] font-bold text-amber-800 dark:text-primary bg-amber-200/80 dark:bg-primary/20 px-2 py-0.5 rounded-full border border-amber-300 dark:border-primary/30">Flat-Rate Pricing</span>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
+                                        <label id="pet-tier-1-card" class="relative flex items-center justify-between p-3 sm:p-3.5 rounded-xl border-2 border-primary bg-white dark:bg-card-dark cursor-pointer transition-all shadow-xs">
+                                            <div class="flex items-center gap-2.5">
+                                                <input type="radio" name="pet-pricing-tier" value="small" checked onchange="window.handlePetTierChange('small')" class="text-primary focus:ring-primary h-4 w-4 cursor-pointer" />
+                                                <div>
+                                                    <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block">Up to 5.5″</span>
+                                                    <span class="text-[10.5px] text-slate-500 dark:text-slate-400">Standard portrait dimensions</span>
+                                                </div>
+                                            </div>
+                                            <span class="text-sm sm:text-base font-black text-slate-900 dark:text-white">$25.00</span>
+                                        </label>
+                                        <label id="pet-tier-2-card" class="relative flex items-center justify-between p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 cursor-pointer hover:border-primary transition-all">
+                                            <div class="flex items-center gap-2.5">
+                                                <input type="radio" name="pet-pricing-tier" value="large" onchange="window.handlePetTierChange('large')" class="text-primary focus:ring-primary h-4 w-4 cursor-pointer" />
+                                                <div>
+                                                    <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block">Over 5.5″</span>
+                                                    <span class="text-[10.5px] text-slate-500 dark:text-slate-400">Large jacket back or frame</span>
+                                                </div>
+                                            </div>
+                                            <span class="text-sm sm:text-base font-black text-slate-900 dark:text-white">$40.00</span>
+                                        </label>
+                                    </div>
+                                    <p class="text-[10.5px] text-amber-900/90 dark:text-slate-300 leading-snug">
+                                        Pricing is flat based on artwork dimensions. Target placement does not alter this base rate.
+                                    </p>
+                                </div>
+
                                 <!-- Job Name & Placement -->
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
                                     <div>
@@ -222,11 +300,19 @@
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Target Placement *</label>
+                                        <!-- Regular Digitizing Placement -->
                                         <select id="dig-placement" onchange="window.handlePlacementChange()" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
                                             <option value="Left Chest — $15" data-price="15">Left Chest — $15</option>
                                             <option value="Cap / Hat Front — $15" data-price="15">Cap / Hat Front — $15</option>
                                             <option value="Jacket Back / Large — $25" data-price="25">Jacket Back / Large — $25</option>
                                             <option value="Custom Placement" data-price="15">Custom Placement</option>
+                                        </select>
+                                        <!-- Pet Portrait Placement (Placement does not control price) -->
+                                        <select id="pet-placement" onchange="window.handlePlacementChange()" class="hidden w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
+                                            <option value="Left Chest">Left Chest</option>
+                                            <option value="Cap / Hat Front">Cap / Hat Front</option>
+                                            <option value="Jacket Back">Jacket Back</option>
+                                            <option value="Other / Custom Placement">Other / Custom Placement</option>
                                         </select>
                                     </div>
                                 </div>
@@ -651,7 +737,7 @@
     window.setGuestMode = window.setModalMode;
 
     /**
-     * Service selection: Digitizing vs. Vectorizing
+     * Service selection: Digitizing vs. PetPortrait vs. Vectorizing
      */
     window.selectOrderService = function(service) {
         state.selectedService = service;
@@ -664,20 +750,38 @@
         const bannerIcon = modal.querySelector('#service-banner-icon');
         const digContainer = modal.querySelector('#digitizing-fields-container');
         const vecContainer = modal.querySelector('#vector-fields-container');
+        const petPricingBlock = modal.querySelector('#pet-pricing-tier-block');
+        const digPlacement = modal.querySelector('#dig-placement');
+        const petPlacement = modal.querySelector('#pet-placement');
+        const digJobName = modal.querySelector('#dig-job-name');
         const headerDesc = modal.querySelector('#order-modal-header-desc');
 
         if (serviceTypeInput) serviceTypeInput.value = service;
 
-        if (service === 'Digitizing') {
+        if (service === 'PetPortrait') {
+            if (bannerTitle) bannerTitle.textContent = 'Realistic / Pet Portrait Digitizing';
+            if (bannerIcon) bannerIcon.textContent = 'pets';
+            if (digContainer) digContainer.classList.remove('hidden');
+            if (vecContainer) vecContainer.classList.add('hidden');
+            if (petPricingBlock) petPricingBlock.classList.remove('hidden');
+            if (digPlacement) digPlacement.classList.add('hidden');
+            if (petPlacement) petPlacement.classList.remove('hidden');
+            if (digJobName) digJobName.placeholder = 'e.g. Golden Retriever Portrait on Jacket';
+        } else if (service === 'Digitizing') {
             if (bannerTitle) bannerTitle.textContent = 'Embroidery Digitizing';
             if (bannerIcon) bannerIcon.textContent = 'precision_manufacturing';
             if (digContainer) digContainer.classList.remove('hidden');
             if (vecContainer) vecContainer.classList.add('hidden');
+            if (petPricingBlock) petPricingBlock.classList.add('hidden');
+            if (digPlacement) digPlacement.classList.remove('hidden');
+            if (petPlacement) petPlacement.classList.add('hidden');
+            if (digJobName) digJobName.placeholder = 'e.g. Falcon Polo Left Chest';
         } else {
             if (bannerTitle) bannerTitle.textContent = 'Vector Art Conversion';
             if (bannerIcon) bannerIcon.textContent = 'draw';
             if (digContainer) digContainer.classList.add('hidden');
             if (vecContainer) vecContainer.classList.remove('hidden');
+            if (petPricingBlock) petPricingBlock.classList.add('hidden');
         }
 
         if (selectionView) selectionView.classList.add('hidden');
@@ -715,6 +819,37 @@
         window.calculateAdaptivePrice();
     };
     window.selectModalService = window.selectOrderService;
+
+    /**
+     * Pet Portrait Sizing Tier Change Handler
+     */
+    window.handlePetTierChange = function(tier) {
+        const modal = ensureModalElement();
+        const tier1Card = modal.querySelector('#pet-tier-1-card');
+        const tier2Card = modal.querySelector('#pet-tier-2-card');
+        const radio1 = modal.querySelector('input[name="pet-pricing-tier"][value="small"]');
+        const radio2 = modal.querySelector('input[name="pet-pricing-tier"][value="large"]');
+
+        if (tier === 'large') {
+            if (radio2) radio2.checked = true;
+            if (tier2Card) {
+                tier2Card.className = 'relative flex items-center justify-between p-3 sm:p-3.5 rounded-xl border-2 border-primary bg-white dark:bg-card-dark cursor-pointer transition-all shadow-xs';
+            }
+            if (tier1Card) {
+                tier1Card.className = 'relative flex items-center justify-between p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 cursor-pointer hover:border-primary transition-all';
+            }
+        } else {
+            if (radio1) radio1.checked = true;
+            if (tier1Card) {
+                tier1Card.className = 'relative flex items-center justify-between p-3 sm:p-3.5 rounded-xl border-2 border-primary bg-white dark:bg-card-dark cursor-pointer transition-all shadow-xs';
+            }
+            if (tier2Card) {
+                tier2Card.className = 'relative flex items-center justify-between p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 cursor-pointer hover:border-primary transition-all';
+            }
+        }
+
+        window.calculateAdaptivePrice();
+    };
 
     /**
      * Switch back to service choice view
@@ -764,9 +899,15 @@
      */
     window.handlePlacementChange = function() {
         const modal = ensureModalElement();
-        const placementSelect = modal.querySelector('#dig-placement');
+        const service = modal.querySelector('#selected-service-type')?.value || 'Digitizing';
+        const placementSelect = service === 'PetPortrait'
+            ? modal.querySelector('#pet-placement')
+            : modal.querySelector('#dig-placement');
         const customContainer = modal.querySelector('#custom-placement-container');
-        const isCustom = placementSelect && placementSelect.value.includes('Custom Placement');
+        const isCustom = placementSelect && (
+            placementSelect.value.includes('Custom Placement') ||
+            placementSelect.value.includes('Other')
+        );
 
         if (customContainer) {
             if (isCustom) {
@@ -817,13 +958,13 @@
 
     /**
      * Size Validation
-     * Any size > 5.5" automatically updates to $25 (valid large design).
+     * Any size > 5.5" automatically updates to $25 (or $40 for Pet Portrait).
      * Only non-positive numbers (e.g. <= 0) are flagged as invalid.
      */
     window.validatePlacementSize = function() {
         const modal = ensureModalElement();
         const service = modal.querySelector('#selected-service-type')?.value || 'Digitizing';
-        if (service !== 'Digitizing') return true;
+        if (service !== 'Digitizing' && service !== 'PetPortrait') return true;
 
         const sizeInput = modal.querySelector('#dig-size');
         const errorEl = modal.querySelector('#dig-size-error');
@@ -850,10 +991,10 @@
 
     /**
      * Dynamic Price Calculation
-     * Rule: If the design is larger than 5.5 inches wide -> automatically change price to $25.
-     * Applies to Custom Placement as well as all other placements (Left Chest, Cap, etc.).
-     * Returning to 5.5 inches or less restores base price to $15.
-     * Shows: "Large design pricing applied (over 5.5″ wide)."
+     * 1. Realistic / Pet Portrait: Up to 5.5" = $25 flat, Over 5.5" = $40 flat. Placement does not alter price.
+     * 2. Regular Digitizing: Standard = $15, Large (>5.5" or Jacket Back) = $25.
+     * 3. Vector Art: Simple = $15, Complex = $30.
+     * +$5 Rush Queue Fee if 5-8h turnaround is selected.
      */
     window.calculateAdaptivePrice = function() {
         const modal = ensureModalElement();
@@ -866,7 +1007,37 @@
         let basePrice = 15.00;
         let breakdownText = 'Standard Turnaround (12-24h)';
 
-        if (service === 'Digitizing') {
+        if (service === 'PetPortrait') {
+            const largeNotice = modal.querySelector('#dig-size-large-notice');
+            if (largeNotice) largeNotice.classList.add('hidden');
+
+            const sizeInput = modal.querySelector('#dig-size');
+            const unitSelect = modal.querySelector('#dig-size-unit');
+            const sizeVal = sizeInput?.value || '';
+            const unit = unitSelect?.value || 'in';
+
+            const widthInInches = getDesignWidthInInches(sizeVal, unit);
+            const isLargeBySize = widthInInches > 5.5001;
+
+            let selectedTier = modal.querySelector('input[name="pet-pricing-tier"]:checked')?.value || 'small';
+            if (widthInInches > 0) {
+                if (isLargeBySize && selectedTier !== 'large') {
+                    window.handlePetTierChange('large');
+                    selectedTier = 'large';
+                } else if (!isLargeBySize && selectedTier !== 'small') {
+                    window.handlePetTierChange('small');
+                    selectedTier = 'small';
+                }
+            }
+
+            if (selectedTier === 'large') {
+                basePrice = 40.00;
+                breakdownText = 'Realistic / Pet Portrait · Over 5.5″ ($40.00)';
+            } else {
+                basePrice = 25.00;
+                breakdownText = 'Realistic / Pet Portrait · Up to 5.5″ ($25.00)';
+            }
+        } else if (service === 'Digitizing') {
             const placementSelect = modal.querySelector('#dig-placement');
             const selectedOpt = placementSelect?.options[placementSelect.selectedIndex];
             const optPrice = parseFloat(selectedOpt?.getAttribute('data-price') || '15');
@@ -938,7 +1109,7 @@
         const guestPriceAnchor = modal.querySelector('#guest-summary-price');
         const guestPlanAnchor = modal.querySelector('#guest-summary-plan');
         if (guestPriceAnchor) guestPriceAnchor.textContent = formattedPrice;
-        if (guestPlanAnchor) guestPlanAnchor.textContent = `${service} · ${breakdownText}`;
+        if (guestPlanAnchor) guestPlanAnchor.textContent = `${service === 'PetPortrait' ? 'Realistic / Pet Portrait' : service} · ${breakdownText}`;
 
         if (submitBtnText && !state.isQuote) {
             submitBtnText.textContent = `Pay & Place Order (${formattedPrice})`;
@@ -1056,14 +1227,41 @@
 
         // Service & Plan determination
         const rawService = (options.service || '').toLowerCase();
-        const isVector = rawService.includes('vector');
-        const targetService = isVector ? 'Vectorizing' : 'Digitizing';
+        const rawPlan = (options.plan || '').toLowerCase();
+        const isPetPortrait = rawService.includes('pet') || rawService.includes('portrait') || rawPlan.includes('pet') || rawPlan.includes('portrait') || rawPlan.includes('realistic');
+        const isVector = rawService.includes('vector') || rawPlan.includes('vector');
+        
+        let targetService = 'Digitizing';
+        if (isPetPortrait) {
+            targetService = 'PetPortrait';
+        } else if (isVector) {
+            targetService = 'Vectorizing';
+        }
         const plan = options.plan || '';
 
         if (options.service || options.plan) {
             window.selectOrderService(targetService);
             
-            if (targetService === 'Digitizing') {
+            if (targetService === 'PetPortrait') {
+                if (rawPlan.includes('large') || rawPlan.includes('40') || rawPlan.includes('over')) {
+                    window.handlePetTierChange('large');
+                } else {
+                    window.handlePetTierChange('small');
+                }
+                const petPlacement = modal.querySelector('#pet-placement');
+                if (petPlacement && plan) {
+                    for (let i = 0; i < petPlacement.options.length; i++) {
+                        const opt = petPlacement.options[i];
+                        if (rawPlan.includes(opt.value.toLowerCase())) {
+                            petPlacement.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+                if (typeof window.handlePlacementChange === 'function') {
+                    window.handlePlacementChange();
+                }
+            } else if (targetService === 'Digitizing') {
                 const placementSelect = modal.querySelector('#dig-placement');
                 if (placementSelect && plan) {
                     const lowerPlan = plan.toLowerCase();
@@ -1106,7 +1304,7 @@
         document.body.style.overflow = 'hidden';
 
         setTimeout(() => {
-            const firstInput = targetService === 'Digitizing' ? modal.querySelector('#dig-job-name') : modal.querySelector('#vec-job-name');
+            const firstInput = (targetService === 'Digitizing' || targetService === 'PetPortrait') ? modal.querySelector('#dig-job-name') : modal.querySelector('#vec-job-name');
             if (firstInput && !modal.querySelector('#order-service-selection-view:not(.hidden)')) {
                 firstInput.focus();
             }
@@ -1180,7 +1378,7 @@
         let fileFormat = 'DST, EMB';
         let specialOptions = [];
 
-        if (serviceType === 'Digitizing') {
+        if (serviceType === 'Digitizing' || serviceType === 'PetPortrait') {
             projectName = (modal.querySelector('#dig-job-name')?.value || '').trim();
             if (!projectName) {
                 alert('Please provide a Job Name / Reference.');
@@ -1188,17 +1386,32 @@
                 return;
             }
 
-            const rawPlacement = modal.querySelector('#dig-placement')?.value || 'Left Chest — $15';
-            if (rawPlacement.includes('Custom')) {
-                const customVal = (modal.querySelector('#dig-custom-placement')?.value || '').trim();
-                if (!customVal) {
-                    alert('Please specify your Custom Placement Details (e.g. patch, visor, apron, tote bag, etc.).');
-                    modal.querySelector('#dig-custom-placement')?.focus();
-                    return;
+            if (serviceType === 'PetPortrait') {
+                const rawPetPlacement = modal.querySelector('#pet-placement')?.value || 'Left Chest';
+                if (rawPetPlacement.includes('Custom') || rawPetPlacement.includes('Other')) {
+                    const customVal = (modal.querySelector('#dig-custom-placement')?.value || '').trim();
+                    if (!customVal) {
+                        alert('Please specify your Custom Placement Details (e.g. patch, visor, apron, tote bag, etc.).');
+                        modal.querySelector('#dig-custom-placement')?.focus();
+                        return;
+                    }
+                    placement = `Custom Placement: ${customVal}`;
+                } else {
+                    placement = rawPetPlacement;
                 }
-                placement = `Custom Placement: ${customVal}`;
             } else {
-                placement = rawPlacement.split('—')[0].trim();
+                const rawPlacement = modal.querySelector('#dig-placement')?.value || 'Left Chest — $15';
+                if (rawPlacement.includes('Custom')) {
+                    const customVal = (modal.querySelector('#dig-custom-placement')?.value || '').trim();
+                    if (!customVal) {
+                        alert('Please specify your Custom Placement Details (e.g. patch, visor, apron, tote bag, etc.).');
+                        modal.querySelector('#dig-custom-placement')?.focus();
+                        return;
+                    }
+                    placement = `Custom Placement: ${customVal}`;
+                } else {
+                    placement = rawPlacement.split('—')[0].trim();
+                }
             }
 
             fabricType = modal.querySelector('#dig-fabric')?.value || 'Cotton / Pique Knit';
@@ -1325,11 +1538,25 @@
         }
 
         const calculatedPrice = isQuote ? 0 : window.calculateAdaptivePrice();
-        const planName = isQuote 
-            ? `${serviceType === 'Digitizing' ? 'Digitizing' : 'Vector'} Quote - ${placement}`
-            : `${serviceType === 'Digitizing' ? 'Embroidery' : 'Vector'} - ${placement}`;
+        let planName = '';
+        if (serviceType === 'PetPortrait') {
+            const activeRadio = modal.querySelector('input[name="pet-pricing-tier"]:checked');
+            const tierLabel = activeRadio?.value === 'large' ? 'Over 5.5"' : 'Up to 5.5"';
+            planName = isQuote 
+                ? `Realistic / Pet Portrait Quote - ${placement}`
+                : `Realistic / Pet Portrait (${tierLabel}) - ${placement}`;
+        } else if (serviceType === 'Digitizing') {
+            planName = isQuote 
+                ? `Digitizing Quote - ${placement}`
+                : `Embroidery - ${placement}`;
+        } else {
+            planName = isQuote 
+                ? `Vector Quote - ${placement}`
+                : `Vector - ${placement}`;
+        }
 
         const combinedInstructions = [
+            `Service: ${serviceType === 'PetPortrait' ? 'Realistic / Pet Portrait Digitizing' : serviceType}`,
             `Sizing: ${sizing}`,
             `Fabric: ${fabricType}`,
             specialOptions.length > 0 ? `Special: ${specialOptions.join(', ')}` : '',
@@ -1340,7 +1567,7 @@
             isQuote: isQuote,
             is_quote: isQuote,
             status: isQuote ? 'quote_requested' : 'pending_review',
-            serviceType: serviceType === 'Digitizing' ? 'Digitizing' : 'Vectorizing',
+            serviceType: serviceType === 'PetPortrait' ? 'Realistic / Pet Portrait' : (serviceType === 'Digitizing' ? 'Digitizing' : 'Vectorizing'),
             planName: planName,
             projectName: projectName,
             placement: placement,
