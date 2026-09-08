@@ -27,6 +27,9 @@ const getTasks = async (req, res) => {
         let params = [];
         let paramIndex = 1;
 
+        // Quotes can never be digitizer tasks
+        whereClauses.push("NOT (order_number LIKE 'QUO-%')");
+
         // If worker, strictly isolate to their assigned tasks
         if (user.role === 'digitizer') {
             whereClauses.push(`assigned_digitizer_id = $${paramIndex}`);
@@ -78,6 +81,11 @@ const getTaskById = async (req, res) => {
         }
 
         const task = taskRes.rows[0];
+
+        // Strict guard: Quotes are administrative between Admin & Client only
+        if (task.order_number && task.order_number.startsWith('QUO-')) {
+            return forbidden(res, 'Quotes are strictly handled by Admin. Digitizers only access active production orders.');
+        }
 
         // Guard: ensure digitizer is assigned to this task
         if (user.role === 'digitizer' && task.assigned_digitizer_id !== user.id) {

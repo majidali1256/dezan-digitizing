@@ -694,8 +694,9 @@
             const syncText = document.getElementById('worker-db-sync-text');
             if (syncText) syncText.textContent = 'Syncing...';
 
-            // STRICT MASKING: queries sanitized digitizer tasks only!
-            allWorkerTasks = await window.insforgeClient.fetchDigitizerTasks();
+            // STRICT MASKING: queries sanitized digitizer tasks only (zero quotes, zero client info, zero pricing)
+            const rawTasks = await window.insforgeClient.fetchDigitizerTasks();
+            allWorkerTasks = (rawTasks || []).filter(t => !t.is_quote && !t.isQuote && !(t.orderNumber && t.orderNumber.startsWith('QUO-')));
 
             if (syncText) {
                 const status = window.insforgeClient.getDatabaseSyncStatus();

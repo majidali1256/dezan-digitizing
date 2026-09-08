@@ -826,9 +826,11 @@
                                 <span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">receipt</span>
                                 <span>Invoice</span>
                             </button>
+                            ${(!order.is_quote && order.status !== 'quote_requested' && !(order.order_number && order.order_number.startsWith('QUO-'))) ? `
                             <button onclick="openAssignModal('${order.order_number}')" class="px-3 py-2 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 text-amber-900 dark:text-primary font-bold text-[11px] border border-amber-300 dark:border-primary/30 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                                 ${order.assigned_digitizer_id ? 'Reassign' : 'Assign'}
                             </button>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
@@ -933,9 +935,11 @@
                                 <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">receipt</span>
                                 <span>Invoice</span>
                             </button>
+                            ${(!order.is_quote && order.status !== 'quote_requested' && !(order.order_number && order.order_number.startsWith('QUO-'))) ? `
                             <button onclick="openAssignModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-500 text-slate-950 border border-amber-500/40 font-black text-[11px] transition-all cursor-pointer shadow-2xs shrink-0 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                                 ${order.assigned_digitizer_id ? 'Reassign' : 'Assign'}
                             </button>
+                            ` : ''}
                         </div>
                     </td>
                 </tr>
@@ -1352,7 +1356,7 @@
             if (teamActiveCount) teamActiveCount.textContent = digitizers.length === 1 ? '1 Digitizer On Duty' : `${digitizers.length} Digitizers On Duty`;
 
             container.innerHTML = digitizers.map(d => {
-                const assignedOrders = allOrders.filter(o => o.assigned_digitizer_id === d.id);
+                const assignedOrders = allOrders.filter(o => o.assigned_digitizer_id === d.id && !o.is_quote && o.status !== 'quote_requested' && !(o.order_number && o.order_number.startsWith('QUO-')));
                 const activeOrders = assignedOrders.filter(o => o.status === 'in_progress' || o.status === 'assigned' || o.status === 'revision_requested');
                 const completedOrders = assignedOrders.filter(o => o.status === 'completed');
                 const spec = specs[d.displayName] || { title: 'Lead Embroidery & Vector Digitizer', specialty: 'Industrial Machine & Vector Master', icon: 'military_tech' };
@@ -1689,12 +1693,17 @@ Email: fdezan91@gmail.com`;
 
             if (orderNumber) {
                 targetOrder = allOrders.find(o => o.order_number === orderNumber);
+                if (targetOrder && (targetOrder.is_quote || targetOrder.status === 'quote_requested' || (targetOrder.order_number && targetOrder.order_number.startsWith('QUO-')))) {
+                    alert('Quotes can only be sent to and reviewed by Admin. Digitizers only receive approved production orders.');
+                    return;
+                }
             } else {
-                targetOrder = allOrders.find(o => !o.assigned_digitizer_id || o.status === 'pending_review') || allOrders[0];
+                targetOrder = allOrders.find(o => !o.is_quote && o.status !== 'quote_requested' && !(o.order_number && o.order_number.startsWith('QUO-')) && (!o.assigned_digitizer_id || o.status === 'pending_review')) 
+                    || allOrders.find(o => !o.is_quote && o.status !== 'quote_requested' && !(o.order_number && o.order_number.startsWith('QUO-')));
             }
 
             if (!targetOrder) {
-                alert('No orders available to assign.');
+                alert('No production orders available to assign.');
                 return;
             }
 
@@ -1731,6 +1740,17 @@ Email: fdezan91@gmail.com`;
             }
 
             const orderNumber = document.getElementById('assign-order-number').value;
+
+            // Strict protection: quotes cannot be assigned to digitizers
+            if (orderNumber && orderNumber.startsWith('QUO-')) {
+                alert('Quotes cannot be assigned to digitizers. Only approved orders can be assigned.');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+                return;
+            }
+
             const select = document.getElementById('assign-worker-select');
             const selectedOpt = select.options[select.selectedIndex];
             const workerId = selectedOpt.value;

@@ -1485,22 +1485,23 @@ class InsForgeClient {
                 if (Array.isArray(cloudTasks)) {
                     const localTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
                     const localOnly = localTasks.filter(l => !cloudTasks.some(c => (c.order_number && c.order_number === l.order_number) || (c.task_number && c.task_number === l.task_number) || (c.id && c.id === l.id)));
-                    tasks = [...localOnly, ...cloudTasks];
+                    tasks = [...localOnly, ...cloudTasks].filter(t => !t.order_number || !t.order_number.startsWith('QUO-'));
                     localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(tasks));
                 }
             } else {
                 console.warn('InsForge tasks fetch non-200 status:', res.status);
-                tasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+                tasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]').filter(t => !t.order_number || !t.order_number.startsWith('QUO-'));
             }
         } catch (err) {
             console.warn('InsForge tasks network notice, using cache:', err.message);
-            tasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+            tasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]').filter(t => !t.order_number || !t.order_number.startsWith('QUO-'));
         }
 
-        // Merge with any assigned orders that don't have tasks yet
+        // Merge with any assigned orders that don't have tasks yet (quotes are strictly excluded!)
         const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
         allOrders.forEach(o => {
-            if (o.assigned_digitizer_id && !tasks.some(t => t.order_number === o.order_number)) {
+            const isQuote = o.is_quote === true || o.status === 'quote_requested' || (o.order_number && o.order_number.startsWith('QUO-'));
+            if (!isQuote && o.assigned_digitizer_id && !tasks.some(t => t.order_number === o.order_number)) {
                 tasks.unshift({
                     id: o.id || this.generateUUID(),
                     task_number: 'TSK-' + (o.order_number || '').replace('ORD-', '').replace('DZ-', ''),
@@ -1519,6 +1520,9 @@ class InsForgeClient {
                 });
             }
         });
+
+        // Quotes can never be digitizer tasks
+        tasks = tasks.filter(t => !t.order_number || !t.order_number.startsWith('QUO-'));
 
         // If tasks table was empty, fallback from local orders
         if (tasks.length === 0) {
@@ -1568,7 +1572,8 @@ class InsForgeClient {
         const user = this.getCurrentUser();
         if (!user || (user.role !== 'digitizer' && user.role !== 'admin')) return [];
 
-        const cachedTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+        const cachedTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]')
+            .filter(t => !t.order_number || !t.order_number.startsWith('QUO-'));
         if (cachedTasks.length > 0) {
             const filtered = user.role === 'admin' 
                 ? cachedTasks 
@@ -1595,11 +1600,12 @@ class InsForgeClient {
             }));
         }
 
-        // Fallback: derive from orders in localStorage
+        // Fallback: derive from orders in localStorage (strictly non-quotes)
         const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
-        const assignedOrders = user.role === 'admin'
+        const assignedOrders = (user.role === 'admin'
             ? allOrders.filter(o => o.assigned_digitizer_id)
-            : allOrders.filter(o => o.assigned_digitizer_id === user.id);
+            : allOrders.filter(o => o.assigned_digitizer_id === user.id)
+        ).filter(o => !o.is_quote && o.status !== 'quote_requested' && !(o.order_number && o.order_number.startsWith('QUO-')));
 
         return assignedOrders.map(order => ({
             taskId: 'TSK-' + order.order_number.replace('ORD-', ''),
@@ -1831,7 +1837,8 @@ class InsForgeClient {
         const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
         let count = 0;
         for (const order of allOrders) {
-            if (!order.is_quote && (!order.assigned_digitizer_id || order.status === 'pending_review')) {
+            const isQuote = order.is_quote === true || order.status === 'quote_requested' || (order.order_number && order.order_number.startsWith('QUO-'));
+            if (!isQuote && (!order.assigned_digitizer_id || order.status === 'pending_review')) {
                 await this.assignDigitizer(order.order_number, primaryWorker.id, primaryWorker.displayName);
                 count++;
             }
@@ -2065,9 +2072,20 @@ class InsForgeClient {
      * @returns {Promise<boolean>}
      */
     async assignDigitizer(orderNumber, digitizerId, digitizerName) {
+        if (!orderNumber) throw new Error('Order number is required');
+
+        // Quotes can ONLY be appraised and handled by Admin; digitizers only work on active production orders
+        if (orderNumber.startsWith('QUO-')) {
+            throw new Error('Quotes can only be sent to and reviewed by Admin. Digitizers only receive approved production orders.');
+        }
+
         const assignedAt = new Date().toISOString();
         const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
         const order = allOrders.find(o => o.order_number === orderNumber);
+
+        if (order && (order.is_quote === true || order.status === 'quote_requested')) {
+            throw new Error('Quotes can only be sent to and reviewed by Admin. Digitizers only receive approved production orders.');
+        }
 
         if (order) {
             order.assigned_digitizer_id = digitizerId;

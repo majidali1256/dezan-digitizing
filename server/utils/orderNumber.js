@@ -14,7 +14,7 @@ const generateQuoteNumber = () => {
 
 const generateTaskNumber = (orderNumber) => {
     if (orderNumber) {
-        return orderNumber.replace('ORD-', 'TSK-').replace('QUO-', 'TSK-');
+        return orderNumber.replace('ORD-', 'TSK-');
     }
     const random = Math.floor(1000 + Math.random() * 9000);
     return `TSK-2026-${random}`;

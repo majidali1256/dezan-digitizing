@@ -282,6 +282,11 @@ const assignDigitizer = async (req, res) => {
         }
         const order = orderRes.rows[0];
 
+        // Quotes can ONLY be appraised and handled by Admin; digitizers only work on active production orders
+        if (order.is_quote === true || order.status === 'quote_requested' || (order.order_number && order.order_number.startsWith('QUO-'))) {
+            return badRequest(res, 'Quotes can only be sent to and reviewed by Admin. Digitizers only receive approved production orders.');
+        }
+
         // 1. Update Order in public.orders
         const updatedOrderRes = await query(
             `UPDATE public.orders 

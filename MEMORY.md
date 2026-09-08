@@ -1037,3 +1037,40 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - Desktop (1512x982), Tablet/Laptop (1440x900), and Mobile (390x844) tests passed 100%.
   - Confirmed 3 service cards, default $25.00 price, $40.00 toggle, placement decoupling, size auto-syncing, custom placement reveal, and dual-modal parity in both public modals and authenticated client portal.
   - Visual QA screenshots saved in artifact directory: `pet_portrait_step1_cards_desktop.png`, `pet_portrait_step2_tier25_desktop.png`, `pet_portrait_step2_tier40_desktop.png`, `pet_portrait_mobile_step1.png`, `pet_portrait_mobile_step2.png`, `pet_portrait_portal_step1.png`, `pet_portrait_portal_step2.png`.
+
+---
+
+## 31. Strict Quote Isolation to Admin & Worker Data Masking (Implemented & Verified)
+- **Problem & Requirement**:
+  - Quotes (`is_quote = true`, `status = 'quote_requested'`, `order_number` starting with `QUO-`) are strictly administrative pricing inquiries between the Client and Admin.
+  - Digitizers (workers) have only one responsibility: receive approved production orders, digitize/work on them, and upload/send deliverables back (`.DST`, `.EMB`, proofs).
+  - Digitizers must have zero access to or involvement with clients (names, emails, phone numbers, companies) and zero involvement with pricing (quoted price, order dollar amounts, invoices, payments).
+  - Quotes must NEVER be sent to or assigned to digitizers.
+- **Architectural Implementation**:
+  - **Backend API Protection (`server/`)**:
+    - `server/controllers/orderController.js`: In `assignDigitizer`, added a strict guard rejecting quote orders with HTTP 400 Bad Request: `"Quotes can only be sent to and reviewed by Admin. Digitizers only receive approved production orders."`.
+    - `server/controllers/taskController.js`: Added SQL exclusion clause `whereClauses.push("NOT (order_number LIKE 'QUO-%')")` so digitizer tasks queries never return quotes; guarded `getTaskById` against any quote orders.
+    - `server/utils/orderNumber.js`: Removed `.replace('QUO-', 'TSK-')` from `generateTaskNumber` to guarantee quote numbers never create worker tasks.
+    - `server/controllers/quoteController.js`: Enforces `if (user.role === 'digitizer') return forbidden(res, 'Digitizer workers do not have access to quote appraisals')`; alert notifications route exclusively to Admin and Client.
+  - **Client-Side SDK & Portal Logic (`js/insforge-client.js`)**:
+    - In `assignDigitizer()`: Throws explicit error if order is a quote (`QUO-...`, `is_quote`, or `quote_requested`).
+    - In `fetchDigitizerTasks()` & `getDigitizerTasks()`: Strictly filters out any quotes from cloud tasks, local tasks cache, and local order merges.
+    - In `autoAssignAllPendingOrders()`: Skips quotes so automated assignment passes over pricing requests.
+  - **Admin Workspace (`js/admin-workspace.js`)**:
+    - In `renderAdminOrderTableRow` and `renderAdminOrderCard`: Conditionally hidden the "Assign" / "Reassign" button for any quotes, ensuring only "Give Price" / "Update Price" and "Invoice" are available for quotes.
+    - In `openAssignModal()`: Added strict validation blocking modal launch for quotes and filtering out quotes from target assignment lists.
+    - In `renderDigitizersDirectory`: Excluded quotes from worker assigned orders and active task counts.
+  - **Worker Portal (`worker-portal.html`)**:
+    - `renderWorkerTasks()`: Strictly filters out any quotes before rendering the active or completed queues.
+    - Technical Specs modal & task cards: Display zero client PII (no client name, email, phone, company) and zero commercial pricing (no dollar amounts, no payment status). Shows strictly technical engineering parameters (placement, sizing, density, formats, instructions, raw artwork download, deliverables upload).
+- **Automated Playwright & Backend Verification (`scratch/test_quote_admin_isolation.js`)**:
+  - Validated 100% passing tests:
+    1. Quote creation (`QUO-9708`) generated with status `quote_requested` and `is_quote: true`.
+    2. Worker token accessing `GET /api/quotes` returns HTTP 403 Forbidden.
+    3. Worker token accessing `GET /api/orders` returns HTTP 403 Forbidden.
+    4. Attempting to assign quote `QUO-9708` to a digitizer returns HTTP 400 Bad Request with `"Quotes can only be sent to and reviewed by Admin. Digitizers only receive approved production orders."`.
+    5. Client-side `assignDigitizer` method throws error when passed quote references.
+    6. Admin portal renders quote with "Give Price" / "Update Price" and NO "Assign" button.
+    7. Worker portal task queue contains 0 quotes, with strict physical data masking confirmed on all properties.
+    8. Screenshots captured: `scratch/admin_portal_quote_isolation.png` and `scratch/worker_portal_quote_isolation.png`.
+
