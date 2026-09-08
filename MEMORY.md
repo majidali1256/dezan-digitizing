@@ -1092,3 +1092,82 @@ The Worker Studio provides an isolated, production-focused environment for embro
 - **Visual QA Verification (`scratch/verify_files_stay_in_account.js`)**:
   - Captured Desktop Light (`scratch/why_choose_pillars_desktop_light.png`), Desktop Dark (`scratch/why_choose_pillars_desktop_dark.png`), and Mobile 390px (`scratch/why_choose_pillars_mobile.png`).
   - Confirmed 4-card desktop layout and 2x2 mobile grid alignment with zero overflow or text clipping.
+
+---
+
+## 33. Comprehensive Google Image SEO Optimization (Semantic Kebab-Case Filenames & Rich Alt Text Architecture)
+- **Mandate & Problem Addressed**:
+  - Google explicitly uses surrounding text, filenames, captions, and `alt` text to understand images and rank visual assets in Google Images search.
+  - Generic names (e.g. `1.webp`, `IMG_8348.webp`, `review3.jpeg`, `Hero Page/Vector.png`) provide zero topical context to web crawlers, forfeiting organic search traffic for high-intent commercial terms (`3d-puff-cap-embroidery-stitchout.webp`, `jacket-back-embroidery-digitizing.webp`, `pet-portrait-embroidery.webp`).
+  - Generic `alt="Client Feedback"` or missing `alt` attributes fail accessibility and image SEO benchmarks.
+- **Architectural Solution & Semantic Standard**:
+  - **Kebab-Case Naming Standard**: All images renamed using lowercase hyphens containing exact subject matter, placement, process, and file type (e.g., `Client FeedBack/6.webp` $\rightarrow$ `Client FeedBack/3d-puff-cap-embroidery-stitchout.webp`).
+  - **All 39 Client FeedBack Images Renamed & Mapped**:
+    1. `1.webp` $\rightarrow$ `boxer-dog-pet-portrait-embroidery-digitizing.webp`
+    2. `2.webp` $\rightarrow$ `boxer-dog-embroidered-tote-bag-stitchout.webp`
+    3. `3.webp` $\rightarrow$ `donas-tacos-mexican-dancer-jacket-back-embroidery-digitizing.webp`
+    4. `4.webp` $\rightarrow$ `donas-tacos-mexican-folkloric-jacket-back-embroidery-stitchout.webp`
+    5. `5.webp` $\rightarrow$ `retro-astros-rainbow-3d-puff-cap-embroidery-digitizing.webp`
+    6. `6.webp` $\rightarrow$ `3d-puff-cap-embroidery-stitchout.webp` (user's target benchmark)
+    7. `7.webp` $\rightarrow$ `houston-skyline-space-city-cap-embroidery-digitizing.webp`
+    8. `8.webp` $\rightarrow$ `houston-cityscape-trucker-hat-embroidery-stitchout.webp`
+    9. `9.webp` $\rightarrow$ `mill-creek-kennels-left-chest-embroidery-stitchout.webp`
+    10. `10.webp` $\rightarrow$ `mill-creek-kennels-dog-left-chest-embroidery-digitizing.webp`
+    11. `11.webp` $\rightarrow$ `reds-world-melting-heart-hat-embroidery-digitizing.webp`
+    12. `12.webp` $\rightarrow$ `reds-world-dripping-heart-cap-embroidery-stitchout.webp`
+    13. `14.webp` $\rightarrow$ `good-jawns-motocross-circular-embroidered-patch.webp`
+    14. `15.webp` $\rightarrow$ `black-terrier-dog-pet-portrait-embroidery-digitizing.webp`
+    15. `16.webp` $\rightarrow$ `beau-dog-pet-portrait-embroidered-sweatshirt-stitchout.webp`
+    16. `17.webp` $\rightarrow$ `french-bulldogs-pet-portrait-embroidery-digitizing.webp`
+    17. `18.webp` $\rightarrow$ `french-bulldog-custom-embroidered-crewneck-stitchout.webp`
+    18. `19.webp` $\rightarrow$ `suave-cuts-barbershop-anchor-patch-digitizing.webp`
+    19. `20.webp` $\rightarrow$ `suave-cuts-barbershop-hoodie-embroidery-stitchout.webp`
+    20. `21.webp` $\rightarrow$ `architectural-estate-lakehouse-jacket-back-embroidery-digitizing.webp`
+    21. `22.webp` $\rightarrow$ `architectural-estate-custom-embroidery-stitchout.webp`
+    22. `23.webp` $\rightarrow$ `houston-sports-hybrid-3d-puff-hat-embroidery-digitizing.webp`
+    23. `24.webp` $\rightarrow$ `houston-sports-hybrid-3d-puff-cap-embroidery-stitchout.webp`
+    24. `25.webp` $\rightarrow$ `good-jawns-dirt-bike-rider-patch-digitizing.webp`
+    25. `26.webp` $\rightarrow$ `good-jawns-motocross-embroidered-patch-stitchout.webp`
+    26. `27.webp` $\rightarrow$ `junes-league-basketball-patch-embroidery-digitizing.webp`
+    27. `28.webp` $\rightarrow$ `junes-league-basketball-embroidered-patch-stitchout.webp`
+    28. `29.webp` $\rightarrow$ `custom-couple-cartoon-sketch-jacket-back-embroidery-digitizing.webp`
+    29. `30.webp` $\rightarrow$ `custom-couple-line-art-embroidered-hoodie-stitchout.webp`
+    30. `31.webp` $\rightarrow$ `suave-cuts-anchor-emblem-embroidery-patch-digitizing.webp`
+    31. `32.webp` $\rightarrow$ `suave-cuts-barbershop-embroidered-caps-stitchout.webp`
+    32. `33.webp` $\rightarrow$ `bull-silhouette-tree-branches-cap-embroidery-digitizing.webp`
+    33. `34.webp` $\rightarrow$ `bull-tree-branches-embroidered-hoodie-and-hat-stitchout.webp`
+    34. `35.webp` $\rightarrow$ `american-flag-mountain-hiker-cap-embroidery-digitizing.webp`
+    35. `36.webp` $\rightarrow$ `american-flag-outdoor-hiker-embroidered-hat-stitchout.webp`
+    36. `37.webp` $\rightarrow$ `barbacoa-bandits-bull-skull-hat-embroidery-digitizing.webp`
+    37. `38.webp` $\rightarrow$ `barbacoa-bandits-trucker-hat-embroidery-stitchout.webp`
+    38. `39.webp` $\rightarrow$ `sevenailz-barbershop-greek-key-jacket-back-embroidery-digitizing.webp`
+    39. `40.webp` $\rightarrow$ `sevenailz-barbershop-jacket-back-embroidery-stitchout.webp`
+  - **Hero Page Comparison Assets Renamed**:
+    - `Hero Page/Vector.png` $\rightarrow$ `Hero Page/astronaut-vector-art-source-illustration.png`
+    - `Hero Page/Embroidery.png` $\rightarrow$ `Hero Page/astronaut-patch-embroidery-digitizing-stitchout.png`
+  - **Factory Craftsmanship Assets Renamed (`images/`)**:
+    - `1.jpeg` $\rightarrow$ `commercial-multi-head-embroidery-machine.jpeg`
+    - `2.jpeg` $\rightarrow$ `wilcom-embroidery-digitizing-software-stitch-simulation.jpeg`
+    - `3.jpeg` $\rightarrow$ `scenic-mountain-landscape-embroidered-patch.jpeg`
+    - `4.jpeg` $\rightarrow$ `madeira-polyneon-embroidery-thread-spools.jpeg`
+    - Removed space-containing duplicates (`Custom Hats.png`, `Jacket Backs.png`, `Left Chest Logos.png`, `Left Chest Logos.jpg`, `Pet Embroidery.png`) in favor of standardized `custom-hats.png`, `jacket-backs.png`, `left-chest-logos.png`, `pet-embroidery.png`.
+  - **Customer Testimonial Screenshots Renamed (`reviews/`)**:
+    - `review2.jpeg` $\rightarrow$ `ashlea-foxwell-embroidery-stitchout-review.jpeg`
+    - `review3.jpeg` $\rightarrow$ `erkan-koyuncu-seaside-hats-embroidery-review.jpeg`
+    - `review4.jpeg` $\rightarrow$ `maralyn-kublek-embroidery-digitizing-review.jpeg`
+    - `review5.jpeg` $\rightarrow$ `lisa-jenkins-embroidery-customer-review.jpeg`
+    - `review6.jpeg` $\rightarrow$ `sandy-escobar-embroidery-digitizing-review.jpeg`
+    - `review7.jpeg` $\rightarrow$ `susan-michael-embroidery-service-review.jpeg`
+    - `review8.jpeg` $\rightarrow$ `karen-giddings-embroidery-digitizing-review.jpeg`
+    - `review9.jpeg` $\rightarrow$ `chris-velasquez-embroidery-stitchout-review.jpeg`
+    - `review10.jpeg` $\rightarrow$ `jean-trinh-le-embroidery-digitizing-review.jpeg`
+  - **Rich Alt Text & Title Injections Across All Pages**:
+    - `portfolio.html`: Enhanced all 39 stitchout cards with unique, keyword-rich `alt` attributes, human-readable `title` tags, and `loading="lazy"`.
+    - `app.js`: Refactored `feedbackImages` into structured `feedbackItems` array containing `{ src, alt, title }`. Injected real alt text into both `#feedback-slide-track` and `#feedback-thumb-strip`.
+    - `index.html`: Updated Hero slider before/after images, preloads, portfolio category grid cards, and customer review cards.
+    - `about.html`, `services.html`, `pricing.html`, `embroidery-digitizing.html`, `worker-workspace.js`: Updated all references with zero legacy filenames remaining.
+- **Verification (`scratch/verify_image_seo_renaming.js`)**:
+  - Automated Playwright crawl across 7 core pages (`index.html`, `portfolio.html`, `about.html`, `services.html`, `pricing.html`, `embroidery-digitizing.html`, `vector-art-conversion.html`).
+  - Results: 0 broken images (`naturalWidth === 0`), 0 HTTP 404 network errors, 0 missing alt tags, 0 generic alt tags.
+  - Multi-viewport visual screenshots verified on Desktop (`1512x982`) and Mobile (`390x844`).
+

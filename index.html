@@ -123,22 +123,13 @@
     </script>
     <!-- Preload critical brand assets & hero comparison images to eliminate reload glitch -->
     <link rel="preload" href="logo.png" as="image" />
-    <link rel="preload" href="Hero%20Page/Embroidery.png" as="image" />
-    <link rel="preload" href="Hero%20Page/Vector.png" as="image" />
-    <!-- Preload hero gallery images for performance -->
-    <link rel="preload" href="images/ai_flower.png" as="image">
-    <link rel="preload" href="images/ai_anime_1.png" as="image">
-    <link rel="preload" href="images/custom-hats.png?v=4" as="image">
-    <link rel="preload" href="images/jacket-backs.png?v=4" as="image">
-    <link rel="preload" href="images/left-chest-logos.png?v=4" as="image">
-    <link rel="preload" href="images/pet-embroidery.png?v=4" as="image">
-    <link rel="preload" href="images/ai_fruits.png" as="image">
-    <link rel="preload" href="images/ai_anime_2.png" as="image">
-    <link rel="preload" href="images/ai_character.png" as="image">
-    <link rel="preload" href="images/ai_banana_2.png" as="image">
-    <link rel="preload" href="images/ai_car_2.png" as="image">
-    <link rel="preload" href="images/ai_cartoon_2.png" as="image">
-    <link rel="preload" href="images/ai_cartoon_3.png" as="image">
+    <link rel="preload" href="Hero%20Page/astronaut-patch-embroidery-digitizing-stitchout.png" as="image" />
+    <link rel="preload" href="Hero%20Page/astronaut-vector-art-source-illustration.png" as="image" />
+    <!-- Preload hero portfolio preview images -->
+    <link rel="preload" href="images/custom-hats.png?v=4" as="image" />
+    <link rel="preload" href="images/jacket-backs.png?v=4" as="image" />
+    <link rel="preload" href="images/left-chest-logos.png?v=4" as="image" />
+    <link rel="preload" href="images/pet-embroidery.png?v=4" as="image" />
     <link rel="stylesheet" href="styles.css" />
 </head>
 
@@ -247,11 +238,11 @@
             <div class="order-1 md:order-2 flex-shrink-0 flex justify-center w-full md:w-auto">
               <div id="hero-compare-slider" class="relative w-full max-w-[285px] xs:max-w-[320px] sm:max-w-[365px] md:max-w-none md:w-[430px] lg:w-[494px] aspect-square select-none touch-manipulation cursor-col-resize">
                 <!-- After layer (Embroidery) — full background -->
-                <img src="Hero Page/Embroidery.png" alt="Embroidery digitizing result"
+                <img src="Hero Page/astronaut-patch-embroidery-digitizing-stitchout.png" alt="Finished Production Astronaut Patch Embroidery Digitizing Stitchout Sample" title="Astronaut Patch Embroidery Digitizing"
                      width="1057" height="1100"
                      class="absolute inset-0 w-full h-full object-contain pointer-events-none" draggable="false" />
                 <!-- Before layer (Vector) — zero-glitch 100% scale, clipped via clip-path -->
-                <img id="compare-before-img" src="Hero Page/Vector.png" alt="Vector art design"
+                <img id="compare-before-img" src="Hero Page/astronaut-vector-art-source-illustration.png" alt="Source Vector Art Illustration with Gold Visor for Embroidery Digitizing" title="Astronaut Source Vector Art"
                      width="1057" height="1100"
                      class="absolute inset-0 w-full h-full object-contain pointer-events-none"
                      style="clip-path: inset(0 50% 0 0); -webkit-clip-path: inset(0 50% 0 0);" draggable="false" />
@@ -294,7 +285,7 @@
                 <div
                     class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale block shadow-xs">
                     <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        alt="3D Puff Embroidery hat"
+                        alt="Custom 3D Puff Cap Front Embroidery Digitizing Stitchout" title="Custom 3D Puff Hats"
                         loading="eager"
                         src="images/custom-hats.png?v=4" />
                     <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
@@ -306,7 +297,7 @@
                 <div
                     class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale shadow-xs">
                     <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        alt="Large jacket back embroidery"
+                        alt="Large Jacket Back Custom Embroidery Digitizing Stitchout on Black Satin Jacket" title="Jacket Back Embroidery"
                         loading="eager"
                         src="images/jacket-backs.png?v=4" />
                     <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
@@ -318,7 +309,7 @@
                 <div
                     class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale shadow-xs">
                     <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        alt="Left chest logo embroidery"
+                        alt="Left Chest Corporate Uniform Logo Embroidery Digitizing on Softshell Team Jackets" title="Left Chest Logos"
                         loading="eager"
                         src="images/left-chest-logos.png?v=4" />
                     <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
@@ -330,7 +321,7 @@
                 <div
                     class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden relative group hover-scale shadow-xs">
                     <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        alt="Custom embroidered pet portrait"
+                        alt="Realistic Custom Pet Dog Portrait Embroidery Digitizing on Fabric" title="Pet Portrait Embroidery"
                         loading="eager"
                         src="images/pet-embroidery.png?v=4" />
                     <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
@@ -403,7 +394,7 @@
                 <!-- Review 1 (Erkan) -->
                 <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review3.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/erkan-koyuncu-seaside-hats-embroidery-review.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm">Erkan Koyuncu</p>
@@ -415,14 +406,14 @@
                     </div>
                     <p class="text-sm mb-3">Fresh out of the machine 😍<br><br>Thank you <span class="text-blue-500 font-semibold cursor-pointer">Felix Dezan</span> for the amazing job with the digitizing!<br><br>SEASIDE MOSTLY HATS</p>
                     <div class="mt-2 overflow-hidden rounded-lg cursor-pointer hover:opacity-90 transition-opacity">
-                        <img src="reviews/review3.jpeg" class="w-full h-32 object-cover object-bottom" alt="Digitized Hats">
+                        <img src="reviews/erkan-koyuncu-seaside-hats-embroidery-review.jpeg" class="w-full h-32 object-cover object-bottom" alt="Erkan Koyuncu Seaside Mostly Hats Custom Embroidery Digitizing Cap Stitchout" title="Erkan Koyuncu Seaside Hats Review">
                     </div>
                 </div>
 
                 <!-- Review 2 (Maralyn) -->
                 <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review4.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/maralyn-kublek-embroidery-digitizing-review.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm flex items-center gap-1">Maralyn Kublek <span class="bg-red-500 text-white rounded-[4px] px-1 text-[8px] uppercase font-bold ml-1">Recommends</span></p>
@@ -439,7 +430,7 @@
                 <!-- Review 3 (Lisa) -->
                 <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review5.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/lisa-jenkins-embroidery-customer-review.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm flex items-center gap-1">Lisa Jenkins <span class="bg-red-500 text-white rounded-[4px] px-1 text-[8px] uppercase font-bold ml-1">Recommends</span></p>
@@ -456,7 +447,7 @@
                 <!-- Review 4 (Sandy) -->
                 <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review6.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/sandy-escobar-embroidery-digitizing-review.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm">Sandy Escobar</p>
@@ -487,7 +478,7 @@
                 <!-- Review 6 (Susan) -->
                 <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review7.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/susan-michael-embroidery-service-review.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm flex items-center gap-1">Susan Michael <span class="bg-red-500 text-white rounded-[4px] px-1 text-[8px] uppercase font-bold ml-1">Recommends</span></p>
@@ -504,7 +495,7 @@
                 <!-- Review 7 (Karen) -->
                 <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review8.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/karen-giddings-embroidery-digitizing-review.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm">Karen Parmenter Giddings</p>
@@ -521,7 +512,7 @@
                 <!-- NEW REVIEW: Ashlea Foxwell -->
                 <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review2.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/ashlea-foxwell-embroidery-stitchout-review.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm">Ashlea Foxwell</p>
@@ -537,7 +528,7 @@
                 <!-- NEW REVIEW: Chris Velasquez -->
                 <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review9.jpeg'); background-size: 800%; background-position: 2% 3%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/chris-velasquez-embroidery-stitchout-review.jpeg'); background-size: 800%; background-position: 2% 3%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm">Chris Velasquez</p>
@@ -553,7 +544,7 @@
                 <!-- NEW REVIEW: Jean Trinh Le -->
                 <div class="break-inside-avoid bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/review10.jpeg'); background-size: 800%; background-position: 2% 80%;">
+                        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 bg-no-repeat" style="background-image: url('reviews/jean-trinh-le-embroidery-digitizing-review.jpeg'); background-size: 800%; background-position: 2% 80%;">
                         </div>
                         <div>
                             <p class="font-bold text-sm">Jean Trinh Le</p>

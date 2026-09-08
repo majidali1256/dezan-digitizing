@@ -1568,6 +1568,7 @@ function initLightbox() {
     
     const imgEl = document.createElement('img');
     imgEl.className = 'lightbox-image';
+    imgEl.alt = 'Enlarged embroidery artwork stitchout preview';
     
     const closeBtn = document.createElement('button');
     closeBtn.className = 'lightbox-close';
@@ -2079,48 +2080,206 @@ function initFeedbackSlider() {
     const wrapper = document.getElementById('feedback-slider-wrapper');
     if (!track || !strip) return;
 
-    // All feedback image paths (sequenced alphabetically based on numeric values)
-    const images = [
-        'Client FeedBack/1.webp',
-        'Client FeedBack/2.webp',
-        'Client FeedBack/3.webp',
-        'Client FeedBack/4.webp',
-        'Client FeedBack/5.webp',
-        'Client FeedBack/6.webp',
-        'Client FeedBack/7.webp',
-        'Client FeedBack/8.webp',
-        'Client FeedBack/9.webp',
-        'Client FeedBack/10.webp',
-        'Client FeedBack/11.webp',
-        'Client FeedBack/12.webp',
-        'Client FeedBack/14.webp',
-        'Client FeedBack/15.webp',
-        'Client FeedBack/16.webp',
-        'Client FeedBack/17.webp',
-        'Client FeedBack/18.webp',
-        'Client FeedBack/19.webp',
-        'Client FeedBack/20.webp',
-        'Client FeedBack/21.webp',
-        'Client FeedBack/22.webp',
-        'Client FeedBack/23.webp',
-        'Client FeedBack/24.webp',
-        'Client FeedBack/25.webp',
-        'Client FeedBack/26.webp',
-        'Client FeedBack/27.webp',
-        'Client FeedBack/28.webp',
-        'Client FeedBack/29.webp',
-        'Client FeedBack/30.webp',
-        'Client FeedBack/31.webp',
-        'Client FeedBack/32.webp',
-        'Client FeedBack/33.webp',
-        'Client FeedBack/34.webp',
-        'Client FeedBack/35.webp',
-        'Client FeedBack/36.webp',
-        'Client FeedBack/37.webp',
-        'Client FeedBack/38.webp',
-        'Client FeedBack/39.webp',
-        'Client FeedBack/40.webp'
+        // All feedback image paths and rich SEO metadata
+    const feedbackItems = [
+        {
+            src: 'Client FeedBack/boxer-dog-pet-portrait-embroidery-digitizing.webp',
+            alt: 'Boxer Dog Pet Portrait Custom Embroidery Digitizing Stitch Preview and Thread Map',
+            title: 'Boxer Dog Pet Portrait Digitizing'
+        },
+        {
+            src: 'Client FeedBack/boxer-dog-embroidered-tote-bag-stitchout.webp',
+            alt: 'Realistic Boxer Dog Pet Portrait Embroidered onto Canvas Tote Bag Stitchout',
+            title: 'Boxer Dog Embroidered Tote Bag Stitchout'
+        },
+        {
+            src: 'Client FeedBack/donas-tacos-mexican-dancer-jacket-back-embroidery-digitizing.webp',
+            alt: 'Doña\'s Tacos Mexican Folkloric Dancer Custom Jacket Back Embroidery Digitizing Run Sheet',
+            title: 'Doña\'s Tacos Jacket Back Digitizing'
+        },
+        {
+            src: 'Client FeedBack/donas-tacos-mexican-folkloric-jacket-back-embroidery-stitchout.webp',
+            alt: 'Doña\'s Tacos Mexican Folkloric Dancer Detailed Jacket Back Embroidery Stitchout on Black Fleece',
+            title: 'Doña\'s Tacos Jacket Back Embroidery Stitchout'
+        },
+        {
+            src: 'Client FeedBack/retro-astros-rainbow-3d-puff-cap-embroidery-digitizing.webp',
+            alt: 'Retro Astros Rainbow Striped Letter A with Star 3D Puff Cap Embroidery Digitizing Stitch Layout',
+            title: 'Retro Astros Rainbow 3D Puff Cap Digitizing'
+        },
+        {
+            src: 'Client FeedBack/3d-puff-cap-embroidery-stitchout.webp',
+            alt: 'High-Density 3D Puff Cap Embroidery Stitchout on Orange Brim Snapback Hat',
+            title: '3D Puff Cap Embroidery Stitchout'
+        },
+        {
+            src: 'Client FeedBack/houston-skyline-space-city-cap-embroidery-digitizing.webp',
+            alt: 'Houston Space City Skyline and Orbiting Craft Cap Logo Embroidery Digitizing File',
+            title: 'Houston Skyline Cap Digitizing'
+        },
+        {
+            src: 'Client FeedBack/houston-cityscape-trucker-hat-embroidery-stitchout.webp',
+            alt: 'Houston Skyline Space City Custom Embroidery Stitchout on Black Mesh Trucker Hat',
+            title: 'Houston Cityscape Trucker Hat Stitchout'
+        },
+        {
+            src: 'Client FeedBack/mill-creek-kennels-left-chest-embroidery-stitchout.webp',
+            alt: 'Mill Creek Farm Kennels Hunting Dog Left Chest Logo Embroidery Stitchout on Heather Polo',
+            title: 'Mill Creek Kennels Left Chest Stitchout'
+        },
+        {
+            src: 'Client FeedBack/mill-creek-kennels-dog-left-chest-embroidery-digitizing.webp',
+            alt: 'Mill Creek Farm Kennels Hunting Dog Pointer Left Chest Embroidery Digitizing Run Sheet',
+            title: 'Mill Creek Kennels Left Chest Digitizing'
+        },
+        {
+            src: 'Client FeedBack/reds-world-melting-heart-hat-embroidery-digitizing.webp',
+            alt: 'Red\'s World Melting Dripping Heart Cartoon Cap Front Embroidery Digitizing Run Sheet',
+            title: 'Red\'s World Melting Heart Hat Digitizing'
+        },
+        {
+            src: 'Client FeedBack/reds-world-dripping-heart-cap-embroidery-stitchout.webp',
+            alt: 'Red\'s World Dripping Melting Heart Embroidered Snapback and Trucker Hats Stitchout',
+            title: 'Red\'s World Dripping Heart Cap Stitchout'
+        },
+        {
+            src: 'Client FeedBack/good-jawns-motocross-circular-embroidered-patch.webp',
+            alt: 'Good Jawns Motocross Dirt Bike Racer Circular Custom Embroidered Patch with Merrowed Edge',
+            title: 'Good Jawns Motocross Embroidered Patch'
+        },
+        {
+            src: 'Client FeedBack/black-terrier-dog-pet-portrait-embroidery-digitizing.webp',
+            alt: 'Black Schnauzer Terrier Dog Pet Portrait Embroidery Digitizing Stitch Plan with Blue Collar',
+            title: 'Black Terrier Pet Portrait Digitizing'
+        },
+        {
+            src: 'Client FeedBack/beau-dog-pet-portrait-embroidered-sweatshirt-stitchout.webp',
+            alt: 'Beau Custom Pet Dog Portrait and Paw Prints Embroidered Sweatshirt Stitchout',
+            title: 'Beau Dog Portrait Embroidered Sweatshirt'
+        },
+        {
+            src: 'Client FeedBack/french-bulldogs-pet-portrait-embroidery-digitizing.webp',
+            alt: 'French Bulldog Puppies Multi-Pet Portrait Embroidery Digitizing Stitch Simulation',
+            title: 'French Bulldogs Pet Portrait Digitizing'
+        },
+        {
+            src: 'Client FeedBack/french-bulldog-custom-embroidered-crewneck-stitchout.webp',
+            alt: 'French Bulldog Custom Embroidered Pet Portrait on Heather Grey Crewneck Sweatshirt',
+            title: 'French Bulldog Embroidered Crewneck Stitchout'
+        },
+        {
+            src: 'Client FeedBack/suave-cuts-barbershop-anchor-patch-digitizing.webp',
+            alt: 'Suave Cuts Barbershop Nautical Anchor Circular Patch Embroidery Digitizing Run Sheet',
+            title: 'Suave Cuts Barbershop Patch Digitizing'
+        },
+        {
+            src: 'Client FeedBack/suave-cuts-barbershop-hoodie-embroidery-stitchout.webp',
+            alt: 'Suave Cuts Barbershop Seaside Oregon Embroidered Crest on Snap Collar Fleece Hoodie',
+            title: 'Suave Cuts Barbershop Fleece Stitchout'
+        },
+        {
+            src: 'Client FeedBack/architectural-estate-lakehouse-jacket-back-embroidery-digitizing.webp',
+            alt: 'Architectural Estate Waterfront Lakehouse Jacket Back Embroidery Digitizing Run Sheet',
+            title: 'Architectural Estate Jacket Back Digitizing'
+        },
+        {
+            src: 'Client FeedBack/architectural-estate-custom-embroidery-stitchout.webp',
+            alt: 'Architectural Estate Custom Home Embroidery Stitchouts with Date on Linen Swatches',
+            title: 'Architectural Estate Custom Embroidery Stitchout'
+        },
+        {
+            src: 'Client FeedBack/houston-sports-hybrid-3d-puff-hat-embroidery-digitizing.webp',
+            alt: 'Houston Sports Hybrid Bull and Star Logo 3D Puff Cap Embroidery Digitizing Run Sheet',
+            title: 'Houston Sports Hybrid 3D Puff Hat Digitizing'
+        },
+        {
+            src: 'Client FeedBack/houston-sports-hybrid-3d-puff-cap-embroidery-stitchout.webp',
+            alt: 'Houston Sports Hybrid Logo High-Density 3D Puff Cap Embroidery Stitchout on Black Snapback',
+            title: 'Houston Sports Hybrid 3D Puff Cap Stitchout'
+        },
+        {
+            src: 'Client FeedBack/good-jawns-dirt-bike-rider-patch-digitizing.webp',
+            alt: 'Good Jawns #6 Motocross Dirt Bike Racer Circular Patch Embroidery Digitizing File',
+            title: 'Good Jawns Dirt Bike Rider Patch Digitizing'
+        },
+        {
+            src: 'Client FeedBack/good-jawns-motocross-embroidered-patch-stitchout.webp',
+            alt: 'Good Jawns #6 Motocross Dirt Bike Racer High-Density Custom Embroidered Patch Stitchout',
+            title: 'Good Jawns Motocross Embroidered Patch Stitchout'
+        },
+        {
+            src: 'Client FeedBack/junes-league-basketball-patch-embroidery-digitizing.webp',
+            alt: 'Junes League Basketball Championship Shield Emblem Cap Embroidery Digitizing Run Sheet',
+            title: 'Junes League Basketball Patch Digitizing'
+        },
+        {
+            src: 'Client FeedBack/junes-league-basketball-embroidered-patch-stitchout.webp',
+            alt: 'Junes League Basketball Tournament Custom Embroidered Shield Patch with Satin Border',
+            title: 'Junes League Basketball Patch Stitchout'
+        },
+        {
+            src: 'Client FeedBack/custom-couple-cartoon-sketch-jacket-back-embroidery-digitizing.webp',
+            alt: 'Custom Romantic Couple Cartoon Sketch to Jacket Back Embroidery Digitizing Stitch Layout',
+            title: 'Couple Cartoon Sketch Jacket Back Digitizing'
+        },
+        {
+            src: 'Client FeedBack/custom-couple-line-art-embroidered-hoodie-stitchout.webp',
+            alt: 'Custom Couple Line Art Caricature Embroidered on Matching Neon Pink Hoodies',
+            title: 'Custom Couple Line Art Embroidered Hoodies'
+        },
+        {
+            src: 'Client FeedBack/suave-cuts-anchor-emblem-embroidery-patch-digitizing.webp',
+            alt: 'Suave Cuts Barbershop Anchor and Rope Emblem Circular Patch Embroidery Digitizing Run Sheet',
+            title: 'Suave Cuts Anchor Emblem Patch Digitizing'
+        },
+        {
+            src: 'Client FeedBack/suave-cuts-barbershop-embroidered-caps-stitchout.webp',
+            alt: 'Suave Cuts Barbershop Nautical Logo Embroidered Dad Hats in Burgundy and Navy Twill',
+            title: 'Suave Cuts Barbershop Embroidered Caps Stitchout'
+        },
+        {
+            src: 'Client FeedBack/bull-silhouette-tree-branches-cap-embroidery-digitizing.webp',
+            alt: 'Bull Silhouette with Forest Tree Branches Wildlife Cap Front Embroidery Digitizing File',
+            title: 'Bull Tree Branches Cap Digitizing'
+        },
+        {
+            src: 'Client FeedBack/bull-tree-branches-embroidered-hoodie-and-hat-stitchout.webp',
+            alt: 'Bull Forest Tree Branches Wildlife Embroidery Stitchout on Red Hoodie and Two-Tone Hat',
+            title: 'Bull Tree Branches Embroidered Hoodie and Hat'
+        },
+        {
+            src: 'Client FeedBack/american-flag-mountain-hiker-cap-embroidery-digitizing.webp',
+            alt: 'American Flag Outdoor Mountain Hiker and Pine Trees Cap Embroidery Digitizing Run Sheet',
+            title: 'American Flag Mountain Hiker Cap Digitizing'
+        },
+        {
+            src: 'Client FeedBack/american-flag-outdoor-hiker-embroidered-hat-stitchout.webp',
+            alt: 'American Flag and Wilderness Hiker White Thread Embroidery Stitchout on Washed Denim Cap',
+            title: 'American Flag Outdoor Hiker Embroidered Cap'
+        },
+        {
+            src: 'Client FeedBack/barbacoa-bandits-bull-skull-hat-embroidery-digitizing.webp',
+            alt: 'Barbacoa Bandits Steer Bull Skull and Paisley Bandana Hat Front Embroidery Digitizing Run Sheet',
+            title: 'Barbacoa Bandits Bull Skull Hat Digitizing'
+        },
+        {
+            src: 'Client FeedBack/barbacoa-bandits-trucker-hat-embroidery-stitchout.webp',
+            alt: 'Barbacoa Bandits Horned Steer Bull Skull Embroidered Trucker Hat Stitchout',
+            title: 'Barbacoa Bandits Trucker Hat Stitchout'
+        },
+        {
+            src: 'Client FeedBack/sevenailz-barbershop-greek-key-jacket-back-embroidery-digitizing.webp',
+            alt: 'Sevenailz Barbershop Pole Circular Emblem with Greek Key Border Jacket Back Embroidery Digitizing File',
+            title: 'Sevenailz Barbershop Greek Key Jacket Back Digitizing'
+        },
+        {
+            src: 'Client FeedBack/sevenailz-barbershop-jacket-back-embroidery-stitchout.webp',
+            alt: 'Sevenailz Barbershop Circular Greek Key Emblem Custom Jacket Back Embroidery Stitchout on Red Shirt',
+            title: 'Sevenailz Barbershop Jacket Back Stitchout'
+        }
     ];
+
+    const images = feedbackItems.map(item => item.src);
 
     const totalSlides = images.length;
     let currentIndex = 0;
@@ -2138,8 +2297,10 @@ function initFeedbackSlider() {
         slide.style.transition = 'transform 600ms ease-in-out, opacity 600ms ease-in-out';
 
         const img = document.createElement('img');
+        const item = feedbackItems[i] || { alt: 'Client Stitchout ' + (i + 1), title: 'Client Stitchout' };
         img.src = src;
-        img.alt = 'Client Stitchout ' + (i + 1);
+        img.alt = item.alt;
+        img.title = item.title;
         img.className = 'w-full h-full object-contain';
         img.draggable = false;
         slide.appendChild(img);
@@ -2151,8 +2312,10 @@ function initFeedbackSlider() {
     // --- Build Thumbnail Strip ---
     images.forEach((src, i) => {
         const thumb = document.createElement('img');
+        const item = feedbackItems[i] || { alt: 'Thumbnail ' + (i + 1), title: 'Client Stitchout' };
         thumb.src = src;
-        thumb.alt = 'Thumbnail ' + (i + 1);
+        thumb.alt = item.alt + ' - Thumbnail';
+        thumb.title = item.title;
         thumb.className = 'h-14 w-20 md:h-16 md:w-24 object-cover rounded cursor-pointer flex-shrink-0 border-2 transition-all duration-300 hover:border-primary';
         thumb.style.borderColor = i === 0 ? 'var(--color-primary, #c9a84c)' : 'transparent';
         thumb.addEventListener('click', () => goTo(i));

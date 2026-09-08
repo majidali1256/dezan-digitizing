@@ -110,7 +110,7 @@
         const dimensions = task.dimensions || task.sizing || '3.5" W x 2.2" H';
         const instructions = task.special_instructions || task.instructions || task.revision_notes || task.revisionNotes || 'Keep stitch density balanced for pique polo; minimal jump stitches on lettering.';
         const serviceType = task.service_type || task.serviceType || 'Digitizing';
-        const artworkUrl = task.artwork_url || (Array.isArray(task.rawArtworkFiles) && task.rawArtworkFiles[0]?.url) || (Array.isArray(task.raw_artwork_files) && task.raw_artwork_files[0]?.url) || 'images/Left Chest Logos.png';
+        const artworkUrl = task.artwork_url || (Array.isArray(task.rawArtworkFiles) && task.rawArtworkFiles[0]?.url) || (Array.isArray(task.raw_artwork_files) && task.raw_artwork_files[0]?.url) || 'images/left-chest-logos.png';
         const deliverableUrl = task.deliverable_url || (Array.isArray(task.deliverables) && task.deliverables[0]?.url) || artworkUrl;
 
         return {
@@ -157,7 +157,7 @@
                 status: 'in_progress',
                 priority: 'normal',
                 created_at: new Date(Date.now() - 3600000 * 3).toISOString(),
-                artwork_url: 'images/Left Chest Logos.png',
+                artwork_url: 'images/left-chest-logos.png',
                 target_fabric: 'Pique Polo Knit',
                 dimensions: '3.5" W x 2.2" H',
                 target_format: 'DST & EMB',
@@ -172,7 +172,7 @@
                 status: 'in_progress',
                 priority: 'rush',
                 created_at: new Date(Date.now() - 3600000 * 6).toISOString(),
-                artwork_url: 'images/Custom Hats.png',
+                artwork_url: 'images/custom-hats.png',
                 target_fabric: 'Structured 6-Panel Cap (Twill)',
                 dimensions: '2.25" H x 4.0" W',
                 target_format: 'DST',
@@ -187,7 +187,7 @@
                 status: 'in_progress',
                 priority: 'normal',
                 created_at: new Date(Date.now() - 3600000 * 9).toISOString(),
-                artwork_url: 'images/1.jpeg',
+                artwork_url: 'images/commercial-multi-head-embroidery-machine.jpeg',
                 target_fabric: 'Screen Print / Sublimation Film',
                 dimensions: '12.0" W x 10.0" H',
                 target_format: 'AI, EPS, SVG, PDF',
@@ -202,7 +202,7 @@
                 status: 'revision_requested',
                 priority: 'rush',
                 created_at: new Date(Date.now() - 3600000 * 14).toISOString(),
-                artwork_url: 'images/Jacket Backs.png',
+                artwork_url: 'images/jacket-backs.png',
                 target_fabric: 'Fleece Pullover',
                 dimensions: '6.5" W x 4.5" H',
                 target_format: 'DST, EMB, PES',
@@ -217,8 +217,8 @@
                 plan: 'Larger Designs',
                 status: 'completed',
                 created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-                artwork_url: 'images/2.jpeg',
-                deliverable_url: 'images/Jacket Backs.png',
+                artwork_url: 'images/wilcom-embroidery-digitizing-software-stitch-simulation.jpeg',
+                deliverable_url: 'images/jacket-backs.png',
                 target_fabric: 'Denim Jacket Back',
                 dimensions: '9.0" W x 7.5" H',
                 stitch_count: 28450,
@@ -232,8 +232,8 @@
                 plan: 'Hat / Left Chest Logos',
                 status: 'completed',
                 created_at: new Date(Date.now() - 86400000 * 4).toISOString(),
-                artwork_url: 'images/3.jpeg',
-                deliverable_url: 'images/Left Chest Logos.png',
+                artwork_url: 'images/scenic-mountain-landscape-embroidered-patch.jpeg',
+                deliverable_url: 'images/left-chest-logos.png',
                 target_fabric: 'Performance Poly Knit',
                 dimensions: '3.2" W x 2.0" H',
                 stitch_count: 14200,
