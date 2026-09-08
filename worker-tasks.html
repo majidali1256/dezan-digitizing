@@ -279,6 +279,72 @@
         </div>
     </nav>
 
+    <!-- ===== IN-DASHBOARD DIGITIZER ARTWORK & DELIVERABLES LIGHTBOX MODAL ===== -->
+    <div id="digitizer-artwork-preview-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-5" onclick="if(event.target === this) window.workerWorkspace.closeDigitizerArtworkPreview()">
+        <div class="relative w-full max-w-5xl h-[88vh] bg-[#0f172a] rounded-2xl border border-slate-700/80 shadow-2xl flex flex-col overflow-hidden text-slate-100">
+            <!-- Modal Header / Bar -->
+            <div class="px-5 py-3 bg-slate-900/90 border-b border-slate-700/80 flex items-center justify-between gap-3 shrink-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span id="digitizer-preview-format-badge" class="px-2 py-0.5 rounded-md font-mono text-[11px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">PNG</span>
+                    <div class="min-w-0">
+                        <h4 id="digitizer-preview-filename" class="text-sm font-bold text-white truncate max-w-[220px] sm:max-w-md">Artwork_Primary.png</h4>
+                        <p id="digitizer-preview-filesize" class="text-[11px] text-slate-400 font-mono">342 KB · Production Asset</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Controls & Actions -->
+                <div class="flex items-center gap-2 shrink-0">
+                    <div id="digitizer-preview-nav-controls" class="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700 rounded-lg px-2 py-1">
+                        <button type="button" id="digitizer-preview-prev-btn" onclick="window.workerWorkspace.navigateDigitizerArtworkPreview(-1)" class="p-1 rounded hover:bg-slate-700 text-slate-300 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer" title="Previous file (Left Arrow)">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <span id="digitizer-preview-counter" class="text-xs font-mono font-bold text-slate-300 px-1">1 / 1</span>
+                        <button type="button" id="digitizer-preview-next-btn" onclick="window.workerWorkspace.navigateDigitizerArtworkPreview(1)" class="p-1 rounded hover:bg-slate-700 text-slate-300 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer" title="Next file (Right Arrow)">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+
+                    <a id="digitizer-preview-download-btn" href="#" download class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        <span>Download</span>
+                    </a>
+
+                    <button type="button" onclick="window.workerWorkspace.closeDigitizerArtworkPreview()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer" title="Close (Escape)">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content Area (Dark Checkerboard Canvas) -->
+            <div class="flex-1 relative overflow-hidden flex items-center justify-center p-4" style="background-color: #0b0f17; background-image: linear-gradient(45deg, #131b2a 25%, transparent 25%), linear-gradient(-45deg, #131b2a 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #131b2a 75%), linear-gradient(-45deg, transparent 75%, #131b2a 75%); background-size: 24px 24px; background-position: 0 0, 0 12px, 12px -12px, -12px 0px;">
+                <!-- Image Container -->
+                <div id="digitizer-preview-image-container" class="w-full h-full flex items-center justify-center overflow-auto p-2">
+                    <img id="digitizer-preview-img" src="" alt="Artwork preview" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl transition-transform duration-200" />
+                </div>
+
+                <!-- PDF Container -->
+                <div id="digitizer-preview-pdf-container" class="w-full h-full hidden flex flex-col p-1">
+                    <iframe id="digitizer-preview-pdf-iframe" src="" class="w-full h-full border-0 rounded-xl bg-white shadow-xl"></iframe>
+                </div>
+
+                <!-- Fallback Container for Non-Previewable Formats -->
+                <div id="digitizer-preview-fallback-container" class="max-w-md w-full p-6 sm:p-8 rounded-2xl bg-slate-900/95 border border-slate-700 shadow-2xl text-center hidden">
+                    <div class="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 mx-auto flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <h4 id="digitizer-fallback-filename" class="text-base font-bold text-white mb-1 truncate">Artwork_Source.ai</h4>
+                    <p class="text-xs text-slate-400 mb-5 leading-relaxed">
+                        This is a source vector or production format (<span id="digitizer-fallback-ext" class="font-bold text-amber-400">AI</span>). Download the file directly to open it in Wilcom EmbroideryStudio, Adobe Illustrator, or Tajima Pulse.
+                    </p>
+                    <a id="digitizer-fallback-download-btn" href="#" download class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg transition-transform hover:scale-[1.02] cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        <span>Download <span id="digitizer-fallback-btn-ext">AI</span> File</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="js/insforge-client.js"></script>
     <script src="js/worker-workspace.js"></script>

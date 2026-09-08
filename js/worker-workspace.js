@@ -113,6 +113,14 @@
         const artworkUrl = task.artwork_url || (Array.isArray(task.rawArtworkFiles) && task.rawArtworkFiles[0]?.url) || (Array.isArray(task.raw_artwork_files) && task.raw_artwork_files[0]?.url) || 'images/left-chest-logos.png';
         const deliverableUrl = task.deliverable_url || (Array.isArray(task.deliverables) && task.deliverables[0]?.url) || artworkUrl;
 
+        const isRush = task.turnaround_speed === 'rush' || task.turnaroundSpeed === 'rush' || task.priority === 'rush' || task.is_rush === true || task.isRush === true;
+        const specialOptions = Array.isArray(task.special_options) ? task.special_options : (Array.isArray(task.specialOptions) ? task.specialOptions : []);
+        const rawArtworkFiles = (Array.isArray(task.rawArtworkFiles) && task.rawArtworkFiles.length > 0)
+            ? task.rawArtworkFiles
+            : (Array.isArray(task.raw_artwork_files) && task.raw_artwork_files.length > 0)
+                ? task.raw_artwork_files
+                : [{ name: 'artwork.png', url: artworkUrl }];
+
         return {
             ...task,
             order_number: orderNumber,
@@ -131,10 +139,17 @@
             sizing: dimensions,
             special_instructions: instructions,
             instructions: instructions,
+            special_options: specialOptions,
+            specialOptions: specialOptions,
             artwork_url: artworkUrl,
+            raw_artwork_files: rawArtworkFiles,
+            rawArtworkFiles: rawArtworkFiles,
             deliverable_url: deliverableUrl,
             status: task.status || 'in_progress',
-            priority: task.priority || (task.isRush || (task.revision_notes || task.revisionNotes) ? 'rush' : 'normal'),
+            priority: isRush ? 'rush' : 'normal',
+            turnaround_speed: isRush ? 'rush' : 'standard',
+            is_rush: isRush,
+            isRush: isRush,
             revision_notes: task.revision_notes || task.revisionNotes || '',
             stitch_count: task.stitch_count || (task.status === 'completed' ? 14200 : null),
             // STRICT WORKER PRIVACY MASKING: Client name, email, phone, and price are 100% masked
@@ -371,45 +386,92 @@
 
     // Worker Card Component
     function renderWorkerTaskCard(task, isCompleted) {
-        const isRush = task.priority === 'rush';
+        const isRush = task.priority === 'rush' || task.isRush === true || task.turnaround_speed === 'rush';
         const isRevision = task.status === 'revision_requested' || !!task.revision_notes;
         const orderNum = task.order_number || task.orderNumber || 'ORD-8492';
         const designName = task.design_name || task.placement || 'Custom Embroidery';
 
+        const rushBadge = isRush
+            ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 shadow-2xs whitespace-nowrap"><span class="material-symbols-outlined text-xs text-rose-600 dark:text-rose-400">bolt</span> ⚡ RUSH · 5–8 HOURS</span>`
+            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 whitespace-nowrap"><span class="material-symbols-outlined text-[11px] text-slate-500">schedule</span> Standard · 12–24 Hours</span>`;
+
+        const rawFiles = (Array.isArray(task.raw_artwork_files) && task.raw_artwork_files.length > 0)
+            ? task.raw_artwork_files
+            : (Array.isArray(task.rawArtworkFiles) && task.rawArtworkFiles.length > 0)
+                ? task.rawArtworkFiles
+                : [{ name: 'artwork.png', url: task.artwork_url || 'images/service-digitizing.png' }];
+
+        const primaryRaw = rawFiles[0];
+        const rawExt = (primaryRaw.name || '').split('.').pop()?.toUpperCase() || 'PNG';
+        const isPreviewable = ['PNG', 'JPG', 'JPEG', 'WEBP', 'PDF'].includes(rawExt);
+
+        const specialOpts = Array.isArray(task.special_options) ? task.special_options : (Array.isArray(task.specialOptions) ? task.specialOptions : []);
+        const specialOptsText = specialOpts.length > 0
+            ? specialOpts.map(o => `<span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-[10px] border border-slate-200 dark:border-slate-700">✓ ${o}</span>`).join(' ')
+            : '<span class="text-slate-500 text-[10px]">Standard flat embroidery (0.40mm)</span>';
+
         return `
-            <div class="worker-task-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border ${isRevision && !isCompleted ? 'border-amber-400 dark:border-amber-500 shadow-sm ring-1 ring-amber-400/20' : 'border-slate-200 dark:border-primary/20'} shadow-xs flex flex-col justify-between gap-4 transition-all">
+            <div class="worker-task-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border ${isRevision && !isCompleted ? 'border-amber-400 dark:border-amber-500 shadow-sm ring-1 ring-amber-400/20' : isRush && !isCompleted ? 'border-rose-400/80 dark:border-rose-500/60 shadow-xs' : 'border-slate-200 dark:border-primary/20'} shadow-xs flex flex-col justify-between gap-3.5 transition-all">
                 <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div class="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
-                        <div class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-primary/20 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-xs cursor-pointer" onclick="window.workerWorkspace.openStitchOutZoomModal('${task.artwork_url || 'images/service-digitizing.png'}', '${designName}')" title="Click to enlarge artwork">
-                            <img src="${task.artwork_url || 'images/service-digitizing.png'}" alt="Source Artwork" class="w-full h-full object-cover">
+                        <div class="w-16 h-16 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-primary/20 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-xs cursor-pointer group/art relative" onclick="window.workerWorkspace.openDigitizerArtworkPreview('${orderNum}', 0)" title="Click to open full in-dashboard artwork preview">
+                            <img src="${primaryRaw.url}" alt="Source Artwork" class="w-full h-full object-cover group-hover/art:scale-105 transition-transform">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/art:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity">
+                                <span class="material-symbols-outlined text-sm">visibility</span>
+                            </div>
                         </div>
-                        <div class="min-w-0">
+                        <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-center gap-2 mb-1">
                                 <span class="font-mono text-xs font-black text-amber-900 dark:text-primary">${orderNum}</span>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">${task.client_name}</span>
-                                ${isRush && !isCompleted ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 flex items-center gap-1"><span class="material-symbols-outlined text-xs">bolt</span> RUSH (<12h)</span>` : ''}
+                                <span class="text-xs font-bold text-slate-800 dark:text-slate-200">${task.service_type || task.serviceType || 'Embroidery Digitizing'}</span>
+                                ${rushBadge}
                                 ${isRevision && !isCompleted ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/30 flex items-center gap-1"><span class="material-symbols-outlined text-xs">warning</span> REVISION</span>` : ''}
                                 ${isCompleted ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 flex items-center gap-1"><span class="material-symbols-outlined text-xs">verified</span> COMPLETED</span>` : ''}
                             </div>
                             <h4 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate">${designName}</h4>
-                            <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-slate-600 dark:text-slate-400 mt-1">
-                                <span class="format-tag">${task.target_format || 'DST'}</span>
-                                <span>• Fabric: <strong class="text-slate-800 dark:text-slate-200">${task.target_fabric || 'Standard'}</strong></span>
-                                <span>• Size: <strong class="text-slate-800 dark:text-slate-200">${task.dimensions || 'Chest Size'}</strong></span>
-                                ${isCompleted && task.stitch_count ? `<span>• Stitches: <strong class="text-emerald-700 dark:text-emerald-400 font-mono font-bold">${Number(task.stitch_count).toLocaleString()}</strong></span>` : ''}
+                            
+                            <!-- Production Parameters Grid -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs mt-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-primary/10">
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase block">Placement:</span>
+                                    <strong class="text-slate-800 dark:text-slate-200 truncate block">${task.placement || 'Left Chest'}</strong>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase block">Size &amp; Unit:</span>
+                                    <strong class="text-slate-800 dark:text-slate-200 truncate block">${task.dimensions || task.sizing || '3.5" W x 2.2" H'}</strong>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase block">Garment Fabric:</span>
+                                    <strong class="text-slate-800 dark:text-slate-200 truncate block">${task.target_fabric || task.fabric_type || 'Pique Polo Knit'}</strong>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase block">Required Formats:</span>
+                                    <strong class="text-amber-800 dark:text-primary font-mono font-bold truncate block">${task.target_format || task.file_format || 'DST, EMB'}</strong>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-2 w-full md:w-auto justify-end pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-primary/10">
-                        <button onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap">
+                    <!-- Right Action Controls -->
+                    <div class="flex items-center gap-2 w-full md:w-auto justify-end pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-primary/10 shrink-0">
+                        ${isPreviewable ? `
+                            <button type="button" onclick="window.workerWorkspace.openDigitizerArtworkPreview('${orderNum}', 0)" class="px-3 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-950 dark:text-primary border border-amber-500/30 font-bold text-xs transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap" title="Preview original customer artwork inside dashboard">
+                                <span class="material-symbols-outlined text-sm">visibility</span>
+                                <span>Preview Artwork</span>
+                            </button>
+                        ` : ''}
+                        <a href="${primaryRaw.url}" download="${primaryRaw.name}" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-all flex items-center gap-1 cursor-pointer border border-slate-200 dark:border-primary/20 whitespace-nowrap" title="Download original artwork">
+                            <span class="material-symbols-outlined text-sm">download</span>
+                            <span>Download Artwork</span>
+                        </a>
+                        <button onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap">
                             <span class="material-symbols-outlined text-sm">assignment</span>
-                            <span>Specs</span>
+                            <span>Full Specs</span>
                         </button>
                         ${!isCompleted ? `
-                            <button onclick="window.workerWorkspace.openDeliverableUploadModal('${orderNum}')" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs transition-all flex items-center gap-1.5 shadow-xs cursor-pointer whitespace-nowrap">
+                            <button onclick="window.workerWorkspace.openDeliverableUploadModal('${orderNum}')" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs transition-all flex items-center gap-1.5 shadow-xs cursor-pointer whitespace-nowrap">
                                 <span class="material-symbols-outlined text-sm">upload_file</span>
-                                <span>Upload &amp; Complete</span>
+                                <span>Attach Deliverables</span>
                             </button>
                         ` : `
                             <a href="${task.deliverable_url || task.artwork_url}" download class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all flex items-center gap-1 shadow-xs whitespace-nowrap">
@@ -417,6 +479,20 @@
                                 <span>Verify Archive</span>
                             </a>
                         `}
+                    </div>
+                </div>
+
+                <!-- Customer Special Instructions & Production Notes Callout -->
+                <div class="p-3 rounded-xl bg-amber-50/50 dark:bg-slate-900/40 border border-amber-200/70 dark:border-primary/15 text-xs text-slate-800 dark:text-slate-200 flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-2">
+                        <span class="material-symbols-outlined text-sm text-amber-700 dark:text-primary shrink-0 mt-0.5">note_alt</span>
+                        <div>
+                            <span class="font-bold text-slate-900 dark:text-white block text-[11px] uppercase tracking-wider">Customer Production Instructions:</span>
+                            <span class="font-medium text-slate-700 dark:text-slate-300 italic">${task.special_instructions || task.instructions || 'Standard commercial Wilcom stitch density (0.40mm), underlay tatted, trim commands set.'}</span>
+                        </div>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-1 shrink-0">
+                        ${specialOptsText}
                     </div>
                 </div>
 
@@ -708,6 +784,145 @@
         if (el) el.value = val;
     }
 
+    // Digitizer In-Dashboard Artwork & Deliverables Lightbox Handlers
+    let currentDigitizerPreviewFiles = [];
+    let currentDigitizerPreviewIndex = 0;
+    let currentDigitizerPreviewOrder = null;
+
+    function getFileExt(filename) {
+        if (!filename) return '';
+        const clean = String(filename).split('?')[0].split('#')[0];
+        const parts = clean.split('.');
+        return parts.length > 1 ? parts.pop().toUpperCase() : '';
+    }
+
+    function openDigitizerArtworkPreview(orderNumber, fileIndex = 0, sourceType = 'artwork') {
+        const task = state.tasks.find(t => (t.order_number || t.orderNumber) === orderNumber);
+        if (!task) return;
+
+        let files = [];
+        if (sourceType === 'deliverables') {
+            files = task.deliverables || [];
+        } else {
+            files = (Array.isArray(task.raw_artwork_files) && task.raw_artwork_files.length > 0)
+                ? task.raw_artwork_files
+                : (Array.isArray(task.rawArtworkFiles) && task.rawArtworkFiles.length > 0)
+                    ? task.rawArtworkFiles
+                    : [{ name: 'artwork.png', url: task.artwork_url || 'images/service-digitizing.png' }];
+        }
+
+        currentDigitizerPreviewOrder = task;
+        currentDigitizerPreviewFiles = files;
+        currentDigitizerPreviewIndex = Math.max(0, Math.min(fileIndex, files.length - 1));
+
+        updateDigitizerArtworkLightboxDisplay();
+
+        const modal = document.getElementById('digitizer-artwork-preview-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeDigitizerArtworkPreview() {
+        const modal = document.getElementById('digitizer-artwork-preview-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        const pdfIframe = document.getElementById('digitizer-preview-pdf-iframe');
+        if (pdfIframe) pdfIframe.src = '';
+        const img = document.getElementById('digitizer-preview-img');
+        if (img) img.src = '';
+    }
+
+    function navigateDigitizerArtworkPreview(dir) {
+        if (!currentDigitizerPreviewFiles || currentDigitizerPreviewFiles.length <= 1) return;
+        const newIdx = currentDigitizerPreviewIndex + dir;
+        if (newIdx >= 0 && newIdx < currentDigitizerPreviewFiles.length) {
+            currentDigitizerPreviewIndex = newIdx;
+            updateDigitizerArtworkLightboxDisplay();
+        }
+    }
+
+    function updateDigitizerArtworkLightboxDisplay() {
+        if (!currentDigitizerPreviewFiles || currentDigitizerPreviewFiles.length === 0) return;
+        const file = currentDigitizerPreviewFiles[currentDigitizerPreviewIndex];
+        if (!file) return;
+
+        const fileName = file.name || ('File_' + (currentDigitizerPreviewIndex + 1));
+        const fileUrl = file.url || '#';
+        const ext = (getFileExt(fileName) || getFileExt(fileUrl) || 'FILE').toUpperCase();
+
+        const modalFilename = document.getElementById('digitizer-preview-filename');
+        const modalFilesize = document.getElementById('digitizer-preview-filesize');
+        const formatBadge = document.getElementById('digitizer-preview-format-badge');
+        const counter = document.getElementById('digitizer-preview-counter');
+        const prevBtn = document.getElementById('digitizer-preview-prev-btn');
+        const nextBtn = document.getElementById('digitizer-preview-next-btn');
+        const downloadBtn = document.getElementById('digitizer-preview-download-btn');
+        const navControls = document.getElementById('digitizer-preview-nav-controls');
+
+        const imgContainer = document.getElementById('digitizer-preview-image-container');
+        const previewImg = document.getElementById('digitizer-preview-img');
+        const pdfContainer = document.getElementById('digitizer-preview-pdf-container');
+        const pdfIframe = document.getElementById('digitizer-preview-pdf-iframe');
+        const fallbackContainer = document.getElementById('digitizer-preview-fallback-container');
+        const fallbackFilename = document.getElementById('digitizer-fallback-filename');
+        const fallbackExt = document.getElementById('digitizer-fallback-ext');
+        const fallbackBtnExt = document.getElementById('digitizer-fallback-btn-ext');
+        const fallbackDownloadBtn = document.getElementById('digitizer-fallback-download-btn');
+
+        if (modalFilename) modalFilename.textContent = fileName;
+        if (modalFilesize) {
+            const orderInfo = currentDigitizerPreviewOrder?.order_number ? ` · Order ${currentDigitizerPreviewOrder.order_number}` : '';
+            modalFilesize.textContent = (file.size ? `${file.size}${orderInfo}` : (orderInfo.replace(/^ · /, '') || 'Production Asset'));
+        }
+        if (formatBadge) formatBadge.textContent = ext;
+        if (downloadBtn) {
+            downloadBtn.href = fileUrl;
+            downloadBtn.download = fileName;
+        }
+
+        if (currentDigitizerPreviewFiles.length > 1) {
+            if (navControls) navControls.classList.remove('hidden');
+            if (counter) counter.textContent = `${currentDigitizerPreviewIndex + 1} / ${currentDigitizerPreviewFiles.length}`;
+            if (prevBtn) prevBtn.disabled = currentDigitizerPreviewIndex === 0;
+            if (nextBtn) nextBtn.disabled = currentDigitizerPreviewIndex === currentDigitizerPreviewFiles.length - 1;
+        } else {
+            if (navControls) navControls.classList.add('hidden');
+        }
+
+        const isImg = ['PNG', 'JPG', 'JPEG', 'WEBP', 'SVG', 'GIF'].includes(ext);
+        const isPdf = ext === 'PDF';
+
+        if (imgContainer) imgContainer.classList.add('hidden');
+        if (pdfContainer) pdfContainer.classList.add('hidden');
+        if (fallbackContainer) fallbackContainer.classList.add('hidden');
+
+        if (isImg) {
+            if (previewImg) {
+                previewImg.src = fileUrl;
+                previewImg.alt = fileName;
+            }
+            if (imgContainer) imgContainer.classList.remove('hidden');
+        } else if (isPdf) {
+            if (pdfIframe) {
+                pdfIframe.src = fileUrl;
+            }
+            if (pdfContainer) pdfContainer.classList.remove('hidden');
+        } else {
+            if (fallbackFilename) fallbackFilename.textContent = fileName;
+            if (fallbackExt) fallbackExt.textContent = ext;
+            if (fallbackBtnExt) fallbackBtnExt.textContent = ext;
+            if (fallbackDownloadBtn) {
+                fallbackDownloadBtn.href = fileUrl;
+                fallbackDownloadBtn.download = fileName;
+            }
+            if (fallbackContainer) fallbackContainer.classList.remove('hidden');
+        }
+    }
+
     // Expose Public API
     window.workerWorkspace = {
         init: initWorkerWorkspace,
@@ -723,7 +938,10 @@
         openFormatSpecsModal,
         closeFormatSpecsModal,
         openWorkerAccountModal,
-        closeWorkerAccountModal
+        closeWorkerAccountModal,
+        openDigitizerArtworkPreview,
+        closeDigitizerArtworkPreview,
+        navigateDigitizerArtworkPreview
     };
 
     if (document.readyState === 'loading') {

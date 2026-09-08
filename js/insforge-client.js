@@ -1527,9 +1527,18 @@ class InsForgeClient {
                     order_id: o.id,
                     assigned_digitizer_id: o.assigned_digitizer_id,
                     service_type: o.service_type || 'Digitizing',
+                    project_name: o.project_name || o.projectName || o.placement || 'Custom Embroidery',
                     placement: o.placement || 'Left Chest',
+                    fabric_type: o.fabric_type || o.fabricType || '',
+                    fabricType: o.fabric_type || o.fabricType || '',
                     sizing: o.sizing || 'Standard',
                     file_format: o.file_format || 'DST, EMB',
+                    special_options: o.special_options || o.specialOptions || [],
+                    specialOptions: o.special_options || o.specialOptions || [],
+                    turnaround_speed: o.turnaround_speed || o.turnaroundSpeed || 'standard',
+                    turnaroundSpeed: o.turnaround_speed || o.turnaroundSpeed || 'standard',
+                    priority: (o.turnaround_speed === 'rush' || o.priority === 'rush') ? 'rush' : 'normal',
+                    is_rush: o.turnaround_speed === 'rush' || o.priority === 'rush',
                     instructions: o.instructions || '',
                     raw_artwork_files: o.raw_artwork_files || [],
                     status: o.status || 'in_progress',
@@ -1553,34 +1562,49 @@ class InsForgeClient {
             : tasks.filter(t => t.assigned_digitizer_id === user.id);
 
         // Normalize property names (support both snake_case and camelCase)
-        return assignedTasks.map(t => ({
-            id: t.id,
-            taskId: t.task_number || ('TSK-' + (t.order_number ? t.order_number.replace('ORD-', '') : '')),
-            taskNumber: t.task_number,
-            orderNumber: t.order_number,
-            serviceType: t.service_type || 'Digitizing',
-            placement: t.placement || 'Left Chest',
-            fabric_type: t.fabric_type || t.fabricType || '',
-            fabricType: t.fabric_type || t.fabricType || '',
-            sizing: t.sizing || 'Standard',
-            fileFormat: t.file_format || 'DST, EMB',
-            instructions: t.instructions || '',
-            rawArtworkFiles: Array.isArray(t.raw_artwork_files) ? t.raw_artwork_files : [],
-            status: t.status || 'in_progress',
-            deliverables: Array.isArray(t.deliverables) ? t.deliverables : [],
-            assignedAt: t.assigned_at,
-            completedAt: t.completed_at,
-            assignedDigitizerId: t.assigned_digitizer_id,
-            revision_notes: t.revision_notes || t.revisionNotes || '',
-            revisionNotes: t.revision_notes || t.revisionNotes || '',
-            stitch_out_photos: Array.isArray(t.stitch_out_photos) ? t.stitch_out_photos : (Array.isArray(t.stitchOutPhotos) ? t.stitchOutPhotos : []),
-            stitchOutPhotos: Array.isArray(t.stitch_out_photos) ? t.stitch_out_photos : (Array.isArray(t.stitchOutPhotos) ? t.stitchOutPhotos : [])
-            // NO client_name
-            // NO client_email
-            // NO client_company
-            // NO price
-            // NO payment_status
-        }));
+        return assignedTasks.map(t => {
+            const isRush = t.turnaround_speed === 'rush' || t.turnaroundSpeed === 'rush' || t.priority === 'rush' || t.is_rush === true || t.isRush === true;
+            return {
+                id: t.id,
+                taskId: t.task_number || ('TSK-' + (t.order_number ? t.order_number.replace('ORD-', '') : '')),
+                taskNumber: t.task_number,
+                orderNumber: t.order_number,
+                serviceType: t.service_type || 'Digitizing',
+                service_type: t.service_type || 'Digitizing',
+                projectName: t.project_name || t.projectName || t.placement || 'Custom Embroidery',
+                project_name: t.project_name || t.projectName || t.placement || 'Custom Embroidery',
+                placement: t.placement || 'Left Chest',
+                fabric_type: t.fabric_type || t.fabricType || '',
+                fabricType: t.fabric_type || t.fabricType || '',
+                sizing: t.sizing || 'Standard',
+                fileFormat: t.file_format || t.fileFormat || 'DST, EMB',
+                file_format: t.file_format || t.fileFormat || 'DST, EMB',
+                special_options: t.special_options || t.specialOptions || [],
+                specialOptions: t.special_options || t.specialOptions || [],
+                turnaround_speed: isRush ? 'rush' : (t.turnaround_speed || t.turnaroundSpeed || 'standard'),
+                turnaroundSpeed: isRush ? 'rush' : (t.turnaround_speed || t.turnaroundSpeed || 'standard'),
+                priority: isRush ? 'rush' : 'normal',
+                isRush: isRush,
+                is_rush: isRush,
+                instructions: t.instructions || '',
+                rawArtworkFiles: Array.isArray(t.raw_artwork_files) ? t.raw_artwork_files : (Array.isArray(t.rawArtworkFiles) ? t.rawArtworkFiles : []),
+                raw_artwork_files: Array.isArray(t.raw_artwork_files) ? t.raw_artwork_files : (Array.isArray(t.rawArtworkFiles) ? t.rawArtworkFiles : []),
+                status: t.status || 'in_progress',
+                deliverables: Array.isArray(t.deliverables) ? t.deliverables : [],
+                assignedAt: t.assigned_at,
+                completedAt: t.completed_at,
+                assignedDigitizerId: t.assigned_digitizer_id,
+                revision_notes: t.revision_notes || t.revisionNotes || '',
+                revisionNotes: t.revision_notes || t.revisionNotes || '',
+                stitch_out_photos: Array.isArray(t.stitch_out_photos) ? t.stitch_out_photos : (Array.isArray(t.stitchOutPhotos) ? t.stitchOutPhotos : []),
+                stitchOutPhotos: Array.isArray(t.stitch_out_photos) ? t.stitch_out_photos : (Array.isArray(t.stitchOutPhotos) ? t.stitchOutPhotos : [])
+                // NO client_name
+                // NO client_email
+                // NO client_company
+                // NO price
+                // NO payment_status
+            };
+        });
     }
 
     /**
@@ -1596,26 +1620,41 @@ class InsForgeClient {
             const filtered = user.role === 'admin' 
                 ? cachedTasks 
                 : cachedTasks.filter(t => t.assigned_digitizer_id === user.id);
-            return filtered.map(t => ({
-                id: t.id,
-                taskId: t.task_number || ('TSK-' + (t.order_number ? t.order_number.replace('ORD-', '') : '')),
-                orderNumber: t.order_number,
-                serviceType: t.service_type || 'Digitizing',
-                placement: t.placement,
-                fabric_type: t.fabric_type || t.fabricType || '',
-                fabricType: t.fabric_type || t.fabricType || '',
-                sizing: t.sizing,
-                fileFormat: t.file_format || 'DST, EMB',
-                instructions: t.instructions || '',
-                rawArtworkFiles: Array.isArray(t.raw_artwork_files) ? t.raw_artwork_files : [],
-                status: t.status,
-                deliverables: Array.isArray(t.deliverables) ? t.deliverables : [],
-                assignedAt: t.assigned_at,
-                revision_notes: t.revision_notes || t.revisionNotes || '',
-                revisionNotes: t.revision_notes || t.revisionNotes || '',
-                stitch_out_photos: Array.isArray(t.stitch_out_photos) ? t.stitch_out_photos : (Array.isArray(t.stitchOutPhotos) ? t.stitchOutPhotos : []),
-                stitchOutPhotos: Array.isArray(t.stitch_out_photos) ? t.stitch_out_photos : (Array.isArray(t.stitchOutPhotos) ? t.stitchOutPhotos : [])
-            }));
+            return filtered.map(t => {
+                const isRush = t.turnaround_speed === 'rush' || t.turnaroundSpeed === 'rush' || t.priority === 'rush' || t.is_rush === true || t.isRush === true;
+                return {
+                    id: t.id,
+                    taskId: t.task_number || ('TSK-' + (t.order_number ? t.order_number.replace('ORD-', '') : '')),
+                    orderNumber: t.order_number,
+                    serviceType: t.service_type || 'Digitizing',
+                    service_type: t.service_type || 'Digitizing',
+                    projectName: t.project_name || t.placement || 'Custom Embroidery',
+                    project_name: t.project_name || t.placement || 'Custom Embroidery',
+                    placement: t.placement,
+                    fabric_type: t.fabric_type || t.fabricType || '',
+                    fabricType: t.fabric_type || t.fabricType || '',
+                    sizing: t.sizing,
+                    fileFormat: t.file_format || 'DST, EMB',
+                    file_format: t.file_format || 'DST, EMB',
+                    special_options: t.special_options || t.specialOptions || [],
+                    specialOptions: t.special_options || t.specialOptions || [],
+                    turnaround_speed: isRush ? 'rush' : (t.turnaround_speed || 'standard'),
+                    turnaroundSpeed: isRush ? 'rush' : (t.turnaround_speed || 'standard'),
+                    priority: isRush ? 'rush' : 'normal',
+                    isRush: isRush,
+                    is_rush: isRush,
+                    instructions: t.instructions || '',
+                    rawArtworkFiles: Array.isArray(t.raw_artwork_files) ? t.raw_artwork_files : [],
+                    raw_artwork_files: Array.isArray(t.raw_artwork_files) ? t.raw_artwork_files : [],
+                    status: t.status,
+                    deliverables: Array.isArray(t.deliverables) ? t.deliverables : [],
+                    assignedAt: t.assigned_at,
+                    revision_notes: t.revision_notes || t.revisionNotes || '',
+                    revisionNotes: t.revision_notes || t.revisionNotes || '',
+                    stitch_out_photos: Array.isArray(t.stitch_out_photos) ? t.stitch_out_photos : (Array.isArray(t.stitchOutPhotos) ? t.stitchOutPhotos : []),
+                    stitchOutPhotos: Array.isArray(t.stitch_out_photos) ? t.stitch_out_photos : (Array.isArray(t.stitchOutPhotos) ? t.stitchOutPhotos : [])
+                };
+            });
         }
 
         // Fallback: derive from orders in localStorage (strictly non-quotes)
@@ -1625,25 +1664,40 @@ class InsForgeClient {
             : allOrders.filter(o => o.assigned_digitizer_id === user.id)
         ).filter(o => !o.is_quote && o.status !== 'quote_requested' && !(o.order_number && o.order_number.startsWith('QUO-')));
 
-        return assignedOrders.map(order => ({
-            taskId: 'TSK-' + order.order_number.replace('ORD-', ''),
-            orderNumber: order.order_number,
-            serviceType: order.service_type,
-            placement: order.placement,
-            fabric_type: order.fabric_type || '',
-            fabricType: order.fabric_type || '',
-            sizing: order.sizing,
-            fileFormat: order.file_format,
-            instructions: order.instructions,
-            rawArtworkFiles: order.raw_artwork_files || [],
-            status: order.status,
-            deliverables: order.deliverables || [],
-            assignedAt: order.assigned_at,
-            revision_notes: order.revision_notes || '',
-            revisionNotes: order.revision_notes || '',
-            stitch_out_photos: Array.isArray(order.stitch_out_photos) ? order.stitch_out_photos : [],
-            stitchOutPhotos: Array.isArray(order.stitch_out_photos) ? order.stitch_out_photos : []
-        }));
+        return assignedOrders.map(order => {
+            const isRush = order.turnaround_speed === 'rush' || order.turnaroundSpeed === 'rush' || order.priority === 'rush';
+            return {
+                taskId: 'TSK-' + order.order_number.replace('ORD-', ''),
+                orderNumber: order.order_number,
+                serviceType: order.service_type,
+                service_type: order.service_type,
+                projectName: order.project_name || order.placement || 'Custom Embroidery',
+                project_name: order.project_name || order.placement || 'Custom Embroidery',
+                placement: order.placement,
+                fabric_type: order.fabric_type || '',
+                fabricType: order.fabric_type || '',
+                sizing: order.sizing,
+                fileFormat: order.file_format,
+                file_format: order.file_format,
+                special_options: order.special_options || order.specialOptions || [],
+                specialOptions: order.special_options || order.specialOptions || [],
+                turnaround_speed: isRush ? 'rush' : (order.turnaround_speed || 'standard'),
+                turnaroundSpeed: isRush ? 'rush' : (order.turnaround_speed || 'standard'),
+                priority: isRush ? 'rush' : 'normal',
+                isRush: isRush,
+                is_rush: isRush,
+                instructions: order.instructions,
+                rawArtworkFiles: order.raw_artwork_files || [],
+                raw_artwork_files: order.raw_artwork_files || [],
+                status: order.status,
+                deliverables: order.deliverables || [],
+                assignedAt: order.assigned_at,
+                revision_notes: order.revision_notes || '',
+                revisionNotes: order.revision_notes || '',
+                stitch_out_photos: Array.isArray(order.stitch_out_photos) ? order.stitch_out_photos : [],
+                stitchOutPhotos: Array.isArray(order.stitch_out_photos) ? order.stitch_out_photos : []
+            };
+        });
     }
 
     /**
@@ -2160,7 +2214,7 @@ class InsForgeClient {
         }
 
         // Sanitized technical task (Strict Data Masking)
-        const taskNumber = 'TSK-' + orderNumber.replace('ORD-', '');
+        const isOrderRush = order && (order.turnaround_speed === 'rush' || order.turnaroundSpeed === 'rush' || order.priority === 'rush');
         const sanitizedTask = {
             id: this.generateUUID(),
             task_number: taskNumber,
@@ -2168,11 +2222,23 @@ class InsForgeClient {
             order_id: order ? order.id : null,
             assigned_digitizer_id: digitizerId,
             service_type: (order && order.service_type) || 'Digitizing',
+            project_name: (order && (order.project_name || order.projectName)) || (order && order.placement) || 'Custom Embroidery',
             placement: (order && order.placement) || 'Left Chest',
+            fabric_type: (order && (order.fabric_type || order.fabricType)) || '',
+            fabricType: (order && (order.fabric_type || order.fabricType)) || '',
             sizing: (order && order.sizing) || 'Standard',
-            file_format: (order && order.file_format) || 'DST, EMB',
+            file_format: (order && (order.file_format || order.fileFormat)) || 'DST, EMB',
+            fileFormat: (order && (order.file_format || order.fileFormat)) || 'DST, EMB',
+            special_options: (order && (order.special_options || order.specialOptions)) || [],
+            specialOptions: (order && (order.special_options || order.specialOptions)) || [],
+            turnaround_speed: isOrderRush ? 'rush' : 'standard',
+            turnaroundSpeed: isOrderRush ? 'rush' : 'standard',
+            priority: isOrderRush ? 'rush' : 'normal',
+            is_rush: isOrderRush,
+            isRush: isOrderRush,
             instructions: (order && order.instructions) || '',
             raw_artwork_files: (order && order.raw_artwork_files) || [],
+            rawArtworkFiles: (order && order.raw_artwork_files) || [],
             status: 'in_progress',
             deliverables: [],
             assigned_at: assignedAt

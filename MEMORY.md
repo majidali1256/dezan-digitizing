@@ -1326,4 +1326,59 @@ The Worker Studio provides an isolated, production-focused environment for embro
     - **Mobile Viewport (390x844)**: Verified responsive card stacking, touch targets, and scrolling modal dossier.
     - Captured artifacts: `admin_orders_cards_resting.png`, `admin_order_details_modal_dz9101_desktop.png`, `admin_artwork_lightbox_png.png`, `admin_artwork_lightbox_ai_fallback.png`, `admin_artwork_lightbox_pdf.png`, `admin_orders_mobile_cards.png`, and `admin_orders_mobile_details_modal.png`.
 
+---
+
+## 37. Digitizer Portal / Active Production Queue Overhaul & Synchronized Admin Deliverables Lightbox (Implemented & Verified)
+- **Problem Statement & Objectives**:
+  - The digitizer production queue needed to be crystal-clear for embroidery digitizers receiving job specifications and submitting completed deliverables.
+  - Digitizers required immediate visibility into all technical embroidery specifications (placement, requested dimensions, garment fabric, required machine formats, 3D puff / applique / technical options, verbatim customer instructions, original artwork files with in-dashboard preview and download) without clutter or confusion.
+  - **Strict Privacy**: Digitizers must NEVER see customer prices, invoices, balances, or payment details.
+  - **Rush Visibility**: Rush orders needed to be unmistakably obvious with a prominent `⚡ RUSH · 5–8 HOURS` badge across both Digitizer and Admin portals.
+  - **Deliverables Submission Overhaul**: Replace rigid old file inputs with a modern Gmail-style "Attach Deliverables" drag-and-drop zone allowing DST, EMB, PES, EXP, JEF, VP3, PDF, JPG/JPEG, PNG, ZIP with an ironclad validation guard:
+    - PDF worksheet = REQUIRED.
+    - JPG/JPEG preview = REQUIRED.
+    - Customer requested machine embroidery format(s) = REQUIRED according to the customer's order.
+    - Submit Deliverables button is strictly locked until all requirements are met, and dynamically re-locks if any required file is removed.
+  - **Admin Deliverable Preview**: Admins must be able to view and preview the digitizer's uploaded deliverables (especially PDF worksheet in iframe and JPG stitch preview in lightbox) directly within the dashboard.
+- **Architectural & UI Implementation**:
+  1. **Data Normalization Engine (`js/insforge-client.js`)**:
+     - Updated `fetchDigitizerTasks()`, `getDigitizerTasks()`, and `assignDigitizer()` to preserve and normalize `fabric_type`, `special_options`, `turnaround_speed`, `priority`, `is_rush`, `project_name`, `sizing`, `file_format`, `raw_artwork_files`, and `deliverables`.
+     - Strict data masking: Digitizer tasks omit any billing, pricing, or customer invoicing properties.
+  2. **Digitizer Portal (`worker-portal.html`, `worker-tasks.html`, `js/worker-workspace.js`)**:
+     - **Prominent Rush Badges**: Rendered `⚡ RUSH · 5–8 HOURS` with lightning bolt icon for rush orders; `Standard · 12–24 Hours` for standard jobs.
+     - **4-Column Bento Grid**: Placement, Requested Size + Unit, Garment Fabric Material, Required Machine Formats chips (`.DST`, `.PES`, etc.).
+     - **Technical Options**: Chips for `3D Puff`, `Trims / Clean Back`, `Applique`, `Center Out Sequencing`, etc.
+     - **Customer Production Notes**: Dedicated callout box displaying verbatim customer special instructions and machine requirements.
+     - **Original Customer Artwork**: Format badges (PNG, JPG, AI, EPS, PDF, ZIP), filenames, `👁 Preview` (opens in-dashboard lightbox), and `⬇ Download` buttons.
+     - **Format Requirement Banner**: Directly above dropzone: `Customer Requested: DST, PES | Also Required: PDF Worksheet + JPG Preview`.
+     - **Gmail-Style Dropzone**: Drag-and-drop container with `📎 Attach Files` button, supporting DST, EMB, PES, EXP, JEF, VP3, PDF, JPG/JPEG, PNG, ZIP.
+     - **Validation Guard Engine**: `checkTaskDeliverablesStatus(task, stagedFiles)` verifies PDF worksheet, JPG preview, and all customer requested machine formats.
+     - **Live Checklist & Staged Files List**: Chips showing requirement status (`✓ PDF Worksheet .PDF`, `✓ JPG Preview .JPG`, `✓ Machine Format (.DST)`), with staged file cards showing format badge, filename, size, `✓ Ready`, and `✕` remove button.
+     - **Locked / Unlocked Submit Button**: Submit button defaults to disabled with lock icon (`lock` + cursor-not-allowed); dynamically unlocks with green glow when all required deliverables are attached; re-locks immediately if a required file is removed.
+     - **In-Dashboard Lightbox**: `#digitizer-artwork-preview-modal` with dark checkerboard background, responsive image rendering, PDF iframe viewer, vector fallback download card, pager controls, and keyboard `Escape` / arrow navigation.
+  3. **Admin Portal Synchronization (`admin-orders.html`, `admin-portal.html`, `js/admin-workspace.js`)**:
+     - Updated order cards and table rows with matching prominent `⚡ RUSH · 5–8 HOURS` and `Standard · 12–24 Hours` badges.
+     - Enhanced `openArtworkPreviewModal(orderNumber, fileIndex, sourceType = 'artwork')` to support `sourceType = 'deliverables'`, loading digitizer deliverables into the lightbox with caption `Production Deliverable · Order {order_number}`.
+     - Updated Section 5 in `openAdminOrderDetailsModal`:
+       - Renders interactive grid of deliverable cards with format badges (PDF in rose, JPG/PNG in amber, DST/EMB/PES in emerald, ZIP in purple).
+       - Added `👁 Preview` button for previewable files (PDF worksheet in iframe, JPG stitch preview in lightbox).
+       - Added `⬇ Download` button for all files.
+       - Added top-right `Preview In Lightbox` button to open the lightbox pager across all deliverables.
+- **Playwright Automated Verification**:
+  - Full end-to-end automated verification script (`scratch/test_digitizer_overhaul.js`) executed against local server:
+    - Digitizer Portal: Verified `⚡ RUSH · 5–8 HOURS` badges, `Standard · 12–24 Hours` badges, zero pricing/payment leak, bento specs (Placement, Size, Fabric, Formats, 3D Puff, customer instructions).
+    - Artwork Lightbox: Verified in-dashboard image/PDF rendering and Escape key close.
+    - Attachment System & Validation Lock:
+      - Initial state: Submit button disabled (`disabled=true`, lock icon).
+      - Attaching only `.dst`: Button remains disabled, warns about missing PDF and JPG.
+      - Attaching `.dst` + `.jpg`: Button remains disabled (still needs PDF).
+      - Attaching `.dst` + `.jpg` + `.pes`: Button remains disabled (still needs PDF).
+      - Attaching `.dst` + `.jpg` + `.pes` + `.pdf`: Button unlocks (`disabled=false`, green glow, `All required files attached`).
+      - Removing `.pdf` via `✕` button: Button immediately re-locks to `disabled=true`.
+      - Re-attaching `.pdf` and clicking Submit: Deliverables uploaded and task transitioned to completed archive.
+    - Admin Portal: Verified `⚡ RUSH · 5–8 HOURS` badges, Section 5 Production Deliverables list in Order Details Modal, and opened digitizer's PDF/JPG deliverables in Admin Lightbox (`332.0 KB · Production Deliverable · Order ORD-6512`).
+    - Responsive Mobile Viewport (iPhone 15 Pro 390x844): Verified clean layout, touch targets, and zero horizontal scroll.
+    - Verified artifacts: `worker_portal_desktop.png`, `worker_artwork_lightbox.png`, `worker_staged_files_ready.png`, `worker_portal_mobile.png`, `admin_orders_desktop.png`, `admin_order_details_deliverables.png`, and `admin_deliverables_lightbox.png`.
+
+
 

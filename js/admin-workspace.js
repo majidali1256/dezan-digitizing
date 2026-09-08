@@ -793,10 +793,14 @@
                             <div class="flex items-start justify-between gap-2">
                                 <h4 class="font-black text-slate-900 dark:text-white text-sm group-hover:text-amber-800 dark:group-hover:text-primary transition-colors leading-tight">${order.project_name}</h4>
                                 ${isRush ? `
-                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/35 shrink-0 whitespace-nowrap" title="Expedited 5-8h delivery (+$5 rush fee included)">
-                                        <span class="material-symbols-outlined text-[11px] text-amber-600 dark:text-amber-400">bolt</span> Rush 5-8h
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 shrink-0 whitespace-nowrap shadow-2xs" title="Expedited 5-8h delivery (+$5 rush fee included)">
+                                        <span class="material-symbols-outlined text-xs text-rose-600 dark:text-rose-400">bolt</span> ⚡ RUSH · 5–8 HOURS
                                     </span>
-                                ` : ''}
+                                ` : `
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 shrink-0 whitespace-nowrap">
+                                        <span class="material-symbols-outlined text-[11px] text-slate-500">schedule</span> Standard · 12–24 Hours
+                                    </span>
+                                `}
                             </div>
                             <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">${order.placement || 'Standard'} · ${order.sizing || 'Default Size'}</p>
                             <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
@@ -973,10 +977,14 @@
                         <div class="flex items-center justify-between gap-1.5">
                             <span class="text-slate-900 dark:text-white font-semibold block leading-tight truncate max-w-[155px]" title="${order.project_name}">${order.project_name}</span>
                             ${isRush ? `
-                                <span class="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9px] font-black bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/35 shrink-0" title="Expedited 5-8h delivery (+$5 rush fee included)">
-                                    <span class="material-symbols-outlined text-[10px] text-amber-600 dark:text-amber-400">bolt</span> Rush
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 shrink-0 whitespace-nowrap shadow-2xs" title="Expedited 5-8h delivery (+$5 rush fee included)">
+                                    <span class="material-symbols-outlined text-xs text-rose-600 dark:text-rose-400">bolt</span> ⚡ RUSH · 5–8 HOURS
                                 </span>
-                            ` : ''}
+                            ` : `
+                                <span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shrink-0 whitespace-nowrap">
+                                    Standard · 12–24h
+                                </span>
+                            `}
                         </div>
                         <span class="text-slate-600 dark:text-slate-400 text-[11px] font-medium block mt-0.5 mb-1 whitespace-nowrap">${order.placement || 'Standard'} (${order.sizing || 'Default'})</span>
                         <div class="flex flex-wrap items-center gap-1.5 mt-1">
@@ -2154,27 +2162,37 @@ Email: fdezan91@gmail.com`;
         let currentPreviewOrder = null;
         let currentPreviewFileIndex = 0;
         let currentPreviewFiles = [];
+        let currentPreviewSourceType = 'artwork';
 
-        function openArtworkPreviewModal(orderNumber, fileIndex = 0) {
+        function openArtworkPreviewModal(orderNumber, fileIndex = 0, sourceType = 'artwork') {
             const allOrders = window.insforgeClient ? window.insforgeClient.getOrders() : [];
             const order = allOrders.find(o => o.order_number === orderNumber);
             if (!order) {
-                console.warn('Order not found for artwork preview:', orderNumber);
+                console.warn('Order not found for preview:', orderNumber);
                 return;
             }
 
-            const files = getOrderArtworkFiles(order);
+            let files = [];
+            if (sourceType === 'deliverables') {
+                files = order.deliverables || [];
+            } else {
+                files = getOrderArtworkFiles(order);
+            }
+
             if (!files || files.length === 0) {
+                const title = sourceType === 'deliverables' ? 'No Deliverables' : 'No Artwork';
+                const msg = sourceType === 'deliverables' ? 'No deliverables are attached to this order yet.' : 'No artwork files are attached to this order.';
                 if (window.insforgeClient && typeof window.insforgeClient.showToast === 'function') {
-                    window.insforgeClient.showToast('No Artwork', 'No artwork files are attached to this order.', 'info', 'info');
+                    window.insforgeClient.showToast(title, msg, 'info', 'info');
                 } else {
-                    alert('No artwork files attached to this order.');
+                    alert(msg);
                 }
                 return;
             }
 
             currentPreviewOrder = order;
             currentPreviewFiles = files;
+            currentPreviewSourceType = sourceType;
             currentPreviewFileIndex = Math.max(0, Math.min(fileIndex, files.length - 1));
 
             updateArtworkLightboxDisplay();
@@ -2218,8 +2236,9 @@ Email: fdezan91@gmail.com`;
 
             if (modalFilename) modalFilename.textContent = fileName;
             if (modalFilesize) {
+                const typeLabel = currentPreviewSourceType === 'deliverables' ? 'Production Deliverable' : 'Artwork Asset';
                 const orderInfo = currentPreviewOrder?.order_number ? ` · Order ${currentPreviewOrder.order_number}` : '';
-                modalFilesize.textContent = (fileSizeText ? `${fileSizeText}${orderInfo}` : (orderInfo.replace(/^ · /, '') || 'Artwork Asset'));
+                modalFilesize.textContent = (fileSizeText ? `${fileSizeText} · ${typeLabel}${orderInfo}` : `${typeLabel}${orderInfo}`);
             }
             if (formatBadge) formatBadge.textContent = ext;
             if (downloadBtn) {
@@ -2581,16 +2600,53 @@ Email: fdezan91@gmail.com`;
             if (deliverablesContainer) {
                 if (order.deliverables && order.deliverables.length > 0) {
                     deliverablesContainer.innerHTML = `
-                        <div class="space-y-2">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Production Deliverables (${order.deliverables.length}):</span>
-                            <div class="flex flex-wrap gap-2">
-                                ${order.deliverables.map(d => `
-                                    <a href="${d.url}" download="${d.name || 'deliverable'}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-500/30 text-xs font-bold hover:bg-emerald-100 shadow-2xs cursor-pointer">
-                                        <span class="material-symbols-outlined text-xs">download</span>
-                                        <span>${d.name || d.format}</span>
-                                        <span class="font-mono text-[10px] opacity-75">(${d.format})</span>
-                                    </a>
-                                `).join('')}
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Production Deliverables (${order.deliverables.length}):</span>
+                                <button type="button" onclick="openArtworkPreviewModal('${order.order_number}', 0, 'deliverables')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-950 dark:text-emerald-300 border border-emerald-500/30 text-[11px] font-bold transition-colors cursor-pointer" title="Preview all deliverables in lightbox">
+                                    <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                    <span>Preview In Lightbox</span>
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                ${order.deliverables.map((d, idx) => {
+                                    const fileName = d.name || `Deliverable_${idx + 1}`;
+                                    const ext = (d.format || getFileExtension(fileName) || getFileExtension(d.url) || 'FILE').toUpperCase();
+                                    const isPreviewable = ['PDF', 'JPG', 'JPEG', 'PNG', 'WEBP', 'SVG'].includes(ext);
+                                    const sizeStr = d.size ? formatFileSize(d.size) : '';
+
+                                    let badgeClass = 'bg-slate-700/20 text-slate-300 border-slate-600/40';
+                                    if (ext === 'PDF') badgeClass = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+                                    else if (['JPG', 'JPEG', 'PNG', 'WEBP'].includes(ext)) badgeClass = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+                                    else if (['DST', 'EMB', 'PES', 'EXP', 'JEF', 'VP3'].includes(ext)) badgeClass = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+                                    else if (ext === 'ZIP') badgeClass = 'bg-purple-500/20 text-purple-300 border-purple-500/40';
+
+                                    return `
+                                        <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+                                            <div class="flex items-center gap-2.5 min-w-0">
+                                                <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-black border uppercase tracking-wider flex-shrink-0 ${badgeClass}">
+                                                    ${ext}
+                                                </span>
+                                                <div class="min-w-0">
+                                                    <p class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate" title="${fileName}">${fileName}</p>
+                                                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">${sizeStr || 'Stitch File'}</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-1.5 flex-shrink-0">
+                                                ${isPreviewable ? `
+                                                    <button type="button" onclick="openArtworkPreviewModal('${order.order_number}', ${idx}, 'deliverables')" class="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 hover:bg-emerald-100 dark:hover:bg-emerald-500/25 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-500/30 text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors" title="Preview ${ext} in lightbox">
+                                                        <span class="material-symbols-outlined text-xs">visibility</span>
+                                                        <span>Preview</span>
+                                                    </button>
+                                                ` : ''}
+                                                <a href="${d.url}" download="${fileName}" target="_blank" class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors" title="Download ${fileName}">
+                                                    <span class="material-symbols-outlined text-xs">download</span>
+                                                    <span>Download</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
                             </div>
                         </div>
                     `;
