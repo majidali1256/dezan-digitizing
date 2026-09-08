@@ -11,5 +11,6 @@ router.get('/:id', authenticate, orderController.getOrderById);
 router.put('/:id/status', authenticate, requireAdmin, orderController.updateOrderStatus);
 router.post('/:id/assign', authenticate, requireAdmin, orderController.assignDigitizer);
 router.post('/:id/payment', authenticate, orderController.confirmPayment);
+router.delete('/:id', authenticate, orderController.deleteOrder);
 
 module.exports = router;

@@ -1257,3 +1257,35 @@ The Worker Studio provides an isolated, production-focused environment for embro
 - **Verification**:
   - Captured Playwright screenshots in light and dark mode (`modal_resting_state.png`, `hover_card1_embroidery.png`, `hover_card2_vector.png`, `hover_card3_realistic.png`, `modal_resting_dark.png`).
   - Validated syntax and event dispatch in Node.js test environment.
+
+---
+
+## 35. Uncompleted Orders Display, Settlement & Removal Workflow (Implemented & Verified)
+- **Problem Statement**:
+  - When users placed or created orders without immediately completing checkout, metrics displayed "OPEN ORDERS: 2" and "BALANCE DUE: $40.00", but the orders did not render below in the list, and users had no UI mechanism to either complete payment or remove/cancel the draft orders.
+- **Root Cause Analysis**:
+  1. **Container & Badge DOM ID Mismatch (`client-portal.html`)**:
+     - The DOM had `<div id="active-orders-container">` and `<span id="badge-active-count">`, but `renderSectionsWithFilter()` and `updateMetrics()` searched for `open-orders-container` and `badge-open-count`. Both returned `null`, silently halting rendering and leaving the badge at `0`.
+  2. **Template Literal Termination Error**:
+     - `renderOrderCard()` had an unclosed template literal before `renderQuoteCard()`, which triggered a syntax error on `$${...}` in browser parsers.
+  3. **Overly Restrictive Status Filter**:
+     - Initial order submissions have status `pending_review`. Filters only matched `in_progress`, omitting newly submitted unpaid orders.
+- **Implementation Details**:
+  - **DOM & Filtering Fixes (`client-portal.html` & `js/client-workspace.js`)**:
+    - Reconciled element lookups: `document.getElementById('active-orders-container') || document.getElementById('open-orders-container')` and `badge-active-count` || `badge-open-count`.
+    - Broadened open orders filter to `(o.status !== 'completed' && !isQuoteRecord(o))` ensuring all newly added orders appear immediately.
+  - **Incomplete Order Action Suite (`client-portal.html` & `js/client-workspace.js`)**:
+    - When `!isPaid` (unpaid or pending payment), order cards display:
+      - **"Payment Due" Badge**: High-visibility rose status indicator with icon.
+      - **"Complete Order ($X.XX)" Action Button**: Directly triggers PayPal/card settlement modal (`openCheckoutModal` / `openClientInvoiceModal`).
+      - **"Remove" Action Button**: Triggers confirmation dialog; on confirmation, deletes order from `localStorage`, calls `insforgeClient.deleteOrder()`, updates metrics (reducing Open Orders and Balance Due in real-time), and notifies user with an info toast.
+  - **Backend & SDK Support**:
+    - Added `deleteOrder(orderId)` to `InsForgeClient` in `js/insforge-client.js`.
+    - Added `deleteOrder` controller in `server/controllers/orderController.js` and route `DELETE /api/orders/:id` in `server/routes/orderRoutes.js`.
+- **Visual & Functional Verification**:
+  - Automated Playwright suite `scratch/test_uncompleted_orders_flow.js` executed across Desktop (1512x982) and Mobile (390x844):
+    - Verified 2 incomplete orders appear with "Complete Order ($20.00)" and "Remove" buttons.
+    - Verified clicking "Remove" cancels the order, decrements Open Orders from 2 to 1, and adjusts Balance Due from $40.00 to $20.00.
+    - Verified `client-orders.html` renders both buttons and handles removal synchronously.
+    - Screenshots captured: `desktop_two_uncompleted_orders.png`, `desktop_after_order_removed.png`, `mobile_orders_visible_scrolled.png`, and `client_orders_page_verified.png`.
+

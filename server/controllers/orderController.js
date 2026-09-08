@@ -508,6 +508,38 @@ const trackOrder = async (req, res) => {
     }
 };
 
+/**
+ * Delete / Cancel Order
+ * DELETE /api/orders/:id
+ */
+const deleteOrder = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await query(
+            'SELECT * FROM public.orders WHERE id = $1 OR order_number = $1',
+            [id]
+        );
+        if (result.rows.length === 0) {
+            return notFound(res, 'Order not found');
+        }
+        const order = result.rows[0];
+
+        // Authorization check: Admin can delete; Client can only delete their own if unpaid or pending
+        if (req.user && req.user.role !== 'admin' && order.client_id !== req.user.id) {
+            return forbidden(res, 'You are not authorized to delete this order');
+        }
+        if (req.user && req.user.role !== 'admin' && order.payment_status === 'paid' && order.status !== 'pending_review') {
+            return badRequest(res, 'Paid orders in production cannot be deleted directly');
+        }
+
+        await query('DELETE FROM public.orders WHERE id = $1', [order.id]);
+        return success(res, { deletedId: order.id, orderNumber: order.order_number }, 'Order removed successfully');
+    } catch (err) {
+        console.error('[Delete Order Error]:', err);
+        return error(res, `Failed to delete order: ${err.message}`);
+    }
+};
+
 module.exports = {
     createOrder,
     getOrders,
@@ -515,5 +547,6 @@ module.exports = {
     updateOrderStatus,
     assignDigitizer,
     confirmPayment,
-    trackOrder
+    trackOrder,
+    deleteOrder
 };

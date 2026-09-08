@@ -1823,6 +1823,43 @@ class InsForgeClient {
     }
 
     /**
+     * Cancel or delete an order (e.g. unpaid incomplete draft or cancelled order)
+     * @param {string} orderId 
+     * @returns {Promise<boolean>}
+     */
+    async deleteOrder(orderId) {
+        if (!orderId) return false;
+
+        // 1. Remove from local orders cache
+        try {
+            const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+            const filtered = allOrders.filter(o => o.id !== orderId && o.order_number !== orderId);
+            localStorage.setItem('dezan_orders', JSON.stringify(filtered));
+
+            // Also clean up tasks if any
+            const allTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+            const filteredTasks = allTasks.filter(t => t.order_id !== orderId && t.order_number !== orderId);
+            localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(filteredTasks));
+        } catch (e) {
+            console.warn('Local storage delete notice:', e);
+        }
+
+        // 2. Delete or cancel in InsForge database
+        try {
+            await fetch(`${this.baseUrl}/api/database/records/orders/${orderId}`, {
+                method: 'DELETE',
+                headers: this.getApiHeaders()
+            });
+        } catch (err) {
+            console.warn('Backend delete order notice:', err.message);
+        }
+
+        // 3. Broadcast removal event
+        this.broadcastEvent('order_deleted', { orderId });
+        return true;
+    }
+
+    /**
      * Check if Auto-Assign work to digitizer is turned on
      * @returns {boolean}
      */

@@ -174,14 +174,16 @@
     // ----- Metrics Calculation -----
     function updateMetricsAcrossViews() {
         const orders = state.orders || [];
-        const openOrders = orders.filter(o => o.status === 'in_progress' || o.status === 'pending' || o.status === 'revision_requested').length;
+        const isQuote = (o) => (o.order_number || '').startsWith('QUO-') || o.status === 'quote_pending' || o.status === 'quote_requested' || o.is_quote;
+        const openOrders = orders.filter(o => o.status !== 'completed' && !isQuote(o)).length;
         const completedOrders = orders.filter(o => o.status === 'completed').length;
-        const quotesCount = orders.filter(o => (o.order_number || '').startsWith('QUO-') || o.status === 'quote_pending').length;
+        const quotesCount = orders.filter(o => isQuote(o)).length;
         
         let balanceDue = 0;
         orders.forEach(o => {
-            if (o.payment_status === 'unpaid' || o.payment_status === 'pending') {
-                balanceDue += parseFloat(o.amount || 0);
+            if (!isQuote(o) && (o.payment_status === 'unpaid' || o.payment_status === 'pending')) {
+                const p = o.price !== undefined ? o.price : (o.amount !== undefined ? o.amount : 0);
+                balanceDue += parseFloat(p || 0);
             }
         });
 
@@ -229,7 +231,7 @@
         const recentOrdersContainer = document.getElementById('recent-orders-container');
         if (!recentOrdersContainer) return;
 
-        const active = state.orders.filter(o => o.status === 'in_progress' || o.status === 'revision_requested');
+        const active = state.orders.filter(o => o.status === 'in_progress' || o.status === 'revision_requested' || o.status === 'pending_review' || o.status === 'assigned');
         const completed = state.orders.filter(o => o.status === 'completed');
 
         if (state.orders.length === 0) {
@@ -248,7 +250,7 @@
 
         // Active production section
         if (active.length > 0) {
-            html += `<div class="mb-4"><h3 class="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-primary mb-2 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> In Production (${active.length})</h3><div class="space-y-3">`;
+            html += `<div class="mb-4"><h3 class="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-primary mb-2 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> In Production & Active (${active.length})</h3><div class="space-y-3">`;
             active.forEach(order => {
                 html += renderClientOrderCard(order, false);
             });
@@ -289,7 +291,7 @@
 
         // Filter tab
         if (state.activeFilter === 'in_progress') {
-            filtered = filtered.filter(o => o.status === 'in_progress');
+            filtered = filtered.filter(o => o.status !== 'completed');
         } else if (state.activeFilter === 'completed') {
             filtered = filtered.filter(o => o.status === 'completed');
         } else if (state.activeFilter === 'revision_requested') {
@@ -317,9 +319,16 @@
     function renderClientOrderCard(order, isCompleted) {
         const statusClass = order.status || 'in_progress';
         const formattedDate = order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently';
+        const isPaid = (order.payment_status === 'paid');
+        const price = (order.price !== undefined ? order.price : (order.amount !== undefined ? order.amount : 15));
+        const priceFormatted = `$${parseFloat(price).toFixed(2)}`;
+
+        const paymentBadge = isPaid
+            ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 text-[10px] font-bold">Paid</span>'
+            : '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/30 text-[10px] font-black flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">pending_actions</span> Due</span>';
 
         return `
-            <div class="client-order-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/20 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="client-order-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border ${!isPaid ? 'border-rose-200 dark:border-rose-500/30 ring-1 ring-rose-500/10' : 'border-slate-200 dark:border-primary/20'} shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div class="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
                     <div class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-primary/20 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-xs">
                         ${order.artwork_url ? `<img src="${order.artwork_url}" alt="Artwork" class="w-full h-full object-cover">` : `<span class="material-symbols-outlined text-2xl text-amber-600 dark:text-primary">brush</span>`}
@@ -328,19 +337,31 @@
                         <div class="flex flex-wrap items-center gap-2 mb-1">
                             <span class="font-mono text-xs font-extrabold text-amber-900 dark:text-primary">${order.order_number || 'ORD-NEW'}</span>
                             <span class="status-badge ${statusClass}">${(order.status || 'in_progress').replace('_', ' ')}</span>
+                            ${paymentBadge}
                             <span class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">• ${formattedDate}</span>
                         </div>
-                        <h4 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate">${order.design_name || 'Custom Design'}</h4>
+                        <h4 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate">${order.design_name || order.project_name || 'Custom Design'}</h4>
                         <div class="flex flex-wrap items-center gap-3 text-xs text-slate-600 dark:text-slate-300 mt-1">
                             <span class="font-semibold text-slate-800 dark:text-slate-200">${order.service_type || 'Digitizing'}</span>
-                            <span>• Plan: <strong>${order.plan || 'Standard'}</strong></span>
+                            <span>• Plan: <strong>${order.plan || order.plan_name || 'Standard'}</strong></span>
+                            <span class="font-bold ${isPaid ? 'text-slate-700 dark:text-slate-300' : 'text-rose-600 dark:text-rose-400'}">• Amount: <strong>${priceFormatted}</strong></span>
                             ${order.stitch_count ? `<span>• Stitches: <strong>${order.stitch_count.toLocaleString()}</strong></span>` : ''}
                             ${order.format ? `<span>• Format: <strong class="uppercase">${order.format}</strong></span>` : ''}
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 w-full md:w-auto justify-end pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-primary/10">
+                <div class="flex items-center gap-2 w-full md:w-auto justify-end pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-primary/10 flex-wrap">
+                    ${!isPaid ? `
+                        <button onclick="window.clientWorkspace.openClientInvoiceModal('${order.id || order.order_number}')" class="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs flex items-center gap-1.5 shadow-xs transition-all hover:scale-105 cursor-pointer" title="Complete order and pay balance">
+                            <span class="material-symbols-outlined text-sm">credit_card</span>
+                            <span>Complete Order (${priceFormatted})</span>
+                        </button>
+                        <button onclick="window.clientWorkspace.removeOrder('${order.id || order.order_number}', '${order.order_number || ''}')" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 font-bold text-xs border border-rose-200 dark:border-rose-800/60 flex items-center gap-1 transition-all cursor-pointer shadow-2xs" title="Remove unpaid order">
+                            <span class="material-symbols-outlined text-sm text-rose-600 dark:text-rose-400">delete</span>
+                            <span>Remove</span>
+                        </button>
+                    ` : ''}
                     ${isCompleted ? `
                         <a href="${order.deliverable_url || order.artwork_url || '#'}" download class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all flex items-center gap-1.5 shadow-xs whitespace-nowrap cursor-pointer">
                             <span class="material-symbols-outlined text-sm">download</span>
@@ -350,12 +371,12 @@
                             <span class="material-symbols-outlined text-sm">history_edu</span>
                             <span>Revision</span>
                         </button>
-                    ` : `
+                    ` : (isPaid ? `
                         <button onclick="window.clientWorkspace.openOrderDetailsModal('${order.order_number}')" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-xs transition-all flex items-center gap-1 whitespace-nowrap cursor-pointer">
                             <span class="material-symbols-outlined text-sm">visibility</span>
                             <span>Inspect Specs</span>
                         </button>
-                    `}
+                    ` : '')}
                     <button onclick="window.clientWorkspace.openClientInvoiceModal('${order.id || order.order_number}')" class="p-2 rounded-xl border border-slate-200 dark:border-primary/20 text-slate-600 dark:text-slate-300 hover:text-amber-800 dark:hover:text-primary transition-colors cursor-pointer" title="View Invoice & Receipt">
                         <span class="material-symbols-outlined text-base">receipt_long</span>
                     </button>
@@ -936,6 +957,31 @@
         });
     }
 
+    async function removeOrder(orderId, orderNumber) {
+        if (!confirm(`Are you sure you want to remove and cancel unpaid order #${orderNumber || orderId}? This will clear it from your orders and balance due.`)) {
+            return;
+        }
+
+        try {
+            state.orders = state.orders.filter(o => o.id !== orderId && o.order_number !== orderNumber);
+            localStorage.setItem('dezan_orders', JSON.stringify(state.orders));
+
+            if (window.insforgeClient && typeof window.insforgeClient.deleteOrder === 'function') {
+                await window.insforgeClient.deleteOrder(orderId);
+            }
+
+            updateMetricsAcrossViews();
+            renderActivePage();
+
+            if (typeof window.showNotification === 'function') {
+                window.showNotification(`Order #${orderNumber || orderId} was removed successfully.`, 'info');
+            }
+        } catch (err) {
+            console.error('Error removing order:', err);
+            alert('Could not remove order. Please try again.');
+        }
+    }
+
     function setElText(id, text) {
         const el = document.getElementById(id);
         if (el) el.textContent = text;
@@ -960,6 +1006,7 @@
         closeOrderDetailsModal,
         openClientInvoiceModal,
         closeClientInvoiceModal,
+        removeOrder,
         openRevisionModal,
         closeRevisionModal,
         handleRevisionPhotoSelected,

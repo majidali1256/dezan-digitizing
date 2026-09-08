@@ -1508,11 +1508,8 @@
         }
 
         function updateMetrics(orders) {
-            // Open orders: pending_review, assigned, in_progress, revision (excluding quotes)
-            const openOrders = orders.filter(o => 
-                (o.status === 'in_progress' || o.status === 'assigned' || o.status === 'pending_review' || o.status === 'revision_requested') &&
-                !isQuoteRecord(o)
-            );
+            // Open orders: all active non-completed orders (excluding quotes)
+            const openOrders = orders.filter(o => o.status !== 'completed' && !isQuoteRecord(o));
 
             // Completed orders
             const completedOrders = orders.filter(o => o.status === 'completed');
@@ -1558,7 +1555,7 @@
             }
 
             // Section badge counts
-            const openBadge = document.getElementById('badge-open-count');
+            const openBadge = document.getElementById('badge-active-count') || document.getElementById('badge-open-count');
             const compBadge = document.getElementById('badge-completed-count');
             const quoteBadge = document.getElementById('badge-quotes-count');
 
@@ -1617,16 +1614,13 @@
                 return orderNum.includes(query) || projName.includes(query) || service.includes(query);
             });
 
-            // If filterType is 'due', filter only unpaid/pending orders
-            if (filterType === 'due') {
+            // If filterType is 'due' or 'unpaid', filter only unpaid/pending orders
+            if (filterType === 'due' || filterType === 'unpaid') {
                 filtered = filtered.filter(o => !isQuoteRecord(o) && (o.payment_status === 'unpaid' || o.payment_status === 'pending'));
             }
 
             // Categorize
-            const openOrders = filtered.filter(o => 
-                (o.status === 'in_progress' || o.status === 'assigned' || o.status === 'pending_review' || o.status === 'revision_requested') &&
-                !isQuoteRecord(o)
-            );
+            const openOrders = filtered.filter(o => o.status !== 'completed' && !isQuoteRecord(o));
 
             const completedOrders = filtered.filter(o => o.status === 'completed');
 
@@ -1649,9 +1643,9 @@
                 sectionOpen.classList.add('hidden');
                 sectionComp.classList.add('hidden');
                 sectionQuotes.classList.remove('hidden');
-            } else if (filterType === 'due') {
+            } else if (filterType === 'due' || filterType === 'unpaid') {
                 sectionOpen.classList.remove('hidden');
-                sectionComp.classList.remove('hidden');
+                sectionComp.classList.add('hidden');
                 sectionQuotes.classList.add('hidden');
             } else {
                 sectionOpen.classList.remove('hidden');
@@ -1660,17 +1654,17 @@
             }
 
             // 1. Render Open Orders
-            const openContainer = document.getElementById('open-orders-container');
+            const openContainer = document.getElementById('active-orders-container') || document.getElementById('open-orders-container');
             if (openContainer) {
                 if (openOrders.length === 0) {
                     openContainer.innerHTML = `
                         <div class="p-8 text-center rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/15 shadow-xs">
                             <span class="material-symbols-outlined text-3xl text-slate-400 mb-1">checklist</span>
                             <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                ${filterType === 'due' ? 'No unpaid open orders found' : 'No open orders at this time'}
+                                ${(filterType === 'due' || filterType === 'unpaid') ? 'No unpaid open orders found' : 'No open orders at this time'}
                             </h4>
                             <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 mb-3">
-                                ${filterType === 'due' ? 'All your active open orders are settled.' : 'All your orders are either completed or you haven\'t placed one yet.'}
+                                ${(filterType === 'due' || filterType === 'unpaid') ? 'All your active open orders are settled.' : 'All your orders are either completed or you haven\'t placed one yet.'}
                             </p>
                             <button onclick="openNewOrderModal()" class="px-3.5 py-1.5 bg-primary text-background-dark font-black text-xs rounded-xl shadow cursor-pointer">Place New Order</button>
                         </div>
@@ -1688,7 +1682,7 @@
                         <div class="p-8 text-center rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/15 shadow-xs">
                             <span class="material-symbols-outlined text-3xl text-slate-400 mb-1">inventory_2</span>
                             <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                ${filterType === 'due' ? 'No unpaid completed orders' : 'No completed orders yet'}
+                                ${(filterType === 'due' || filterType === 'unpaid') ? 'No unpaid completed orders' : 'No completed orders yet'}
                             </h4>
                             <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Your completed orders will appear here once ready.</p>
                         </div>
@@ -1715,6 +1709,40 @@
                 } else {
                     quotesContainer.innerHTML = quotes.map(order => renderQuoteCard(order)).join('');
                 }
+            }
+        }
+
+        async function confirmRemoveUnpaidOrder(orderId, orderNumber) {
+            if (!confirm(`Are you sure you want to remove and cancel unpaid order #${orderNumber}? This will clear it from your dashboard and balance due.`)) {
+                return;
+            }
+
+            try {
+                // 1. Remove from local array
+                cachedOrders = cachedOrders.filter(o => o.id !== orderId && o.order_number !== orderNumber);
+                localStorage.setItem('dezan_orders', JSON.stringify(cachedOrders));
+
+                // 2. Call delete in insforgeClient
+                if (window.insforgeClient && typeof window.insforgeClient.deleteOrder === 'function') {
+                    await window.insforgeClient.deleteOrder(orderId);
+                }
+
+                // 3. Re-calculate metrics and update DOM
+                updateMetrics(cachedOrders);
+                renderSectionsWithFilter();
+
+                // 4. Show toast
+                if (window.insforgeClient && typeof window.insforgeClient.showToast === 'function') {
+                    window.insforgeClient.showToast(
+                        'Order Cancelled',
+                        `Order #${orderNumber} has been removed from your account.`,
+                        'delete',
+                        'info'
+                    );
+                }
+            } catch (err) {
+                console.error('Error removing order:', err);
+                alert('Could not remove order. Please try again.');
             }
         }
 
@@ -1797,17 +1825,21 @@
                             `}
                         </div>
 
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
                             ${!isPaid ? `
-                                <button onclick="openCheckoutModal('${order.id}')" class="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs flex items-center gap-1 shadow-sm transition-all hover:scale-105 cursor-pointer">
-                                    <span class="material-symbols-outlined text-xs">credit_card</span> Pay Now ($${(order.price || 15).toFixed(2)})
+                                <button onclick="openCheckoutModal('${order.id}')" class="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs flex items-center gap-1.5 shadow-xs transition-all hover:scale-105 cursor-pointer" title="Complete payment for this order">
+                                    <span class="material-symbols-outlined text-sm">credit_card</span>
+                                    <span>Complete Order ($${(order.price || 15).toFixed(2)})</span>
+                                </button>
+                                <button onclick="confirmRemoveUnpaidOrder('${order.id}', '${order.order_number}')" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 font-bold text-xs border border-rose-200 dark:border-rose-800/60 flex items-center gap-1 transition-all cursor-pointer shadow-2xs" title="Cancel or remove this unpaid order">
+                                    <span class="material-symbols-outlined text-sm text-rose-600 dark:text-rose-400">delete</span>
+                                    <span>Remove</span>
                                 </button>
                             ` : ''}
                             <button onclick="openClientInvoiceModal('${order.id}')" class="inline-flex items-center gap-1 text-xs font-black text-amber-800 dark:text-primary hover:underline cursor-pointer">
                                 <span>${isCompleted ? 'View Invoice & Receipt' : 'View Details'}</span>
                                 <span class="material-symbols-outlined text-xs">arrow_forward</span>
                             </button>
-                        </div>
                     </div>
                 </div>
             `;
