@@ -1235,6 +1235,25 @@ The Worker Studio provides an isolated, production-focused environment for embro
     - Captures `transactionId` on direct order submissions.
 - **Verification**:
   - Automated unit test suite `scratch/test_paypal_workflow.js`: 6/6 tests passed.
-  - Playwright visual tests `scratch/verify_paypal_modal.js`: Verified clean rendering of PayPal, Pay Later, and Debit/Credit card buttons on Desktop (1280px) and Mobile (390px).
+---
 
-
+## 34. Stage 1 Service Choice Cards Harmonization & InsForge Client Event Guard Fix (Implemented & Verified)
+- **Modal Stage 1 Harmonization (`js/order-quote-modal.js` & `client-portal.html`)**:
+  - **Service Sequence**: Reordered to match user specification:
+    1. **Embroidery Digitizing** (From $15)
+    2. **Vector Art Conversion** (From $15) — *Now positioned in the middle*
+    3. **Realistic / Pet Portrait Digitizing** (From $25) — *Now positioned last*
+  - **Uniform Border & Weight**: Removed `border-2` and bold styling from the center card. All 3 cards now feature uniform 1px borders (`border border-[#e2eaf4] dark:border-primary/25`) and consistent weight.
+  - **Default & Hover Color States**:
+    - **Default**: All three cards feature the identical blue icon box (`bg-[#e8f1fd] dark:bg-blue-950/40 text-[#1d68d8] dark:text-blue-400 border border-[#cce0fc] dark:border-blue-800/50`), blue price badge, and blue right chevron.
+    - **Hover (`group-hover`)**: Transitions smoothly to warm gold/brown (`#b89218` / primary) for the icon box (`group-hover:bg-[#fef5df] group-hover:text-[#b89218] group-hover:border-[#f5dfaa]`), card border, title text, badge, and right chevron.
+- **InsForgeClient Event Engine Fix (`js/insforge-client.js`)**:
+  - **Root Cause of `undefined is not an object (evaluating 'this._processedEventKeys.add')`**:
+    - A duplicate `initStorage()` method lower in `InsForgeClient` was overriding the primary `initStorage()` on the prototype, preventing `initRealtime()` from executing and leaving `_processedEventKeys` and `subscribers` uninitialized.
+  - **Fix & Hardening**:
+    - Initialized `this.subscribers = new Set()`, `this._processedEventKeys = new Set()`, and heartbeat timers directly in the `constructor()`.
+    - Removed the redundant duplicate `initStorage()` method.
+    - Added fallback defensive checks (`if (!this._processedEventKeys) this._processedEventKeys = new Set()`) in `broadcastEvent()` and all storage / broadcast listeners.
+- **Verification**:
+  - Captured Playwright screenshots in light and dark mode (`modal_resting_state.png`, `hover_card1_embroidery.png`, `hover_card2_vector.png`, `hover_card3_realistic.png`, `modal_resting_dark.png`).
+  - Validated syntax and event dispatch in Node.js test environment.

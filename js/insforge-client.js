@@ -297,6 +297,10 @@ class InsForgeClient {
     constructor() {
         this.baseUrl = INSFORGE_CONFIG.baseUrl;
         this.anonKey = INSFORGE_CONFIG.anonKey;
+        this.subscribers = new Set();
+        this._processedEventKeys = new Set();
+        this.lastKnownFingerprint = null;
+        this._heartbeatTimer = null;
         this.initStorage();
     }
 
@@ -306,8 +310,16 @@ class InsForgeClient {
 
     initStorage() {
         if (typeof window === 'undefined') return;
-        this.initData();
-        this.initRealtime();
+        try {
+            this.initData();
+        } catch (err) {
+            console.warn('InsForgeClient initData error:', err);
+        }
+        try {
+            this.initRealtime();
+        } catch (err) {
+            console.warn('InsForgeClient initRealtime error:', err);
+        }
     }
 
     initData() {
@@ -393,16 +405,6 @@ class InsForgeClient {
         }
     }
 
-    initStorage() {
-        if (!localStorage.getItem('dezan_orders')) {
-            localStorage.setItem('dezan_orders', JSON.stringify(INITIAL_DEMO_ORDERS));
-        }
-        if (!localStorage.getItem('dezan_digitizers')) {
-            localStorage.setItem('dezan_digitizers', JSON.stringify([
-                DEMO_USERS.digitizer
-            ]));
-        }
-    }
 
     // ===================================================================
     //  REALTIME & AUTO-HEARTBEAT DUAL-ENGINE
@@ -421,10 +423,13 @@ class InsForgeClient {
                     this.broadcastChannel = new BroadcastChannel('dezan_realtime_sync');
                     this.broadcastChannel.onmessage = (event) => {
                         const { id, type, payload } = event.data || {};
+                        if (!this._processedEventKeys) this._processedEventKeys = new Set();
                         if (id && this._processedEventKeys.has(id)) return;
                         if (id) {
                             this._processedEventKeys.add(id);
-                            setTimeout(() => this._processedEventKeys.delete(id), 8000);
+                            setTimeout(() => {
+                                if (this._processedEventKeys) this._processedEventKeys.delete(id);
+                            }, 8000);
                         }
                         if (type) {
                             console.log('⚡ Realtime Broadcast received:', type, payload);
@@ -441,10 +446,13 @@ class InsForgeClient {
                 if (e.key === 'dezan_last_event' && e.newValue) {
                     try {
                         const { id, type, payload } = JSON.parse(e.newValue);
+                        if (!this._processedEventKeys) this._processedEventKeys = new Set();
                         if (id && this._processedEventKeys.has(id)) return;
                         if (id) {
                             this._processedEventKeys.add(id);
-                            setTimeout(() => this._processedEventKeys.delete(id), 8000);
+                            setTimeout(() => {
+                                if (this._processedEventKeys) this._processedEventKeys.delete(id);
+                            }, 8000);
                         }
                         this.notifySubscribers(type, payload, false);
                     } catch (_) {}
@@ -488,9 +496,19 @@ class InsForgeClient {
     }
 
     broadcastEvent(type, payload) {
+        if (!this._processedEventKeys) {
+            this._processedEventKeys = new Set();
+        }
+        if (!this.subscribers) {
+            this.subscribers = new Set();
+        }
         const eventId = `${type}_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
         this._processedEventKeys.add(eventId);
-        setTimeout(() => this._processedEventKeys.delete(eventId), 8000);
+        setTimeout(() => {
+            if (this._processedEventKeys) {
+                this._processedEventKeys.delete(eventId);
+            }
+        }, 8000);
 
         const message = { id: eventId, type, payload, timestamp: Date.now() };
 
