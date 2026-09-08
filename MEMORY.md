@@ -990,7 +990,7 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - Aligned Card 2 ("Jacket Back / Large") colors to match Card 1 and Card 3 identically with neutral styling (`border border-primary/15 dark:border-primary/25`, `text-slate-600 dark:text-slate-400` eyebrow, and `text-slate-900 dark:text-white` price).
   - Removed misleading `cursor-pointer` and hover transitions from all three informational preview cards, clearly distinguishing them from interactive buttons and directing users to the primary "View Full Price List & Order" button.
 - **Home Page Hero Copy Update (`index.html`)**:
-  - Added primary value proposition under headline: `"We provide professional, high-quality embroidery digitizing and vector art services for embroidery shops across the U.S."`
+  - Value proposition under headline: `"We provide professional, high-quality embroidery digitizing services for embroidery shops across the U.S."`
   - Calibrated typography (`text-xs xs:text-[13px] sm:text-sm md:text-base text-slate-600 dark:text-slate-300 font-normal leading-relaxed max-w-xl`) to maintain visual balance and zero layout shifts on desktop and mobile.
 - **Optional Picture Upload in Revision Requests (`client-portal.html`, `client-orders.html`, `js/client-workspace.js`)**:
   - Clients can provide a text description of adjustments required, with an optional picture/photo upload to illustrate problem areas (puckering, fabric pull, stitch density, or marked-up artwork).
