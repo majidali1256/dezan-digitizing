@@ -194,7 +194,11 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - **Strictly Pricing Only**: Zero embedded order forms or quote submission inputs. Authenticated client banners and action buttons route to `client-portal.html` (for logged-in clients) or `portal-login.html?redirect=...` (for unauthenticated visitors).
   - **Instant Visibility & Zero CLS**: Removed `.reveal` opacity blocking so all cards and sections render immediately across all devices, with full light/dark mode contrast parity verified via Playwright visual verification across Desktop (1440x900), Tablet (834x1112), and Mobile (390x844).
 - `/contact.html`: Contact form for general inquiries, and interactive "Request a Custom Quote" portal showcase (`#custom-quote-section`). Features mobile-optimized `#quote-login-prompt` and `#quote-client-banner` with strict `items-stretch sm:items-center` flex alignment, full-width wrapping copy, nested emerald bolt icon badge (curing horizontal centering displacement outside container), responsive `grid-cols-3` step cards with proportional micro-padding, and full touch-target buttons.
+- `/terms.html`: Dedicated Terms of Service (Acceptance, service scope, 100% client artwork ownership warranty, flat-rate pricing without hidden stitch fees, 12-24h turnaround, and test sewout recommendations).
+- `/privacy.html`: Dedicated Privacy Policy (Strict artwork confidentiality guarantee, zero resale/sharing of client designs, PCI-DSS payment compliance, and 5-year secure cloud file backup retention).
+- `/refund-policy.html`: Dedicated Refund & Revision Policy (Free unlimited revisions, 2-4 hour priority revision turnaround, 1-click revision submission via Client Portal with test sewout photo proof, and 100% money-back guarantee).
 - `/order-success.html`: Order confirmation receipt page with transaction lookup parameters.
+
 
 ### Spacing Harmonization & Mobile Compact Layouts (Implemented Across All 6 Outer Pages)
 - **Problem**: Elements and sections appeared oversized and vertically bloated on mobile screens (especially stacked pricing cards and step boxes dominating screen height), combined with irregular section spacing (`py-16` / 128px gaps on some pages, `py-4` on others).
