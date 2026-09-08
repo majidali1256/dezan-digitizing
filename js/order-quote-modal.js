@@ -254,15 +254,19 @@
                                     <div>
                                         <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Target Size *</label>
                                         <div class="flex items-center gap-2">
-                                            <input type="text" id="dig-size" placeholder="e.g. 4.0 Tall / Wide" oninput="window.validatePlacementSize()" class="flex-1 min-w-0 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary" />
-                                            <select id="dig-size-unit" onchange="window.validatePlacementSize()" class="w-20 flex-shrink-0 px-2.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
+                                            <input type="text" id="dig-size" placeholder="e.g. 4.0 Tall / Wide" oninput="window.validatePlacementSize(); window.calculateAdaptivePrice();" class="flex-1 min-w-0 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary" />
+                                            <select id="dig-size-unit" onchange="window.validatePlacementSize(); window.calculateAdaptivePrice();" class="w-20 flex-shrink-0 px-2.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
                                                 <option value="in" selected>in</option>
                                                 <option value="cm">cm</option>
                                             </select>
                                         </div>
+                                        <div id="dig-size-large-notice" class="hidden text-[11.5px] font-semibold text-[#9a7810] dark:text-primary mt-1.5 flex items-center gap-1.5 transition-all">
+                                            <span class="material-symbols-outlined text-sm leading-none shrink-0">info</span>
+                                            <span>Large design pricing applied (over 5.5″ wide).</span>
+                                        </div>
                                         <div id="dig-size-error" class="hidden text-[11px] font-semibold text-rose-600 dark:text-rose-400 mt-1 flex items-center gap-1">
                                             <span class="material-symbols-outlined text-xs">error</span>
-                                            <span id="dig-size-error-text">Maximum size for this placement is 5.5 inches.</span>
+                                            <span id="dig-size-error-text">Please enter a valid size.</span>
                                         </div>
                                     </div>
                                 </div>
@@ -571,6 +575,22 @@
             }, false);
         }
 
+        // Live size input listeners for real-time large design pricing calculation
+        const sizeInput = modal.querySelector('#dig-size');
+        const sizeUnit = modal.querySelector('#dig-size-unit');
+        if (sizeInput) {
+            sizeInput.addEventListener('input', () => {
+                if (typeof window.validatePlacementSize === 'function') window.validatePlacementSize();
+                if (typeof window.calculateAdaptivePrice === 'function') window.calculateAdaptivePrice();
+            });
+        }
+        if (sizeUnit) {
+            sizeUnit.addEventListener('change', () => {
+                if (typeof window.validatePlacementSize === 'function') window.validatePlacementSize();
+                if (typeof window.calculateAdaptivePrice === 'function') window.calculateAdaptivePrice();
+            });
+        }
+
         document.body.appendChild(modal);
         return modal;
     }
@@ -762,20 +782,50 @@
     };
 
     /**
-     * Size Validation by Placement
-     * Left Chest: max 5.5 inches
-     * Cap / Hat Front: max 5.5 inches
-     * Jacket Back / Large: no limit
-     * Custom Placement: no limit
+     * Parses design size and returns width/dimension in inches.
+     * Converts cm to inches (val / 2.54) if unit is cm.
+     */
+    function getDesignWidthInInches(sizeVal, unitVal) {
+        if (!sizeVal) return 0;
+        const text = String(sizeVal).toLowerCase().trim();
+        if (!text) return 0;
+
+        // Check if user explicitly specified width (e.g., "7 wide", "7w", "w: 7", "7 inches wide")
+        const explicitWidthMatch = text.match(/([\d.]+)\s*(?:in|inch|inches|cm)?\s*(?:w\b|wide|width)/) 
+            || text.match(/(?:w\b|width|wide)\s*[:=]?\s*([\d.]+)/);
+
+        let rawVal = NaN;
+        if (explicitWidthMatch) {
+            rawVal = parseFloat(explicitWidthMatch[1]);
+        } else {
+            const numbers = (text.match(/[\d.]+/g) || []).map(n => parseFloat(n)).filter(n => !isNaN(n));
+            if (numbers.length === 1) {
+                rawVal = numbers[0];
+            } else if (numbers.length > 1) {
+                // In embroidery sizing (e.g. 4 x 7 or 7 x 5), if any dimension exceeds 5.5", it requires large hoop/pricing
+                rawVal = Math.max(...numbers);
+            }
+        }
+
+        if (isNaN(rawVal) || rawVal <= 0) return 0;
+
+        // Determine if unit is cm (dropdown selection or typed directly in input)
+        const isCm = (unitVal === 'cm') || text.includes('cm');
+        return isCm ? (rawVal / 2.54) : rawVal;
+    }
+    window.getDesignWidthInInches = getDesignWidthInInches;
+
+    /**
+     * Size Validation
+     * Any size > 5.5" automatically updates to $25 (valid large design).
+     * Only non-positive numbers (e.g. <= 0) are flagged as invalid.
      */
     window.validatePlacementSize = function() {
         const modal = ensureModalElement();
         const service = modal.querySelector('#selected-service-type')?.value || 'Digitizing';
         if (service !== 'Digitizing') return true;
 
-        const placementVal = modal.querySelector('#dig-placement')?.value || '';
         const sizeInput = modal.querySelector('#dig-size');
-        const unitSelect = modal.querySelector('#dig-size-unit');
         const errorEl = modal.querySelector('#dig-size-error');
         const errorText = modal.querySelector('#dig-size-error-text');
 
@@ -783,24 +833,13 @@
 
         const match = (sizeInput.value || '').match(/[\d.]+/);
         const rawVal = match ? parseFloat(match[0]) : parseFloat(sizeInput.value);
-        const unit = unitSelect ? unitSelect.value : 'in';
 
-        // Restriction applies to Left Chest and Cap / Hat Front
-        const hasRestriction = placementVal.includes('Left Chest') || placementVal.includes('Cap / Hat');
-
-        if (hasRestriction && !isNaN(rawVal) && rawVal > 0) {
-            const valInInches = unit === 'cm' ? (rawVal / 2.54) : rawVal;
-            if (valInInches > 5.5001) {
-                if (errorEl) errorEl.classList.remove('hidden');
-                if (errorText) {
-                    errorText.textContent = unit === 'cm'
-                        ? 'Maximum size for this placement is 5.5 inches (14.0 cm).'
-                        : 'Maximum size for this placement is 5.5 inches.';
-                }
-                sizeInput.classList.add('border-rose-500', 'focus:border-rose-500');
-                sizeInput.classList.remove('border-slate-300', 'dark:border-primary/25');
-                return false;
-            }
+        if (!isNaN(rawVal) && rawVal <= 0) {
+            if (errorEl) errorEl.classList.remove('hidden');
+            if (errorText) errorText.textContent = 'Please enter a valid positive size.';
+            sizeInput.classList.add('border-rose-500', 'focus:border-rose-500');
+            sizeInput.classList.remove('border-slate-300', 'dark:border-primary/25');
+            return false;
         }
 
         if (errorEl) errorEl.classList.add('hidden');
@@ -811,6 +850,10 @@
 
     /**
      * Dynamic Price Calculation
+     * Rule: If the design is larger than 5.5 inches wide -> automatically change price to $25.
+     * Applies to Custom Placement as well as all other placements (Left Chest, Cap, etc.).
+     * Returning to 5.5 inches or less restores base price to $15.
+     * Shows: "Large design pricing applied (over 5.5″ wide)."
      */
     window.calculateAdaptivePrice = function() {
         const modal = ensureModalElement();
@@ -830,17 +873,50 @@
             basePrice = optPrice;
 
             const placementVal = selectedOpt?.value || '';
-            if (placementVal.includes('Jacket Back') || placementVal.includes('25')) {
-                breakdownText = 'Jacket Back / Large ($25.00)';
-            } else if (placementVal.includes('Cap')) {
-                breakdownText = 'Cap / Hat Front ($15.00)';
-            } else if (placementVal.includes('Custom')) {
-                breakdownText = 'Custom Placement ($15.00)';
+            const sizeInput = modal.querySelector('#dig-size');
+            const unitSelect = modal.querySelector('#dig-size-unit');
+            const sizeVal = sizeInput?.value || '';
+            const unit = unitSelect?.value || 'in';
+
+            const widthInInches = getDesignWidthInInches(sizeVal, unit);
+            const isLargeBySize = widthInInches > 5.5001;
+            const isJacketBack = placementVal.includes('Jacket Back') || placementVal.includes('25');
+
+            const largeNotice = modal.querySelector('#dig-size-large-notice');
+            if (largeNotice) {
+                if (isLargeBySize) {
+                    largeNotice.classList.remove('hidden');
+                } else {
+                    largeNotice.classList.add('hidden');
+                }
+            }
+
+            if (isLargeBySize || isJacketBack) {
+                basePrice = 25.00;
+                if (isJacketBack) {
+                    breakdownText = 'Jacket Back / Large ($25.00)';
+                } else if (placementVal.includes('Cap')) {
+                    breakdownText = 'Cap / Hat Front · Large Design ($25.00)';
+                } else if (placementVal.includes('Custom')) {
+                    breakdownText = 'Custom Placement · Large Design ($25.00)';
+                } else {
+                    breakdownText = 'Left Chest · Large Design ($25.00)';
+                }
             } else {
-                breakdownText = 'Left Chest ($15.00)';
+                basePrice = 15.00;
+                if (placementVal.includes('Cap')) {
+                    breakdownText = 'Cap / Hat Front ($15.00)';
+                } else if (placementVal.includes('Custom')) {
+                    breakdownText = 'Custom Placement ($15.00)';
+                } else {
+                    breakdownText = 'Left Chest ($15.00)';
+                }
             }
             // 3D Puff has NO additional charge (+$0)
         } else {
+            const largeNotice = modal.querySelector('#dig-size-large-notice');
+            if (largeNotice) largeNotice.classList.add('hidden');
+
             const vecRadio = modal.querySelector('input[name="vec-plan-choice"]:checked');
             const vecPrice = parseFloat(vecRadio?.getAttribute('data-price') || '15');
             basePrice = vecPrice;
@@ -1127,10 +1203,10 @@
 
             fabricType = modal.querySelector('#dig-fabric')?.value || 'Cotton / Pique Knit';
 
-            // Validate placement size limit (5.5" for Left Chest and Cap / Hat Front)
+            // Validate target size (ensures positive size if entered)
             const isSizeValid = window.validatePlacementSize();
             if (!isSizeValid) {
-                alert('Maximum size for this placement is 5.5 inches.');
+                alert('Please enter a valid positive target size.');
                 modal.querySelector('#dig-size')?.focus();
                 return;
             }

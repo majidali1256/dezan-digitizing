@@ -782,14 +782,16 @@ The Worker Studio provides an isolated, production-focused environment for embro
       - Options: `Left Chest — $15`, `Cap / Hat Front — $15`, `Jacket Back / Large — $25`, and `Custom Placement`.
       - Removed options: `Sleeve / Visor` and `Patches / Badges` completely removed.
       - **Custom Placement**: Dynamically reveals extra text input field `#dig-custom-placement` ("Custom Placement Details", placeholder: `e.g. patch , visor , apron, tote bag, etc.`) for manual entry.
-    - **Target Size (Single Manual Dimension & Validation)**:
-      - Single manual size input: `Target Size: [ e.g. 4.0 Tall / Wide ] [ in ]` (with `in` / `cm` unit toggle). Separate W × H boxes completely eliminated. Accepts both direct numbers and dimensional qualifiers (e.g. 4.0, 4.0 Tall, 4.0 Wide) with robust parsing and validation against maximum placement limits.
-      - **Placement Size Limits**:
-        - `Left Chest`: maximum 5.5 inches (or 14.0 cm).
-        - `Cap / Hat Front`: maximum 5.5 inches (or 14.0 cm).
-        - `Jacket Back / Large`: no maximum restriction.
-        - `Custom Placement`: no maximum restriction.
-      - Automated live validation blocks submission and displays: *"Maximum size for this placement is 5.5 inches."*
+    - **Target Size & Adaptive Large Design Pricing**:
+      - Single manual size input: `Target Size: [ e.g. 4.0 Tall / Wide ] [ in ]` (with `in` / `cm` unit toggle).
+      - **Dynamic Large Design Rule ($25 over 5.5″ wide)**:
+        - If the design is larger than 5.5 inches wide, the price automatically updates live from $15.00 to **$25.00**.
+        - Applies universally across **all placements** (Left Chest, Cap / Hat Front, and Custom Placement for aprons, sleeves, tote bags, etc.).
+        - Placement selection does **not** override the size rule; if size is > 5.5", price becomes $25.00.
+        - Changes back to $15.00 immediately if size is reduced to $\le 5.5$ inches.
+        - Supports unit conversion: when `cm` is selected, converts to inches (`val / 2.54`) before evaluating the 5.5" threshold (e.g. 14 cm = 5.51" $\rightarrow$ $25; 7 cm = 2.75" $\rightarrow$ $15).
+        - **UI Explanation Notice**: Displays a dedicated explanatory notice directly under Target Size: `“Large design pricing applied (over 5.5″ wide).”` (`#dig-size-large-notice`) in high-contrast gold `#9a7810` (light) / `#d4af35` (dark) with info icon.
+        - Sizes $> 5.5"$ are valid large designs and no longer blocked with validation error alerts.
     - **Required Machine File Formats**:
       - All machine brand names removed (no Tajima, Wilcom, Brother, Melco, Janome, etc.). Only file extensions displayed.
       - Exact sequence with `.DST` first and checked: `.DST | .PES | EMB | .OFM | .EXP | .JEF | .VP3 | .CND | .XXX`. Multiple formats remain selectable.
@@ -932,3 +934,51 @@ The Worker Studio provides an isolated, production-focused environment for embro
     - Synchronized with backend `POST /api/auth/google`, PostgreSQL `public.profiles` database record, JWT token persistence, and guest order claiming.
 - **Verification**:
   - Headless Playwright integration test verified full handshake: Google modal display $\rightarrow$ expandable custom input toggle $\rightarrow$ Majid Hussain 1-click sign-in $\rightarrow$ successful HTTP 200 backend handshake $\rightarrow$ automatic redirection to `client-portal.html` with active session.
+
+---
+
+## 29. Dynamic Large Design Pricing Rule ($25 over 5.5″ Wide) & Live Explanatory UI (Implemented & Verified)
+- **Problem & Requirement**:
+  - Previously, sizes entered over 5.5 inches for Left Chest or Cap / Hat Front triggered a validation error alert and blocked order submission. Furthermore, Custom Placement options did not dynamically adjust the base price when customers specified large dimensions (e.g., 7 inches for an apron or tote bag).
+  - The customer required:
+    1. Designs larger than 5.5 inches wide must automatically adjust base price from $15.00 to **$25.00**.
+    2. The rule must apply across all placements including Custom Placement, Left Chest, Cap / Hat Front, and others. The placement selection must not override the size rule.
+    3. Price must update live as soon as the user types/edits the size, before clicking "Pay & Place Order".
+    4. Changing size back to $\le 5.5$ inches must immediately restore base price to $15.00.
+    5. Unit conversion (`cm` $\rightarrow$ `in` via `rawVal / 2.54`) must be evaluated prior to threshold testing.
+    6. A small explanatory line must appear directly beneath Target Size when $25 pricing is applied:
+       `“Large design pricing applied (over 5.5″ wide).”`
+       This clarifies the price adjustment so users understand why the checkout price changed.
+- **Architectural Implementation**:
+  - **Files Updated**:
+    - `js/order-quote-modal.js`: Unified order/quote modal engine used on all public marketing pages and client portal wrappers.
+    - `client-portal.html`: Internal client workspace order modal.
+  - **Helper Function (`getDesignWidthInInches`)**:
+    - Parses input strings supporting direct floats (`7`, `5.5`, `4.0`), dimensional annotations (`7 inches wide`, `6w`, `4 x 7`), and unit conversion (checks both unit dropdown and string text for `cm`).
+    - Compares against precision threshold: `valInInches > 5.5001`.
+  - **Live Adaptive Calculation (`calculateAdaptivePrice`)**:
+    - If `service === 'Digitizing'` and `isLargeBySize || isJacketBack`: sets `basePrice = 25.00` and adjusts breakdown text (e.g. `Custom Placement · Large Design ($25.00)` or `Left Chest · Large Design ($25.00)`).
+    - If rush turnaround is selected: adds +$5 fee ($30.00 total).
+    - Updates price summary display and checkout button text live (`Pay & Place Order ($25.00)` or `Pay & Place Order ($30.00)`).
+    - Toggles `#dig-size-large-notice` (`hidden` removed when large size detected, restored when $\le 5.5"$).
+  - **Notice Element (`#dig-size-large-notice`)**:
+    - Styled with WCAG 2.1 AA compliant brand gold: `text-[#9a7810]` in light mode and `dark:text-primary` (`#d4af35`) in dark mode with a subtle info icon.
+  - **Validation Refactoring (`validatePlacementSize`)**:
+    - Removed the 5.5" restriction and alert blocking.
+    - Sizes $> 5.5"$ are valid large designs and accepted smoothly. Only non-positive numbers ($\le 0$) trigger input validation.
+  - **Live Event Binding**:
+    - `oninput="window.validatePlacementSize(); window.calculateAdaptivePrice();"` on `#dig-size`.
+    - `onchange="window.validatePlacementSize(); window.calculateAdaptivePrice();"` on `#dig-size-unit`.
+    - Native `input` and `change` listeners attached in `ensureModalElement` and `DOMContentLoaded`.
+- **Automated Verification (`scratch/test_large_pricing_rule.js`)**:
+  - **Scenario A**: Left Chest with 4.0" $\rightarrow$ $15.00, notice hidden.
+  - **Scenario B**: Left Chest with 7.0" $\rightarrow$ $25.00, notice visible, button `Pay & Place Order ($25.00)`.
+  - **Scenario C**: Change back to 5.5" $\rightarrow$ returns to $15.00, notice hidden, button `Pay & Place Order ($15.00)`.
+  - **Scenario D**: Custom Placement (Apron / Tote bag) with 7" $\rightarrow$ $25.00, notice visible.
+  - **Scenario E**: Unit toggle to `cm` with 7 cm (2.75") $\rightarrow$ returns to $15.00, notice hidden.
+  - **Scenario F**: 15 cm (5.9") $\rightarrow$ $25.00, notice visible.
+  - **Scenario G**: Cap / Hat Front with 6" $\rightarrow$ $25.00, notice visible, no blocking errors.
+  - **Scenario H**: Rush priority (+ $5) with large design $\rightarrow$ $30.00 total.
+  - **Client Portal**: Verified identical behaviors in `client-portal.html` order builder.
+  - **Screenshots**: Multi-viewport visual QA verified for desktop light (`large_design_modal_light.png`), desktop dark (`large_design_modal_dark.png`), and mobile (`large_design_modal_mobile.png`).
+
