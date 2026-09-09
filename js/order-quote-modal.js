@@ -40,7 +40,7 @@
     function ensureModalElement() {
         let existing = document.getElementById('new-order-modal');
         if (existing) {
-            if (existing.querySelector('#modal-mode-order-btn') && existing.querySelector('#modal-auth-name')) {
+            if (existing.querySelector('#modal-mode-order-btn') && existing.querySelector('#order-step-3-view')) {
                 return existing;
             }
             // If existing is legacy or incomplete markup, replace it with the unified modal
@@ -106,26 +106,35 @@
                             </button>
                         </div>
 
-                        <!-- 2-Step Stepper Progress Bar -->
-                        <div class="w-full max-w-[260px] sm:max-w-[320px] mx-auto pt-1 sm:pt-1.5 pb-0.5">
+                        <!-- 3-Step Stepper Progress Bar -->
+                        <div class="w-full max-w-[300px] sm:max-w-[380px] mx-auto pt-1 sm:pt-1.5 pb-0.5">
                             <div class="flex items-start justify-between relative">
                                 <!-- Connecting line centered at top-3.5 sm:top-4 (middle of circle) -->
-                                <div class="absolute left-7 sm:left-8 right-7 sm:right-8 top-3.5 sm:top-4 -translate-y-1/2 h-[2px] bg-slate-200 dark:bg-slate-700 transition-colors" id="step-connector"></div>
+                                <div class="absolute left-6 sm:left-8 right-6 sm:right-8 top-3.5 sm:top-4 -translate-y-1/2 h-[2px] bg-slate-200 dark:bg-slate-700 transition-colors" id="step-connector"></div>
+                                <div class="absolute left-6 sm:left-8 top-3.5 sm:top-4 -translate-y-1/2 h-[2px] bg-[#b89218] transition-all duration-300" style="width: 0%" id="step-connector-progress"></div>
 
                                 <!-- Step 1 (Clickable to return to service choice) -->
                                 <button type="button" onclick="window.switchOrderServiceChoice()" class="relative z-10 flex flex-col items-center cursor-pointer group bg-transparent border-0 p-0 text-center" title="Step 1: Choose Service">
                                     <div id="step-circle-1" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#b89218] text-white font-bold flex items-center justify-center text-xs sm:text-sm shadow-xs transition-all ring-4 ring-white dark:ring-card-dark">
                                         1
                                     </div>
-                                    <span id="step-label-1" class="text-[10.5px] sm:text-xs font-bold text-[#b89218] mt-0.5 sm:mt-1 whitespace-nowrap transition-colors">Choose Service</span>
+                                    <span id="step-label-1" class="text-[9.5px] sm:text-[11px] font-bold text-[#b89218] mt-0.5 sm:mt-1 whitespace-nowrap transition-colors">Choose Service</span>
                                 </button>
 
-                                <!-- Step 2 -->
-                                <div class="relative z-10 flex flex-col items-center text-center">
+                                <!-- Step 2 (Clickable from Step 3 to return to details) -->
+                                <button type="button" id="step-tab-2" onclick="window.backToOrderDetailsStep()" class="relative z-10 flex flex-col items-center cursor-pointer group bg-transparent border-0 p-0 text-center" title="Step 2: Order Details">
                                     <div id="step-circle-2" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-all ring-4 ring-white dark:ring-card-dark">
                                         2
                                     </div>
-                                    <span id="step-label-2" class="text-[10.5px] sm:text-xs font-medium text-slate-400 mt-0.5 sm:mt-1 whitespace-nowrap transition-colors">Order Details</span>
+                                    <span id="step-label-2" class="text-[9.5px] sm:text-[11px] font-medium text-slate-400 mt-0.5 sm:mt-1 whitespace-nowrap transition-colors">Order Details</span>
+                                </button>
+
+                                <!-- Step 3 -->
+                                <div id="step-tab-3" class="relative z-10 flex flex-col items-center text-center">
+                                    <div id="step-circle-3" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-all ring-4 ring-white dark:ring-card-dark">
+                                        3
+                                    </div>
+                                    <span id="step-label-3" class="text-[9.5px] sm:text-[11px] font-medium text-slate-400 mt-0.5 sm:mt-1 whitespace-nowrap transition-colors">Review &amp; Pay</span>
                                 </div>
                             </div>
                         </div>
@@ -233,9 +242,11 @@
                     <form id="adaptive-order-form" onsubmit="window.handleAdaptiveOrderSubmit(event)" class="hidden flex-1 flex flex-col overflow-hidden">
                         <input type="hidden" id="selected-service-type" value="Digitizing" />
 
-                        <!-- Scrollable Form Fields Body -->
-                        <div class="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-3.5 sm:space-y-4">
-                            <!-- Active Service Banner with Quick Switcher -->
+                        <!-- STEP 2 VIEW: ORDER SPECIFICATIONS -->
+                        <div id="order-step-2-view" class="flex-1 flex flex-col overflow-hidden">
+                            <!-- Scrollable Form Fields Body -->
+                            <div class="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-3.5 sm:space-y-4">
+                                <!-- Active Service Banner with Quick Switcher -->
                             <div class="p-2.5 sm:p-3 rounded-xl bg-amber-50/50 dark:bg-slate-900/60 border border-amber-200/80 dark:border-primary/20 flex items-center justify-between">
                                 <div class="flex items-center gap-2 min-w-0">
                                     <span class="material-symbols-outlined text-amber-800 dark:text-primary text-lg flex-shrink-0" id="service-banner-icon">precision_manufacturing</span>
@@ -554,67 +565,216 @@
                                 </div>
                             </div>
 
-                            <!-- Order Payment Notice & Options (Hidden in Quote Mode) -->
-                            <div id="order-payment-terms-box" class="space-y-3">
-                                <div class="p-3 sm:p-3.5 rounded-xl bg-amber-500/10 dark:bg-primary/10 border border-amber-400/30 dark:border-primary/25 flex items-center justify-between gap-3">
-                                    <div class="flex items-center gap-2.5 sm:gap-3">
-                                        <div class="w-8 h-8 rounded-lg bg-primary/20 text-amber-900 dark:text-primary flex items-center justify-center flex-shrink-0">
-                                            <span class="material-symbols-outlined text-lg">credit_card</span>
+                                <!-- Quote Mode Notice (Visible ONLY in Quote Mode) -->
+                                <div id="quote-mode-info-box" class="hidden p-3.5 sm:p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-500/30 text-xs text-blue-950 dark:text-blue-200">
+                                    <div class="flex items-start gap-2.5 sm:gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-800 dark:text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-blue-500/25">
+                                            <span class="material-symbols-outlined text-lg">request_quote</span>
                                         </div>
                                         <div>
-                                            <span class="text-xs font-bold text-slate-900 dark:text-white block">Payment Required to Start Production</span>
-                                            <span class="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-400">All standard orders require payment upfront. Secure instant checkout via Credit Card or PayPal.</span>
+                                            <strong class="text-xs font-black block text-blue-950 dark:text-blue-200">100% Free Stitch Appraisal &amp; Estimation</strong>
+                                            <p class="text-[10px] sm:text-[11px] text-blue-900/80 dark:text-blue-300/80 mt-1 leading-relaxed">
+                                                Submit your design specs and artwork for free. Our senior digitizer will inspect stitch density, small text complexity, and fabric compatibility within 1 hour. Pay only after price approval.
+                                            </p>
                                         </div>
                                     </div>
-                                    <div class="hidden sm:flex items-center gap-1.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 flex-shrink-0">
-                                        <span class="material-symbols-outlined text-sm text-emerald-600 dark:text-emerald-400">lock</span>
-                                        <span>256-Bit SSL</span>
-                                    </div>
-                                </div>
-
-                                <!-- Payment Method Tabs -->
-                                <div class="grid grid-cols-2 gap-2">
-                                    <button type="button" id="modal-tab-card" onclick="window.setModalPaymentMethod('Credit Card')" class="p-2 sm:p-2.5 rounded-xl border-2 border-primary bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer">
-                                        <span class="material-symbols-outlined text-sm text-primary">credit_card</span>
-                                        <span>Credit / Debit Card</span>
-                                    </button>
-                                    <button type="button" id="modal-tab-paypal" onclick="window.setModalPaymentMethod('PayPal')" class="p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer">
-                                        <span class="material-symbols-outlined text-sm">account_balance_wallet</span>
-                                        <span>PayPal</span>
-                                    </button>
                                 </div>
                             </div>
 
-                            <!-- Quote Mode Notice (Visible ONLY in Quote Mode) -->
-                            <div id="quote-mode-info-box" class="hidden p-3.5 sm:p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-500/30 text-xs text-blue-950 dark:text-blue-200">
-                                <div class="flex items-start gap-2.5 sm:gap-3">
-                                    <div class="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-800 dark:text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-blue-500/25">
-                                        <span class="material-symbols-outlined text-lg">request_quote</span>
-                                    </div>
-                                    <div>
-                                        <strong class="text-xs font-black block text-blue-950 dark:text-blue-200">100% Free Stitch Appraisal &amp; Estimation</strong>
-                                        <p class="text-[10px] sm:text-[11px] text-blue-900/80 dark:text-blue-300/80 mt-1 leading-relaxed">
-                                            Submit your design specs and artwork for free. Our senior digitizer will inspect stitch density, small text complexity, and fabric compatibility within 1 hour. Pay only after price approval.
-                                        </p>
-                                    </div>
+                            <!-- Step 2 Sticky Form Action Buttons -->
+                            <div class="flex-shrink-0 px-4 py-3 sm:px-6 sm:py-3.5 border-t border-slate-200 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex items-center justify-between gap-2 shadow-lg sm:shadow-none pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+                                <button type="button" onclick="window.switchOrderServiceChoice()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer transition-colors flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">arrow_back</span>
+                                    <span>Back</span>
+                                </button>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick="window.closeOrderQuoteModal()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer transition-colors">
+                                        Cancel
+                                    </button>
+                                    <button type="button" id="order-goto-review-btn" onclick="window.goToOrderReviewStep()" class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0">
+                                        <span id="order-goto-review-btn-text">Review Order</span>
+                                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Sticky Form Action Buttons -->
-                        <div class="flex-shrink-0 px-4 py-3 sm:px-6 sm:py-3.5 border-t border-slate-200 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex items-center justify-between gap-2 shadow-lg sm:shadow-none pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-                            <button type="button" onclick="window.switchOrderServiceChoice()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer transition-colors flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm">arrow_back</span>
-                                <span class="hidden xs:inline">Back</span>
-                            </button>
-                            <div class="flex items-center gap-2">
-                                <button type="button" onclick="window.closeOrderQuoteModal()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer transition-colors">
-                                    Cancel
+                        <!-- ================= STAGE 3: REVIEW & PAY VIEW ================= -->
+                        <div id="order-step-3-view" class="hidden flex-1 flex flex-col overflow-hidden">
+                            <div class="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-4">
+                                <!-- Section Title Bar -->
+                                <div class="flex items-center justify-between pb-2 border-b border-slate-200/80 dark:border-primary/20">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-lg bg-[#b89218]/10 dark:bg-primary/20 text-[#b89218] dark:text-primary flex items-center justify-center flex-shrink-0">
+                                            <span class="material-symbols-outlined text-lg">fact_check</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-wider" id="order-review-title">Order Summary</h4>
+                                            <p class="text-[11px] text-slate-500 dark:text-slate-400" id="order-review-subtitle">Please double-check your specifications before paying.</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="window.backToOrderDetailsStep()" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-xs font-bold text-[#b89218] dark:text-primary transition-colors flex items-center gap-1 cursor-pointer">
+                                        <span class="material-symbols-outlined text-sm">edit</span>
+                                        <span>Edit</span>
+                                    </button>
+                                </div>
+
+                                <!-- Specification Card (Clean Dezan Luxury Table) -->
+                                <div class="rounded-2xl bg-[#f8faff] dark:bg-slate-900/60 border border-[#e2eaf4] dark:border-primary/25 p-3.5 sm:p-4 space-y-2.5 shadow-xs">
+                                    <!-- Service Row -->
+                                    <div class="flex items-center justify-between py-1 border-b border-slate-200/70 dark:border-primary/15">
+                                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Service</span>
+                                        <div class="flex items-center gap-1.5">
+                                            <strong class="text-xs font-bold text-slate-900 dark:text-white" id="review-summary-service">Embroidery Digitizing</strong>
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 border border-[#cce0fc] dark:border-blue-800/50" id="review-summary-service-badge">From $15</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Job Name / Reference -->
+                                    <div class="flex items-center justify-between py-1 border-b border-slate-200/70 dark:border-primary/15">
+                                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Job Name / Reference</span>
+                                        <strong class="text-xs font-bold text-slate-900 dark:text-white text-right max-w-[200px] truncate" id="review-summary-jobname">—</strong>
+                                    </div>
+
+                                    <!-- Placement -->
+                                    <div class="flex items-center justify-between py-1 border-b border-slate-200/70 dark:border-primary/15">
+                                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Placement</span>
+                                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200 text-right" id="review-summary-placement">Left Chest</span>
+                                    </div>
+
+                                    <!-- Target Size -->
+                                    <div class="flex items-center justify-between py-1 border-b border-slate-200/70 dark:border-primary/15">
+                                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Target Size</span>
+                                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200 text-right" id="review-summary-size">4.0″ Wide</span>
+                                    </div>
+
+                                    <!-- Garment / Material -->
+                                    <div class="flex items-center justify-between py-1 border-b border-slate-200/70 dark:border-primary/15">
+                                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400" id="review-summary-material-label">Garment / Material</span>
+                                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200 text-right" id="review-summary-material">Cotton / Piqué Knit</span>
+                                    </div>
+
+                                    <!-- File Formats -->
+                                    <div class="flex items-center justify-between py-1 border-b border-slate-200/70 dark:border-primary/15">
+                                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">File Formats</span>
+                                        <div class="flex flex-wrap items-center justify-end gap-1" id="review-summary-formats">
+                                            <span class="px-2 py-0.5 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-primary/20 text-[10.5px] font-bold text-[#b89218] dark:text-primary">.DST</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Special Options (Only if selected) -->
+                                    <div id="review-summary-special-row" class="hidden flex items-start justify-between py-1 border-b border-slate-200/70 dark:border-primary/15">
+                                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Special Options</span>
+                                        <div class="flex flex-wrap items-center justify-end gap-1" id="review-summary-special">
+                                        </div>
+                                    </div>
+
+                                    <!-- Turnaround Speed -->
+                                    <div class="flex items-center justify-between py-1 border-b border-slate-200/70 dark:border-primary/15">
+                                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Turnaround Speed</span>
+                                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="review-summary-turnaround">Standard (12-24 Hours)</span>
+                                    </div>
+
+                                    <!-- Special Notes (Only if entered) -->
+                                    <div id="review-summary-notes-row" class="hidden flex flex-col gap-1 py-1 border-b border-slate-200/70 dark:border-primary/15">
+                                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Special Instructions</span>
+                                        <p class="text-[11px] text-slate-700 dark:text-slate-300 italic bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-primary/20" id="review-summary-notes">—</p>
+                                    </div>
+
+                                    <!-- Delivery Contact Information -->
+                                    <div class="flex items-center justify-between pt-1">
+                                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Delivery To</span>
+                                        <div class="text-right">
+                                            <strong class="text-xs font-bold text-slate-900 dark:text-white block" id="review-summary-contact-name">—</strong>
+                                            <span class="text-[10.5px] text-slate-500 dark:text-slate-400 block" id="review-summary-contact-email">—</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Attached Artwork Thumbnails Card -->
+                                <div class="rounded-2xl bg-[#f8faff] dark:bg-slate-900/60 border border-[#e2eaf4] dark:border-primary/25 p-3.5 sm:p-4 space-y-2.5 shadow-xs">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-[#b89218] dark:text-primary text-base">image</span>
+                                            <span>Attached Artwork (<span id="review-artwork-count">0</span>)</span>
+                                        </span>
+                                        <button type="button" onclick="window.backToOrderDetailsStep()" class="text-[11px] font-bold text-[#b89218] dark:text-primary hover:underline cursor-pointer">
+                                            Add / Change Files
+                                        </button>
+                                    </div>
+                                    <div id="review-artwork-gallery" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <!-- Rendered dynamically -->
+                                    </div>
+                                </div>
+
+                                <!-- Final Price Summary Box -->
+                                <div id="review-price-summary-box" class="p-3.5 sm:p-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-primary/20 flex items-center justify-between">
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase block">Total Estimated Price</span>
+                                        <span class="text-xs font-semibold text-slate-600 dark:text-slate-400" id="review-price-breakdown">Standard Digitizing</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-xl sm:text-2xl font-black text-amber-800 dark:text-primary" id="review-price-display">$15.00</span>
+                                        <span class="text-[10px] font-bold text-slate-400 block">USD</span>
+                                    </div>
+                                </div>
+
+                                <!-- Payment Method Selector (Order Mode Only) -->
+                                <div id="order-payment-terms-box" class="space-y-2.5">
+                                    <div class="p-3 rounded-xl bg-amber-50/60 dark:bg-primary/10 border border-amber-200/80 dark:border-primary/20 text-xs flex items-center justify-between gap-2.5">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="material-symbols-outlined text-amber-800 dark:text-primary text-base flex-shrink-0">lock</span>
+                                            <div>
+                                                <strong class="text-xs font-bold text-slate-900 dark:text-white block">Secure Instant Checkout</strong>
+                                                <span class="text-[10.5px] text-slate-600 dark:text-slate-400">Payment required to start production. Choose your preferred method:</span>
+                                            </div>
+                                        </div>
+                                        <span class="hidden sm:inline-flex px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">256-bit SSL</span>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button type="button" id="modal-tab-card" onclick="window.setModalPaymentMethod('Credit Card')" class="p-2 sm:p-2.5 rounded-xl border-2 border-primary bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer">
+                                            <span class="material-symbols-outlined text-sm text-primary">credit_card</span>
+                                            <span>Credit / Debit Card</span>
+                                        </button>
+                                        <button type="button" id="modal-tab-paypal" onclick="window.setModalPaymentMethod('PayPal')" class="p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer">
+                                            <span class="material-symbols-outlined text-sm">account_balance_wallet</span>
+                                            <span>PayPal</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Quote Mode Notice (Visible ONLY in Quote Mode) -->
+                                <div id="quote-mode-info-box" class="hidden p-3.5 sm:p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-500/30 text-xs text-blue-950 dark:text-blue-200">
+                                    <div class="flex items-start gap-2.5 sm:gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-800 dark:text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-blue-500/25">
+                                            <span class="material-symbols-outlined text-lg">request_quote</span>
+                                        </div>
+                                        <div>
+                                            <strong class="text-xs font-black block text-blue-950 dark:text-blue-200">100% Free Stitch Appraisal &amp; Estimation</strong>
+                                            <p class="text-[10px] sm:text-[11px] text-blue-900/80 dark:text-blue-300/80 mt-1 leading-relaxed">
+                                                Submit your design specs and artwork for free. Our senior digitizer will inspect stitch density, small text complexity, and fabric compatibility within 1 hour. Pay only after price approval.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 3 Sticky Form Action Buttons -->
+                            <div class="flex-shrink-0 px-4 py-3 sm:px-6 sm:py-3.5 border-t border-slate-200 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex items-center justify-between gap-2 shadow-lg sm:shadow-none pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+                                <button type="button" onclick="window.backToOrderDetailsStep()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer transition-colors flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">arrow_back</span>
+                                    <span>Edit Details</span>
                                 </button>
-                                <button type="submit" id="adaptive-order-submit-btn" class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0">
-                                    <span class="material-symbols-outlined text-sm" id="order-submit-btn-icon">lock</span>
-                                    <span id="order-submit-btn-text">Pay &amp; Place Order ($15.00)</span>
-                                </button>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick="window.closeOrderQuoteModal()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer transition-colors">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" id="adaptive-order-submit-btn" class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0">
+                                        <span class="material-symbols-outlined text-sm" id="order-submit-btn-icon">lock</span>
+                                        <span id="order-submit-btn-text">Pay &amp; Place Order ($15.00)</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -678,6 +838,114 @@
     /**
      * Mode switcher: Order Mode vs Quote Mode
      */
+    /**
+     * Centralized 3-Step Stepper State Controller
+     * 1: Choose Service -> 2: Order Details -> 3: Review & Pay
+     */
+    function updateStepperState(stepNum) {
+        const modal = ensureModalElement();
+        const stepCircle1 = modal.querySelector('#step-circle-1');
+        const stepLabel1 = modal.querySelector('#step-label-1');
+        const stepCircle2 = modal.querySelector('#step-circle-2');
+        const stepLabel2 = modal.querySelector('#step-label-2');
+        const stepCircle3 = modal.querySelector('#step-circle-3');
+        const stepLabel3 = modal.querySelector('#step-label-3');
+        const progressBar = modal.querySelector('#step-connector-progress');
+
+        const activeCircleClass = 'w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#b89218] text-white font-bold flex items-center justify-center text-xs sm:text-sm shadow-xs transition-all ring-4 ring-white dark:ring-card-dark';
+        const inactiveCircleClass = 'w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-all ring-4 ring-white dark:ring-card-dark';
+
+        const activeLabelClass = 'text-[9.5px] sm:text-[11px] font-bold text-[#b89218] mt-0.5 sm:mt-1 whitespace-nowrap transition-colors';
+        const inactiveLabelClass = 'text-[9.5px] sm:text-[11px] font-medium text-slate-400 mt-0.5 sm:mt-1 whitespace-nowrap transition-colors';
+
+        const detailsText = state.isQuote ? 'Quote Details' : 'Order Details';
+        const reviewText = state.isQuote ? 'Review & Submit' : 'Review & Pay';
+
+        if (stepNum === 1) {
+            if (progressBar) progressBar.style.width = '0%';
+
+            if (stepCircle1) {
+                stepCircle1.innerHTML = '1';
+                stepCircle1.className = activeCircleClass;
+            }
+            if (stepLabel1) stepLabel1.className = activeLabelClass;
+
+            if (stepCircle2) {
+                stepCircle2.innerHTML = '2';
+                stepCircle2.className = inactiveCircleClass;
+            }
+            if (stepLabel2) {
+                stepLabel2.className = inactiveLabelClass;
+                stepLabel2.textContent = detailsText;
+            }
+
+            if (stepCircle3) {
+                stepCircle3.innerHTML = '3';
+                stepCircle3.className = inactiveCircleClass;
+            }
+            if (stepLabel3) {
+                stepLabel3.className = inactiveLabelClass;
+                stepLabel3.textContent = reviewText;
+            }
+        } else if (stepNum === 2) {
+            if (progressBar) progressBar.style.width = '50%';
+
+            if (stepCircle1) {
+                stepCircle1.innerHTML = '<span class="material-symbols-outlined text-sm font-bold">check</span>';
+                stepCircle1.className = activeCircleClass;
+            }
+            if (stepLabel1) stepLabel1.className = activeLabelClass;
+
+            if (stepCircle2) {
+                stepCircle2.innerHTML = '2';
+                stepCircle2.className = activeCircleClass;
+            }
+            if (stepLabel2) {
+                stepLabel2.className = activeLabelClass;
+                stepLabel2.textContent = detailsText;
+            }
+
+            if (stepCircle3) {
+                stepCircle3.innerHTML = '3';
+                stepCircle3.className = inactiveCircleClass;
+            }
+            if (stepLabel3) {
+                stepLabel3.className = inactiveLabelClass;
+                stepLabel3.textContent = reviewText;
+            }
+        } else if (stepNum === 3) {
+            if (progressBar) progressBar.style.width = '100%';
+
+            if (stepCircle1) {
+                stepCircle1.innerHTML = '<span class="material-symbols-outlined text-sm font-bold">check</span>';
+                stepCircle1.className = activeCircleClass;
+            }
+            if (stepLabel1) stepLabel1.className = activeLabelClass;
+
+            if (stepCircle2) {
+                stepCircle2.innerHTML = '<span class="material-symbols-outlined text-sm font-bold">check</span>';
+                stepCircle2.className = activeCircleClass;
+            }
+            if (stepLabel2) {
+                stepLabel2.className = activeLabelClass;
+                stepLabel2.textContent = detailsText;
+            }
+
+            if (stepCircle3) {
+                stepCircle3.innerHTML = '3';
+                stepCircle3.className = activeCircleClass;
+            }
+            if (stepLabel3) {
+                stepLabel3.className = activeLabelClass;
+                stepLabel3.textContent = reviewText;
+            }
+        }
+    }
+    window.updateStepperState = updateStepperState;
+
+    /**
+     * Mode switcher: Order Mode vs Quote Mode
+     */
     window.setModalMode = function(isQuote) {
         state.isQuote = isQuote;
         const modal = ensureModalElement();
@@ -688,41 +956,56 @@
         const headerText = modal.querySelector('#order-modal-header-text');
         const headerDesc = modal.querySelector('#order-modal-header-desc');
         const step2Label = modal.querySelector('#step-label-2');
+        const step3Label = modal.querySelector('#step-label-3');
+        const gotoReviewBtnText = modal.querySelector('#order-goto-review-btn-text');
+        const reviewTitle = modal.querySelector('#order-review-title');
+        const reviewSubtitle = modal.querySelector('#order-review-subtitle');
         const priceBox = modal.querySelector('#order-price-summary-box');
         const termsBox = modal.querySelector('#order-payment-terms-box');
         const quoteBox = modal.querySelector('#quote-mode-info-box');
+        const reviewPriceBox = modal.querySelector('#review-price-summary-box');
         const submitBtnIcon = modal.querySelector('#order-submit-btn-icon');
         const submitBtnText = modal.querySelector('#order-submit-btn-text');
 
         const isFormOpen = modal.querySelector('#order-service-selection-view')?.classList.contains('hidden');
 
         if (isQuote) {
-            if (tabOrder) tabOrder.className = 'py-1.5 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer';
-            if (tabQuote) tabQuote.className = 'py-1.5 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-primary text-background-dark shadow-xs cursor-pointer';
+            if (tabOrder) tabOrder.className = 'py-1 sm:py-1.5 px-2.5 sm:px-3 rounded-lg font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer';
+            if (tabQuote) tabQuote.className = 'py-1 sm:py-1.5 px-2.5 sm:px-3 rounded-lg font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition-all bg-primary text-background-dark shadow-xs cursor-pointer';
 
             if (headerIcon) headerIcon.textContent = 'request_quote';
             if (headerText) headerText.textContent = 'Request a Free Quote';
             if (headerDesc) headerDesc.textContent = isFormOpen ? 'Provide specifications for accurate quotation' : 'Choose a service to continue.';
             if (step2Label) step2Label.textContent = 'Quote Details';
+            if (step3Label) step3Label.textContent = 'Review & Submit';
+            if (gotoReviewBtnText) gotoReviewBtnText.textContent = 'Review Quote';
+            if (reviewTitle) reviewTitle.textContent = 'Quote Summary';
+            if (reviewSubtitle) reviewSubtitle.textContent = 'Please double-check your specifications before requesting your quote.';
 
             if (priceBox) priceBox.classList.add('hidden');
             if (termsBox) termsBox.classList.add('hidden');
             if (quoteBox) quoteBox.classList.remove('hidden');
+            if (reviewPriceBox) reviewPriceBox.classList.add('hidden');
 
             if (submitBtnIcon) submitBtnIcon.textContent = 'send';
             if (submitBtnText) submitBtnText.textContent = 'Submit Free Custom Quote';
         } else {
-            if (tabOrder) tabOrder.className = 'py-1.5 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-primary text-background-dark shadow-xs cursor-pointer';
-            if (tabQuote) tabQuote.className = 'py-1.5 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer';
+            if (tabOrder) tabOrder.className = 'py-1 sm:py-1.5 px-2.5 sm:px-3 rounded-lg font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition-all bg-primary text-background-dark shadow-xs cursor-pointer';
+            if (tabQuote) tabQuote.className = 'py-1 sm:py-1.5 px-2.5 sm:px-3 rounded-lg font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer';
 
             if (headerIcon) headerIcon.textContent = 'shopping_cart';
             if (headerText) headerText.textContent = 'Place an Order';
             if (headerDesc) headerDesc.textContent = isFormOpen ? 'Provide specifications to complete your order' : 'Choose a service to continue.';
             if (step2Label) step2Label.textContent = 'Order Details';
+            if (step3Label) step3Label.textContent = 'Review & Pay';
+            if (gotoReviewBtnText) gotoReviewBtnText.textContent = 'Review Order';
+            if (reviewTitle) reviewTitle.textContent = 'Order Summary';
+            if (reviewSubtitle) reviewSubtitle.textContent = 'Please double-check your specifications before paying.';
 
             if (priceBox) priceBox.classList.remove('hidden');
             if (termsBox) termsBox.classList.remove('hidden');
             if (quoteBox) quoteBox.classList.add('hidden');
+            if (reviewPriceBox) reviewPriceBox.classList.remove('hidden');
 
             if (submitBtnIcon) submitBtnIcon.textContent = 'lock';
             window.calculateAdaptivePrice();
@@ -781,30 +1064,14 @@
         if (selectionView) selectionView.classList.add('hidden');
         if (formView) formView.classList.remove('hidden');
 
-        // Dynamic Stepper State Transition: Step 1 -> Step 2
-        const stepCircle1 = modal.querySelector('#step-circle-1');
-        const stepLabel1 = modal.querySelector('#step-label-1');
-        const stepConnector = modal.querySelector('#step-connector');
-        const stepCircle2 = modal.querySelector('#step-circle-2');
-        const stepLabel2 = modal.querySelector('#step-label-2');
+        // Show Step 2 View and hide Step 3 View
+        const step2View = modal.querySelector('#order-step-2-view');
+        const step3View = modal.querySelector('#order-step-3-view');
+        if (step2View) step2View.classList.remove('hidden');
+        if (step3View) step3View.classList.add('hidden');
 
-        if (stepCircle1) {
-            stepCircle1.innerHTML = '<span class="material-symbols-outlined text-sm font-bold">check</span>';
-            stepCircle1.className = 'w-8 h-8 rounded-full bg-[#b89218] text-white font-bold flex items-center justify-center text-xs sm:text-sm shadow-xs transition-all ring-4 ring-white dark:ring-card-dark';
-        }
-        if (stepLabel1) {
-            stepLabel1.className = 'text-[11px] sm:text-xs font-bold text-[#b89218] mt-1 whitespace-nowrap transition-colors';
-        }
-        if (stepConnector) {
-            stepConnector.className = 'absolute left-8 right-8 top-4 -translate-y-1/2 h-[2px] bg-[#b89218] transition-colors';
-        }
-        if (stepCircle2) {
-            stepCircle2.className = 'w-8 h-8 rounded-full bg-[#b89218] text-white font-bold flex items-center justify-center text-xs sm:text-sm shadow-xs transition-all ring-4 ring-white dark:ring-card-dark';
-        }
-        if (stepLabel2) {
-            stepLabel2.className = 'text-[11px] sm:text-xs font-bold text-[#b89218] mt-1 whitespace-nowrap transition-colors';
-            stepLabel2.textContent = state.isQuote ? 'Quote Details' : 'Order Details';
-        }
+        // Dynamic Stepper Transition: Step 1 -> Step 2
+        updateStepperState(2);
 
         if (headerDesc) {
             headerDesc.textContent = state.isQuote ? 'Provide specifications for accurate quotation' : 'Provide specifications to complete your order';
@@ -846,7 +1113,7 @@
     };
 
     /**
-     * Switch back to service choice view
+     * Switch back to service choice view (Step 1)
      */
     window.switchOrderServiceChoice = function() {
         const modal = ensureModalElement();
@@ -858,35 +1125,393 @@
         if (formView) formView.classList.add('hidden');
 
         // Dynamic Stepper State Transition: Reset back to Step 1 Active
-        const stepCircle1 = modal.querySelector('#step-circle-1');
-        const stepLabel1 = modal.querySelector('#step-label-1');
-        const stepConnector = modal.querySelector('#step-connector');
-        const stepCircle2 = modal.querySelector('#step-circle-2');
-        const stepLabel2 = modal.querySelector('#step-label-2');
-
-        if (stepCircle1) {
-            stepCircle1.innerHTML = '1';
-            stepCircle1.className = 'w-8 h-8 rounded-full bg-[#b89218] text-white font-bold flex items-center justify-center text-xs sm:text-sm shadow-xs transition-all ring-4 ring-white dark:ring-card-dark';
-        }
-        if (stepLabel1) {
-            stepLabel1.className = 'text-[11px] sm:text-xs font-bold text-[#b89218] mt-1 whitespace-nowrap transition-colors';
-        }
-        if (stepConnector) {
-            stepConnector.className = 'absolute left-8 right-8 top-4 -translate-y-1/2 h-[2px] bg-slate-200 dark:bg-slate-700 transition-colors';
-        }
-        if (stepCircle2) {
-            stepCircle2.className = 'w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-all ring-4 ring-white dark:ring-card-dark';
-        }
-        if (stepLabel2) {
-            stepLabel2.className = 'text-[11px] sm:text-xs font-medium text-slate-400 mt-1 whitespace-nowrap transition-colors';
-            stepLabel2.textContent = state.isQuote ? 'Quote Details' : 'Order Details';
-        }
+        updateStepperState(1);
 
         if (headerDesc) {
             headerDesc.textContent = 'Choose a service to continue.';
         }
     };
     window.switchModalServiceChoice = window.switchOrderServiceChoice;
+
+    /**
+     * Artwork Thumbnail Gallery Renderer for Step 3 Review Screen
+     */
+    function renderReviewArtworkThumbnails() {
+        const modal = ensureModalElement();
+        const gallery = modal.querySelector('#review-artwork-gallery');
+        const countEl = modal.querySelector('#review-artwork-count');
+        if (!gallery) return;
+
+        if (countEl) countEl.textContent = state.uploadedFiles.length;
+
+        if (state.uploadedFiles.length === 0) {
+            gallery.className = 'col-span-full';
+            gallery.innerHTML = `
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-100/70 dark:bg-slate-800/50 border border-dashed border-slate-300 dark:border-primary/20 text-xs text-slate-500 dark:text-slate-400">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-slate-400 text-lg">info</span>
+                        <span>No artwork attached yet (optional at order creation).</span>
+                    </div>
+                    <button type="button" onclick="window.backToOrderDetailsStep()" class="text-xs font-bold text-[#b89218] dark:text-primary hover:underline cursor-pointer">
+                        + Add File
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        gallery.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2';
+        gallery.innerHTML = state.uploadedFiles.map((file) => {
+            const sizeStr = (file.size / 1024 < 1024) ? `${(file.size / 1024).toFixed(1)} KB` : `${(file.size / 1048576).toFixed(1)} MB`;
+            const isImage = file.type?.startsWith('image/') || /\.(png|jpe?g|webp|gif|svg)$/i.test(file.name);
+            const ext = file.name.split('.').pop()?.toUpperCase() || 'FILE';
+
+            let visualThumbnail = '';
+            if (isImage) {
+                try {
+                    const objectUrl = URL.createObjectURL(file);
+                    visualThumbnail = `
+                        <div class="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-primary/20 flex-shrink-0 flex items-center justify-center">
+                            <img src="${objectUrl}" alt="${file.name}" class="w-full h-full object-cover" />
+                        </div>
+                    `;
+                } catch (err) {
+                    visualThumbnail = `
+                        <div class="w-12 h-12 rounded-lg bg-[#fef5df] dark:bg-primary/20 text-[#b89218] dark:text-primary flex items-center justify-center flex-shrink-0 font-bold text-xs border border-amber-300 dark:border-primary/30">
+                            ${ext}
+                        </div>
+                    `;
+                }
+            } else {
+                visualThumbnail = `
+                    <div class="w-12 h-12 rounded-lg bg-[#e8f1fd] dark:bg-blue-950/50 text-[#1d68d8] dark:text-blue-400 flex flex-col items-center justify-center flex-shrink-0 border border-[#cce0fc] dark:border-blue-800/40">
+                        <span class="material-symbols-outlined text-base leading-none">draft</span>
+                        <span class="text-[9px] font-black mt-0.5">${ext}</span>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-primary/20 flex items-center gap-2.5 shadow-xs overflow-hidden">
+                    ${visualThumbnail}
+                    <div class="flex-1 min-w-0">
+                        <strong class="text-xs font-bold text-slate-900 dark:text-white truncate block" title="${file.name}">${file.name}</strong>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400">${sizeStr}</span>
+                            <span class="px-1.5 py-0.2 rounded text-[9.5px] font-black bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">Attached</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    window.renderReviewArtworkThumbnails = renderReviewArtworkThumbnails;
+
+    /**
+     * Go to Step 3: Review & Pay
+     * Validates Step 2 fields, extracts specifications, and populates the Review screen
+     */
+    window.goToOrderReviewStep = function() {
+        const modal = ensureModalElement();
+        const service = modal.querySelector('#selected-service-type')?.value || 'Digitizing';
+
+        // 1. Validation of Step 2 Fields
+        let projectName = '';
+        if (service === 'Digitizing' || service === 'PetPortrait') {
+            projectName = (modal.querySelector('#dig-job-name')?.value || '').trim();
+            if (!projectName) {
+                alert('Please provide a Job Name / Reference.');
+                modal.querySelector('#dig-job-name')?.focus();
+                return false;
+            }
+
+            if (service === 'PetPortrait') {
+                const rawPetPlacement = modal.querySelector('#pet-placement')?.value || 'Left Chest';
+                if (rawPetPlacement.includes('Custom') || rawPetPlacement.includes('Other')) {
+                    const customVal = (modal.querySelector('#dig-custom-placement')?.value || '').trim();
+                    if (!customVal) {
+                        alert('Please specify your Custom Placement Details (e.g. patch, visor, apron, tote bag, etc.).');
+                        modal.querySelector('#dig-custom-placement')?.focus();
+                        return false;
+                    }
+                }
+            } else {
+                const rawPlacement = modal.querySelector('#dig-placement')?.value || 'Left Chest — $15';
+                if (rawPlacement.includes('Custom')) {
+                    const customVal = (modal.querySelector('#dig-custom-placement')?.value || '').trim();
+                    if (!customVal) {
+                        alert('Please specify your Custom Placement Details (e.g. patch, visor, apron, tote bag, etc.).');
+                        modal.querySelector('#dig-custom-placement')?.focus();
+                        return false;
+                    }
+                }
+            }
+
+            const isSizeValid = window.validatePlacementSize();
+            if (!isSizeValid) {
+                alert('Please enter a valid positive target size.');
+                modal.querySelector('#dig-size')?.focus();
+                return false;
+            }
+        } else {
+            projectName = (modal.querySelector('#vec-job-name')?.value || '').trim();
+            if (!projectName) {
+                alert('Please provide a Job Name / Vector Reference.');
+                modal.querySelector('#vec-job-name')?.focus();
+                return false;
+            }
+        }
+
+        // Contact info validation
+        const session = getSession();
+        if (session && (session.role === 'admin' || session.role === 'digitizer')) {
+            if (typeof window.showStaffOrderBlockModal === 'function') {
+                window.showStaffOrderBlockModal(session.role, session.email);
+            } else {
+                alert("You can't place orders from this account.");
+            }
+            return false;
+        }
+
+        let clientName = session?.full_name || session?.name || '';
+        let clientEmail = session?.email || '';
+
+        if (!clientEmail) {
+            clientName = (modal.querySelector('#order-client-name')?.value || '').trim();
+            clientEmail = (modal.querySelector('#order-client-email')?.value || '').trim();
+
+            const normalizedEmail = clientEmail.toLowerCase();
+            if (normalizedEmail === 'admin@dezandigitizing.com' || normalizedEmail === 'digitizer@dezandigitizing.com') {
+                if (typeof window.showStaffOrderBlockModal === 'function') {
+                    window.showStaffOrderBlockModal(normalizedEmail.includes('digitizer') ? 'digitizer' : 'admin', clientEmail);
+                } else {
+                    alert("You can't place orders from this account.");
+                }
+                return false;
+            }
+
+            if (!clientName) {
+                alert('Please enter your full name.');
+                modal.querySelector('#order-client-name')?.focus();
+                return false;
+            }
+            if (!clientEmail || !clientEmail.includes('@')) {
+                alert('Please provide a valid delivery email address.');
+                modal.querySelector('#order-client-email')?.focus();
+                return false;
+            }
+        }
+
+        // 2. Populate Step 3 Order Summary fields
+        // Service
+        const summaryService = modal.querySelector('#review-summary-service');
+        const summaryServiceBadge = modal.querySelector('#review-summary-service-badge');
+        if (summaryService) {
+            if (service === 'PetPortrait') {
+                summaryService.textContent = 'Realistic / Pet Portrait Digitizing';
+                if (summaryServiceBadge) summaryServiceBadge.textContent = 'From $25';
+            } else if (service === 'Digitizing') {
+                summaryService.textContent = 'Embroidery Digitizing';
+                if (summaryServiceBadge) summaryServiceBadge.textContent = 'From $15';
+            } else {
+                summaryService.textContent = 'Vector Art Conversion';
+                if (summaryServiceBadge) summaryServiceBadge.textContent = 'From $15';
+            }
+        }
+
+        // Job Name / Reference
+        const summaryJobName = modal.querySelector('#review-summary-jobname');
+        if (summaryJobName) summaryJobName.textContent = projectName;
+
+        // Placement
+        const summaryPlacement = modal.querySelector('#review-summary-placement');
+        let placementText = '';
+        if (service === 'PetPortrait') {
+            const rawPetPlacement = modal.querySelector('#pet-placement')?.value || 'Left Chest';
+            if (rawPetPlacement.includes('Custom') || rawPetPlacement.includes('Other')) {
+                const customVal = (modal.querySelector('#dig-custom-placement')?.value || '').trim();
+                placementText = customVal ? `Custom: ${customVal}` : 'Custom Placement';
+            } else {
+                placementText = rawPetPlacement;
+            }
+        } else if (service === 'Digitizing') {
+            const rawPlacement = modal.querySelector('#dig-placement')?.value || 'Left Chest — $15';
+            if (rawPlacement.includes('Custom')) {
+                const customVal = (modal.querySelector('#dig-custom-placement')?.value || '').trim();
+                placementText = customVal ? `Custom: ${customVal}` : 'Custom Placement';
+            } else {
+                placementText = rawPlacement.split('—')[0].trim();
+            }
+        } else {
+            placementText = modal.querySelector('#vec-use')?.value || 'Screen Printing';
+        }
+        if (summaryPlacement) summaryPlacement.textContent = placementText;
+
+        // Target Size
+        const summarySize = modal.querySelector('#review-summary-size');
+        if (summarySize) {
+            if (service === 'Vectorizing') {
+                summarySize.textContent = 'Scalable Vector (Resolution Independent)';
+            } else {
+                const sizeVal = (modal.querySelector('#dig-size')?.value || '').trim();
+                const sizeUnit = modal.querySelector('#dig-size-unit')?.value || 'in';
+                if (sizeVal) {
+                    summarySize.textContent = sizeVal.toLowerCase().includes(sizeUnit.toLowerCase()) ? sizeVal : `${sizeVal} ${sizeUnit}`;
+                } else {
+                    summarySize.textContent = 'Standard / Proportional';
+                }
+            }
+        }
+
+        // Garment / Material
+        const summaryMaterialLabel = modal.querySelector('#review-summary-material-label');
+        const summaryMaterial = modal.querySelector('#review-summary-material');
+        if (summaryMaterial) {
+            if (service === 'Vectorizing') {
+                if (summaryMaterialLabel) summaryMaterialLabel.textContent = 'Production Use';
+                summaryMaterial.textContent = modal.querySelector('#vec-use')?.value || 'Screen Printing';
+            } else {
+                if (summaryMaterialLabel) summaryMaterialLabel.textContent = 'Garment / Material';
+                summaryMaterial.textContent = modal.querySelector('#dig-fabric')?.value || 'Cotton / Piqué Knit';
+            }
+        }
+
+        // File Formats
+        const summaryFormats = modal.querySelector('#review-summary-formats');
+        if (summaryFormats) {
+            let formats = [];
+            if (service === 'Digitizing' || service === 'PetPortrait') {
+                formats = Array.from(modal.querySelectorAll('input[name="dig-formats"]:checked')).map(cb => cb.value);
+                if (formats.length === 0) formats = ['.DST'];
+            } else {
+                formats = Array.from(modal.querySelectorAll('input[name="vec-formats"]:checked')).map(cb => cb.value);
+                if (formats.length === 0) formats = ['AI', 'EPS', 'PDF'];
+            }
+            summaryFormats.innerHTML = formats.map(fmt => `
+                <span class="px-2 py-0.5 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-primary/20 text-[10.5px] font-bold text-[#b89218] dark:text-primary">${fmt.startsWith('.') ? fmt : '.' + fmt}</span>
+            `).join('');
+        }
+
+        // Special Options (Only if selected)
+        const summarySpecialRow = modal.querySelector('#review-summary-special-row');
+        const summarySpecial = modal.querySelector('#review-summary-special');
+        if (summarySpecialRow && summarySpecial) {
+            if (service === 'Digitizing' || service === 'PetPortrait') {
+                const special = Array.from(modal.querySelectorAll('input[name="dig-special"]:checked')).map(cb => cb.value);
+                if (special.length > 0) {
+                    summarySpecialRow.classList.remove('hidden');
+                    summarySpecial.innerHTML = special.map(opt => `
+                        <span class="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-primary/10 border border-amber-300 dark:border-primary/30 text-[10.5px] font-bold text-amber-900 dark:text-primary flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[11px]">check_circle</span>
+                            <span>${opt}</span>
+                        </span>
+                    `).join('');
+                } else {
+                    summarySpecialRow.classList.add('hidden');
+                    summarySpecial.innerHTML = '';
+                }
+            } else {
+                summarySpecialRow.classList.add('hidden');
+                summarySpecial.innerHTML = '';
+            }
+        }
+
+        // Turnaround Speed
+        const summaryTurnaround = modal.querySelector('#review-summary-turnaround');
+        const isRush = modal.querySelector('input[name="order-turnaround"]:checked')?.value === 'rush';
+        if (summaryTurnaround) {
+            summaryTurnaround.innerHTML = isRush
+                ? '<span class="text-amber-600 dark:text-primary font-bold flex items-center gap-1">⚡ Rush Priority (5-8 Hours)</span>'
+                : '<span class="text-slate-800 dark:text-slate-200 font-bold">Standard (12-24 Hours)</span>';
+        }
+
+        // Special Notes / Instructions (Only if entered)
+        const summaryNotesRow = modal.querySelector('#review-summary-notes-row');
+        const summaryNotes = modal.querySelector('#review-summary-notes');
+        const notesVal = (modal.querySelector('#order-notes')?.value || '').trim();
+        if (summaryNotesRow && summaryNotes) {
+            if (notesVal) {
+                summaryNotesRow.classList.remove('hidden');
+                summaryNotes.textContent = `"${notesVal}"`;
+            } else {
+                summaryNotesRow.classList.add('hidden');
+                summaryNotes.textContent = '';
+            }
+        }
+
+        // Delivery Contact Information
+        const summaryContactName = modal.querySelector('#review-summary-contact-name');
+        const summaryContactEmail = modal.querySelector('#review-summary-contact-email');
+        if (summaryContactName) summaryContactName.textContent = clientName || 'Guest Customer';
+        if (summaryContactEmail) summaryContactEmail.textContent = clientEmail || '—';
+
+        // Attached Artwork Thumbnails
+        renderReviewArtworkThumbnails();
+
+        // Price Calculation and Refresh
+        const calculatedPrice = window.calculateAdaptivePrice();
+        const formattedPrice = `$${calculatedPrice.toFixed(2)}`;
+        const reviewPriceDisplay = modal.querySelector('#review-price-display');
+        if (reviewPriceDisplay) reviewPriceDisplay.textContent = formattedPrice;
+
+        // Quote Mode vs Order Mode UI adjustments for Step 3
+        const isQuote = state.isQuote;
+        const reviewPriceBox = modal.querySelector('#review-price-summary-box');
+        const paymentTermsBox = modal.querySelector('#order-payment-terms-box');
+        const quoteModeBox = modal.querySelector('#quote-mode-info-box');
+        const submitBtnIcon = modal.querySelector('#order-submit-btn-icon');
+        const submitBtnText = modal.querySelector('#order-submit-btn-text');
+
+        if (isQuote) {
+            if (reviewPriceBox) reviewPriceBox.classList.add('hidden');
+            if (paymentTermsBox) paymentTermsBox.classList.add('hidden');
+            if (quoteModeBox) quoteModeBox.classList.remove('hidden');
+            if (submitBtnIcon) submitBtnIcon.textContent = 'send';
+            if (submitBtnText) submitBtnText.textContent = 'Submit Free Custom Quote';
+        } else {
+            if (reviewPriceBox) reviewPriceBox.classList.remove('hidden');
+            if (paymentTermsBox) paymentTermsBox.classList.remove('hidden');
+            if (quoteModeBox) quoteModeBox.classList.add('hidden');
+            if (submitBtnIcon) submitBtnIcon.textContent = 'lock';
+            if (submitBtnText) submitBtnText.textContent = `Pay & Place Order (${formattedPrice})`;
+        }
+
+        // 3. Switch View: Step 2 -> Step 3
+        const step2View = modal.querySelector('#order-step-2-view');
+        const step3View = modal.querySelector('#order-step-3-view');
+        if (step2View) step2View.classList.add('hidden');
+        if (step3View) {
+            step3View.classList.remove('hidden');
+            const scrollable = step3View.querySelector('.overflow-y-auto');
+            if (scrollable) scrollable.scrollTop = 0;
+        }
+
+        // Update Stepper to Step 3
+        updateStepperState(3);
+
+        return true;
+    };
+
+    /**
+     * Back to Step 2: Order Details
+     */
+    window.backToOrderDetailsStep = function() {
+        const modal = ensureModalElement();
+        const step2View = modal.querySelector('#order-step-2-view');
+        const step3View = modal.querySelector('#order-step-3-view');
+
+        if (step3View) step3View.classList.add('hidden');
+        if (step2View) {
+            step2View.classList.remove('hidden');
+            const scrollable = step2View.querySelector('.overflow-y-auto');
+            if (scrollable) scrollable.scrollTop = 0;
+        }
+
+        updateStepperState(2);
+    };
+
+    window.modalGoToReviewStep = window.goToOrderReviewStep;
+    window.modalBackToOrderDetailsStep = window.backToOrderDetailsStep;
 
     /**
      * Placement Change Handler
@@ -1098,6 +1723,11 @@
         const formattedPrice = `$${basePrice.toFixed(2)}`;
         if (priceDisplay) priceDisplay.textContent = formattedPrice;
         if (priceBreakdown) priceBreakdown.textContent = breakdownText;
+
+        const reviewPriceDisplay = modal.querySelector('#review-price-display');
+        const reviewPriceBreakdown = modal.querySelector('#review-price-breakdown');
+        if (reviewPriceDisplay) reviewPriceDisplay.textContent = formattedPrice;
+        if (reviewPriceBreakdown) reviewPriceBreakdown.textContent = breakdownText;
 
         // Update compatibility anchors
         const guestPriceAnchor = modal.querySelector('#guest-summary-price');

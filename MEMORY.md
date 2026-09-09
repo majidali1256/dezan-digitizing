@@ -1513,5 +1513,59 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - Automated button & link validator: 30/30 pages verified with 0 broken links or unbound buttons (`scripts/deep_button_link_validator.js`).
   - Backend API test suite: 10/10 tests pass (`npm test`).
 
+---
 
-
+## 37. 3-Step Checkout Flow with Dedicated "Review & Pay" Summary Step
+- **User Requirement**:
+  - Previously, after completing Order Details on Step 2, customers directly encountered the "Pay & Place Order" submission button.
+  - The customer requested an intermediate confirmation step so customers can catch mistakes before paying:
+    1. Stepper progression updated to: `1. Choose Service` → `2. Order Details` → `3. Review & Pay` (or `Review & Submit` in Quote mode).
+    2. On Step 2, the primary action button was changed from `"Pay & Place Order"` to `"Review Order →"` (or `"Review Quote →"`).
+    3. Clicking `"Review Order →"` opens the bespoke Review & Pay view inside the same bottom-sheet/elevated dialog without copying any external layouts, styled with Dezan luxury tokens (1px subtle border, gold accents, dark luxury and light modes).
+    4. The Review & Pay page displays an **Order Summary** card:
+       - Service (`Embroidery Digitizing`, `Vector Art Conversion`, or `Realistic / Pet Portrait Digitizing`) + Pricing badge
+       - Job Name / Reference (Customer entered)
+       - Placement / Application (e.g. `Left Chest`)
+       - Target Size (e.g. `4.0 in` or `4.0” Wide`)
+       - Garment / Material (e.g. `Cotton / Piqué Knit`)
+       - File Formats (Badges e.g. `.DST`, `.PES`)
+       - Special Options (`3D Puff`, `Trims`, `Appliqué` — **strictly hidden if none selected**)
+       - Turnaround Speed (`Standard (12-24 Hours)` vs `Rush Priority (2-4 Hours)`)
+       - Special Instructions (Hidden if empty, styled in subtle callout box if provided)
+       - Delivery Contact (`Name` & `Email`)
+       - Attached Artwork Gallery (`#review-artwork-gallery`): Previews image thumbnails using `URL.createObjectURL(file)`, vector/document icon badges for `.dst`/`.pdf`/`.ai`/`.eps`, artwork count indicator, and "+ Add File" / "Add / Change Files" button linking directly back to Step 2.
+       - Final Price Box & Payment Method Selector (Credit Card vs PayPal; hidden in Quote Mode).
+       - Step 3 Sticky Footer: `"← Edit Details"` (restores Step 2 with all inputs preserved), `"Cancel"`, and `"🔒 Pay & Place Order ($XX.XX)"` (`#adaptive-order-submit-btn`).
+- **Architectural Implementation**:
+  - **Files Synchronized**:
+    - `js/order-quote-modal.js`: Unified modal engine for public pages and portal delegates.
+    - `client-portal.html`: Inline client workspace modal and action delegation functions.
+  - **3-Step Stepper Progress Bar**:
+    - Added `#step-tab-3` with `#step-circle-3` and `#step-label-3`.
+    - Stepper connector line dynamically fills via `#step-connector-progress` (`0%` on Step 1, `50%` on Step 2, `100%` on Step 3) with gold gradient background.
+    - `updateStepperState(stepNum)` dynamically applies checkmarks (`check` icon) for completed steps and filled gold badges for active steps.
+  - **Step 2 View (`#order-step-2-view`)**:
+    - Form inputs wrapped in `#order-step-2-view`.
+    - Footer contains `"← Change Service"`, `"Cancel"`, and `"Review Order →"` (`#order-goto-review-btn` / `window.goToOrderReviewStep()`).
+  - **Step 3 View (`#order-step-3-view`)**:
+    - Clean luxury specification card with bespoke Dezan styling (`border border-[#e2eaf4] dark:border-primary/25`, `bg-[#f8faff] dark:bg-slate-900/60`).
+    - Conditional rendering: `#review-summary-special-row` stays `.hidden` if no special option is checked. `#review-summary-notes-row` stays `.hidden` if instructions are empty.
+    - Attached artwork gallery: renders live blob object URLs for image formats (`.png`, `.jpg`, `.jpeg`, `.webp`), material symbols for vector/embroidery formats (`.dst`, `.ai`, `.eps`, `.pdf`), file size formatting, and empty state CTA.
+    - Payment methods and price summary: automatically toggled via `setModalMode(isQuote)` (hidden in Quote Mode, active in Order Mode).
+  - **Preserved Form State & Submission Safety**:
+    - Both `#order-step-2-view` and `#order-step-3-view` reside within the single `<form id="adaptive-order-form">`. Toggling visibility via `.hidden` ensures all form inputs remain mounted in the DOM, so submitting from Step 3 cleanly reads all customer input values without re-serialization.
+    - `"← Edit Details"` seamlessly hides Step 3 and shows Step 2 with scroll reset and zero loss of entered values.
+  - **Safe Global Delegation**:
+    - Exported `window.modalGoToReviewStep` and `window.modalBackToOrderDetailsStep` to prevent global scope collisions and infinite recursion in portal pages.
+- **Automated Verification (`scripts/verify_review_pay_flow.js`)**:
+  - **Test 1: Mobile Viewport (iPhone 14 Pro, 390x844)**:
+    - Order Mode: Verified 3-step stepper, Step 2 button text `"Review Order →"`, transition to Step 3, accurate field population, special options row visibility, payment method switching (Credit Card vs PayPal), and `"← Edit Details"` form state retention.
+    - Screenshot saved: `mobile_step3_review_pay.png`.
+  - **Test 2: Desktop Viewport (1512x982)**:
+    - Quote Mode: Verified `"Review Quote →"`, transition to Step 3, Quote Summary title & subtitle, price box hidden, payment method selector hidden, submit button text `"Submit Free Custom Quote"`.
+    - Screenshot saved: `desktop_step3_review_quote.png`.
+  - **Test 3: Client Portal (`client-portal.html`)**:
+    - Verified authenticated client workspace order flow, Step 2 `"Review Order →"` button, and seamless Step 3 Review & Pay view transition.
+  - **Quality Gates**:
+    - `node scripts/deep_button_link_validator.js`: PASSED (30/30 HTML pages validated).
+    - `npm test` (`tests/api.test.js`): PASSED (10/10 backend API tests passed).
