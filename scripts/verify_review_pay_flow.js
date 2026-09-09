@@ -2,6 +2,7 @@ const { chromium } = require('playwright');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const assert = require('assert');
 
 const PORT = 8099;
 const WORKSPACE_DIR = path.resolve(__dirname, '..');
@@ -220,6 +221,21 @@ async function runVerification() {
 
         const quoteBtnText = await desktopPage.$eval('#order-goto-review-btn', el => el.textContent.trim());
         console.log('✓ Quote Mode Step 2 button text:', JSON.stringify(quoteBtnText));
+
+        const quoteRushHidden = await desktopPage.$eval('#order-turnaround-rush-card', el => el.classList.contains('hidden'));
+        const quoteStandardFullWidth = await desktopPage.$eval('#order-turnaround-standard-card', el => el.classList.contains('sm:col-span-2'));
+        const quoteStandardDesc = await desktopPage.$eval('#order-turnaround-standard-desc', el => el.textContent.trim());
+        console.log('✓ Quote Mode Rush Fee Option Hidden:', quoteRushHidden);
+        console.log('✓ Quote Mode Standard Card Spans Full Width:', quoteStandardFullWidth);
+        console.log('✓ Quote Mode Standard Desc:', quoteStandardDesc);
+        assert.equal(quoteRushHidden, true, 'Rush fee card MUST be hidden in quote mode');
+
+        await desktopPage.$eval('#order-turnaround-container', el => el.scrollIntoView({ behavior: 'instant', block: 'center' }));
+        await desktopPage.waitForTimeout(200);
+
+        const quoteStep2Screenshot = path.join(ARTIFACTS_DIR, 'quote_step2_no_rush_fee.png');
+        await desktopPage.screenshot({ path: quoteStep2Screenshot, fullPage: false });
+        console.log(`📸 Saved Quote Step 2 (No Rush Fee) screenshot: ${quoteStep2Screenshot}`);
 
         await desktopPage.fill('#dig-job-name', 'Golden Retriever Portrait on Denim Jacket');
         await desktopPage.fill('#order-client-name', 'Mark Peterson');

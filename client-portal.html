@@ -744,17 +744,17 @@
                         </div>
 
                         <!-- Turnaround Speed Selection -->
-                        <div>
+                        <div id="order-turnaround-container">
                             <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">Turnaround Speed</label>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
-                                <label class="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 cursor-pointer">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5" id="order-turnaround-grid">
+                                <label class="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 cursor-pointer" id="order-turnaround-standard-card">
                                     <input type="radio" name="order-turnaround" value="standard" checked onchange="calculateAdaptivePrice()" class="text-primary focus:ring-primary h-4 w-4 mt-0.5" />
                                     <div>
                                         <strong class="text-xs font-black text-slate-900 dark:text-white block">Standard Turnaround (12-24 Hours)</strong>
-                                        <span class="text-[10px] text-slate-500 dark:text-slate-400">Included at standard pricing</span>
+                                        <span class="text-[10px] text-slate-500 dark:text-slate-400" id="order-turnaround-standard-desc">Included at standard pricing</span>
                                     </div>
                                 </label>
-                                <label class="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 cursor-pointer hover:border-primary">
+                                <label class="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 cursor-pointer hover:border-primary" id="order-turnaround-rush-card">
                                     <input type="radio" name="order-turnaround" value="rush" onchange="calculateAdaptivePrice()" class="text-primary focus:ring-primary h-4 w-4 mt-0.5" />
                                     <div>
                                         <strong class="text-xs font-black text-slate-900 dark:text-white block flex items-center gap-1">
@@ -2153,6 +2153,24 @@
                 else quoteBox.classList.add('hidden');
             }
 
+            // Turnaround Speed Rush Fee removal for Quote Mode
+            const rushCard = document.getElementById('order-turnaround-rush-card');
+            const standardCard = document.getElementById('order-turnaround-standard-card');
+            const standardRadio = document.querySelector('input[name="order-turnaround"][value="standard"]');
+            const standardDesc = document.getElementById('order-turnaround-standard-desc');
+            if (rushCard) {
+                if (isQuote) {
+                    rushCard.classList.add('hidden');
+                    if (standardRadio) standardRadio.checked = true;
+                    if (standardCard) standardCard.classList.add('sm:col-span-2');
+                    if (standardDesc) standardDesc.textContent = 'Included free with every quote';
+                } else {
+                    rushCard.classList.remove('hidden');
+                    if (standardCard) standardCard.classList.remove('sm:col-span-2');
+                    if (standardDesc) standardDesc.textContent = 'Included at standard pricing';
+                }
+            }
+
             // Submit Button
             const submitBtnIcon = document.getElementById('order-submit-btn-icon');
             const submitBtnText = document.getElementById('order-submit-btn-text');
@@ -2405,7 +2423,7 @@
             const service = document.getElementById('selected-service-type')?.value || 'Digitizing';
             const priceDisplay = document.getElementById('order-price-display');
             const priceBreakdown = document.getElementById('order-price-breakdown');
-            const isRush = document.querySelector('input[name="order-turnaround"]:checked')?.value === 'rush';
+            const isRush = currentModalMode !== 'quote' && document.querySelector('input[name="order-turnaround"]:checked')?.value === 'rush';
 
             let basePrice = 15.00;
             let breakdownText = 'Standard Turnaround (12-24h)';
@@ -2687,8 +2705,8 @@
             }
 
             const instructions = document.getElementById('order-notes')?.value.trim() || '';
-            const turnaroundSpeed = document.querySelector('input[name="order-turnaround"]:checked')?.value || 'standard';
             const isQuote = (currentModalMode === 'quote');
+            const turnaroundSpeed = isQuote ? 'standard' : (document.querySelector('input[name="order-turnaround"]:checked')?.value || 'standard');
             const price = isQuote ? null : calculateAdaptivePrice();
 
             const paymentStatus = 'unpaid';

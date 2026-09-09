@@ -1569,3 +1569,38 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - **Quality Gates**:
     - `node scripts/deep_button_link_validator.js`: PASSED (30/30 HTML pages validated).
     - `npm test` (`tests/api.test.js`): PASSED (10/10 backend API tests passed).
+
+---
+
+## 38. Removal of Rush Fee Option from Free Quote Flow (`isQuote: true`)
+- **User Requirement**:
+  - The customer requested: *"remove rush fee option from quote"*.
+  - Because quote requests are free custom stitch & price appraisals ($0.00 upfront), offering a paid `+$5.00 expedited queue fee` rush turnaround option on the quote form was inappropriate.
+- **Architectural Implementation**:
+  - **Files Updated**:
+    - `js/order-quote-modal.js`: Unified modal template, `setModalMode(isQuote)`, `calculateAdaptivePrice()`, `goToOrderReviewStep()`, and `handleAdaptiveOrderSubmit()`.
+    - `client-portal.html`: Inline workspace modal `#new-order-modal`, `updateModalModeUI()`, `calculateAdaptivePrice()`, and `handleCreateNewOrderSubmit()`.
+  - **DOM & Layout Changes**:
+    - Assigned `#order-turnaround-container`, `#order-turnaround-grid`, `#order-turnaround-standard-card`, `#order-turnaround-rush-card`, and `#order-turnaround-standard-desc`.
+    - When `isQuote === true`:
+      - `#order-turnaround-rush-card` is hidden (`classList.add('hidden')`).
+      - `#order-turnaround-standard-card` spans the full grid width (`classList.add('sm:col-span-2')`).
+      - `#order-turnaround-standard-desc` updates to `"Included free with every quote"`.
+      - Standard radio is automatically checked (`standardRadio.checked = true`).
+    - When `isQuote === false` (Order Mode):
+      - `#order-turnaround-rush-card` is visible (`classList.remove('hidden')`).
+      - `#order-turnaround-standard-card` returns to standard half-width (`classList.remove('sm:col-span-2')`).
+      - `#order-turnaround-standard-desc` updates to `"Included at standard pricing"`.
+  - **Price Calculation & Submission Protection**:
+    - `calculateAdaptivePrice()` evaluates `isRush = !state.isQuote && ...`, preventing any rush surcharge on quotes.
+    - `goToOrderReviewStep()` renders `Standard (12-24 Hours)` in the Step 3 summary table for quote mode.
+    - Order submission payloads set `turnaroundSpeed = 'standard'` for all quote requests.
+- **Automated & Visual Verification**:
+  - `scripts/verify_review_pay_flow.js`:
+    - Verified `#order-turnaround-rush-card` is hidden in quote mode (`classList.contains('hidden') === true`).
+    - Verified `#order-turnaround-standard-card` spans full width (`sm:col-span-2`).
+    - Verified standard description text equals `"Included free with every quote"`.
+    - Verified Step 3 review summary and quote submission text.
+    - Verified Order Mode preserves rush card visibility and +$5 rush fee calculation.
+    - Captured visual screenshot: `quote_step2_no_rush_fee.png`.
+  - Quality gates: 30/30 pages validated (`deep_button_link_validator.js`), 10/10 tests pass (`npm test`).

@@ -499,17 +499,17 @@
                             </div>
 
                             <!-- Turnaround Speed Selection -->
-                            <div>
+                            <div id="order-turnaround-container">
                                 <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">Turnaround Speed</label>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
-                                    <label class="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 cursor-pointer">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5" id="order-turnaround-grid">
+                                    <label class="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 cursor-pointer" id="order-turnaround-standard-card">
                                         <input type="radio" name="order-turnaround" value="standard" checked onchange="window.calculateAdaptivePrice()" class="text-primary focus:ring-primary h-4 w-4 mt-0.5" />
                                         <div>
                                             <strong class="text-xs font-black text-slate-900 dark:text-white block">Standard Turnaround (12-24 Hours)</strong>
-                                            <span class="text-[10px] text-slate-500 dark:text-slate-400">Included at standard pricing</span>
+                                            <span class="text-[10px] text-slate-500 dark:text-slate-400" id="order-turnaround-standard-desc">Included at standard pricing</span>
                                         </div>
                                     </label>
-                                    <label class="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 cursor-pointer hover:border-primary">
+                                    <label class="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 cursor-pointer hover:border-primary" id="order-turnaround-rush-card">
                                         <input type="radio" name="order-turnaround" value="rush" onchange="window.calculateAdaptivePrice()" class="text-primary focus:ring-primary h-4 w-4 mt-0.5" />
                                         <div>
                                             <strong class="text-xs font-black text-slate-900 dark:text-white block flex items-center gap-1">
@@ -987,6 +987,15 @@
             if (quoteBox) quoteBox.classList.remove('hidden');
             if (reviewPriceBox) reviewPriceBox.classList.add('hidden');
 
+            const rushCard = modal.querySelector('#order-turnaround-rush-card');
+            const standardCard = modal.querySelector('#order-turnaround-standard-card');
+            const standardRadio = modal.querySelector('input[name="order-turnaround"][value="standard"]');
+            const standardDesc = modal.querySelector('#order-turnaround-standard-desc');
+            if (rushCard) rushCard.classList.add('hidden');
+            if (standardRadio) standardRadio.checked = true;
+            if (standardCard) standardCard.classList.add('sm:col-span-2');
+            if (standardDesc) standardDesc.textContent = 'Included free with every quote';
+
             if (submitBtnIcon) submitBtnIcon.textContent = 'send';
             if (submitBtnText) submitBtnText.textContent = 'Submit Free Custom Quote';
         } else {
@@ -1006,6 +1015,13 @@
             if (termsBox) termsBox.classList.remove('hidden');
             if (quoteBox) quoteBox.classList.add('hidden');
             if (reviewPriceBox) reviewPriceBox.classList.remove('hidden');
+
+            const rushCard = modal.querySelector('#order-turnaround-rush-card');
+            const standardCard = modal.querySelector('#order-turnaround-standard-card');
+            const standardDesc = modal.querySelector('#order-turnaround-standard-desc');
+            if (rushCard) rushCard.classList.remove('hidden');
+            if (standardCard) standardCard.classList.remove('sm:col-span-2');
+            if (standardDesc) standardDesc.textContent = 'Included at standard pricing';
 
             if (submitBtnIcon) submitBtnIcon.textContent = 'lock';
             window.calculateAdaptivePrice();
@@ -1418,7 +1434,7 @@
 
         // Turnaround Speed
         const summaryTurnaround = modal.querySelector('#review-summary-turnaround');
-        const isRush = modal.querySelector('input[name="order-turnaround"]:checked')?.value === 'rush';
+        const isRush = !state.isQuote && modal.querySelector('input[name="order-turnaround"]:checked')?.value === 'rush';
         if (summaryTurnaround) {
             summaryTurnaround.innerHTML = isRush
                 ? '<span class="text-amber-600 dark:text-primary font-bold flex items-center gap-1">⚡ Rush Priority (5-8 Hours)</span>'
@@ -1621,7 +1637,7 @@
         const priceDisplay = modal.querySelector('#order-price-display');
         const priceBreakdown = modal.querySelector('#order-price-breakdown');
         const submitBtnText = modal.querySelector('#order-submit-btn-text');
-        const isRush = modal.querySelector('input[name="order-turnaround"]:checked')?.value === 'rush';
+        const isRush = !state.isQuote && modal.querySelector('input[name="order-turnaround"]:checked')?.value === 'rush';
 
         let basePrice = 15.00;
         let breakdownText = 'Standard Turnaround (12-24h)';
@@ -2070,8 +2086,8 @@
         }
 
         const instructions = (modal.querySelector('#order-notes')?.value || '').trim();
-        const turnaroundSpeed = modal.querySelector('input[name="order-turnaround"]:checked')?.value || 'standard';
         const isQuote = state.isQuote;
+        const turnaroundSpeed = isQuote ? 'standard' : (modal.querySelector('input[name="order-turnaround"]:checked')?.value || 'standard');
 
         // Contact info handling
         const session = getSession();
