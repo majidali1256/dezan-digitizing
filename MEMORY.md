@@ -1456,3 +1456,31 @@ The Worker Studio provides an isolated, production-focused environment for embro
 - **Verification Result**:
   - 30 HTML files scanned, 0 broken links, 0 unbound buttons.
 
+---
+
+## 35. Worker Studio Deliverables Validation Engine: Optional .EMB & Automated Client-Requested Formats
+- **User Requirement**:
+  - Make Wilcom `.EMB` format optional when digitizers submit production deliverables (`worker-portal.html`), preventing `.EMB` from being a mandatory blocker.
+  - Automatically detect and require all customer-requested machine and vector formats (`DST`, `PES`, `EXP`, `JEF`, `VP3`, `OFM`, `AI`, `EPS`, etc.) directly from client orders, options, and production instructions.
+- **Architectural Implementation**:
+  - **`worker-portal.html` (`checkTaskDeliverablesStatus`)**:
+    - Decoupled Wilcom `.EMB` from `requiredFormats`; categorized as `{ label: 'Machine Format (.EMB)', required: false, badge: '.EMB (Optional)', isOptional: true }`.
+    - Removed `.EMB` from `missingLabels`, eliminating the blocking `"⚠️ Missing: .EMB Machine File"` alert.
+    - `isValid` evaluates `checklist.filter(c => c.required).every(c => c.met)`, allowing digitizers to complete submission immediately once the customer's machine formats, PDF worksheet, and JPG preview are attached.
+    - If `.EMB` is attached, the checklist badge turns green (`check_circle`) and submits with the package.
+  - **Automated Customer Format Extraction (`parseRequestedFormats`)**:
+    - Parses client order format fields (`file_format`, `fileFormat`, `target_format`) as well as scanning `instructions` / `special_instructions` for explicitly requested embroidery/vector formats (`DST`, `PES`, `EXP`, `JEF`, `VP3`, `OFM`, `HUS`, `XXX`, `CND`, `AI`, `EPS`, `SVG`, `PDF`).
+    - Dynamically generates required checklist items for each format requested by the customer.
+  - **UI/UX Updates**:
+    - Task card header badges now display `.EMB (Optional)` with dashed border styling, distinct from required amber format badges.
+    - Format reminder banner reflects: `"Customer Requested: [FORMATS] (.EMB Optional)"`.
+    - Expanded file input picker `accept` attribute to include `.ofm`, `.cnd`, `.xxx`, `.hus`, `.ai`, `.eps`, `.svg`, `.webp`.
+- **Validation**:
+  - Automated Node.js unit tests validated all scenarios:
+    1. Default `DST, EMB` order with PDF + JPG + DST attached $\rightarrow$ `isValid: true`, `missingLabels: []`.
+    2. Multi-format customer order (`PES, JEF`) $\rightarrow$ requires both `PES` and `JEF`.
+    3. Custom instruction note (`"Please send in EXP"`) $\rightarrow$ automatically detected and required.
+    4. Vector order (`AI, EPS, SVG`) $\rightarrow$ requires vector formats and design preview.
+  - All 10/10 backend API tests pass cleanly (`npm test`).
+
+

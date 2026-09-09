@@ -886,18 +886,37 @@
             return (bytes / 1048576).toFixed(1) + ' MB';
         }
 
-        function parseRequestedFormats(formatStr) {
-            if (!formatStr) return ['DST'];
-            const clean = String(formatStr).toUpperCase().replace(/\./g, ' ');
-            const parts = clean.split(/[,&/|;\s]+/).map(s => s.trim()).filter(Boolean);
-            const validFormats = ['DST', 'EMB', 'PES', 'EXP', 'JEF', 'VP3', 'HUS', 'XXX', 'CND', 'ART', 'AI', 'EPS', 'SVG', 'PDF', 'PNG', 'JPG', 'JPEG', 'ZIP'];
-            const matched = parts.filter(p => validFormats.includes(p));
-            return matched.length > 0 ? Array.from(new Set(matched)) : ['DST'];
+        function parseRequestedFormats(formatStr, instructions = '') {
+            const validFormats = ['DST', 'EMB', 'PES', 'EXP', 'JEF', 'VP3', 'HUS', 'XXX', 'CND', 'ART', 'OFM', 'AI', 'EPS', 'SVG', 'PDF', 'PNG', 'JPG', 'JPEG', 'ZIP'];
+            const found = [];
+
+            if (formatStr) {
+                const clean = String(formatStr).toUpperCase().replace(/\./g, ' ');
+                const parts = clean.split(/[,&/|;\s]+/).map(s => s.trim()).filter(Boolean);
+                parts.forEach(p => {
+                    if (validFormats.includes(p)) found.push(p);
+                });
+            }
+
+            // Also check customer instructions/notes for any specifically mentioned machine/vector formats
+            if (instructions) {
+                const cleanInst = String(instructions).toUpperCase();
+                ['DST', 'PES', 'EXP', 'JEF', 'VP3', 'HUS', 'XXX', 'CND', 'OFM', 'AI', 'EPS', 'SVG'].forEach(fmt => {
+                    const regex = new RegExp(`(\\b|\\.)${fmt}(\\b|\\s|$)`, 'i');
+                    if (regex.test(cleanInst) && !found.includes(fmt)) {
+                        found.push(fmt);
+                    }
+                });
+            }
+
+            const matched = Array.from(new Set(found));
+            return matched.length > 0 ? matched : ['DST'];
         }
 
         // Deliverables Validation Engine
         function checkTaskDeliverablesStatus(task, stagedFiles = []) {
-            const rawReq = parseRequestedFormats(task.fileFormat || task.file_format || task.target_format || 'DST');
+            const instructionsText = `${task.instructions || ''} ${task.special_instructions || ''} ${task.specialOptions || ''} ${task.notes || ''}`;
+            const rawReq = parseRequestedFormats(task.fileFormat || task.file_format || task.target_format || 'DST', instructionsText);
             const isVector = (task.serviceType || task.service_type || '').toLowerCase().includes('vector');
 
             const attachedExtensions = stagedFiles.map(f => getFileExtension(f.name));
@@ -905,57 +924,84 @@
             // Required for every completed digitizing order:
             // 1. PDF production worksheet = REQUIRED
             const hasPdf = attachedExtensions.includes('PDF');
-            // 2. JPG/JPEG preview of the digitized design = REQUIRED
+            // 2. JPG/JPEG/PNG preview of the design = REQUIRED
             const hasJpgPreview = attachedExtensions.some(ext => ['JPG', 'JPEG', 'PNG', 'WEBP'].includes(ext));
 
-            // 3. Requested machine embroidery format(s) = REQUIRED according to customer order
-            let requiredMachineFormats = rawReq.filter(f => !['PDF', 'JPG', 'JPEG', 'PNG', 'WEBP'].includes(f));
-            if (requiredMachineFormats.length === 0 && !isVector) {
-                requiredMachineFormats = ['DST'];
+            // 3. Customer Requested Formats (AUTOMATICALLY REQUIRED from client order, strictly excluding EMB which is optional):
+            const requiredFormats = rawReq.filter(f => !['PDF', 'JPG', 'JPEG', 'PNG', 'WEBP', 'EMB', 'ZIP'].includes(f));
+            if (requiredFormats.length === 0 && !isVector) {
+                requiredFormats.push('DST');
             }
 
-            const missingMachineFormats = requiredMachineFormats.filter(fmt => !attachedExtensions.includes(fmt));
+            // Missing required formats from client's order:
+            const missingRequiredFormats = requiredFormats.filter(fmt => !attachedExtensions.includes(fmt));
 
+            // Checklist items
             const checklist = [
                 {
                     key: 'pdf',
-                    label: 'PDF Worksheet',
-                    required: true,
+                    label: isVector ? 'Vector PDF' : 'PDF Worksheet',
+                    required: !isVector || rawReq.includes('PDF'),
                     met: hasPdf,
-                    badge: '.PDF'
+                    badge: '.PDF',
+                    isOptional: false
                 },
                 {
                     key: 'preview',
-                    label: 'JPG Preview',
+                    label: isVector ? 'Design Preview' : 'JPG Preview',
                     required: true,
                     met: hasJpgPreview,
-                    badge: '.JPG'
+                    badge: '.JPG',
+                    isOptional: false
                 },
-                ...requiredMachineFormats.map(fmt => ({
-                    key: `machine_${fmt}`,
-                    label: `Machine Format (.${fmt})`,
+                ...requiredFormats.map(fmt => ({
+                    key: `format_${fmt}`,
+                    label: isVector ? `Vector Format (.${fmt})` : `Machine Format (.${fmt})`,
                     required: true,
                     met: attachedExtensions.includes(fmt),
-                    badge: `.${fmt}`
+                    badge: `.${fmt}`,
+                    isOptional: false
                 }))
             ];
 
-            const missingLabels = [];
-            if (!hasPdf) missingLabels.push('PDF Worksheet');
-            if (!hasJpgPreview) missingLabels.push('JPG Preview');
-            missingMachineFormats.forEach(fmt => missingLabels.push(`.${fmt} Machine File`));
+            // 4. EMB Wilcom Source File: Strictly OPTIONAL
+            // If EMB was requested or order is digitizing, show in checklist as (Optional)
+            const allowsEmb = rawReq.includes('EMB') || !isVector;
+            if (allowsEmb) {
+                checklist.push({
+                    key: 'format_EMB',
+                    label: 'Machine Format (.EMB)',
+                    required: false,
+                    met: attachedExtensions.includes('EMB'),
+                    badge: '.EMB (Optional)',
+                    isOptional: true
+                });
+            }
 
-            const isValid = checklist.every(c => c.met);
+            // Missing labels only for REQUIRED files (.EMB is never in missingLabels)
+            const missingLabels = [];
+            if (!hasPdf && (!isVector || rawReq.includes('PDF'))) {
+                missingLabels.push(isVector ? 'Vector PDF' : 'PDF Worksheet');
+            }
+            if (!hasJpgPreview) {
+                missingLabels.push('JPG Preview');
+            }
+            missingRequiredFormats.forEach(fmt => {
+                missingLabels.push(isVector ? `.${fmt} Vector File` : `.${fmt} Machine File`);
+            });
+
+            // Submission is valid when ALL required items are satisfied (.EMB never blocks submission!)
+            const isValid = checklist.filter(c => c.required).every(c => c.met);
 
             return {
                 isValid,
                 hasPdf,
                 hasJpgPreview,
-                requiredMachineFormats,
-                missingMachineFormats,
+                requiredFormats,
+                missingRequiredFormats,
                 checklist,
                 missingLabels,
-                rawRequestedString: requiredMachineFormats.join(', ') || rawReq.join(', ')
+                rawRequestedString: requiredFormats.join(', ') || rawReq.join(', ')
             };
         }
 
@@ -965,13 +1011,15 @@
                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
                     item.met 
                         ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30' 
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700'
+                        : (item.isOptional 
+                            ? 'bg-slate-100/70 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border border-dashed border-slate-300 dark:border-slate-700' 
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700')
                 }">
                     <span class="material-symbols-outlined text-[13px] ${item.met ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}">
                         ${item.met ? 'check_circle' : 'radio_button_unchecked'}
                     </span>
                     <span>${item.label}</span>
-                    <span class="font-mono text-[10px] px-1 py-0.2 rounded bg-black/10 dark:bg-white/10 ml-0.5">${item.badge}</span>
+                    <span class="font-mono text-[10px] px-1 py-0.2 rounded ${item.isOptional ? 'bg-slate-200/80 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300' : 'bg-black/10 dark:bg-white/10'} ml-0.5">${item.badge}</span>
                 </span>
             `).join('');
         }
@@ -1058,9 +1106,15 @@
                         ? 'border-2 border-rose-400/80 dark:border-rose-500/60 shadow-sm'
                         : 'border-slate-200 dark:border-primary/40 shadow-sm';
 
-            // Requested formats parsing
-            const reqFormats = parseRequestedFormats(task.fileFormat || task.file_format || 'DST');
-            const reqFormatsBadges = reqFormats.map(f => `<span class="px-2 py-0.5 rounded-md font-mono text-xs font-black bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/30">.${f}</span>`).join(' ');
+            // Requested formats parsing (automatically including any formats from client order and instructions)
+            const instructionsText = `${task.instructions || ''} ${task.special_instructions || ''} ${task.specialOptions || ''} ${task.notes || ''}`;
+            const reqFormats = parseRequestedFormats(task.fileFormat || task.file_format || task.target_format || 'DST', instructionsText);
+            const reqFormatsBadges = reqFormats.map(f => {
+                if (f === 'EMB') {
+                    return `<span class="px-2 py-0.5 rounded-md font-mono text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-dashed border-slate-300 dark:border-slate-700" title="Optional Wilcom source file">.EMB (Optional)</span>`;
+                }
+                return `<span class="px-2 py-0.5 rounded-md font-mono text-xs font-black bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/30">.${f}</span>`;
+            }).join(' ');
 
             // Special technical options
             const specialOpts = Array.isArray(task.special_options) ? task.special_options : (Array.isArray(task.specialOptions) ? task.specialOptions : []);
@@ -1230,7 +1284,8 @@
                                 <div class="flex items-center gap-2">
                                     <span class="material-symbols-outlined text-amber-800 dark:text-primary text-base">checklist_rtl</span>
                                     <span class="font-bold text-slate-900 dark:text-white">
-                                        Customer Requested: <strong class="font-mono text-amber-900 dark:text-primary uppercase font-black">${reqFormats.join(', ')}</strong>
+                                        Customer Requested: <strong class="font-mono text-amber-900 dark:text-primary uppercase font-black">${reqFormats.filter(f => f !== 'EMB').join(', ') || 'DST'}</strong>
+                                        ${reqFormats.includes('EMB') ? '<span class="text-xs font-normal text-slate-500 dark:text-slate-400 font-mono ml-1">(.EMB Optional)</span>' : ''}
                                     </span>
                                 </div>
                                 <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-slate-700 dark:text-slate-300">
@@ -1250,11 +1305,11 @@
                                             <span class="material-symbols-outlined text-base text-amber-700 dark:text-primary">attachment</span>
                                             <span>Attach Deliverables</span>
                                         </h5>
-                                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Attach DST, EMB, PES, EXP, JEF, VP3, PDF worksheet, and JPG design preview.</p>
+                                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Attach ${reqFormats.filter(f => f !== 'EMB').map(f => '.' + f).join(', ') || '.DST'}, PDF worksheet, JPG preview (.EMB source optional).</p>
                                     </div>
 
                                     <div>
-                                        <input type="file" id="deliverable-file-input-${task.orderNumber}" multiple accept=".dst,.emb,.pes,.exp,.jef,.vp3,.pdf,.jpg,.jpeg,.png,.zip" class="hidden" onchange="handleDeliverableFileInput('${task.orderNumber}', event)" />
+                                        <input type="file" id="deliverable-file-input-${task.orderNumber}" multiple accept=".dst,.emb,.pes,.exp,.jef,.vp3,.ofm,.cnd,.xxx,.hus,.ai,.eps,.svg,.pdf,.jpg,.jpeg,.png,.webp,.zip" class="hidden" onchange="handleDeliverableFileInput('${task.orderNumber}', event)" />
                                         <button type="button" onclick="document.getElementById('deliverable-file-input-${task.orderNumber}').click()" class="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-white border border-slate-300 dark:border-primary/30 text-xs font-black flex items-center gap-1.5 shadow-2xs transition-transform hover:scale-[1.02] cursor-pointer">
                                             <span class="material-symbols-outlined text-base text-amber-700 dark:text-primary">attach_file</span>
                                             <span>📎 Attach Files</span>
