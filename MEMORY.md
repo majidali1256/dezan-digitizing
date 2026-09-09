@@ -1483,4 +1483,35 @@ The Worker Studio provides an isolated, production-focused environment for embro
     4. Vector order (`AI, EPS, SVG`) $\rightarrow$ requires vector formats and design preview.
   - All 10/10 backend API tests pass cleanly (`npm test`).
 
+---
+
+## 36. Mobile Modal Viewport Optimization: Floating Elevated Dialog & 100% Simultaneous 3-Card Visibility
+- **User Requirement**:
+  - In mobile browser viewports (e.g. mobile Safari / Chrome on iOS/Android), the order/quote modal was previously anchored as a bottom sheet (`justify-end`), causing Card 3 ("Realistic / Pet Portrait Digitizing") to be clipped by the browser navigation toolbar and requiring user scrolling.
+  - The user requested: *"can you move it a bit above in moble so the can all three at a time"*.
+- **Architectural Implementation**:
+  - **Modal Container Elevation & Centering**:
+    - Converted `#new-order-modal` from bottom sheet (`justify-end sm:justify-center p-0 rounded-t-3xl`) to a floating, centered dialog (`justify-center items-center p-2.5 sm:p-4 rounded-2xl`).
+    - Added `pointer-events-none` on the outer layout wrapper and `pointer-events-auto` on the dialog box to ensure backdrop clicks cleanly dismiss the modal while centering stays robust.
+  - **Compact Mobile Header & Stepper**:
+    - Reduced mobile header padding (`pt-2 sm:pt-4 pb-2 sm:pb-3 px-3.5 sm:px-6`).
+    - Adjusted mobile title font size (`text-base sm:text-2xl`) and close button target (`w-8 h-8 sm:w-10 sm:h-10`).
+    - Segmented switcher pill compacted to `py-1 sm:py-1.5 px-2.5 sm:px-3 text-[11px] sm:text-xs`.
+    - Stepper progress bar width tightened to `max-w-[260px] sm:max-w-[320px]`, step indicator circles to `w-7 h-7 sm:w-8 sm:h-8`, and connector line position to `top-3.5 sm:top-4`.
+  - **Compact Service Choice Cards (Stage 1)**:
+    - Card container spacing set to `space-y-2 sm:space-y-2.5`.
+    - Card padding streamlined to `p-2 sm:p-3 rounded-xl sm:rounded-2xl`.
+    - Icon wrapper sized to `w-9 h-9 sm:w-11 sm:h-11` with `w-5 h-5 sm:w-6 sm:h-6` SVGs.
+    - Card titles set to `text-[13.5px] sm:text-base` and descriptions to `text-[10.5px] sm:text-xs`.
+    - Feature tags/pills tightened to `text-[10px] sm:text-[10.5px] px-2 sm:px-2.5 py-0.5`.
+- **Codebase Synchronization**:
+  - Synchronized across both public website modal (`js/order-quote-modal.js`) and embedded client portal order flow (`client-portal.html`).
+- **Visual & Automated Verification**:
+  - Captured multi-viewport screenshots via Playwright headless Chrome on mobile viewports:
+    - iPhone 12/13/14/15/16 (`390 x 844`): Total modal height ~536px, `top: 154px`, `bottom: 690px` with 154px clearance above and 154px clearance below. All 3 cards (Embroidery Digitizing, Vector Art Conversion, Realistic / Pet Portrait) fit 100% simultaneously on screen with zero clipping and zero scrolling required.
+    - iPhone SE (`375 x 667`): Modal height ~571px, `top: 48px`, `bottom: 619px`, all 3 cards fully visible.
+  - Automated button & link validator: 30/30 pages verified with 0 broken links or unbound buttons (`scripts/deep_button_link_validator.js`).
+  - Backend API test suite: 10/10 tests pass (`npm test`).
+
+
 

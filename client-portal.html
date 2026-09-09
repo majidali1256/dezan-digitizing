@@ -324,7 +324,7 @@
     </nav>
 
     <!-- ===== ADAPTIVE PLACE ORDER & REQUEST QUOTE MODAL (2-STAGE SELECTION) ===== -->
-    <div id="new-order-modal" onclick="if(event.target === this) closeNewOrderModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex flex-col justify-end sm:justify-center sm:items-center p-0 sm:p-4 overflow-hidden">
+    <div id="new-order-modal" onclick="if(event.target === this) closeNewOrderModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex flex-col justify-center items-center p-2.5 sm:p-4 overflow-y-auto overscroll-contain">
         <style>
             @media screen and (max-width: 768px) {
                 #new-order-modal input:not([type="checkbox"]):not([type="radio"]),
@@ -340,70 +340,70 @@
                 touch-action: manipulation;
             }
         </style>
-        <div class="w-full sm:max-w-2xl bg-white dark:bg-card-dark border-t sm:border border-slate-200 dark:border-primary/30 rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[90vh] text-slate-900 dark:text-slate-100 overflow-hidden relative">
+        <div class="w-full sm:max-w-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[90vh] text-slate-900 dark:text-slate-100 overflow-hidden relative">
             
             <!-- Mobile Drag Indicator Bar -->
-            <div class="w-12 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mt-2.5 mb-1 sm:hidden flex-shrink-0"></div>
+            <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mt-2 mb-0.5 sm:hidden flex-shrink-0"></div>
 
             <!-- Sticky Modal Header (Image 2 Target Design) -->
-            <div class="flex flex-col px-4 sm:px-6 pt-3 sm:pt-4 pb-2 sm:pb-3 border-b border-slate-200/80 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex-shrink-0 z-10 gap-2.5">
+            <div class="flex flex-col px-3.5 sm:px-6 pt-2 sm:pt-4 pb-2 sm:pb-3 border-b border-slate-200/80 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex-shrink-0 z-10 gap-2 sm:gap-2.5">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3 min-w-0 pr-2">
+                    <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 pr-2">
                         <span class="material-symbols-outlined text-[#b89218] dark:text-primary text-2xl sm:text-3xl flex-shrink-0" id="order-modal-header-icon">shopping_cart</span>
                         <div class="min-w-0">
-                            <h3 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white truncate" id="order-modal-header-text">Place an Order</h3>
+                            <h3 class="text-base sm:text-2xl font-black text-slate-900 dark:text-white truncate" id="order-modal-header-text">Place an Order</h3>
                             <p class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 truncate mt-0.5" id="order-modal-header-desc">Choose a service to continue.</p>
                         </div>
                     </div>
-                    <button type="button" onclick="closeNewOrderModal()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer flex-shrink-0" title="Close (Esc)">
-                        <span class="material-symbols-outlined text-lg sm:text-xl">close</span>
+                    <button type="button" onclick="closeNewOrderModal()" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer flex-shrink-0" title="Close (Esc)">
+                        <span class="material-symbols-outlined text-base sm:text-xl">close</span>
                     </button>
                 </div>
 
                 <!-- Top Segmented Mode Switcher Pill (Place Order vs. Free Quote) -->
-                <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-900/90 rounded-xl border border-slate-200 dark:border-primary/20">
-                    <button type="button" id="modal-mode-order-btn" onclick="if(typeof setModalMode==='function') setModalMode(false)" class="py-1.5 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-primary text-background-dark shadow-xs cursor-pointer">
-                        <span class="material-symbols-outlined text-sm">bolt</span>
+                <div class="grid grid-cols-2 gap-1 sm:gap-1.5 p-1 bg-slate-100 dark:bg-slate-900/90 rounded-xl border border-slate-200 dark:border-primary/20">
+                    <button type="button" id="modal-mode-order-btn" onclick="if(typeof setModalMode==='function') setModalMode(false)" class="py-1 sm:py-1.5 px-2.5 sm:px-3 rounded-lg font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition-all bg-primary text-background-dark shadow-xs cursor-pointer">
+                        <span class="material-symbols-outlined text-xs sm:text-sm">bolt</span>
                         <span>Place Order</span>
                     </button>
-                    <button type="button" id="modal-mode-quote-btn" onclick="if(typeof setModalMode==='function') setModalMode(true)" class="py-1.5 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer">
-                        <span class="material-symbols-outlined text-sm">request_quote</span>
+                    <button type="button" id="modal-mode-quote-btn" onclick="if(typeof setModalMode==='function') setModalMode(true)" class="py-1 sm:py-1.5 px-2.5 sm:px-3 rounded-lg font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer">
+                        <span class="material-symbols-outlined text-xs sm:text-sm">request_quote</span>
                         <span>Request Free Quote ($0)</span>
                     </button>
                 </div>
 
                 <!-- 2-Step Stepper Progress Bar (Image 2 Target Design) -->
-                <div class="w-full max-w-[280px] sm:max-w-[320px] mx-auto pt-1.5 pb-0.5">
+                <div class="w-full max-w-[260px] sm:max-w-[320px] mx-auto pt-1 sm:pt-1.5 pb-0.5">
                     <div class="flex items-start justify-between relative">
-                        <!-- Connecting line centered at top-4 (middle of 32px circle) -->
-                        <div class="absolute left-8 right-8 top-4 -translate-y-1/2 h-[2px] bg-slate-200 dark:bg-slate-700 transition-colors" id="step-connector"></div>
+                        <!-- Connecting line centered at top-3.5 sm:top-4 (middle of circle) -->
+                        <div class="absolute left-7 sm:left-8 right-7 sm:right-8 top-3.5 sm:top-4 -translate-y-1/2 h-[2px] bg-slate-200 dark:bg-slate-700 transition-colors" id="step-connector"></div>
 
                         <!-- Step 1 (Clickable to return to service choice) -->
                         <button type="button" onclick="switchOrderServiceChoice()" class="relative z-10 flex flex-col items-center cursor-pointer group bg-transparent border-0 p-0 text-center" title="Step 1: Choose Service">
-                            <div id="step-circle-1" class="w-8 h-8 rounded-full bg-[#b89218] text-white font-bold flex items-center justify-center text-xs sm:text-sm shadow-xs transition-all ring-4 ring-white dark:ring-card-dark">
+                            <div id="step-circle-1" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#b89218] text-white font-bold flex items-center justify-center text-xs sm:text-sm shadow-xs transition-all ring-4 ring-white dark:ring-card-dark">
                                 1
                             </div>
-                            <span id="step-label-1" class="text-[11px] sm:text-xs font-bold text-[#b89218] mt-1 whitespace-nowrap transition-colors">Choose Service</span>
+                            <span id="step-label-1" class="text-[10px] sm:text-xs font-bold text-[#b89218] mt-1 whitespace-nowrap transition-colors">Choose Service</span>
                         </button>
 
                         <!-- Step 2 -->
                         <div class="relative z-10 flex flex-col items-center text-center">
-                            <div id="step-circle-2" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-all ring-4 ring-white dark:ring-card-dark">
+                            <div id="step-circle-2" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-all ring-4 ring-white dark:ring-card-dark">
                                 2
                             </div>
-                            <span id="step-label-2" class="text-[11px] sm:text-xs font-medium text-slate-400 mt-1 whitespace-nowrap transition-colors">Order Details</span>
+                            <span id="step-label-2" class="text-[10px] sm:text-xs font-medium text-slate-400 mt-1 whitespace-nowrap transition-colors">Order Details</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- STAGE 1: SERVICE CHOICE CARDS (All 3 fit cleanly in view without scrolling) -->
-            <div id="order-service-selection-view" class="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-4 space-y-2 sm:space-y-2.5">
+            <div id="order-service-selection-view" class="flex-1 overflow-y-auto overscroll-contain p-2.5 sm:p-4 space-y-2 sm:space-y-2.5">
                 
                 <!-- Option 1: Embroidery Digitizing -->
-                <button type="button" onclick="selectOrderService('Digitizing')" class="w-full group p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-[#e2eaf4] dark:border-primary/25 bg-[#f8faff] dark:bg-card-dark hover:border-[#b89218] dark:hover:border-primary hover:bg-[#fffdf8] dark:hover:bg-[#1a1714] transition-all text-left flex flex-col gap-1.5 sm:gap-2 cursor-pointer shadow-xs hover:shadow-md">
+                <button type="button" onclick="selectOrderService('Digitizing')" class="w-full group p-2 sm:p-3 rounded-xl sm:rounded-2xl border border-[#e2eaf4] dark:border-primary/25 bg-[#f8faff] dark:bg-card-dark hover:border-[#b89218] dark:hover:border-primary hover:bg-[#fffdf8] dark:hover:bg-[#1a1714] transition-all text-left flex flex-col gap-1 sm:gap-2 cursor-pointer shadow-xs hover:shadow-md">
                     <div class="flex items-center gap-2.5 sm:gap-3.5 w-full">
-                        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#e8f1fd] dark:bg-blue-950/40 border border-[#cce0fc] dark:border-blue-800/50 text-[#1d68d8] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 group-hover:bg-[#fef5df] group-hover:border-[#f5dfaa] group-hover:text-[#b89218] dark:group-hover:bg-primary/20 dark:group-hover:border-primary/40 dark:group-hover:text-primary transition-all">
+                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[#e8f1fd] dark:bg-blue-950/40 border border-[#cce0fc] dark:border-blue-800/50 text-[#1d68d8] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 group-hover:bg-[#fef5df] group-hover:border-[#f5dfaa] group-hover:text-[#b89218] dark:group-hover:bg-primary/20 dark:group-hover:border-primary/40 dark:group-hover:text-primary transition-all">
                             <svg class="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="2" y="3" width="20" height="13" rx="2"></rect>
                                 <path d="M8 20h8"></path>
@@ -418,25 +418,25 @@
                             </svg>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-[#b89218] dark:group-hover:text-primary transition-colors leading-tight">Embroidery Digitizing</h4>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 border border-[#cce0fc] dark:border-blue-800/50 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] group-hover:border-amber-300/60 dark:group-hover:bg-primary/25 dark:group-hover:text-primary dark:group-hover:border-primary/40 transition-colors">From $15</span>
+                            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                <h4 class="text-[13.5px] sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-[#b89218] dark:group-hover:text-primary transition-colors leading-tight">Embroidery Digitizing</h4>
+                                <span class="px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 border border-[#cce0fc] dark:border-blue-800/50 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] group-hover:border-amber-300/60 dark:group-hover:bg-primary/25 dark:group-hover:text-primary dark:group-hover:border-primary/40 transition-colors">From $15</span>
                             </div>
-                            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Regular logos, text, hats, left chest, jacket backs.</p>
+                            <p class="text-[10.5px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Regular logos, text, hats, left chest, jacket backs.</p>
                         </div>
-                        <span class="material-symbols-outlined text-xl text-[#1d68d8] dark:text-blue-400 group-hover:text-[#b89218] dark:group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
+                        <span class="material-symbols-outlined text-lg sm:text-xl text-[#1d68d8] dark:text-blue-400 group-hover:text-[#b89218] dark:group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
                     </div>
-                    <div class="flex flex-wrap items-center gap-1.5 pl-0 sm:pl-[50px]">
-                        <span class="px-2.5 py-0.5 rounded-full bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] dark:group-hover:bg-primary/20 dark:group-hover:text-primary transition-colors font-bold text-[10.5px]">.DST &nbsp;.PES &nbsp;.EXP</span>
-                        <span class="px-2.5 py-0.5 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px]">Left Chest / Hats / Jacket Back</span>
-                        <span class="px-2.5 py-0.5 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px]">3D Puff</span>
+                    <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pl-0 sm:pl-[50px]">
+                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] dark:group-hover:bg-primary/20 dark:group-hover:text-primary transition-colors font-bold text-[10px] sm:text-[10.5px]">.DST &nbsp;.PES &nbsp;.EXP</span>
+                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10px] sm:text-[10.5px]">Left Chest / Hats / Jacket Back</span>
+                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10px] sm:text-[10.5px]">3D Puff</span>
                     </div>
                 </button>
 
                 <!-- Option 2: Vector Art Conversion (Middle) -->
-                <button type="button" onclick="selectOrderService('Vectorizing')" class="w-full group p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-[#e2eaf4] dark:border-primary/25 bg-[#f8faff] dark:bg-card-dark hover:border-[#b89218] dark:hover:border-primary hover:bg-[#fffdf8] dark:hover:bg-[#1a1714] transition-all text-left flex flex-col gap-1.5 sm:gap-2 cursor-pointer shadow-xs hover:shadow-md">
+                <button type="button" onclick="selectOrderService('Vectorizing')" class="w-full group p-2 sm:p-3 rounded-xl sm:rounded-2xl border border-[#e2eaf4] dark:border-primary/25 bg-[#f8faff] dark:bg-card-dark hover:border-[#b89218] dark:hover:border-primary hover:bg-[#fffdf8] dark:hover:bg-[#1a1714] transition-all text-left flex flex-col gap-1 sm:gap-2 cursor-pointer shadow-xs hover:shadow-md">
                     <div class="flex items-center gap-2.5 sm:gap-3.5 w-full">
-                        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#e8f1fd] dark:bg-blue-950/40 border border-[#cce0fc] dark:border-blue-800/50 text-[#1d68d8] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 group-hover:bg-[#fef5df] group-hover:border-[#f5dfaa] group-hover:text-[#b89218] dark:group-hover:bg-primary/20 dark:group-hover:border-primary/40 dark:group-hover:text-primary transition-all">
+                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[#e8f1fd] dark:bg-blue-950/40 border border-[#cce0fc] dark:border-blue-800/50 text-[#1d68d8] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 group-hover:bg-[#fef5df] group-hover:border-[#f5dfaa] group-hover:text-[#b89218] dark:group-hover:bg-primary/20 dark:group-hover:border-primary/40 dark:group-hover:text-primary transition-all">
                             <svg class="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M3 17c3-8 9-8 18 0"></path>
                                 <circle cx="3" cy="17" r="1.4" fill="currentColor"></circle>
@@ -448,24 +448,24 @@
                             </svg>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-[#b89218] dark:group-hover:text-primary transition-colors leading-tight">Vector Art Conversion</h4>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 border border-[#cce0fc] dark:border-blue-800/50 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] group-hover:border-amber-300/60 dark:group-hover:bg-primary/25 dark:group-hover:text-primary dark:group-hover:border-primary/40 transition-colors">From $15</span>
+                            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                <h4 class="text-[13.5px] sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-[#b89218] dark:group-hover:text-primary transition-colors leading-tight">Vector Art Conversion</h4>
+                                <span class="px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 border border-[#cce0fc] dark:border-blue-800/50 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] group-hover:border-amber-300/60 dark:group-hover:bg-primary/25 dark:group-hover:text-primary dark:group-hover:border-primary/40 transition-colors">From $15</span>
                             </div>
-                            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Clean vector artwork for printing, cutting &amp; screen print.</p>
+                            <p class="text-[10.5px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Clean vector artwork for printing, cutting &amp; screen print.</p>
                         </div>
-                        <span class="material-symbols-outlined text-xl text-[#1d68d8] dark:text-blue-400 group-hover:text-[#b89218] dark:group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
+                        <span class="material-symbols-outlined text-lg sm:text-xl text-[#1d68d8] dark:text-blue-400 group-hover:text-[#b89218] dark:group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
                     </div>
-                    <div class="flex flex-wrap items-center gap-1.5 pl-0 sm:pl-[50px]">
-                        <span class="px-2.5 py-0.5 rounded-full bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] dark:group-hover:bg-primary/20 dark:group-hover:text-primary transition-colors font-bold text-[10.5px]">.AI &nbsp;.EPS &nbsp;.SVG &nbsp;.PDF</span>
-                        <span class="px-2.5 py-0.5 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px]">Print-ready Vectors</span>
+                    <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pl-0 sm:pl-[50px]">
+                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] dark:group-hover:bg-primary/20 dark:group-hover:text-primary transition-colors font-bold text-[10px] sm:text-[10.5px]">.AI &nbsp;.EPS &nbsp;.SVG &nbsp;.PDF</span>
+                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10px] sm:text-[10.5px]">Print-ready Vectors</span>
                     </div>
                 </button>
 
                 <!-- Option 3: Realistic / Pet Portrait Digitizing (Last) -->
-                <button type="button" onclick="selectOrderService('PetPortrait')" class="w-full group p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-[#e2eaf4] dark:border-primary/25 bg-[#f8faff] dark:bg-card-dark hover:border-[#b89218] dark:hover:border-primary hover:bg-[#fffdf8] dark:hover:bg-[#1a1714] transition-all text-left flex flex-col gap-1.5 sm:gap-2 cursor-pointer shadow-xs hover:shadow-md">
+                <button type="button" onclick="selectOrderService('PetPortrait')" class="w-full group p-2 sm:p-3 rounded-xl sm:rounded-2xl border border-[#e2eaf4] dark:border-primary/25 bg-[#f8faff] dark:bg-card-dark hover:border-[#b89218] dark:hover:border-primary hover:bg-[#fffdf8] dark:hover:bg-[#1a1714] transition-all text-left flex flex-col gap-1 sm:gap-2 cursor-pointer shadow-xs hover:shadow-md">
                     <div class="flex items-center gap-2.5 sm:gap-3.5 w-full">
-                        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#e8f1fd] dark:bg-blue-950/40 border border-[#cce0fc] dark:border-blue-800/50 text-[#1d68d8] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 group-hover:bg-[#fef5df] group-hover:border-[#f5dfaa] group-hover:text-[#b89218] dark:group-hover:bg-primary/20 dark:group-hover:border-primary/40 dark:group-hover:text-primary transition-all">
+                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[#e8f1fd] dark:bg-blue-950/40 border border-[#cce0fc] dark:border-blue-800/50 text-[#1d68d8] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 group-hover:bg-[#fef5df] group-hover:border-[#f5dfaa] group-hover:text-[#b89218] dark:group-hover:bg-primary/20 dark:group-hover:border-primary/40 dark:group-hover:text-primary transition-all">
                             <svg class="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="28" cy="28" r="23" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
                                 <circle cx="28" cy="28" r="20" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 2" stroke-opacity="0.4"/>
@@ -478,18 +478,18 @@
                             </svg>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-[#b89218] dark:group-hover:text-primary transition-colors leading-tight">Realistic / Pet Portrait Digitizing</h4>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 border border-[#cce0fc] dark:border-blue-800/50 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] group-hover:border-amber-300/60 dark:group-hover:bg-primary/25 dark:group-hover:text-primary dark:group-hover:border-primary/40 transition-colors">From $25</span>
+                            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                <h4 class="text-[13.5px] sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-[#b89218] dark:group-hover:text-primary transition-colors leading-tight">Realistic / Pet Portrait Digitizing</h4>
+                                <span class="px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 border border-[#cce0fc] dark:border-blue-800/50 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] group-hover:border-amber-300/60 dark:group-hover:bg-primary/25 dark:group-hover:text-primary dark:group-hover:border-primary/40 transition-colors">From $25</span>
                             </div>
-                            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Pet portraits, realistic animals, faces, fur, detailed shading.</p>
+                            <p class="text-[10.5px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Pet portraits, realistic animals, faces, fur, detailed shading.</p>
                         </div>
-                        <span class="material-symbols-outlined text-xl text-[#1d68d8] dark:text-blue-400 group-hover:text-[#b89218] dark:group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
+                        <span class="material-symbols-outlined text-lg sm:text-xl text-[#1d68d8] dark:text-blue-400 group-hover:text-[#b89218] dark:group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
                     </div>
-                    <div class="flex flex-wrap items-center gap-1.5 pl-0 sm:pl-[50px]">
-                        <span class="px-2.5 py-0.5 rounded-full bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] dark:group-hover:bg-primary/20 dark:group-hover:text-primary transition-colors font-bold text-[10.5px]">.DST &nbsp;.PES &nbsp;.EXP &nbsp;.EMB</span>
-                        <span class="px-2.5 py-0.5 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px]">Pets, Animals &amp; Fur</span>
-                        <span class="px-2.5 py-0.5 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px]">Photorealistic Shading</span>
+                    <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pl-0 sm:pl-[50px]">
+                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] dark:group-hover:bg-primary/20 dark:group-hover:text-primary transition-colors font-bold text-[10px] sm:text-[10.5px]">.DST &nbsp;.PES &nbsp;.EXP &nbsp;.EMB</span>
+                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10px] sm:text-[10.5px]">Pets, Animals &amp; Fur</span>
+                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10px] sm:text-[10.5px]">Photorealistic Shading</span>
                     </div>
                 </button>
 
