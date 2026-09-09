@@ -574,7 +574,7 @@
                                         <div>
                                             <strong class="text-xs font-black block text-blue-950 dark:text-blue-200">100% Free Stitch Appraisal &amp; Estimation</strong>
                                             <p class="text-[10px] sm:text-[11px] text-blue-900/80 dark:text-blue-300/80 mt-1 leading-relaxed">
-                                                Submit your design specs and artwork for free. Our senior digitizer will inspect stitch density, small text complexity, and fabric compatibility within 1 hour. Pay only after price approval.
+                                                Submit your artwork and design requirements for a free quote. Our senior digitizer will review your design and send you a price shortly. You only pay after you approve the quote.
                                             </p>
                                         </div>
                                     </div>
@@ -753,7 +753,7 @@
                                         <div>
                                             <strong class="text-xs font-black block text-blue-950 dark:text-blue-200">100% Free Stitch Appraisal &amp; Estimation</strong>
                                             <p class="text-[10px] sm:text-[11px] text-blue-900/80 dark:text-blue-300/80 mt-1 leading-relaxed">
-                                                Submit your design specs and artwork for free. Our senior digitizer will inspect stitch density, small text complexity, and fabric compatibility within 1 hour. Pay only after price approval.
+                                                Submit your artwork and design requirements for a free quote. Our senior digitizer will review your design and send you a price shortly. You only pay after you approve the quote.
                                             </p>
                                         </div>
                                     </div>

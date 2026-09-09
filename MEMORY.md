@@ -242,7 +242,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
       - Order ID Prefix: `DZ-XXXX`, Status: `pending_review`, Payment: `paid`.
     - **`[ 📄 Request Free Quote ($0) ]` Mode**:
       - Modal Title: "Request a Free Custom Quote", Badge: "100% Free · No Signup Needed".
-      - Completely hides flat pricing plans and payment forms; renders the "100% Free Stitch Appraisal & Estimation" banner.
+      - Completely hides flat pricing plans and payment forms; renders the "100% Free Stitch Appraisal & Estimation" banner ("Submit your artwork and design requirements for a free quote. Our senior digitizer will review your design and send you a price shortly. You only pay after you approve the quote.").
       - Zero upfront charge ($0.00); 1-click submission button: `[ Submit Free Custom Quote Request ]`.
       - Quote ID Prefix: `QUO-XXXX`, Status: `quote_requested`, Payment: `unpaid` ($0.00).
   - **Dynamic Service & Plan Preselection**:
