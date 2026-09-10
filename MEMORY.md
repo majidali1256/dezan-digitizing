@@ -2166,6 +2166,25 @@ The Worker Studio provides an isolated, production-focused environment for embro
     - `admin_cards_simplified_desktop.png`
     - `admin_cards_simplified_mobile.png`
 
-
-
-
+### 35.15 Worker Assignment: Fix ReferenceError `taskNumber is not defined` (Live & Verified)
+- **User Incident & Problem Statement**:
+  - In Admin Workspace (`admin-orders.html`), when attempting to assign an active production order (e.g., `ORD-2026-1395`) to a digitizer worker via the "Assign Digitizer" modal and clicking "Assign & Dispatch", a browser alert was triggered:
+    `dezan-digitizing.vercel.app says: ⚠️ Error assigning worker: taskNumber is not defined`.
+- **Root Cause Analysis**:
+  - In `js/insforge-client.js`, inside `assignDigitizer(orderNumber, digitizerId, digitizerName)`:
+    - The sanitized task payload object referenced `task_number: taskNumber` and `this.broadcastEvent('order_assigned', { taskNumber: taskNumber, ... })`.
+    - However, the variable `taskNumber` was never declared or computed in the scope of `assignDigitizer()`, throwing an unhandled runtime `ReferenceError: taskNumber is not defined`.
+- **Architectural Solution**:
+  1. **Declared Standard Task Number**:
+     - Computed canonical task identifier in `js/insforge-client.js`: `const taskNumber = 'TSK-' + orderNumber.replace('ORD-', '').replace('DZ-', '');` prior to building `sanitizedTask`.
+     - Populated `task_number: taskNumber` on newly created and existing cached tasks in `dezan_digitizer_tasks`.
+  2. **Backend & Cloud Synchronization**:
+     - Added resilient Express backend dispatch via `this.callBackendApi('/orders/' + encodeURIComponent(orderNumber) + '/assign', 'POST', { digitizerId, digitizerName })` alongside InsForge PostgreSQL REST sync.
+  3. **Data Parity in Tasks Retrieval**:
+     - Updated `getDigitizerTasks()` fallback mapping to populate both `taskId` and `taskNumber` symmetrically on returned task representations.
+- **Verification**:
+  - Validated with automated Playwright headless test (`test_assign_worker.js`):
+    - Opened `admin-orders.html`, launched Assign Digitizer modal for `ORD-2026-1395`.
+    - Selected digitizer and clicked "Assign & Dispatch".
+    - Confirmed zero error dialogs caught.
+    - Verified `orderStatus: 'in_progress'`, `assignedDigitizerId` updated, and task registered in `dezan_digitizer_tasks` with `taskNumber: 'TSK-2026-1395'`.
