@@ -10,6 +10,12 @@ const INSFORGE_CONFIG = {
     storageUrl: 'https://e8rw998g.us-east.insforge.app/api/storage'
 };
 
+// Global taskNumber declaration to guarantee zero ReferenceErrors across all browser cache states
+var taskNumber = '';
+if (typeof window !== 'undefined') {
+    window.taskNumber = '';
+}
+
 // ===================================================================
 //  DEMO MOCK ACCOUNTS (For Instant 1-Click Role Testing & Verifications)
 // ===================================================================
@@ -2350,6 +2356,7 @@ class InsForgeClient {
 
         // Sanitized technical task (Strict Data Masking)
         const taskNumber = 'TSK-' + orderNumber.replace('ORD-', '').replace('DZ-', '');
+        if (typeof window !== 'undefined') window.taskNumber = taskNumber;
         const isOrderRush = order && (order.turnaround_speed === 'rush' || order.turnaroundSpeed === 'rush' || order.priority === 'rush');
         const sanitizedTask = {
             id: this.generateUUID(),

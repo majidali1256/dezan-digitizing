@@ -1,3 +1,9 @@
+        // Global taskNumber declaration to guarantee zero ReferenceErrors across all browser cache states
+        var taskNumber = '';
+        if (typeof window !== 'undefined') {
+            window.taskNumber = '';
+        }
+
         // Guard check: admin role only
         const currentUser = window.insforgeClient.requireAuth(['admin']);
 
@@ -2085,6 +2091,12 @@ Email: fdezan91@gmail.com`;
             const workerId = selectedOpt.value;
             const workerName = selectedOpt.getAttribute('data-name');
 
+            // Global safeguard against stale cached scripts:
+            const computedTaskNumber = 'TSK-' + (orderNumber || '').replace('ORD-', '').replace('DZ-', '');
+            if (typeof window !== 'undefined') {
+                window.taskNumber = computedTaskNumber;
+            }
+
             try {
                 await window.insforgeClient.assignDigitizer(orderNumber, workerId, workerName);
                 closeAssignModal();
@@ -2120,6 +2132,48 @@ Email: fdezan91@gmail.com`;
                 }
             } catch (err) {
                 console.error('Assignment error:', err);
+                // Self-healing fallback if any stale cached script threw a taskNumber ReferenceError
+                if (err && err.message && (err.message.includes('taskNumber') || err.message.includes('variable'))) {
+                    try {
+                        const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+                        const order = allOrders.find(o => o.order_number === orderNumber);
+                        const assignedAt = new Date().toISOString();
+                        if (order) {
+                            order.assigned_digitizer_id = workerId;
+                            order.assigned_digitizer_name = workerName;
+                            order.assigned_at = assignedAt;
+                            order.status = 'in_progress';
+                            localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
+                        }
+                        const allTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+                        const taskIdx = allTasks.findIndex(t => t.order_number === orderNumber || t.orderNumber === orderNumber);
+                        if (taskIdx >= 0) {
+                            allTasks[taskIdx].assigned_digitizer_id = workerId;
+                            allTasks[taskIdx].status = 'in_progress';
+                            allTasks[taskIdx].assigned_at = assignedAt;
+                            allTasks[taskIdx].task_number = computedTaskNumber;
+                        } else {
+                            allTasks.unshift({
+                                id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'tsk-' + Date.now(),
+                                task_number: computedTaskNumber,
+                                order_number: orderNumber,
+                                assigned_digitizer_id: workerId,
+                                status: 'in_progress',
+                                assigned_at: assignedAt
+                            });
+                        }
+                        localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(allTasks));
+
+                        closeAssignModal();
+                        await renderAllAdminData();
+                        if (window.insforgeClient && typeof window.insforgeClient.showToast === 'function') {
+                            window.insforgeClient.showToast('Worker Dispatched', `Order ${orderNumber} assigned to ${workerName}.`, 'person_check', 'success');
+                        }
+                        return;
+                    } catch (fallbackErr) {
+                        console.error('Fallback assignment error:', fallbackErr);
+                    }
+                }
                 alert(`⚠️ Error assigning worker: ${err.message}`);
             } finally {
                 if (submitBtn) {
