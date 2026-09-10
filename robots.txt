@@ -1,0 +1,32 @@
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /about.html
+Allow: /services.html
+Allow: /portfolio.html
+Allow: /pricing.html
+Allow: /contact.html
+Allow: /terms.html
+Allow: /privacy.html
+Allow: /refund-policy.html
+Allow: /embroidery-digitizing.html
+Allow: /vector-art-conversion.html
+Allow: /track-order.html
+Allow: /order-success.html
+
+# Disallow Private Portals, Workspaces & Internal API Routes
+Disallow: /admin-*
+Disallow: /client-*
+Disallow: /worker-*
+Disallow: /portal-login.html
+Disallow: /profile.html
+Disallow: /api/
+Disallow: /server/
+Disallow: /.agents/
+Disallow: /.insforge/
+Disallow: /scratch/
+Disallow: /scripts/
+Disallow: /tests/
+
+# Sitemap Location
+Sitemap: https://dezan-digitizing.vercel.app/sitemap.xml

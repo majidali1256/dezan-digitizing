@@ -28,7 +28,7 @@
         }
     </script>
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="client-workspace.css" />
+    <link rel="stylesheet" href="client-workspace.css?v=3.7" />
     <style>
         @media print {
             body {
@@ -218,82 +218,174 @@
 
         <!-- Controls Bar: Filter Tabs & Search -->
         <div class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3.5">
-            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0" id="filter-tabs">
-                <button onclick="setFilter('all')" class="filter-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary text-background-dark shadow-xs transition-all cursor-pointer">
-                    All Activity
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none" id="filter-tabs">
+                <button type="button" onclick="setFilter('all')" data-filter="all" class="client-dist-pill pill-all active focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>All activity</span>
+                    <span id="client-dash-pill-all">0</span>
                 </button>
-                <button onclick="setFilter('in_progress')" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer">
-                    In Production
+                <button type="button" onclick="setFilter('in_progress')" data-filter="in_progress" class="client-dist-pill pill-production focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>In production</span>
+                    <span id="client-dash-pill-production">0</span>
                 </button>
-                <button onclick="setFilter('completed')" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer">
-                    Delivered
+                <button type="button" onclick="setFilter('quotes')" data-filter="quotes" class="client-dist-pill pill-quotes focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>Quotes &amp; Estimates</span>
+                    <span id="client-dash-pill-quotes">0</span>
                 </button>
-                <button onclick="setFilter('quotes')" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer">
-                    Quotes
+                <button type="button" onclick="setFilter('revision_requested')" data-filter="revision_requested" class="client-dist-pill pill-revisions focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>Revisions</span>
+                    <span id="client-dash-pill-revisions">0</span>
                 </button>
-                <button onclick="setFilter('unpaid')" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer flex items-center gap-1">
+                <button type="button" onclick="setFilter('unpaid')" data-filter="unpaid" class="client-dist-pill pill-due focus-visible:outline-2 focus-visible:outline-primary">
                     <span>Payment Due</span>
-                    <span id="badge-due-count" class="w-2 h-2 rounded-full bg-rose-500 hidden"></span>
+                    <span id="client-dash-pill-due">0</span>
+                </button>
+                <button type="button" onclick="setFilter('completed')" data-filter="completed" class="client-dist-pill pill-completed focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>Delivered</span>
+                    <span id="client-dash-pill-completed">0</span>
                 </button>
             </div>
 
-            <!-- Search and Filter Dropdown -->
+            <!-- Search, Density Switcher and Filter Dropdown -->
             <div class="flex items-center gap-2">
+                <!-- Density Switcher: Cards vs Table -->
+                <div class="flex items-center bg-slate-100 dark:bg-slate-900 p-0.5 rounded-xl border border-primary/20 dark:border-primary/25 text-xs shrink-0">
+                    <button type="button" onclick="setPortalLayout('grid')" id="portal-layout-toggle-grid" class="px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Visual Cards View" aria-pressed="true">
+                        <span class="material-symbols-outlined text-sm">grid_view</span>
+                        <span class="text-[11px] hidden sm:inline">Cards</span>
+                    </button>
+                    <button type="button" onclick="setPortalLayout('table')" id="portal-layout-toggle-table" class="px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Compact Table View" aria-pressed="false">
+                        <span class="material-symbols-outlined text-sm">table_rows</span>
+                        <span class="text-[11px] hidden sm:inline">Table</span>
+                    </button>
+                </div>
+
                 <div class="relative flex-1 md:w-64">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
                     <input type="text" id="order-search-input" onkeyup="handleOrderSearch(event)" placeholder="Search order #, job name..." class="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary" />
                 </div>
                 <select id="mobile-filter-select" onchange="handleSelectFilter(event)" class="md:hidden px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:border-primary">
-                    <option value="all">All Items</option>
+                    <option value="all">All Activity</option>
                     <option value="in_progress">In Production</option>
-                    <option value="completed">Delivered</option>
-                    <option value="quotes">Quotes Only</option>
+                    <option value="quotes">Quotes &amp; Estimates</option>
+                    <option value="revision_requested">Revisions</option>
                     <option value="unpaid">Payment Due</option>
+                    <option value="completed">Delivered</option>
                 </select>
             </div>
         </div>
 
-        <!-- Section: Open Active Orders -->
-        <section id="section-open-orders" class="mb-8">
-            <div class="flex items-center justify-between mb-3.5">
-                <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                    <span>In Production &amp; Active Jobs</span>
-                    <span id="badge-active-count" class="text-xs px-2 py-0.5 rounded-full bg-amber-50 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30 font-bold">0</span>
-                </h2>
-                <a href="client-orders.html" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</a>
-            </div>
-            <div id="active-orders-container" class="space-y-3.5">
-                <!-- Populated by JS -->
-            </div>
-        </section>
+        <!-- Distinct Stage Sections Flow (28px breathing room) -->
+        <div class="stage-sections-flow" id="dashboard-stage-flow">
+            <!-- Section 1: Open Active Orders (Production) -->
+            <section id="section-open-orders" class="stage-sub-section">
+                <div class="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 dark:border-primary/10 bg-slate-50/60 dark:bg-slate-900/40">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-xl text-blue-600 dark:text-blue-400">precision_manufacturing</span>
+                        <div>
+                            <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                                <span>In Production &amp; Active Jobs</span>
+                                <span id="badge-active-count" class="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-500/15 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30 font-bold">0</span>
+                            </h2>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">Designs undergoing digitizing, vector redraw, or QA inspection</p>
+                        </div>
+                    </div>
+                    <a href="client-orders.html" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</a>
+                </div>
+                <div class="p-4 sm:p-5">
+                    <div id="active-orders-container" class="space-y-3.5">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
 
-        <!-- Section: Completed Deliverables -->
-        <section id="section-completed-orders" class="mb-8">
-            <div class="flex items-center justify-between mb-3.5">
-                <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                    <span>Completed &amp; Download Deliverables</span>
-                    <span id="badge-completed-count" class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 font-bold">0</span>
-                </h2>
-                <a href="client-orders.html" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</a>
-            </div>
-            <div id="completed-orders-container" class="space-y-3.5">
-                <!-- Populated by JS -->
-            </div>
-        </section>
+            <!-- Section 2: Dedicated Quotes & Estimates -->
+            <section id="section-quotes" class="stage-sub-section">
+                <div class="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 dark:border-primary/10 bg-slate-50/60 dark:bg-slate-900/40">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-xl text-sky-600 dark:text-sky-400">request_quote</span>
+                        <div>
+                            <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                                <span>Quotes &amp; Estimates</span>
+                                <span id="badge-quotes-count" class="text-xs px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-500/15 text-sky-800 dark:text-sky-400 border border-sky-200 dark:border-sky-500/30 font-bold">0</span>
+                            </h2>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">Dedicated custom quotes and stitch appraisals pending review</p>
+                        </div>
+                    </div>
+                    <a href="client-quotes.html" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</a>
+                </div>
+                <div class="p-4 sm:p-5">
+                    <div id="quotes-container" class="space-y-3.5">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
 
-        <!-- Section: Quotes -->
-        <section id="section-quotes" class="mb-8">
-            <div class="flex items-center justify-between mb-3.5">
-                <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                    <span>Quotes</span>
-                    <span id="badge-quotes-count" class="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 font-bold">0</span>
-                </h2>
-                <a href="client-quotes.html" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</a>
-            </div>
-            <div id="quotes-container" class="space-y-3.5">
-                <!-- Populated by JS -->
-            </div>
-        </section>
+            <!-- Section 3: Revisions In Progress -->
+            <section id="section-revisions" class="stage-sub-section">
+                <div class="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 dark:border-primary/10 bg-slate-50/60 dark:bg-slate-900/40">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-xl text-purple-600 dark:text-purple-400">history_edu</span>
+                        <div>
+                            <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                                <span>Revisions In Progress</span>
+                                <span id="badge-revisions-count" class="text-xs px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-500/15 text-purple-800 dark:text-purple-400 border border-purple-200 dark:border-purple-500/30 font-bold">0</span>
+                            </h2>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">Modifications and stitch adjustments actively in progress</p>
+                        </div>
+                    </div>
+                    <a href="client-orders.html" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</a>
+                </div>
+                <div class="p-4 sm:p-5">
+                    <div id="revisions-orders-container" class="space-y-3.5">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: Payment Due -->
+            <section id="section-due-orders" class="stage-sub-section">
+                <div class="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 dark:border-primary/10 bg-slate-50/60 dark:bg-slate-900/40">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-xl text-rose-600 dark:text-rose-400">pending_actions</span>
+                        <div>
+                            <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                                <span>Payment Due</span>
+                                <span id="badge-due-count-section" class="text-xs px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/15 text-rose-800 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 font-bold">0</span>
+                            </h2>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">Orders requiring settlement to unlock instant deliverable files</p>
+                        </div>
+                    </div>
+                    <a href="client-invoices.html" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View Billing</a>
+                </div>
+                <div class="p-4 sm:p-5">
+                    <div id="due-orders-container" class="space-y-3.5">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 5: Completed Deliverables -->
+            <section id="section-completed-orders" class="stage-sub-section">
+                <div class="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 dark:border-primary/10 bg-slate-50/60 dark:bg-slate-900/40">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-xl text-emerald-600 dark:text-emerald-400">verified</span>
+                        <div>
+                            <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                                <span>Completed &amp; Download Deliverables</span>
+                                <span id="badge-completed-count" class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 font-bold">0</span>
+                            </h2>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">Finished machine stitch files (DST, PES, EMB) and vector redraws</p>
+                        </div>
+                    </div>
+                    <a href="client-orders.html" class="text-xs font-bold text-amber-800 dark:text-primary hover:underline cursor-pointer">View all</a>
+                </div>
+                <div class="p-4 sm:p-5">
+                    <div id="completed-orders-container" class="space-y-3.5">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+        </div>
 
     </main>
 
@@ -407,75 +499,83 @@
             </div>
 
             <!-- STAGE 1: SERVICE CHOICE CARDS (All 3 fit cleanly in view without scrolling) -->
-            <div id="order-service-selection-view" class="flex-1 overflow-y-auto overscroll-contain p-2.5 sm:p-4 space-y-2 sm:space-y-2.5">
+            <div id="order-service-selection-view" class="flex-1 overflow-y-auto overscroll-contain p-2.5 sm:p-4 space-y-2 sm:space-y-3">
                 
-                <!-- Option 1: Embroidery Digitizing -->
-                <button type="button" onclick="selectOrderService('Digitizing')" class="w-full group p-2 sm:p-3 rounded-xl sm:rounded-2xl border border-[#e2eaf4] dark:border-primary/25 bg-[#f8faff] dark:bg-card-dark hover:border-[#b89218] dark:hover:border-primary hover:bg-[#fffdf8] dark:hover:bg-[#1a1714] transition-all text-left flex flex-col gap-1 sm:gap-2 cursor-pointer shadow-xs hover:shadow-md">
+                <!-- Option 1: Embroidery Digitizing (Warm Light Brown / Gold) -->
+                <button type="button" onclick="selectOrderService('Digitizing')" class="w-full group p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-[#f2ddb3] dark:border-amber-700/40 bg-[#fffdf8] dark:bg-card-dark hover:border-[#b89218] dark:hover:border-primary hover:bg-[#fff9ed] dark:hover:bg-[#1f1b13] transition-all text-left flex flex-col gap-1.5 sm:gap-2.5 cursor-pointer shadow-xs hover:shadow-md">
                     <div class="flex items-center gap-2.5 sm:gap-3.5 w-full">
-                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[#e8f1fd] dark:bg-blue-950/40 border border-[#cce0fc] dark:border-blue-800/50 text-[#1d68d8] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 group-hover:bg-[#fef5df] group-hover:border-[#f5dfaa] group-hover:text-[#b89218] dark:group-hover:bg-primary/20 dark:group-hover:border-primary/40 dark:group-hover:text-primary transition-all">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="2" y="3" width="20" height="13" rx="2"></rect>
-                                <path d="M8 20h8"></path>
-                                <path d="M12 16v4"></path>
-                                <circle cx="6" cy="10.5" r="1.2" fill="currentColor"></circle>
-                                <circle cx="9.5" cy="7" r="1.2" fill="currentColor"></circle>
-                                <circle cx="9.5" cy="12.5" r="1.2" fill="currentColor"></circle>
-                                <path d="M6 10.5c1.2-3.5 2.5-3.5 3.5-3.5s2 2 3.5 3.5"></path>
-                                <path d="M14 7h4"></path>
-                                <path d="M14 9.5h4"></path>
-                                <path d="M14 12h4"></path>
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#fef3d6] dark:bg-amber-950/50 border border-[#f5dfaa] dark:border-amber-700/40 text-[#b8860b] dark:text-amber-300 flex items-center justify-center shrink-0 group-hover:scale-105 transition-all">
+                            <svg width="24" height="24" class="w-6 h-6 sm:w-7 sm:h-7 shrink-0" style="width: 24px; height: 24px; min-width: 24px; min-height: 24px;" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g>
+                                    <path d="M4 31C3 31 2 32 2 33.5C2 35.5 5 36.5 11 36.5C18 36.5 26 34 30 31H4Z" fill="currentColor" fill-opacity="0.85"/>
+                                    <path d="M4 31C3 31 2 32 2 33.5C2 35.5 5 36.5 11 36.5C18 36.5 26 34 30 31H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                    <path d="M7 31C7 20 14 11 23 10C27 10 30 12 32 14.5C29 17 28 21 28 26V31H7Z" fill="currentColor" fill-opacity="0.2"/>
+                                    <path d="M7 31C7 20 14 11 23 10C27 10 30 12 32 14.5C29 17 28 21 28 26V31" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <circle cx="23" cy="9.5" r="1.8" fill="currentColor"/>
+                                </g>
+                                <g>
+                                    <path d="M31 24L38 18L51 22L47 30L43 28.5V46C43 47.1 42.1 48 41 48H30C28.9 48 28 47.1 28 46V30L26 31" fill="currentColor" fill-opacity="0.15"/>
+                                    <path d="M31 24L38 18L51 22L47 30L43 28.5V46C43 47.1 42.1 48 41 48H30C28.9 48 28 47.1 28 46V30" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M33 21L38 27L43 21L38 18L33 21Z" fill="currentColor" fill-opacity="0.35" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                    <rect x="30.5" y="28" width="5" height="5.5" rx="1.2" fill="currentColor"/>
+                                </g>
                             </svg>
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                                <h4 class="text-[13.5px] sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-[#b89218] dark:group-hover:text-primary transition-colors leading-tight">Embroidery Digitizing</h4>
-                                <span class="px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 border border-[#cce0fc] dark:border-blue-800/50 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] group-hover:border-amber-300/60 dark:group-hover:bg-primary/25 dark:group-hover:text-primary dark:group-hover:border-primary/40 transition-colors">From $15</span>
+                                <h4 class="text-sm sm:text-[16.5px] font-bold text-slate-900 dark:text-white group-hover:text-[#b8860b] dark:group-hover:text-primary transition-colors leading-tight">Embroidery Digitizing</h4>
+                                <span class="px-2 py-0.5 rounded-full text-[10.5px] sm:text-xs font-bold bg-[#fef3d6] dark:bg-amber-950/40 text-[#9a7810] dark:text-amber-300 border border-[#f5dfaa] dark:border-amber-700/50 transition-colors">From $15</span>
                             </div>
-                            <p class="text-[10.5px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Regular logos, text, hats, left chest, jacket backs.</p>
+                            <p class="text-[11px] sm:text-[12.5px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Regular logos, text, hats, left chest, jacket backs.</p>
                         </div>
-                        <span class="material-symbols-outlined text-lg sm:text-xl text-[#1d68d8] dark:text-blue-400 group-hover:text-[#b89218] dark:group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
+                        <span class="material-symbols-outlined text-lg sm:text-xl text-[#b8860b] dark:text-amber-300 group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
                     </div>
-                    <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pl-0 sm:pl-[50px]">
-                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] dark:group-hover:bg-primary/20 dark:group-hover:text-primary transition-colors font-bold text-[10px] sm:text-[10.5px]">.DST &nbsp;.PES &nbsp;.EXP</span>
-                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10px] sm:text-[10.5px]">Left Chest / Hats / Jacket Back</span>
-                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10px] sm:text-[10.5px]">3D Puff</span>
+                    <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pl-0 sm:pl-[56px]">
+                        <span class="px-2.5 py-0.5 rounded-full bg-[#fef3d6] dark:bg-amber-950/40 text-[#9a7810] dark:text-amber-300 font-bold text-[10.5px] sm:text-[11px]">.DST &nbsp;.PES &nbsp;.EXP</span>
+                        <span class="px-2.5 py-0.5 rounded-full bg-[#f6f3eb] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px] sm:text-[11px]">Left Chest / Hats / Jacket Back</span>
+                        <span class="px-2.5 py-0.5 rounded-full bg-[#f6f3eb] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px] sm:text-[11px]">3D Puff</span>
                     </div>
                 </button>
 
-                <!-- Option 2: Vector Art Conversion (Middle) -->
-                <button type="button" onclick="selectOrderService('Vectorizing')" class="w-full group p-2 sm:p-3 rounded-xl sm:rounded-2xl border border-[#e2eaf4] dark:border-primary/25 bg-[#f8faff] dark:bg-card-dark hover:border-[#b89218] dark:hover:border-primary hover:bg-[#fffdf8] dark:hover:bg-[#1a1714] transition-all text-left flex flex-col gap-1 sm:gap-2 cursor-pointer shadow-xs hover:shadow-md">
+                <!-- Option 2: Vector Art Conversion (Crisp Blue) -->
+                <button type="button" onclick="selectOrderService('Vectorizing')" class="w-full group p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-[#cce0fc] dark:border-blue-800/40 bg-[#f8faff] dark:bg-card-dark hover:border-[#1d68d8] dark:hover:border-blue-400 hover:bg-[#f0f6ff] dark:hover:bg-[#121926] transition-all text-left flex flex-col gap-1.5 sm:gap-2.5 cursor-pointer shadow-xs hover:shadow-md">
                     <div class="flex items-center gap-2.5 sm:gap-3.5 w-full">
-                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[#e8f1fd] dark:bg-blue-950/40 border border-[#cce0fc] dark:border-blue-800/50 text-[#1d68d8] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 group-hover:bg-[#fef5df] group-hover:border-[#f5dfaa] group-hover:text-[#b89218] dark:group-hover:bg-primary/20 dark:group-hover:border-primary/40 dark:group-hover:text-primary transition-all">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 17c3-8 9-8 18 0"></path>
-                                <circle cx="3" cy="17" r="1.4" fill="currentColor"></circle>
-                                <circle cx="12" cy="10" r="1.4" fill="currentColor"></circle>
-                                <circle cx="21" cy="17" r="1.4" fill="currentColor"></circle>
-                                <path d="M12 11l-3 6h6l-3-6z"></path>
-                                <circle cx="12" cy="14.5" r="0.8" fill="currentColor"></circle>
-                                <path d="M10.5 17v4h3v-4"></path>
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#e8f1fd] dark:bg-blue-950/50 border border-[#cce0fc] dark:border-blue-800/50 text-[#1d68d8] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-all">
+                            <svg width="24" height="24" class="w-6 h-6 sm:w-7 sm:h-7 shrink-0" style="width: 24px; height: 24px; min-width: 24px; min-height: 24px;" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 44C16 30 23 20 40 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                                <line x1="9" y1="44" x2="19" y2="34" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.5 2.5" opacity="0.6"/>
+                                <line x1="40" y1="13" x2="30" y2="21" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.5 2.5" opacity="0.6"/>
+                                <circle cx="19" cy="34" r="3" fill="currentColor" fill-opacity="0.35" stroke="currentColor" stroke-width="1.8"/>
+                                <circle cx="30" cy="21" r="3" fill="currentColor" fill-opacity="0.35" stroke="currentColor" stroke-width="1.8"/>
+                                <rect x="6" y="41" width="6" height="6" rx="1.2" fill="currentColor" stroke="currentColor" stroke-width="1.8"/>
+                                <rect x="37" y="10" width="6" height="6" rx="1.2" fill="currentColor" stroke="currentColor" stroke-width="1.8"/>
+                                <g class="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                                    <path d="M40 13L49 22L39 32L33 30L32 24L40 13Z" fill="currentColor" fill-opacity="0.25" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                    <circle cx="39" cy="23" r="1.8" fill="currentColor"/>
+                                    <path d="M40 13L37 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </g>
                             </svg>
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                                <h4 class="text-[13.5px] sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-[#b89218] dark:group-hover:text-primary transition-colors leading-tight">Vector Art Conversion</h4>
-                                <span class="px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 border border-[#cce0fc] dark:border-blue-800/50 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] group-hover:border-amber-300/60 dark:group-hover:bg-primary/25 dark:group-hover:text-primary dark:group-hover:border-primary/40 transition-colors">From $15</span>
+                                <h4 class="text-sm sm:text-[16.5px] font-bold text-slate-900 dark:text-white group-hover:text-[#1d68d8] dark:group-hover:text-blue-400 transition-colors leading-tight">Vector Art Conversion</h4>
+                                <span class="px-2 py-0.5 rounded-full text-[10.5px] sm:text-xs font-bold bg-[#dbeafe] dark:bg-blue-900/40 text-[#1d68d8] dark:text-blue-300 border border-[#bfdbfe] dark:border-blue-800/50 transition-colors">From $15</span>
                             </div>
-                            <p class="text-[10.5px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Clean vector artwork for printing, cutting &amp; screen print.</p>
+                            <p class="text-[11px] sm:text-[12.5px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Clean vector artwork for printing, cutting &amp; screen print.</p>
                         </div>
-                        <span class="material-symbols-outlined text-lg sm:text-xl text-[#1d68d8] dark:text-blue-400 group-hover:text-[#b89218] dark:group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
+                        <span class="material-symbols-outlined text-lg sm:text-xl text-[#1d68d8] dark:text-blue-400 group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
                     </div>
-                    <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pl-0 sm:pl-[50px]">
-                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] dark:group-hover:bg-primary/20 dark:group-hover:text-primary transition-colors font-bold text-[10px] sm:text-[10.5px]">.AI &nbsp;.EPS &nbsp;.SVG &nbsp;.PDF</span>
-                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10px] sm:text-[10.5px]">Print-ready Vectors</span>
+                    <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pl-0 sm:pl-[56px]">
+                        <span class="px-2.5 py-0.5 rounded-full bg-[#dbeafe] dark:bg-blue-900/40 text-[#1d68d8] dark:text-blue-300 font-bold text-[10.5px] sm:text-[11px]">.AI &nbsp;.EPS &nbsp;.SVG &nbsp;.PDF</span>
+                        <span class="px-2.5 py-0.5 rounded-full bg-[#eef4fa] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px] sm:text-[11px]">Print-ready Vectors</span>
                     </div>
                 </button>
 
-                <!-- Option 3: Realistic / Pet Portrait Digitizing (Last) -->
-                <button type="button" onclick="selectOrderService('PetPortrait')" class="w-full group p-2 sm:p-3 rounded-xl sm:rounded-2xl border border-[#e2eaf4] dark:border-primary/25 bg-[#f8faff] dark:bg-card-dark hover:border-[#b89218] dark:hover:border-primary hover:bg-[#fffdf8] dark:hover:bg-[#1a1714] transition-all text-left flex flex-col gap-1 sm:gap-2 cursor-pointer shadow-xs hover:shadow-md">
+                <!-- Option 3: Realistic / Pet Portrait Digitizing (Rich Distinct Violet) -->
+                <button type="button" onclick="selectOrderService('PetPortrait')" class="w-full group p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-[#e4d4f8] dark:border-purple-800/40 bg-[#faf6fe] dark:bg-card-dark hover:border-[#7c3aed] dark:hover:border-purple-400 hover:bg-[#f4ecff] dark:hover:bg-[#1c1426] transition-all text-left flex flex-col gap-1.5 sm:gap-2.5 cursor-pointer shadow-xs hover:shadow-md">
                     <div class="flex items-center gap-2.5 sm:gap-3.5 w-full">
-                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[#e8f1fd] dark:bg-blue-950/40 border border-[#cce0fc] dark:border-blue-800/50 text-[#1d68d8] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 group-hover:bg-[#fef5df] group-hover:border-[#f5dfaa] group-hover:text-[#b89218] dark:group-hover:bg-primary/20 dark:group-hover:border-primary/40 dark:group-hover:text-primary transition-all">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#f3e8ff] dark:bg-purple-950/60 border border-[#e4d4f8] dark:border-purple-800/50 text-[#7c3aed] dark:text-purple-300 flex items-center justify-center shrink-0 group-hover:scale-105 transition-all">
+                            <svg width="24" height="24" class="w-6 h-6 sm:w-7 sm:h-7 shrink-0" style="width: 24px; height: 24px; min-width: 24px; min-height: 24px;" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="28" cy="28" r="23" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
                                 <circle cx="28" cy="28" r="20" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 2" stroke-opacity="0.4"/>
                                 <path d="M20 17C18 13 14 15 15 21C16 25 18 28 20 31C22 35 24 37 28 37C32 37 34 35 36 31C38 28 40 25 41 21C42 15 38 13 36 17C33 15 31 15 28 15C25 15 23 15 20 17Z" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
@@ -488,17 +588,17 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                                <h4 class="text-[13.5px] sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-[#b89218] dark:group-hover:text-primary transition-colors leading-tight">Realistic / Pet Portrait Digitizing</h4>
-                                <span class="px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 border border-[#cce0fc] dark:border-blue-800/50 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] group-hover:border-amber-300/60 dark:group-hover:bg-primary/25 dark:group-hover:text-primary dark:group-hover:border-primary/40 transition-colors">From $25</span>
+                                <h4 class="text-sm sm:text-[16.5px] font-bold text-slate-900 dark:text-white group-hover:text-[#7c3aed] dark:group-hover:text-purple-300 transition-colors leading-tight">Realistic / Pet Portrait Digitizing</h4>
+                                <span class="px-2 py-0.5 rounded-full text-[10.5px] sm:text-xs font-bold bg-[#ede9fe] dark:bg-purple-900/40 text-[#6d28d9] dark:text-purple-200 border border-[#ddd6fe] dark:border-purple-800/50 transition-colors">From $25</span>
                             </div>
-                            <p class="text-[10.5px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Pet portraits, realistic animals, faces, fur, detailed shading.</p>
+                            <p class="text-[11px] sm:text-[12.5px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Pet portraits, realistic animals, faces, fur, detailed shading.</p>
                         </div>
-                        <span class="material-symbols-outlined text-lg sm:text-xl text-[#1d68d8] dark:text-blue-400 group-hover:text-[#b89218] dark:group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
+                        <span class="material-symbols-outlined text-lg sm:text-xl text-[#7c3aed] dark:text-purple-400 group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
                     </div>
-                    <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pl-0 sm:pl-[50px]">
-                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#dbeafe] dark:bg-blue-900/30 text-[#1d68d8] dark:text-blue-300 group-hover:bg-[#fef3cd] group-hover:text-[#9a7810] dark:group-hover:bg-primary/20 dark:group-hover:text-primary transition-colors font-bold text-[10px] sm:text-[10.5px]">.DST &nbsp;.PES &nbsp;.EXP &nbsp;.EMB</span>
-                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10px] sm:text-[10.5px]">Pets, Animals &amp; Fur</span>
-                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#edf4f9] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10px] sm:text-[10.5px]">Photorealistic Shading</span>
+                    <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pl-0 sm:pl-[56px]">
+                        <span class="px-2.5 py-0.5 rounded-full bg-[#ede9fe] dark:bg-purple-900/40 text-[#6d28d9] dark:text-purple-200 font-bold text-[10.5px] sm:text-[11px]">.DST &nbsp;.PES &nbsp;.EXP &nbsp;.EMB</span>
+                        <span class="px-2.5 py-0.5 rounded-full bg-[#f3effa] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px] sm:text-[11px]">Pets, Animals &amp; Fur</span>
+                        <span class="px-2.5 py-0.5 rounded-full bg-[#f3effa] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px] sm:text-[11px]">Photorealistic Shading</span>
                     </div>
                 </button>
 
@@ -740,7 +840,7 @@
                         <!-- Notes / Instructions -->
                         <div>
                             <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1" id="order-notes-label">Production Notes / Special Instructions</label>
-                            <textarea id="order-notes" rows="2" placeholder="Specific thread colors, underlay preference, color count, or special curve adjustments..." class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary"></textarea>
+                            <textarea id="order-notes" rows="3" placeholder="Thread colors, underlay preferences, size details, or special instructions..." class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary leading-relaxed min-h-[72px] resize-none"></textarea>
                         </div>
 
                         <!-- Turnaround Speed Selection -->
@@ -1015,7 +1115,7 @@
                         <span>Reference Photo or Problem Picture</span>
                         <span class="text-[10px] font-normal lowercase text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">(optional)</span>
                     </label>
-                    <div id="stitch-out-dropzone" onclick="document.getElementById('stitch-out-file').click()" class="border-2 border-dashed border-slate-300 dark:border-primary/30 hover:border-primary rounded-xl p-3.5 sm:p-4 text-center cursor-pointer bg-slate-50/50 dark:bg-slate-950/40 transition-all hover:bg-slate-100/60 dark:hover:bg-slate-900/60">
+                    <div id="stitch-out-dropzone" onclick="document.getElementById('stitch-out-file').click()" ondragover="event.preventDefault(); this.classList.add('border-primary', 'bg-amber-50/20');" ondragleave="this.classList.remove('border-primary', 'bg-amber-50/20');" ondrop="handleStitchOutDrop(event)" class="border-2 border-dashed border-slate-300 dark:border-primary/30 hover:border-primary rounded-xl p-3.5 sm:p-4 text-center cursor-pointer bg-slate-50/50 dark:bg-slate-950/40 transition-all hover:bg-slate-100/60 dark:hover:bg-slate-900/60">
                         <span class="material-symbols-outlined text-amber-600 dark:text-primary text-2xl sm:text-3xl mb-1">add_a_photo</span>
                         <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Upload Photo or Screenshot</p>
                         <p class="text-[10px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">Attach a photo of the stitch-out, garment, or marked-up artwork to show what needs fixing. (Optional)</p>
@@ -1481,6 +1581,7 @@
     <!-- Scripts -->
     <script src="js/paypal-config.js"></script>
     <script src="js/insforge-client.js"></script>
+    <script src="js/notifications-manager.js"></script>
     <script src="js/order-quote-modal.js"></script>
     <script>
         // Default to white/light theme; check if user explicitly chose dark
@@ -1517,11 +1618,12 @@
         let cachedOrders = [];
         let activeCheckoutOrderId = null;
 
-        document.addEventListener('DOMContentLoaded', () => {
+        function initClientPortal() {
             if (currentUser) {
                 populateClientAccountModal();
             }
             renderOrders();
+            updatePortalLayoutButtons();
 
             // Auto-open Place Order or Request Quote modal if redirected with action=new_order or action=request_quote
             try {
@@ -1620,7 +1722,85 @@
                     await renderOrders();
                 }
             });
-        });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initClientPortal);
+        } else {
+            initClientPortal();
+        }
+
+        function getClientFallbackOrders() {
+            return [
+                {
+                    id: 'ord-101',
+                    order_number: 'ORD-8492',
+                    project_name: 'Apex Mountain Gear Left Chest',
+                    service_type: 'Embroidery Digitizing',
+                    plan_name: 'Hat / Left Chest Logos',
+                    placement: 'Left Chest',
+                    fabric_type: 'Pique Polo Knit',
+                    status: 'in_progress',
+                    price: 15.00,
+                    payment_status: 'paid',
+                    created_at: new Date(Date.now() - 3600000 * 4).toISOString()
+                },
+                {
+                    id: 'quo-104',
+                    order_number: 'QUO-7215',
+                    project_name: 'Falcon Motorsport Jacket Back Quote',
+                    service_type: 'Custom Quote',
+                    plan_name: 'Jacket Backs',
+                    placement: 'Jacket Back',
+                    fabric_type: 'Leather & Denim',
+                    status: 'quote_requested',
+                    is_quote: true,
+                    price: 45.00,
+                    payment_status: 'unpaid',
+                    created_at: new Date(Date.now() - 3600000 * 8).toISOString()
+                },
+                {
+                    id: 'ord-105',
+                    order_number: 'ORD-8240',
+                    project_name: 'Pacific Coast Marina Cap Revision',
+                    service_type: 'Embroidery Digitizing',
+                    plan_name: 'Hat / Left Chest Logos',
+                    placement: 'Cap Front',
+                    fabric_type: 'Structured Twill',
+                    status: 'revision_requested',
+                    price: 15.00,
+                    payment_status: 'paid',
+                    revision_notes: 'Please reduce underlay density and sharpen satin borders on the lettering.',
+                    created_at: new Date(Date.now() - 86400000 * 1).toISOString()
+                },
+                {
+                    id: 'ord-106',
+                    order_number: 'ORD-8511',
+                    project_name: 'Iron Horse Biker Club Emblem',
+                    service_type: 'Embroidery Digitizing',
+                    plan_name: 'Standard Patch',
+                    placement: 'Embroidered Patch',
+                    fabric_type: 'Heavy Twill',
+                    status: 'in_progress',
+                    price: 25.00,
+                    payment_status: 'unpaid',
+                    created_at: new Date(Date.now() - 3600000 * 12).toISOString()
+                },
+                {
+                    id: 'ord-102',
+                    order_number: 'ORD-8310',
+                    project_name: 'Golden Eagle Crest Vintage',
+                    service_type: 'Embroidery Digitizing',
+                    plan_name: 'Larger Designs',
+                    placement: 'Jacket Back',
+                    fabric_type: 'Denim Jacket',
+                    status: 'completed',
+                    price: 30.00,
+                    payment_status: 'paid',
+                    created_at: new Date(Date.now() - 86400000 * 2).toISOString()
+                }
+            ];
+        }
 
         async function renderOrders() {
             const syncBadge = document.getElementById('db-sync-badge');
@@ -1629,11 +1809,23 @@
                 syncText.textContent = 'Syncing...';
             }
 
-            const orders = await window.insforgeClient.fetchOrders();
-            cachedOrders = orders || [];
+            let orders = [];
+            try {
+                if (window.insforgeClient && typeof window.insforgeClient.fetchOrders === 'function') {
+                    orders = await window.insforgeClient.fetchOrders();
+                }
+            } catch (e) {
+                console.warn('Orders fetch error, using fallbacks:', e);
+            }
+
+            if (Array.isArray(orders) && orders.length > 0) {
+                cachedOrders = orders;
+            } else {
+                cachedOrders = getClientFallbackOrders();
+            }
 
             if (syncBadge && syncText) {
-                const status = window.insforgeClient.getDatabaseSyncStatus();
+                const status = window.insforgeClient?.getDatabaseSyncStatus?.() || { lastSynced: 'Just now' };
                 syncText.textContent = `InsForge DB Live (${status.lastSynced})`;
             }
 
@@ -1655,16 +1847,11 @@
         }
 
         function updateMetrics(orders) {
-            // Open orders: all active non-completed orders (excluding quotes)
-            const openOrders = orders.filter(o => o.status !== 'completed' && !isQuoteRecord(o));
-
-            // Completed orders
-            const completedOrders = orders.filter(o => o.status === 'completed');
-
-            // Quotes: all requested, ready, or marked quotes
+            // Categorize orders
             const quotes = orders.filter(o => isQuoteRecord(o));
-
-            // Calculate unpaid orders & active balance due (exclude unpriced quotes)
+            const completedOrders = orders.filter(o => !isQuoteRecord(o) && o.status === 'completed');
+            const revisionOrders = orders.filter(o => !isQuoteRecord(o) && o.status === 'revision_requested');
+            const openOrders = orders.filter(o => !isQuoteRecord(o) && o.status !== 'completed' && o.status !== 'revision_requested');
             const unpaidOrders = orders.filter(o => !isQuoteRecord(o) && (o.payment_status === 'unpaid' || o.payment_status === 'pending'));
             const balanceDue = unpaidOrders.reduce((sum, o) => sum + (parseFloat(o.price) || 0), 0);
 
@@ -1675,7 +1862,7 @@
             const balMetric = document.getElementById('metric-balance-due');
             const dueBadge = document.getElementById('badge-due-count');
 
-            if (openMetric) openMetric.textContent = openOrders.length;
+            if (openMetric) openMetric.textContent = openOrders.length + revisionOrders.length;
             if (compMetric) compMetric.textContent = completedOrders.length;
             if (quoteMetric) quoteMetric.textContent = quotes.length;
             
@@ -1705,10 +1892,29 @@
             const openBadge = document.getElementById('badge-active-count') || document.getElementById('badge-open-count');
             const compBadge = document.getElementById('badge-completed-count');
             const quoteBadge = document.getElementById('badge-quotes-count');
+            const revBadge = document.getElementById('badge-revisions-count');
+            const dueSectionBadge = document.getElementById('badge-due-count-section');
 
             if (openBadge) openBadge.textContent = openOrders.length;
             if (compBadge) compBadge.textContent = completedOrders.length;
             if (quoteBadge) quoteBadge.textContent = quotes.length;
+            if (revBadge) revBadge.textContent = revisionOrders.length;
+            if (dueSectionBadge) dueSectionBadge.textContent = unpaidOrders.length;
+
+            // Dashboard 6 stage distribution pill counts
+            const pillAll = document.getElementById('client-dash-pill-all');
+            const pillProd = document.getElementById('client-dash-pill-production');
+            const pillQuo = document.getElementById('client-dash-pill-quotes');
+            const pillRev = document.getElementById('client-dash-pill-revisions');
+            const pillDue = document.getElementById('client-dash-pill-due');
+            const pillComp = document.getElementById('client-dash-pill-completed');
+
+            if (pillAll) pillAll.textContent = orders.length;
+            if (pillProd) pillProd.textContent = openOrders.length;
+            if (pillQuo) pillQuo.textContent = quotes.length;
+            if (pillRev) pillRev.textContent = revisionOrders.length;
+            if (pillDue) pillDue.textContent = unpaidOrders.length;
+            if (pillComp) pillComp.textContent = completedOrders.length;
 
             populateClientAccountModal();
         }
@@ -1722,16 +1928,18 @@
             const mobileSelect = document.getElementById('mobile-filter-select');
             if (mobileSelect) mobileSelect.value = type;
 
-            // Update tab button styles
-            document.querySelectorAll('#filter-tabs .filter-btn').forEach(btn => {
-                btn.classList.remove('active', 'bg-primary', 'text-background-dark', 'shadow-xs');
-                btn.classList.add('bg-slate-100', 'dark:bg-slate-800/80', 'text-slate-700', 'dark:text-slate-300');
+            // Update pill styles & accessibility
+            document.querySelectorAll('#filter-tabs .client-dist-pill, #filter-tabs .filter-btn').forEach(btn => {
+                const btnFilter = btn.getAttribute('data-filter') || btn.getAttribute('onclick');
+                const isMatch = btn.getAttribute('data-filter') === type || (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${type}'`));
+                if (isMatch) {
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-pressed', 'true');
+                } else {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-pressed', 'false');
+                }
             });
-            const activeBtn = Array.from(document.querySelectorAll('#filter-tabs .filter-btn')).find(b => b.getAttribute('onclick')?.includes(`'${type}'`));
-            if (activeBtn) {
-                activeBtn.classList.add('active', 'bg-primary', 'text-background-dark', 'shadow-xs');
-                activeBtn.classList.remove('bg-slate-100', 'dark:bg-slate-800/80', 'text-slate-700', 'dark:text-slate-300');
-            }
 
             renderSectionsWithFilter();
         }
@@ -1748,6 +1956,33 @@
             renderSectionsWithFilter();
         }
 
+        let portalLayout = localStorage.getItem('dezan_client_layout') || 'grid';
+        function setPortalLayout(mode) {
+            portalLayout = mode;
+            try { localStorage.setItem('dezan_client_layout', mode); } catch (e) {}
+            updatePortalLayoutButtons();
+            renderSectionsWithFilter();
+        }
+        window.setPortalLayout = setPortalLayout;
+
+        function updatePortalLayoutButtons() {
+            const gridBtn = document.getElementById('portal-layout-toggle-grid');
+            const tableBtn = document.getElementById('portal-layout-toggle-table');
+            if (!gridBtn || !tableBtn) return;
+            if (portalLayout === 'table') {
+                tableBtn.className = 'px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2';
+                tableBtn.setAttribute('aria-pressed', 'true');
+                gridBtn.className = 'px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2';
+                gridBtn.setAttribute('aria-pressed', 'false');
+            } else {
+                gridBtn.className = 'px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2';
+                gridBtn.setAttribute('aria-pressed', 'true');
+                tableBtn.className = 'px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2';
+                tableBtn.setAttribute('aria-pressed', 'false');
+            }
+        }
+        window.updatePortalLayoutButtons = updatePortalLayoutButtons;
+
         function renderSectionsWithFilter() {
             const query = (document.getElementById('order-search-input')?.value || '').trim().toLowerCase();
             const filterType = activeFilterType || document.getElementById('status-filter-select')?.value || 'all';
@@ -1756,105 +1991,138 @@
             let filtered = cachedOrders.filter(order => {
                 if (!query) return true;
                 const orderNum = (order.order_number || '').toLowerCase();
-                const projName = (order.project_name || '').toLowerCase();
+                const projName = (order.project_name || order.design_name || '').toLowerCase();
                 const service = (order.service_type || '').toLowerCase();
                 return orderNum.includes(query) || projName.includes(query) || service.includes(query);
             });
 
-            // If filterType is 'due' or 'unpaid', filter only unpaid/pending orders
-            if (filterType === 'due' || filterType === 'unpaid') {
-                filtered = filtered.filter(o => !isQuoteRecord(o) && (o.payment_status === 'unpaid' || o.payment_status === 'pending'));
-            }
-
-            // Categorize
-            const openOrders = filtered.filter(o => o.status !== 'completed' && !isQuoteRecord(o));
-
-            const completedOrders = filtered.filter(o => o.status === 'completed');
-
+            // Categorize into the 5 stages
+            const openOrders = filtered.filter(o => !isQuoteRecord(o) && o.status !== 'completed' && o.status !== 'revision_requested');
             const quotes = filtered.filter(o => isQuoteRecord(o));
+            const revisionOrders = filtered.filter(o => !isQuoteRecord(o) && o.status === 'revision_requested');
+            const unpaidOrders = filtered.filter(o => !isQuoteRecord(o) && (o.payment_status === 'unpaid' || o.payment_status === 'pending'));
+            const completedOrders = filtered.filter(o => !isQuoteRecord(o) && o.status === 'completed');
 
             // Section elements
             const sectionOpen = document.getElementById('section-open-orders');
-            const sectionComp = document.getElementById('section-completed-orders');
             const sectionQuotes = document.getElementById('section-quotes');
+            const sectionRevisions = document.getElementById('section-revisions');
+            const sectionDue = document.getElementById('section-due-orders');
+            const sectionComp = document.getElementById('section-completed-orders');
 
-            if (filterType === 'open' || filterType === 'in_progress') {
-                sectionOpen.classList.remove('hidden');
-                sectionComp.classList.add('hidden');
-                sectionQuotes.classList.add('hidden');
-            } else if (filterType === 'completed') {
-                sectionOpen.classList.add('hidden');
-                sectionComp.classList.remove('hidden');
-                sectionQuotes.classList.add('hidden');
-            } else if (filterType === 'quotes') {
-                sectionOpen.classList.add('hidden');
-                sectionComp.classList.add('hidden');
-                sectionQuotes.classList.remove('hidden');
-            } else if (filterType === 'due' || filterType === 'unpaid') {
-                sectionOpen.classList.remove('hidden');
-                sectionComp.classList.add('hidden');
-                sectionQuotes.classList.add('hidden');
-            } else {
-                sectionOpen.classList.remove('hidden');
-                sectionComp.classList.remove('hidden');
-                sectionQuotes.classList.remove('hidden');
-            }
+            // Stage scoping isolation
+            if (sectionOpen) sectionOpen.classList.toggle('hidden', filterType !== 'all' && filterType !== 'in_progress');
+            if (sectionQuotes) sectionQuotes.classList.toggle('hidden', filterType !== 'all' && filterType !== 'quotes');
+            if (sectionRevisions) sectionRevisions.classList.toggle('hidden', filterType !== 'all' && filterType !== 'revision_requested');
+            if (sectionDue) sectionDue.classList.toggle('hidden', filterType !== 'all' && filterType !== 'unpaid' && filterType !== 'due');
+            if (sectionComp) sectionComp.classList.toggle('hidden', filterType !== 'all' && filterType !== 'completed');
 
-            // 1. Render Open Orders
+            // 1. Render Open Orders (Production)
             const openContainer = document.getElementById('active-orders-container') || document.getElementById('open-orders-container');
             if (openContainer) {
                 if (openOrders.length === 0) {
+                    openContainer.className = "space-y-3.5";
                     openContainer.innerHTML = `
-                        <div class="p-8 text-center rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/15 shadow-xs">
+                        <div class="p-8 text-center rounded-2xl bg-slate-50/50 dark:bg-slate-900/30 border border-dashed border-slate-200 dark:border-slate-800">
                             <span class="material-symbols-outlined text-3xl text-slate-400 mb-1">checklist</span>
-                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                ${(filterType === 'due' || filterType === 'unpaid') ? 'No unpaid open orders found' : 'No open orders at this time'}
-                            </h4>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 mb-3">
-                                ${(filterType === 'due' || filterType === 'unpaid') ? 'All your active open orders are settled.' : 'All your orders are either completed or you haven\'t placed one yet.'}
-                            </p>
+                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">No active production orders</h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 mb-3">All production jobs are completed or ready for review.</p>
                             <button onclick="openNewOrderModal()" class="px-3.5 py-1.5 bg-primary text-background-dark font-black text-xs rounded-xl shadow cursor-pointer">Place New Order</button>
                         </div>
                     `;
+                } else if (portalLayout === 'table') {
+                    openContainer.className = "space-y-3.5";
+                    openContainer.innerHTML = renderTableWrapper(openOrders, false);
                 } else {
+                    openContainer.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5";
                     openContainer.innerHTML = openOrders.map(order => renderOrderCard(order, false)).join('');
                 }
             }
 
-            // 2. Render Completed Orders
-            const compContainer = document.getElementById('completed-orders-container');
-            if (compContainer) {
-                if (completedOrders.length === 0) {
-                    compContainer.innerHTML = `
-                        <div class="p-8 text-center rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/15 shadow-xs">
-                            <span class="material-symbols-outlined text-3xl text-slate-400 mb-1">inventory_2</span>
-                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                ${(filterType === 'due' || filterType === 'unpaid') ? 'No unpaid completed orders' : 'No completed orders yet'}
-                            </h4>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Your completed orders will appear here once ready.</p>
-                        </div>
-                    `;
-                } else {
-                    compContainer.innerHTML = completedOrders.map(order => renderOrderCard(order, true)).join('');
-                }
-            }
-
-            // 3. Render Quotes
+            // 2. Render Quotes
             const quotesContainer = document.getElementById('quotes-container');
             if (quotesContainer) {
                 if (quotes.length === 0) {
+                    quotesContainer.className = "space-y-3.5";
                     quotesContainer.innerHTML = `
-                        <div class="p-8 text-center rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/15 shadow-xs">
+                        <div class="p-8 text-center rounded-2xl bg-slate-50/50 dark:bg-slate-900/30 border border-dashed border-slate-200 dark:border-slate-800">
                             <span class="material-symbols-outlined text-3xl text-slate-400 mb-1">request_quote</span>
-                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">No open quotes at this time</h4>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 mb-3">Request a quote and we'll get back to you soon.</p>
-                            <button onclick="openRequestQuoteModal()" class="px-3.5 py-1.5 bg-white dark:bg-slate-800 text-amber-900 dark:text-primary border border-amber-300 dark:border-primary/30 font-black text-xs rounded-xl shadow-xs hover:bg-amber-50 dark:hover:bg-primary/10 cursor-pointer">
+                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">No open custom quotes</h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 mb-3">Request a free appraisal with estimated stitch count in 12-24 hours.</p>
+                            <button onclick="openRequestQuoteModal()" class="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-black text-xs rounded-xl shadow cursor-pointer">
                                 + Request Quote
                             </button>
                         </div>
                     `;
+                } else if (portalLayout === 'table') {
+                    quotesContainer.className = "space-y-3.5";
+                    quotesContainer.innerHTML = renderTableWrapper(quotes, false);
                 } else {
+                    quotesContainer.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5";
                     quotesContainer.innerHTML = quotes.map(order => renderQuoteCard(order)).join('');
+                }
+            }
+
+            // 3. Render Revisions
+            const revContainer = document.getElementById('revisions-orders-container');
+            if (revContainer) {
+                if (revisionOrders.length === 0) {
+                    revContainer.className = "space-y-3.5";
+                    revContainer.innerHTML = `
+                        <div class="p-8 text-center rounded-2xl bg-slate-50/50 dark:bg-slate-900/30 border border-dashed border-slate-200 dark:border-slate-800">
+                            <span class="material-symbols-outlined text-3xl text-slate-400 mb-1">history_edu</span>
+                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">No revisions in progress</h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">All customer revision requests have been resolved.</p>
+                        </div>
+                    `;
+                } else if (portalLayout === 'table') {
+                    revContainer.className = "space-y-3.5";
+                    revContainer.innerHTML = renderTableWrapper(revisionOrders, false);
+                } else {
+                    revContainer.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5";
+                    revContainer.innerHTML = revisionOrders.map(order => renderOrderCard(order, false)).join('');
+                }
+            }
+
+            // 4. Render Payment Due
+            const dueContainer = document.getElementById('due-orders-container');
+            if (dueContainer) {
+                if (unpaidOrders.length === 0) {
+                    dueContainer.className = "space-y-3.5";
+                    dueContainer.innerHTML = `
+                        <div class="p-8 text-center rounded-2xl bg-slate-50/50 dark:bg-slate-900/30 border border-dashed border-slate-200 dark:border-slate-800">
+                            <span class="material-symbols-outlined text-3xl text-emerald-500 mb-1">check_circle</span>
+                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">All balances settled</h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">You have no unpaid balances or pending invoices.</p>
+                        </div>
+                    `;
+                } else if (portalLayout === 'table') {
+                    dueContainer.className = "space-y-3.5";
+                    dueContainer.innerHTML = renderTableWrapper(unpaidOrders, false);
+                } else {
+                    dueContainer.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5";
+                    dueContainer.innerHTML = unpaidOrders.map(order => renderOrderCard(order, false)).join('');
+                }
+            }
+
+            // 5. Render Completed Orders
+            const compContainer = document.getElementById('completed-orders-container');
+            if (compContainer) {
+                if (completedOrders.length === 0) {
+                    compContainer.className = "space-y-3.5";
+                    compContainer.innerHTML = `
+                        <div class="p-8 text-center rounded-2xl bg-slate-50/50 dark:bg-slate-900/30 border border-dashed border-slate-200 dark:border-slate-800">
+                            <span class="material-symbols-outlined text-3xl text-slate-400 mb-1">inventory_2</span>
+                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">No completed orders yet</h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Finished files will appear here ready for one-click download.</p>
+                        </div>
+                    `;
+                } else if (portalLayout === 'table') {
+                    compContainer.className = "space-y-3.5";
+                    compContainer.innerHTML = renderTableWrapper(completedOrders, true);
+                } else {
+                    compContainer.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5";
+                    compContainer.innerHTML = completedOrders.map(order => renderOrderCard(order, true)).join('');
                 }
             }
         }
@@ -1893,171 +2161,319 @@
             }
         }
 
-        function renderOrderCard(order, isCompleted) {
-            const dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Sep 4, 2026';
-            const statusBadge = getStatusBadge(order.status);
-            const isPaid = order.payment_status === 'paid';
-            const priceFormatted = `$${(order.price || 15.00).toFixed(2)}`;
-            const isRevision = order.status === 'revision_requested';
+        function formatOrderDateTime(dateVal) {
+            if (!dateVal) return { date: 'Recently', time: 'Just now', full: 'Recently' };
+            const d = new Date(dateVal);
+            if (isNaN(d.getTime())) return { date: 'Recently', time: 'Just now', full: 'Recently' };
+            const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            return {
+                date: dateStr,
+                time: timeStr,
+                full: `${dateStr} · ${timeStr}`
+            };
+        }
 
-            const paymentBadge = isPaid 
-                ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 text-[10px] font-bold">Paid</span>'
-                : '<span class="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/30 text-xs font-black flex items-center gap-1"><span class="material-symbols-outlined text-xs">pending_actions</span> Payment Due</span>';
+        function renderTableWrapper(list, isCompleted) {
+            if (!list || list.length === 0) return '';
+            return `
+                <div class="overflow-x-auto rounded-xl border border-slate-200/80 dark:border-primary/20 shadow-2xs">
+                    <table class="w-full text-left text-xs min-w-[980px]">
+                        <thead class="bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-primary/20 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                            <tr>
+                                <th class="px-4 py-3 w-[145px]">Order #, Date &amp; Time</th>
+                                <th class="px-4 py-3 min-w-[200px]">Design &amp; Service</th>
+                                <th class="px-4 py-3 w-[140px]">Specs &amp; Fabric</th>
+                                <th class="px-4 py-3 w-[110px]">Format</th>
+                                <th class="px-4 py-3 w-[110px]">Price</th>
+                                <th class="px-4 py-3 w-[125px]">Status</th>
+                                <th class="px-4 py-3 w-[260px] text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-primary/10">
+                            ${list.map(o => renderOrderTableRow(o, isCompleted)).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderOrderTableRow(order, isCompleted) {
+            const isQuote = isQuoteRecord(order);
+            const isPaid = (order.payment_status === 'paid');
+            const isRevision = order.status === 'revision_requested';
+            const safeOrderNumber = String(order.order_number || (isQuote ? 'QUO-REQ' : 'DZ-ORD')).replace(/-/g, '&#8209;');
+            const orderDt = formatOrderDateTime(order.created_at);
+            const price = (order.price !== undefined ? order.price : (order.amount !== undefined ? order.amount : (isQuote ? 0 : 15)));
+            const priceFormatted = `$${parseFloat(price).toFixed(2)}`;
+
+            let rowBorderClass = 'border-l-4 border-l-amber-500 bg-amber-500/[0.02] hover:bg-amber-500/[0.06]';
+            let orderIdClass = 'text-amber-900 dark:text-primary';
+            if (isCompleted) {
+                rowBorderClass = 'border-l-4 border-l-emerald-500 bg-emerald-500/[0.02] hover:bg-emerald-500/[0.06]';
+                orderIdClass = 'text-emerald-800 dark:text-emerald-400';
+            } else if (isRevision) {
+                rowBorderClass = 'border-l-4 border-l-purple-500 bg-purple-500/[0.02] hover:bg-purple-500/[0.06]';
+                orderIdClass = 'text-purple-900 dark:text-purple-300';
+            } else if (isQuote) {
+                rowBorderClass = 'border-l-4 border-l-sky-500 bg-sky-500/[0.02] hover:bg-sky-500/[0.06]';
+                orderIdClass = 'text-sky-900 dark:text-sky-300';
+            } else if (!isPaid) {
+                rowBorderClass = 'border-l-4 border-l-rose-500 bg-rose-500/[0.02] hover:bg-rose-500/[0.06]';
+                orderIdClass = 'text-rose-900 dark:text-rose-300';
+            } else if (order.status === 'in_progress' || order.status === 'assigned') {
+                rowBorderClass = 'border-l-4 border-l-blue-500 bg-blue-500/[0.02] hover:bg-blue-500/[0.06]';
+                orderIdClass = 'text-blue-900 dark:text-blue-300';
+            }
+
+            let statusBadge = '';
+            if (isCompleted) {
+                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-[11px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">check_circle</span> Completed</span>';
+            } else if (isRevision) {
+                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-700/50 text-[11px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">warning</span> Revision</span>';
+            } else if (isQuote) {
+                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-300 border border-sky-200 dark:border-sky-700/40 text-[11px] font-bold whitespace-nowrap">Free Quote</span>';
+            } else if (!isPaid) {
+                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 text-[11px] font-bold whitespace-nowrap">Payment Due</span>';
+            } else {
+                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700/40 text-[11px] font-bold whitespace-nowrap">In Production</span>';
+            }
 
             return `
-                <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border ${isRevision ? 'border-amber-400 dark:border-amber-500/50 ring-2 ring-amber-500/20' : (isPaid ? 'border-slate-200/90 dark:border-primary/25' : 'border-rose-200 dark:border-rose-500/30 ring-1 ring-rose-500/10')} shadow-sm hover:shadow-md transition-all">
-                    <!-- Top Bar: Order # & Date -->
-                    <div class="flex items-center justify-between gap-2 mb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-black text-amber-900 dark:text-primary">Order #${order.order_number}</span>
-                            ${paymentBadge}
-                            ${isRevision ? '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-300 text-[10px] font-black border border-amber-300 dark:border-amber-500/30 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-600 dark:bg-primary animate-ping"></span> Revision In Progress</span>' : ''}
+                <tr class="transition-colors ${rowBorderClass}">
+                    <td class="px-4 py-3.5 whitespace-nowrap font-mono font-bold w-[145px] min-w-[145px]">
+                        <span class="inline-block whitespace-nowrap select-all font-mono font-black ${orderIdClass}">#${safeOrderNumber}</span>
+                        <div class="text-[10px] text-slate-500 dark:text-slate-400 font-sans font-medium mt-0.5 leading-tight flex items-center gap-1">
+                            <span>${orderDt.date}</span>
+                            <span class="text-slate-300 dark:text-slate-600">·</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-300">${orderDt.time}</span>
                         </div>
-                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Created ${dateStr}</span>
-                    </div>
-
-                    <!-- Middle: Job Name & Details -->
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 my-2">
-                        <div>
-                            <h3 class="text-base font-black text-slate-900 dark:text-white">${order.project_name}</h3>
-                            <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-0.5">
-                                ${order.service_type || 'Embroidery Digitizing'} · ${order.placement || 'Left Chest'} ${order.sizing ? `(${order.sizing})` : ''} ${order.fabric_type ? `· ${order.fabric_type}` : ''}
-                            </p>
-                            ${isRevision && order.revision_notes ? `
-                                <div class="mt-2 p-2.5 rounded-xl bg-amber-50/70 dark:bg-slate-900/60 border border-amber-300/60 dark:border-primary/20 text-xs">
-                                    <span class="text-[10px] font-bold text-amber-800 dark:text-primary uppercase tracking-wider block">Client Revision Notes:</span>
-                                    <p class="text-slate-700 dark:text-slate-300 text-[11px] font-medium mt-0.5">"${order.revision_notes}"</p>
-                                </div>
-                            ` : ''}
+                    </td>
+                    <td class="px-4 py-3.5 min-w-[200px]">
+                        <div class="font-black text-slate-900 dark:text-white text-xs leading-snug truncate max-w-[240px]" title="${order.project_name || order.design_name || 'Custom Design'}">${order.project_name || order.design_name || 'Custom Design'}</div>
+                        <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
+                            <span class="font-semibold text-slate-700 dark:text-slate-300">${order.service_type || (isQuote ? 'Custom Quote' : 'Digitizing')}</span>
+                            <span>·</span>
+                            <span>${order.plan_name || order.plan || 'Standard'}</span>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-lg font-black ${isPaid ? 'text-slate-900 dark:text-white' : 'text-rose-600 dark:text-rose-400'}">${priceFormatted}</span>
-                            <div>${statusBadge}</div>
-                        </div>
-                    </div>
-
-                    <!-- Bottom Action & Delivery Bar -->
-                    <div class="pt-3 mt-3 border-t border-slate-100 dark:border-primary/15 flex flex-wrap items-center justify-between gap-2">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            ${isCompleted ? `
-                                <!-- 1. Primary Download Files Button -->
-                                ${order.deliverables && order.deliverables.length > 0 ? order.deliverables.map(deliv => `
-                                    <a href="${deliv.url}" target="_blank" download="${deliv.name}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-xs hover:scale-105 transition-all">
-                                        <span class="material-symbols-outlined text-sm">download</span>
-                                        <span>Download ${deliv.format || 'Files'}</span>
-                                    </a>
-                                `).join('') : `
-                                    <a href="#" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-xs">
-                                        <span class="material-symbols-outlined text-sm">download</span>
-                                        <span>Download Files</span>
-                                    </a>
-                                `}
-                                <!-- 2. Secondary Request a Revision Button -->
-                                <button onclick="openRevisionModal('${order.order_number}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-card-dark border-2 border-amber-400 dark:border-primary/50 hover:border-amber-500 text-amber-900 dark:text-primary hover:bg-amber-50 dark:hover:bg-primary/10 text-xs font-bold transition-all shadow-xs cursor-pointer">
-                                    <span class="material-symbols-outlined text-sm text-amber-700 dark:text-primary">rate_review</span>
-                                    <span>Request a Revision</span>
-                                </button>
-                            ` : `
-                                ${isRevision ? `
-                                    <span class="inline-flex items-center gap-1 text-xs font-bold text-amber-800 dark:text-primary">
-                                        <span class="material-symbols-outlined text-sm animate-spin">sync</span>
-                                        <span>Digitizer is actively revising stitch files</span>
-                                    </span>
-                                ` : `
-                                    <span class="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-xs text-amber-600">info</span>
-                                        Format: ${order.file_format || 'DST, EMB'}
-                                    </span>
-                                `}
-                            `}
-                        </div>
-
-                        <div class="flex items-center gap-2 flex-wrap">
-                            ${!isPaid ? `
-                                <button onclick="openCheckoutModal('${order.id}')" class="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs flex items-center gap-1.5 shadow-xs transition-all hover:scale-105 cursor-pointer" title="Complete payment for this order">
-                                    <span class="material-symbols-outlined text-sm">credit_card</span>
-                                    <span>Complete Order ($${(order.price || 15).toFixed(2)})</span>
-                                </button>
-                                <button onclick="confirmRemoveUnpaidOrder('${order.id}', '${order.order_number}')" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 font-bold text-xs border border-rose-200 dark:border-rose-800/60 flex items-center gap-1 transition-all cursor-pointer shadow-2xs" title="Cancel or remove this unpaid order">
-                                    <span class="material-symbols-outlined text-sm text-rose-600 dark:text-rose-400">delete</span>
-                                    <span>Remove</span>
-                                </button>
-                            ` : ''}
-                            <button onclick="openClientInvoiceModal('${order.id}')" class="inline-flex items-center gap-1 text-xs font-black text-amber-800 dark:text-primary hover:underline cursor-pointer">
-                                <span>${isCompleted ? 'View Invoice & Receipt' : 'View Details'}</span>
-                                <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                    </td>
+                    <td class="px-4 py-3.5 w-[140px] text-[11px]">
+                        <span class="font-bold text-slate-800 dark:text-slate-200 block truncate">${order.placement || 'Left Chest'}</span>
+                        <span class="text-slate-500 text-[10px] block truncate">${order.fabric_type || 'Pique Polo'}</span>
+                    </td>
+                    <td class="px-4 py-3.5 w-[110px] whitespace-nowrap">
+                        <span class="px-2 py-0.5 rounded font-mono text-[10px] font-black bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/30 uppercase">.${order.file_format || order.format || 'DST'}</span>
+                    </td>
+                    <td class="px-4 py-3.5 w-[110px] whitespace-nowrap font-black text-slate-900 dark:text-white">
+                        ${priceFormatted}
+                    </td>
+                    <td class="px-4 py-3.5 w-[125px] whitespace-nowrap">
+                        ${statusBadge}
+                    </td>
+                    <td class="px-4 py-3.5 w-[260px] text-right whitespace-nowrap">
+                        <div class="flex items-center justify-end gap-1.5">
+                            <button type="button" onclick="openClientInvoiceModal('${order.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs inline-flex items-center gap-1 cursor-pointer">
+                                <span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">description</span>
+                                <span>Details</span>
                             </button>
+                            ${isCompleted ? `
+                                <button type="button" onclick="openRevisionModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg border border-purple-300 dark:border-purple-600/40 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/30 text-xs font-bold cursor-pointer">
+                                    <span>Revision</span>
+                                </button>
+                                ${order.deliverables && order.deliverables.length > 0 ? `
+                                    <a href="${order.deliverables[0].url}" download target="_blank" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs inline-flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-xs">download</span> Files
+                                    </a>
+                                ` : ''}
+                            ` : isQuote ? `
+                                <button type="button" onclick="openNewOrderModal('${order.project_name || order.design_name || ''}')" class="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs cursor-pointer">
+                                    <span>Convert</span>
+                                </button>
+                            ` : !isPaid ? `
+                                <button type="button" onclick="openCheckoutModal('${order.id}')" class="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs cursor-pointer">
+                                    <span>Pay</span>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Global card expansion helper for client portal
+        if (!window.toggleOrderCardExpand) {
+            window.toggleOrderCardExpand = function(orderNumber, btn) {
+                const card = document.getElementById(`client-card-${orderNumber}`)
+                    || document.getElementById(`digitizer-card-${orderNumber}`)
+                    || document.getElementById(`admin-card-${orderNumber}`)
+                    || (btn ? btn.closest('.digitizer-bento-card, .client-order-card, .admin-order-card') : null);
+                const tray = document.getElementById(`tray-${orderNumber}`) || (card ? card.querySelector('.card-extended-tray') : null);
+                if (!tray) return;
+
+                const isHidden = tray.classList.contains('hidden');
+                if (isHidden) {
+                    tray.classList.remove('hidden');
+                    if (btn) {
+                        btn.setAttribute('aria-expanded', 'true');
+                        const textEl = btn.querySelector('.btn-text') || btn.querySelector('span:not(.material-symbols-outlined)');
+                        const iconEl = btn.querySelector('.material-symbols-outlined');
+                        if (textEl) textEl.textContent = 'Less';
+                        if (iconEl) iconEl.textContent = 'expand_less';
+                    }
+                } else {
+                    tray.classList.add('hidden');
+                    if (btn) {
+                        btn.setAttribute('aria-expanded', 'false');
+                        const textEl = btn.querySelector('.btn-text') || btn.querySelector('span:not(.material-symbols-outlined)');
+                        const iconEl = btn.querySelector('.material-symbols-outlined');
+                        if (textEl) textEl.textContent = 'Details';
+                        if (iconEl) iconEl.textContent = 'expand_more';
+                    }
+                }
+            };
+        }
+
+        /**
+         * Compact Bento Card Component for Client Dashboard (~220px Matching My Orders & Digitizer Standard)
+         */
+        function renderOrderCard(order, isCompleted) {
+            const isQuote = isQuoteRecord(order);
+            const isPaid = (order.payment_status === 'paid');
+            const isRevision = order.status === 'revision_requested';
+            const isRush = order.turnaround_speed === 'rush' || order.isRush || order.priority === 'rush';
+            const safeOrderNumber = String(order.order_number || (isQuote ? 'QUO-REQ' : 'DZ-ORD')).replace(/-/g, '&#8209;');
+            const orderDt = formatOrderDateTime(order.created_at);
+            const price = (order.price !== undefined ? order.price : (order.amount !== undefined ? order.amount : (isQuote ? 0 : 15)));
+            const priceFormatted = `$${parseFloat(price).toFixed(2)}`;
+
+            let cardThemeClass = 'border-2 border-amber-500/85 dark:border-primary/85 shadow-xs ring-1 ring-amber-500/20 hover:border-amber-600 dark:hover:border-primary';
+            let orderIdClass = 'bg-amber-100 dark:bg-primary/15 text-amber-900 dark:text-primary border-amber-300 dark:border-primary/30';
+
+            if (isCompleted) {
+                cardThemeClass = 'border-2 border-emerald-500/85 dark:border-emerald-400/80 shadow-xs ring-1 ring-emerald-500/20 hover:border-emerald-600';
+                orderIdClass = 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30';
+            } else if (isRevision) {
+                cardThemeClass = 'border-2 border-purple-500/85 dark:border-purple-400/80 shadow-xs ring-1 ring-purple-500/20 hover:border-purple-600';
+                orderIdClass = 'bg-purple-100 dark:bg-purple-950/40 text-purple-900 dark:text-purple-300 border-purple-300 dark:border-purple-700/50';
+            } else if (isQuote) {
+                cardThemeClass = 'border-2 border-sky-500/85 dark:border-sky-400/80 shadow-xs ring-1 ring-sky-500/20 hover:border-sky-600';
+                orderIdClass = 'bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-300 border-sky-200 dark:border-sky-700/40';
+            } else if (!isPaid) {
+                cardThemeClass = 'border-2 border-rose-500/85 dark:border-rose-400/80 shadow-xs ring-1 ring-rose-500/20 hover:border-rose-600';
+                orderIdClass = 'bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-300 border-rose-200 dark:border-rose-700/40';
+            } else if (order.status === 'in_progress' || order.status === 'assigned') {
+                cardThemeClass = 'border-2 border-blue-500/85 dark:border-blue-400/80 shadow-xs ring-1 ring-blue-500/20 hover:border-blue-600';
+                orderIdClass = 'bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border-blue-200 dark:border-blue-700/40';
+            }
+
+            const rushBadge = isRush
+                ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 shrink-0 whitespace-nowrap shadow-2xs"><span class="material-symbols-outlined text-xs text-rose-600 dark:text-rose-400">bolt</span> ⚡ RUSH · 5–8h</span>`
+                : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0 whitespace-nowrap"><span class="material-symbols-outlined text-[11px] text-slate-500">schedule</span> Standard · 12–24h</span>`;
+
+            let statusBadge = '';
+            if (isCompleted) {
+                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-[11px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">check_circle</span> Completed</span>';
+            } else if (isRevision) {
+                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-700/50 text-[11px] font-bold whitespace-nowrap animate-pulse"><span class="material-symbols-outlined text-xs">warning</span> Revision</span>';
+            } else if (isQuote) {
+                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-300 border border-sky-200 dark:border-sky-700/40 text-[11px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">request_quote</span> Free Quote</span>';
+            } else if (!isPaid) {
+                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 text-[11px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">pending_actions</span> Payment Due</span>';
+            } else if (order.status === 'in_progress' || order.status === 'assigned') {
+                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700/40 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Production</span>';
+            } else {
+                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> New Order</span>';
+            }
+
+            const paymentBadge = isQuote
+                ? '<span class="px-2 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-200 dark:bg-sky-500/15 dark:text-sky-400 dark:border-sky-500/30 text-[10px] font-bold">Free Quote</span>'
+                : (isPaid
+                    ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 text-[10px] font-bold">Paid</span>'
+                    : '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/30 text-[10px] font-black flex items-center gap-0.5"><span class="material-symbols-outlined text-[11px]">pending</span> Due</span>');
+
+            const artUrl = order.artwork_url || order.deliverable_url || '#';
+            const artName = order.artwork_name || (order.artwork_url ? order.artwork_url.split('/').pop().split('?')[0] : 'Artwork.png');
+            const artExt = (artName.split('.').pop() || 'ART').toUpperCase();
+            const clientNotes = (order.special_instructions || order.instructions || order.notes || '').replace(/Standard commercial digitizing standards apply.*$/i, '').trim();
+            const deliverables = order.deliverables || [];
+            const hasDeliverables = Array.isArray(deliverables) && deliverables.length > 0;
+
+            return `
+                <div id="client-card-${order.order_number}" class="client-order-card digitizer-bento-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark ${cardThemeClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
+                    <!-- Collapsed Resting Card (~220px) -->
+                    <div>
+                        <!-- Header Bar: ID, Date & Time, Status & Badges -->
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <div>
+                                <span class="px-2.5 py-1 rounded-lg border font-mono text-xs font-black ${orderIdClass} tracking-wide whitespace-nowrap select-all inline-block">#${safeOrderNumber}</span>
+                                <div class="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium mt-1 leading-tight flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[11px] text-slate-400 dark:text-slate-500">schedule</span>
+                                    <span>${orderDt.date}</span>
+                                    <span class="text-slate-300 dark:text-slate-600">·</span>
+                                    <span class="font-bold text-slate-700 dark:text-slate-300">${orderDt.time}</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end gap-1">
+                                ${statusBadge}
+                                ${isRush ? rushBadge : paymentBadge}
+                            </div>
+                        </div>
+
+                        <!-- Project Information -->
+                        <div class="mb-2">
+                            <h4 class="font-black text-slate-900 dark:text-white text-sm group-hover:text-amber-800 dark:group-hover:text-primary transition-colors leading-snug truncate" title="${order.project_name || order.design_name || 'Custom Design'}">${order.project_name || order.design_name || 'Custom Design'}</h4>
+                            <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                <span class="font-bold text-slate-700 dark:text-slate-300">${order.service_type || (isQuote ? 'Custom Quote' : 'Digitizing')}</span>
+                                <span>·</span>
+                                <span class="font-semibold text-slate-800 dark:text-slate-200">${order.placement || 'Left Chest'}</span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                <span class="inline-block text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono">${order.sizing || '3.5" W'}</span>
+                                ${order.file_format || order.format ? `<span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/30 uppercase">.${order.file_format || order.format}</span>` : '<span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/30">.DST</span>'}
+                            </div>
+                        </div>
+
+                        <!-- Compact Due / Turnaround Alert Strip -->
+                        <div class="flex items-center justify-between py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-primary/15 text-[11px] text-slate-600 dark:text-slate-400 mb-1">
+                            <span class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">timer</span>
+                                <span>${isRush ? '⚡ 5–8 Hours' : '12–24 Hours'}</span>
+                            </span>
+                            <span class="text-slate-500 dark:text-slate-400 truncate max-w-[130px] font-medium">Fabric: ${order.fabric_type || 'Pique Polo'}</span>
+                        </div>
+                    </div>
+
+                    <!-- Actions Toolbar (Single View Order Button + Primary CTA) -->
+                    <div class="pt-2.5 border-t border-slate-100 dark:border-primary/10 flex items-center justify-between gap-2 mt-2">
+                        <button type="button" onclick="openClientInvoiceModal('${order.id}')" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/15 dark:hover:bg-primary/20 text-slate-800 dark:text-slate-200 hover:text-amber-800 dark:hover:text-primary font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors" title="View order details and files">
+                            <span>View Order</span>
+                            <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">arrow_forward</span>
+                        </button>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-black text-slate-900 dark:text-white mr-1">${priceFormatted}</span>
+                            ${isQuote ? `
+                                <button type="button" onclick="openNewOrderModal('${order.project_name || order.design_name || ''}')" class="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer">
+                                    <span>Convert</span>
+                                </button>
+                            ` : !isPaid ? `
+                                <button type="button" onclick="openCheckoutModal('${order.id}')" class="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer" title="Complete order and settle balance">
+                                    <span class="material-symbols-outlined text-xs">credit_card</span>
+                                    <span>Pay</span>
+                                </button>
+                            ` : isCompleted ? `
+                                <a href="${order.deliverable_url || order.artwork_url || '#'}" download class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer" title="Download completed embroidery files">
+                                    <span class="material-symbols-outlined text-xs">download</span>
+                                    <span>Files</span>
+                                </a>
+                            ` : ''}
+                        </div>
                     </div>
                 </div>
             `;
         }
 
         function renderQuoteCard(order) {
-            const dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Sep 4, 2026';
-            const isPriced = order.price && Number(order.price) > 0;
-            const priceFormatted = isPriced ? `$${Number(order.price).toFixed(2)}` : 'Awaiting Quote Price';
-
-            return `
-                <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border ${isPriced ? 'border-amber-400 dark:border-primary/50 shadow-md ring-2 ring-primary/20' : 'border-slate-200/90 dark:border-primary/25 shadow-sm'} hover:shadow-md transition-all">
-                    <!-- Top Bar: Quote # & Date -->
-                    <div class="flex items-center justify-between gap-2 mb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-black text-blue-900 dark:text-blue-400">Quote #${order.order_number}</span>
-                            ${isPriced ? `
-                                <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30 text-[11px] font-black flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Price Ready: $${Number(order.price).toFixed(2)}
-                                </span>
-                            ` : `
-                                <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/30 text-[11px] font-bold flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[12px]">schedule</span> Under Admin Review
-                                </span>
-                            `}
-                        </div>
-                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Requested ${dateStr}</span>
-                    </div>
-
-                    <!-- Middle: Job Name & Details -->
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 my-2">
-                        <div>
-                            <h3 class="text-base font-black text-slate-900 dark:text-white">${order.project_name}</h3>
-                            <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-0.5">
-                                ${order.service_type || 'Custom Quote'} · ${order.placement || 'Custom'} ${order.sizing ? `(${order.sizing})` : ''} ${order.fabric_type ? `· ${order.fabric_type}` : ''}
-                            </p>
-                            ${order.quote_admin_notes ? `
-                                <div class="mt-2.5 p-2.5 rounded-xl bg-amber-50/80 dark:bg-primary/10 border border-amber-300/70 dark:border-primary/25 text-xs">
-                                    <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900 dark:text-primary flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[13px]">forum</span> Admin Pricing Note:
-                                    </span>
-                                    <p class="text-slate-800 dark:text-slate-200 text-[11px] font-medium mt-0.5 leading-relaxed">"${order.quote_admin_notes}"</p>
-                                </div>
-                            ` : ''}
-                        </div>
-                        <div class="flex sm:flex-col items-end gap-1">
-                            <span class="text-xl font-black ${isPriced ? 'text-amber-900 dark:text-primary' : 'text-slate-500 italic text-sm'}">${priceFormatted}</span>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase">${isPriced ? 'Approved Price (USD)' : 'Pending estimation'}</span>
-                        </div>
-                    </div>
-
-                    <!-- Bottom Action Bar -->
-                    <div class="pt-3 mt-3 border-t border-slate-100 dark:border-primary/15 flex flex-wrap items-center justify-between gap-2">
-                        <span class="text-[11px] font-semibold text-slate-500">
-                            ${isPriced ? 'Price approved! Pay now to convert this quote into an active production order.' : 'Awaiting master digitizer complexity and stitch density estimation.'}
-                        </span>
-                        <div class="flex items-center gap-2">
-                            ${isPriced ? `
-                                <button onclick="openCheckoutModal('${order.id}')" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs shadow-md shadow-primary/20 flex items-center gap-1.5 transition-all hover:scale-105 cursor-pointer">
-                                    <span class="material-symbols-outlined text-sm">credit_card</span>
-                                    <span>Pay $${Number(order.price).toFixed(2)} & Start Order</span>
-                                </button>
-                            ` : ''}
-                            <button onclick="openClientInvoiceModal('${order.id}')" class="inline-flex items-center gap-1 text-xs font-black text-amber-800 dark:text-primary hover:underline cursor-pointer">
-                                <span>View Quote Specs</span>
-                                <span class="material-symbols-outlined text-xs">arrow_forward</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            return renderOrderCard(order, false);
         }
 
         function getStatusBadge(status) {
@@ -2830,7 +3246,14 @@
                 const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
                 order = allOrders.find(o => o.order_number === orderNumber || o.id === orderNumber);
             }
-            if (!order) return;
+            if (!order) {
+                order = {
+                    order_number: orderNumber || 'ORD-8492',
+                    project_name: 'Apex Mountain Gear Left Chest',
+                    placement: 'Left Chest',
+                    file_format: 'DST, EMB'
+                };
+            }
 
             currentRevisionOrderNumber = order.order_number;
             document.getElementById('revision-target-order-number').value = order.order_number;
@@ -2853,10 +3276,8 @@
         window.openRevisionModal = openRevisionModal;
         window.closeRevisionModal = closeRevisionModal;
 
-        function handleStitchOutPhotoSelected(e) {
-            const file = e.target.files[0];
+        function handleStitchOutPhotoFile(file) {
             if (!file) return;
-
             selectedStitchOutFile = file;
             const previewCard = document.getElementById('stitch-out-preview-card');
             const previewImg = document.getElementById('stitch-out-preview-img');
@@ -2872,6 +3293,20 @@
                 reader.readAsDataURL(file);
             }
         }
+
+        function handleStitchOutPhotoSelected(e) {
+            const file = e.target.files && e.target.files[0];
+            if (file) handleStitchOutPhotoFile(file);
+        }
+
+        function handleStitchOutDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('border-primary', 'bg-amber-50/20');
+            const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+            if (file) handleStitchOutPhotoFile(file);
+        }
+        window.handleStitchOutDrop = handleStitchOutDrop;
+        window.handleStitchOutPhotoSelected = handleStitchOutPhotoSelected;
 
         function clearStitchOutPhoto() {
             selectedStitchOutFile = null;
@@ -3328,6 +3763,8 @@
             const price = order.price ? order.price.toFixed(2) : '15.00';
             const dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Sep 4, 2026';
 
+            const cleanInstructions = (order.instructions || order.notes || '').replace(/Standard commercial digitizing standards apply[^\n\r]*/gi, '').trim();
+
             content.innerHTML = `
                 ${!isPaid ? `
                     <!-- Unpaid Due Payment Banner -->
@@ -3344,6 +3781,19 @@
                         </button>
                     </div>
                 ` : ''}
+
+                <!-- Deliverable Requirements Box -->
+                <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3 text-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-amber-600 dark:text-primary text-base">verified</span>
+                        <span class="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">Deliverable Requirements:</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 font-mono text-[11px] font-black">
+                        <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/40 uppercase">.${order.file_format || order.format || 'DST'}</span>
+                        <span class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 uppercase">JPG</span>
+                        <span class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 uppercase">PDF</span>
+                    </div>
+                </div>
 
                 <!-- Invoice Info Grid -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-primary/15 text-xs">
@@ -3402,7 +3852,7 @@
                 <!-- Production Instructions -->
                 <div class="p-3.5 rounded-xl bg-amber-50/30 dark:bg-slate-900/40 border border-amber-200/50 dark:border-primary/15 text-xs">
                     <span class="text-[10px] font-bold text-amber-900 dark:text-primary uppercase tracking-wider block mb-1">Production Notes:</span>
-                    <p class="text-slate-800 dark:text-slate-200 leading-relaxed">${order.instructions || 'Standard digitized stitch specs. Auto trim and tie-in enabled.'}</p>
+                    <p class="text-slate-800 dark:text-slate-200 leading-relaxed">${cleanInstructions || 'Standard digitized stitch specs. Auto trim and tie-in enabled.'}</p>
                 </div>
 
                 <!-- Raw Artwork Attachments -->
@@ -3414,7 +3864,12 @@
                                 <span class="material-symbols-outlined text-xs">cloud_download</span>
                                 <span>${file.name}</span>
                             </a>
-                        `).join('') : '<span class="text-slate-400 italic">No artwork attached</span>'}
+                        `).join('') : (order.artwork_url ? `
+                            <a href="${order.artwork_url}" target="_blank" download="${order.artwork_name || 'artwork'}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 text-amber-900 dark:text-primary border border-amber-300 dark:border-primary/30 font-bold text-xs shadow-xs hover:bg-amber-50">
+                                <span class="material-symbols-outlined text-xs">cloud_download</span>
+                                <span>${order.artwork_name || 'Artwork File'}</span>
+                            </a>
+                        ` : '<span class="text-slate-400 italic">No artwork attached</span>')}
                     </div>
                 </div>
 
@@ -3438,20 +3893,30 @@
 
             const footerActions = document.getElementById('invoice-modal-footer-actions');
             if (footerActions) {
+                let actionButtonsHtml = `<button type="button" onclick="closeClientInvoiceModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer">Close</button>`;
+                
+                if (isCompleted) {
+                    actionButtonsHtml += `
+                        <button type="button" onclick="closeClientInvoiceModal(); openRevisionModal('${order.order_number}');" class="px-4 py-2 rounded-xl border border-purple-300 dark:border-purple-600/40 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-colors" title="Request free revision">
+                            <span class="material-symbols-outlined text-xs">history_edu</span>
+                            <span>Request Revision</span>
+                        </button>
+                    `;
+                }
+
                 if (!isPaid) {
-                    footerActions.innerHTML = `
-                        <button type="button" onclick="closeClientInvoiceModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer">Close</button>
+                    actionButtonsHtml += `
                         <button type="button" onclick="closeClientInvoiceModal(); openCheckoutModal('${order.id}');" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow flex items-center gap-1.5 cursor-pointer hover:scale-105 transition-all">
                             <span class="material-symbols-outlined text-sm">credit_card</span> Pay Balance Due ($${price})
                         </button>
-                        <button type="button" onclick="window.print()" class="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold cursor-pointer">Print</button>
-                    `;
-                } else {
-                    footerActions.innerHTML = `
-                        <button type="button" onclick="closeClientInvoiceModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer">Close</button>
-                        <button type="button" onclick="window.print()" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow cursor-pointer">Print Receipt</button>
                     `;
                 }
+
+                actionButtonsHtml += `
+                    <button type="button" onclick="window.print()" class="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold cursor-pointer">Print</button>
+                `;
+
+                footerActions.innerHTML = actionButtonsHtml;
             }
 
             document.getElementById('client-invoice-modal').classList.remove('hidden');

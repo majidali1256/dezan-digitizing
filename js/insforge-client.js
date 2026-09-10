@@ -290,6 +290,128 @@ const INITIAL_DEMO_ORDERS = [
             { format: 'SVG', name: 'Summit_Alpine_Vector.svg', url: 'logo.png', size: 85000 }
         ],
         created_at: new Date(Date.now() - 3600000 * 150).toISOString()
+    },
+    {
+        id: '00000000-0000-0000-0000-000000000109',
+        order_number: 'QUO-4769',
+        client_id: '00000000-0000-0000-0000-000000000006',
+        client_name: 'Marcus Vance',
+        client_email: 'vance@vanceathletics.com',
+        client_company: 'Vance Athletics',
+        service_type: 'Vector Art',
+        plan_name: 'Custom Vector Redraw',
+        project_name: 'Custom Vector Redraw',
+        placement: 'Vector Graphic / Print',
+        sizing: 'Scalable Vector',
+        fabric_type: 'Vector Graphic',
+        file_format: 'AI, EPS, SVG, PDF',
+        instructions: 'Custom Vector Redraw requested by Marcus Vance. Requires complexity appraisal.',
+        raw_artwork_files: [
+            { name: 'vance_vector_sketch.png', url: 'logo.png', size: 165000 }
+        ],
+        price: 0,
+        currency: 'USD',
+        payment_status: 'unpaid',
+        payment_method: 'Pending Quote',
+        assigned_digitizer_id: null,
+        assigned_digitizer_name: null,
+        assigned_at: null,
+        status: 'quote_requested',
+        is_quote: true,
+        deliverables: [],
+        created_at: new Date(Date.now() - 3600000 * 1).toISOString()
+    },
+    {
+        id: '00000000-0000-0000-0000-000000000110',
+        order_number: 'ORD-8837',
+        client_id: '00000000-0000-0000-0000-000000000007',
+        client_name: 'Sarah Jenkins',
+        client_email: 'sarah@apexuniforms.com',
+        client_company: 'Apex Workwear & Uniforms',
+        service_type: 'Digitizing',
+        plan_name: 'Left Chest',
+        project_name: 'Apex Shield Uniform Badge',
+        placement: 'Left Chest',
+        sizing: '3.2" W x 3.5" H',
+        fabric_type: 'Cotton / Oxford Pique',
+        file_format: 'DST, PES, EMB',
+        instructions: 'Client reported minor thread pull on Left Chest crest. Please increase pull compensation to 0.40mm for pique knit.',
+        revision_notes: 'Client reported minor thread pull on Left Chest crest. Physical defect photos attached. Increase pull compensation to 0.40mm for pique knit.',
+        raw_artwork_files: [
+            { name: 'apex_shield_vector.png', url: 'logo.png', size: 115000 }
+        ],
+        stitch_out_photos: [
+            { name: 'defect_thread_pull.jpg', url: 'logo.png', size: 95000 }
+        ],
+        price: 20.00,
+        currency: 'USD',
+        payment_status: 'paid',
+        payment_method: 'PayPal',
+        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
+        assigned_digitizer_name: 'Digitizer',
+        assigned_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+        status: 'revision_requested',
+        deliverables: [],
+        created_at: new Date(Date.now() - 3600000 * 5).toISOString()
+    },
+    {
+        id: '00000000-0000-0000-0000-000000000111',
+        order_number: 'ORD-8840',
+        client_id: '00000000-0000-0000-0000-000000000002',
+        client_name: 'John Falcon',
+        client_email: 'client@falconapparel.com',
+        client_company: 'Falcon Apparel Co.',
+        service_type: 'Digitizing',
+        plan_name: 'Left Chest / Hat',
+        project_name: 'Falcon Cap Badge',
+        placement: 'Cap Front / Hat',
+        sizing: '3.5" W x 2.2" H',
+        fabric_type: 'Structured Cap',
+        file_format: 'DST, EMB',
+        instructions: 'Needle 75/11, Tatami underlay with satin edge. Center-out sewing sequence.',
+        raw_artwork_files: [
+            { name: 'falcon_cap_badge.png', url: 'logo.png', size: 142000 }
+        ],
+        price: 15.00,
+        currency: 'USD',
+        payment_status: 'paid',
+        payment_method: 'PayPal',
+        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
+        assigned_digitizer_name: 'Digitizer',
+        assigned_at: new Date(Date.now() - 3600000 * 1).toISOString(),
+        status: 'in_progress',
+        deliverables: [],
+        created_at: new Date(Date.now() - 3600000 * 3).toISOString()
+    },
+    {
+        id: '00000000-0000-0000-0000-000000000112',
+        order_number: 'QUO-8845',
+        client_id: '00000000-0000-0000-0000-000000000002',
+        client_name: 'John Falcon',
+        client_email: 'client@falconapparel.com',
+        client_company: 'Falcon Apparel Co.',
+        service_type: 'Custom Quote',
+        plan_name: 'Jacket Back / High Stitch Count',
+        project_name: 'Falcon Golden Eagle Jacket Back',
+        placement: 'Jacket Back',
+        sizing: '11.0" W x 9.5" H',
+        fabric_type: 'Heavy Leather Bomber',
+        file_format: 'DST, EMB',
+        instructions: 'Heavy density embroidery quote request with projected 65,000 stitch count. Check backing requirements.',
+        raw_artwork_files: [
+            { name: 'golden_eagle_back.png', url: 'logo.png', size: 310000 }
+        ],
+        price: 0,
+        currency: 'USD',
+        payment_status: 'unpaid',
+        payment_method: 'Pending Quote',
+        assigned_digitizer_id: null,
+        assigned_digitizer_name: null,
+        assigned_at: null,
+        status: 'quote_requested',
+        is_quote: true,
+        deliverables: [],
+        created_at: new Date(Date.now() - 3600000 * 6).toISOString()
     }
 ];
 
@@ -326,7 +448,7 @@ class InsForgeClient {
         if (!localStorage.getItem('dezan_orders')) {
             localStorage.setItem('dezan_orders', JSON.stringify(INITIAL_DEMO_ORDERS));
         } else {
-            // Normalize any previously cached demo orders to use the single Digitizer
+            // Normalize any previously cached demo orders to use the single Digitizer & backfill missing demo orders
             try {
                 const cachedOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
                 let modified = false;
@@ -334,6 +456,13 @@ class InsForgeClient {
                     if (o.assigned_digitizer_name && o.assigned_digitizer_name !== 'Digitizer') {
                         o.assigned_digitizer_name = 'Digitizer';
                         o.assigned_digitizer_id = DEMO_USERS.digitizer.id;
+                        modified = true;
+                    }
+                });
+                const existingNums = new Set(cachedOrders.map(o => o.order_number));
+                INITIAL_DEMO_ORDERS.forEach(demo => {
+                    if (!existingNums.has(demo.order_number)) {
+                        cachedOrders.push(demo);
                         modified = true;
                     }
                 });

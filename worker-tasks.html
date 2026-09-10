@@ -28,7 +28,7 @@
         }
     </script>
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="worker-workspace.css" />
+    <link rel="stylesheet" href="worker-workspace.css?v=3.7" />
 </head>
 
 <body data-worker-page="tasks" class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30 transition-colors duration-200">
@@ -116,25 +116,46 @@
         <!-- Filter Controls Bar -->
         <div class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3.5">
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none" id="worker-filter-tabs">
-                <button onclick="window.workerWorkspace.setFilter('all')" data-filter="all" class="worker-filter-pill active">
-                    All Active Tasks
+                <button onclick="window.workerWorkspace.setFilter('all')" data-filter="all" class="worker-filter-pill pill-all active focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>All orders</span>
+                    <span id="worker-pill-count-all">0</span>
                 </button>
-                <button onclick="window.workerWorkspace.setFilter('digitizing')" data-filter="digitizing" class="worker-filter-pill">
-                    Digitizing
+                <button onclick="window.workerWorkspace.setFilter('new')" data-filter="new" class="worker-filter-pill pill-new focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>New Orders</span>
+                    <span id="worker-pill-count-new">0</span>
                 </button>
-                <button onclick="window.workerWorkspace.setFilter('vectorizing')" data-filter="vectorizing" class="worker-filter-pill">
-                    Vectorizing
+                <button onclick="window.workerWorkspace.setFilter('revisions')" data-filter="revisions" class="worker-filter-pill pill-revisions focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>Revisions</span>
+                    <span id="worker-pill-count-revisions">0</span>
                 </button>
-                <button onclick="window.workerWorkspace.setFilter('rush')" data-filter="rush" class="worker-filter-pill flex items-center gap-1">
-                    <span class="material-symbols-outlined text-xs text-rose-500">bolt</span>
-                    <span>Rush Priority</span>
+                <button onclick="window.workerWorkspace.setFilter('in_progress')" data-filter="in_progress" class="worker-filter-pill pill-production focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>In production</span>
+                    <span id="worker-pill-count-production">0</span>
+                </button>
+                <button onclick="window.workerWorkspace.setFilter('completed')" data-filter="completed" class="worker-filter-pill pill-completed focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>Completed</span>
+                    <span id="worker-pill-count-completed">0</span>
                 </button>
             </div>
 
-            <!-- Search input -->
-            <div class="relative w-full md:w-64">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
-                <input type="text" id="worker-search-input" oninput="window.workerWorkspace.handleSearch(event)" placeholder="Search task #, design..." class="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary" />
+            <div class="flex items-center gap-2.5 w-full md:w-auto">
+                <!-- Density Switcher: Cards vs Table -->
+                <div class="inline-flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-primary/20 text-xs shrink-0" role="group" aria-label="Workbench Density Switcher">
+                    <button onclick="window.workerWorkspace.setLayout('grid')" id="digitizer-layout-toggle-grid" class="px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Visual Cards View" aria-pressed="true">
+                        <span class="material-symbols-outlined text-sm text-amber-700 dark:text-primary">grid_view</span>
+                        <span>Cards</span>
+                    </button>
+                    <button onclick="window.workerWorkspace.setLayout('table')" id="digitizer-layout-toggle-table" class="px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Compact Table View" aria-pressed="false">
+                        <span class="material-symbols-outlined text-sm">table_rows</span>
+                        <span>Table</span>
+                    </button>
+                </div>
+
+                <!-- Search input -->
+                <div class="relative flex-1 md:w-64">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                    <input type="text" id="worker-search-input" oninput="window.workerWorkspace.handleSearch(event)" placeholder="Search task #, design..." class="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary" />
+                </div>
             </div>
         </div>
 
@@ -146,94 +167,154 @@
     </main>
 
     <!-- ===== DELIVERABLE UPLOAD MODAL ===== -->
-    <div id="deliverable-upload-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="w-full max-w-lg bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/30 shadow-2xl p-6 text-slate-900 dark:text-slate-100">
-            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-primary/20">
-                <h3 class="font-black text-base flex items-center gap-2 text-slate-900 dark:text-white">
-                    <span class="material-symbols-outlined text-primary">upload_file</span>
-                    <span>Upload Machine Deliverables</span>
-                </h3>
-                <button onclick="window.workerWorkspace.closeDeliverableUploadModal()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
-                    <span class="material-symbols-outlined">close</span>
+    <!-- ===== DELIVERABLE UPLOAD MODAL (SIMPLIFIED GMAIL-STYLE) ===== -->
+    <div id="deliverable-upload-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto" onclick="if(event.target === this) window.workerWorkspace.closeDeliverableUploadModal()">
+        <div class="w-full max-w-xl bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/30 shadow-2xl p-5 sm:p-6 text-slate-900 dark:text-slate-100 my-8">
+            <div class="flex items-center justify-between pb-3.5 border-b border-slate-200 dark:border-primary/20 mb-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span id="upload-task-id" class="px-2.5 py-0.5 rounded-lg bg-amber-100 dark:bg-primary/15 text-amber-900 dark:text-primary font-mono font-black text-xs border border-amber-300 dark:border-primary/30">ORD-NEW</span>
+                        <div id="upload-task-rush-badge"></div>
+                    </div>
+                    <h3 class="text-base font-black text-slate-900 dark:text-white uppercase tracking-wide">UPLOAD FINISHED FILES</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400" id="upload-design-name">Design Title</p>
+                </div>
+                <button type="button" onclick="window.workerWorkspace.closeDeliverableUploadModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer transition-colors" aria-label="Close modal">
+                    <span class="material-symbols-outlined text-lg">close</span>
                 </button>
             </div>
-            <form onsubmit="window.workerWorkspace.handleDeliverableSubmit(event)" class="space-y-3.5 text-xs">
+
+            <!-- Single Consolidated Deliver Requirement (Non-duplicated) -->
+            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-primary/20 text-xs flex items-center justify-between gap-3 mb-4">
                 <div>
-                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Task Ref: <span id="upload-task-id" class="font-mono text-amber-900 dark:text-primary font-black">ORD-NEW</span></label>
-                    <p class="text-slate-500 dark:text-slate-400" id="upload-design-name">Design Title</p>
+                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">DELIVER:</span>
+                    <span id="upload-deliver-req-summary" class="font-mono font-black text-amber-900 dark:text-primary text-sm tracking-wide">DST · JPG · PDF</span>
                 </div>
+                <div class="text-right">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Optional:</span>
+                    <span id="upload-deliver-opt-summary" class="font-mono text-xs text-slate-500 dark:text-slate-400 font-semibold">EMB</span>
+                </div>
+            </div>
 
-                <!-- Dropzone -->
-                <div class="border-2 border-dashed border-slate-300 dark:border-primary/30 rounded-2xl p-6 text-center bg-slate-50 dark:bg-slate-900/40 hover:border-primary transition-colors cursor-pointer">
-                    <span class="material-symbols-outlined text-3xl text-primary mb-1">cloud_upload</span>
-                    <p class="font-bold text-slate-800 dark:text-slate-200">Drag &amp; drop machine stitch files</p>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Supports .DST, .EMB, .PES, .EXP, .AI, .EPS, .PDF</p>
+            <!-- Large Gmail-Style Attachment Area: 📎 Add Files (Select multiple files at once) -->
+            <div id="worker-tasks-upload-dropzone" onclick="document.getElementById('worker-task-file-input').click()" class="gmail-upload-area p-6 rounded-2xl text-center cursor-pointer transition-all hover:border-amber-500/80 mb-4 flex flex-col items-center justify-center gap-1.5 group">
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-800 dark:text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined text-2xl">attach_file</span>
                 </div>
+                <div class="font-black text-sm text-slate-900 dark:text-white flex items-center gap-1.5 mt-1">
+                    <span>📎 Add Files</span>
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Select several files at once or drop them here</p>
+                <input type="file" id="worker-task-file-input" multiple accept=".dst,.emb,.pes,.exp,.jef,.vp3,.ofm,.cnd,.xxx,.hus,.ai,.eps,.svg,.pdf,.jpg,.jpeg,.png,.webp,.zip" class="hidden" onchange="window.workerWorkspace.handleDeliverableFileInput(event)" />
+            </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-bold mb-1">Final Stitch Count *</label>
-                        <input type="number" id="deliverable-stitch-count" required value="12450" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs focus:border-primary font-mono" />
-                    </div>
-                    <div>
-                        <label class="block font-bold mb-1">Hoop Size Used</label>
-                        <input type="text" id="deliverable-hoop" value="100mm x 100mm" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs focus:border-primary" />
-                    </div>
-                </div>
+            <!-- Auto-recognized Extensions Live Checklist -->
+            <div class="mb-4">
+                <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">Detected Deliverables:</span>
+                <div class="flex flex-wrap gap-2" id="worker-task-validation-checklist"></div>
+            </div>
 
-                <div>
-                    <label class="block font-bold mb-1">Production Notes for Client</label>
-                    <textarea id="deliverable-notes" rows="2" placeholder="e.g. Optimized with center-out sequencing and underlay for pique polo." class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 text-xs focus:border-primary"></textarea>
-                </div>
+            <!-- Attached Files List -->
+            <div class="mb-4" id="worker-task-staged-container">
+                <div id="worker-task-staged-list" class="space-y-1.5 max-h-40 overflow-y-auto pr-1"></div>
+            </div>
 
-                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-primary/15">
-                    <button type="button" onclick="window.workerWorkspace.closeDeliverableUploadModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-xs">Cancel</button>
-                    <button type="submit" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs shadow-md">Complete &amp; Submit Deliverable</button>
+            <!-- Missing indicator & Single Large Submit Button -->
+            <div class="pt-3 border-t border-slate-200 dark:border-primary/15 space-y-3">
+                <div class="text-center font-bold text-xs" id="worker-task-submit-hint">
+                    <span class="text-amber-700 dark:text-amber-400">Missing: JPG Preview + PDF</span>
                 </div>
-            </form>
+                <button type="button" id="worker-task-submit-btn" onclick="window.workerWorkspace.handleDeliverableSubmit(event)" disabled class="w-full py-3.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 font-black text-sm tracking-wide shadow-none cursor-not-allowed transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-base">task_alt</span>
+                    <span id="worker-task-btn-text">SUBMIT COMPLETED ORDER</span>
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- ===== TASK DETAILS INSPECT MODAL ===== -->
     <div id="task-details-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="w-full max-w-lg bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/30 shadow-2xl p-6 text-slate-900 dark:text-slate-100">
+        <div class="w-full max-w-lg bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/30 shadow-2xl p-6 text-slate-900 dark:text-slate-100 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-primary/20">
-                <h3 class="font-black text-base flex items-center gap-2 text-slate-900 dark:text-white">
+                <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">assignment</span>
-                    <span>Production Technical Specs</span>
-                </h3>
-                <button onclick="window.workerWorkspace.closeTaskDetailsModal()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+                    <div>
+                        <h3 class="font-black text-base text-slate-900 dark:text-white" id="detail-modal-title">Work Order Details</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400" id="detail-design-name">Design Title</p>
+                    </div>
+                </div>
+                <button onclick="window.workerWorkspace.closeTaskDetailsModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 cursor-pointer">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-            <div class="space-y-3 text-xs">
-                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                    <span class="text-slate-500">Ticket Number:</span>
-                    <strong id="detail-task-id" class="font-mono text-amber-900 dark:text-primary">ORD-NEW</strong>
+            <div class="space-y-3.5 text-xs">
+                <!-- Top Key-Value Grid -->
+                <div class="grid grid-cols-2 gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-primary/20">
+                    <div>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Ticket Number</span>
+                        <strong id="detail-task-id" class="font-mono text-amber-900 dark:text-primary text-xs">ORD-NEW</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Client Reference</span>
+                        <span id="detail-client-id" class="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs">Client #CLI-8492</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Target Fabric</span>
+                        <strong id="detail-fabric" class="text-slate-900 dark:text-white text-xs">Pique Polo Knit</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Dimensions</span>
+                        <strong id="detail-dimensions" class="text-slate-900 dark:text-white text-xs">3.5" W x 2.2" H</strong>
+                    </div>
                 </div>
-                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                    <span class="text-slate-500">Client Reference:</span>
-                    <span id="detail-client-id" class="font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[11px]">Client #CLI-8492</span>
+
+                <!-- Consolidated Deliverables Requirements Box -->
+                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-primary/20 text-xs">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">DELIVER:</span>
+                        <span id="detail-deliver-optional" class="text-[10px] font-semibold text-slate-400 dark:text-slate-500">Optional: EMB</span>
+                    </div>
+                    <div id="detail-deliver-required" class="font-mono font-black text-amber-900 dark:text-primary text-xs mt-0.5 tracking-wide">
+                        DST · JPG Preview · PDF Worksheet
+                    </div>
                 </div>
-                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                    <span class="text-slate-500">Target Fabric:</span>
-                    <strong id="detail-fabric" class="text-slate-900 dark:text-white">Pique Polo Knit</strong>
+
+                <!-- Client Special Instructions / Notes -->
+                <div id="detail-notes-container" class="space-y-1">
+                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Client Instructions:</span>
+                    <p id="detail-instructions" class="p-2.5 rounded-xl bg-amber-50/50 dark:bg-slate-900 border border-amber-200/60 dark:border-primary/20 text-slate-800 dark:text-slate-200 italic leading-relaxed">None</p>
                 </div>
-                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                    <span class="text-slate-500">Dimensions:</span>
-                    <strong id="detail-dimensions">3.5" W x 2.2" H</strong>
+
+                <!-- Revision Notice (if active revision) -->
+                <div id="detail-revision-container" class="hidden p-3 rounded-xl bg-purple-50/90 dark:bg-purple-950/40 border border-purple-300 dark:border-purple-600/40">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-purple-900 dark:text-purple-300 flex items-center gap-1 mb-1">
+                        <span class="material-symbols-outlined text-xs text-purple-600 dark:text-purple-400">warning</span>
+                        <span>Client Stitch-Out Revision</span>
+                    </span>
+                    <p id="detail-revision-notes" class="text-[11px] text-slate-700 dark:text-slate-300 font-medium italic mb-2"></p>
+                    <div id="detail-revision-photos" class="flex flex-wrap gap-2"></div>
                 </div>
-                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                    <span class="text-slate-500">Requested Format:</span>
-                    <strong id="detail-format" class="format-tag">DST</strong>
+
+                <!-- Customer Artwork Section -->
+                <div class="space-y-1.5">
+                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Customer Artwork:</span>
+                    <div id="detail-artwork-container" class="space-y-1.5"></div>
                 </div>
-                <div class="py-1">
-                    <span class="text-slate-500 block mb-1">Special Machine Instructions:</span>
-                    <p id="detail-instructions" class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-slate-800 dark:text-slate-200 italic leading-relaxed">None</p>
+
+                <!-- Delivered Files Section (if completed) -->
+                <div id="detail-deliverables-container" class="hidden space-y-1.5">
+                    <span class="text-[10px] font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider block">Completed Deliverables:</span>
+                    <div id="detail-deliverables-list" class="space-y-1"></div>
                 </div>
             </div>
-            <div class="flex justify-end pt-3">
-                <button type="button" onclick="window.workerWorkspace.closeTaskDetailsModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-xs">Close</button>
+
+            <!-- Action Buttons Footer -->
+            <div class="flex items-center justify-between pt-4 mt-3 border-t border-slate-200 dark:border-primary/20">
+                <button type="button" id="detail-attach-btn" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-transform hover:scale-[1.02]">
+                    <span class="material-symbols-outlined text-sm">cloud_upload</span>
+                    <span>Attach Deliverables</span>
+                </button>
+                <button type="button" onclick="window.workerWorkspace.closeTaskDetailsModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-xs cursor-pointer ml-auto">Close</button>
             </div>
         </div>
     </div>
@@ -347,7 +428,8 @@
 
     <!-- Scripts -->
     <script src="js/insforge-client.js"></script>
-    <script src="js/worker-workspace.js"></script>
+    <script src="js/notifications-manager.js"></script>
+    <script src="js/worker-workspace.js?v=3.7"></script>
 </body>
 
 </html>

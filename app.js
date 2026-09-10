@@ -1408,3 +1408,25 @@ function initInteractiveElements() {
     });
 }
 
+// Auto-load Cookie Consent & Analytics modules globally
+(function loadGlobalUtilities() {
+    if (typeof document === 'undefined') return;
+    function injectScript(src) {
+        if (!document.querySelector('script[src*="' + src + '"]')) {
+            const s = document.createElement('script');
+            s.src = src;
+            s.defer = true;
+            document.head.appendChild(s);
+        }
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            injectScript('js/cookie-consent.js');
+            injectScript('js/analytics.js');
+        });
+    } else {
+        injectScript('js/cookie-consent.js');
+        injectScript('js/analytics.js');
+    }
+})();
+

@@ -18,11 +18,103 @@
         tasks: [],
         activeFilter: 'all',
         searchQuery: '',
+        layout: (function() {
+            try { return localStorage.getItem('dezan_worker_layout') || 'grid'; } catch(e) { return 'grid'; }
+        })(),
         currentTaskNumber: null,
         selectedFiles: []
     };
 
     const state = window.workerWorkspaceState;
+
+    function escapeHtml(str) {
+        if (str == null) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // ----- Universal Date & Time Formatter -----
+    function formatOrderDateTime(dateVal) {
+        if (!dateVal) return { date: 'Sep 9, 2026', time: '09:00 AM', full: 'Sep 9, 2026 · 09:00 AM' };
+        try {
+            const d = new Date(dateVal);
+            if (isNaN(d.getTime())) return { date: 'Sep 9, 2026', time: '09:00 AM', full: 'Sep 9, 2026 · 09:00 AM' };
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const dateStr = `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+            let hours = d.getHours();
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const timeStr = `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+            return { date: dateStr, time: timeStr, full: `${dateStr} · ${timeStr}` };
+        } catch (e) {
+            return { date: 'Sep 9, 2026', time: '09:00 AM', full: 'Sep 9, 2026 · 09:00 AM' };
+        }
+    }
+
+    function parseRequestedFormats(fmtString, instructionsText) {
+        const formats = new Set();
+        const primary = (fmtString || 'DST').toUpperCase();
+        if (primary.includes(',')) {
+            primary.split(',').forEach(f => {
+                const clean = f.trim().replace(/^\./, '').toUpperCase();
+                if (clean) formats.add(clean);
+            });
+        } else {
+            formats.add(primary.replace(/^\./, ''));
+        }
+        if (instructionsText && /emb(\b|\.)/i.test(instructionsText)) {
+            formats.add('EMB');
+        }
+        if (formats.size === 0) formats.add('DST');
+        return Array.from(formats);
+    }
+
+    function getFileExtension(filename) {
+        if (!filename) return 'ART';
+        const parts = filename.split('.');
+        if (parts.length < 2) return 'ART';
+        return parts.pop().toUpperCase();
+    }
+
+    // ----- Workbench Layout Switcher (Cards vs Table) -----
+    function setDigitizerLayout(mode) {
+        state.layout = mode;
+        try { localStorage.setItem('dezan_worker_layout', mode); } catch (e) {}
+        ['grid', 'table'].forEach(key => {
+            const btn = document.getElementById('digitizer-layout-toggle-' + key);
+            if (btn) btn.setAttribute('aria-pressed', String(key === mode));
+        });
+        const tableBtn = document.getElementById('digitizer-layout-toggle-table');
+        const gridBtn = document.getElementById('digitizer-layout-toggle-grid');
+        const cardContainers = document.querySelectorAll('.digitizer-cards-container');
+        const tableContainers = document.querySelectorAll('.digitizer-table-container');
+
+        if (mode === 'grid') {
+            tableContainers.forEach(el => el.classList.add('hidden'));
+            cardContainers.forEach(el => el.classList.remove('hidden'));
+            if (gridBtn) {
+                gridBtn.className = 'px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2';
+            }
+            if (tableBtn) {
+                tableBtn.className = 'px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2';
+            }
+        } else {
+            tableContainers.forEach(el => el.classList.remove('hidden'));
+            cardContainers.forEach(el => el.classList.add('hidden'));
+            if (tableBtn) {
+                tableBtn.className = 'px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2';
+            }
+            if (gridBtn) {
+                gridBtn.className = 'px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2';
+            }
+        }
+    }
 
     // ----- Initialize Workspace -----
     async function initWorkerWorkspace() {
@@ -66,6 +158,16 @@
 
         // Render current page
         renderActivePage();
+        setDigitizerLayout(state.layout);
+
+        // Check for deep-linked task from notification
+        try {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('task')) {
+                const taskNum = params.get('task');
+                setTimeout(() => openTaskDetailsModal(taskNum), 350);
+            }
+        } catch (e) {}
 
         // Global listeners
         bindGlobalListeners();
@@ -260,9 +362,15 @@
     // ----- Metrics Calculation -----
     function updateMetricsAcrossViews() {
         const tasks = state.tasks || [];
-        const active = tasks.filter(t => t.status === 'in_progress' || t.status === 'pending' || t.status === 'revision_requested');
+        const active = tasks.filter(t => t.status === 'in_progress' || t.status === 'pending' || t.status === 'assigned' || t.status === 'pending_review' || t.status === 'revision_requested');
         const completed = tasks.filter(t => t.status === 'completed');
         const rush = tasks.filter(t => (t.priority === 'rush' || t.status === 'revision_requested') && t.status !== 'completed');
+
+        const newCount = tasks.filter(t => t.status === 'pending' || t.status === 'assigned' || t.status === 'pending_review').length;
+        const revisionCount = tasks.filter(t => t.status === 'revision_requested').length;
+        const inProgressCount = tasks.filter(t => t.status === 'in_progress' || (t.status !== 'completed' && t.status !== 'revision_requested' && t.status !== 'pending' && t.status !== 'assigned' && t.status !== 'pending_review')).length;
+        const completedCount = completed.length;
+        const allCount = tasks.length;
 
         setElText('metric-active-tasks', active.length);
         setElText('metric-completed-tasks', completed.length);
@@ -271,6 +379,13 @@
 
         setElText('nav-badge-tasks', active.length);
         setElText('nav-badge-archive', completed.length);
+
+        // 5-stage distribution counters (Strictly NO quotes for digitizer)
+        setElText('worker-pill-count-all', allCount);
+        setElText('worker-pill-count-new', newCount);
+        setElText('worker-pill-count-revisions', revisionCount);
+        setElText('worker-pill-count-production', inProgressCount);
+        setElText('worker-pill-count-completed', completedCount);
     }
 
     // ----- Active Page Dispatcher -----
@@ -328,37 +443,181 @@
         const container = document.getElementById('tasks-workbench-container');
         if (!container) return;
 
-        let filtered = state.tasks.filter(t => t.status === 'in_progress' || t.status === 'revision_requested');
+        let allTasks = state.tasks || [];
 
         if (state.searchQuery) {
             const q = state.searchQuery.toLowerCase();
-            filtered = filtered.filter(t =>
+            allTasks = allTasks.filter(t =>
                 (t.design_name || '').toLowerCase().includes(q) ||
                 (t.order_number || '').toLowerCase().includes(q) ||
                 (t.target_fabric || '').toLowerCase().includes(q)
             );
         }
 
-        if (state.activeFilter === 'digitizing') {
-            filtered = filtered.filter(t => (t.service_type || '').toLowerCase().includes('digit'));
-        } else if (state.activeFilter === 'vectorizing') {
-            filtered = filtered.filter(t => (t.service_type || '').toLowerCase().includes('vector'));
-        } else if (state.activeFilter === 'rush') {
-            filtered = filtered.filter(t => t.priority === 'rush');
-        }
+        const newTasks = allTasks.filter(t => t.status === 'pending' || t.status === 'assigned' || t.status === 'pending_review');
+        const revisionTasks = allTasks.filter(t => t.status === 'revision_requested');
+        const productionTasks = allTasks.filter(t => t.status === 'in_progress' || (t.status !== 'completed' && t.status !== 'revision_requested' && t.status !== 'pending' && t.status !== 'assigned' && t.status !== 'pending_review'));
+        const completedTasks = allTasks.filter(t => t.status === 'completed');
 
-        if (filtered.length === 0) {
+        // Helper to render a subsection card
+        const renderSubSection = (id, icon, title, badgeColor, count, items, emptyTitle, emptyDesc, isCompletedSection = false) => `
+            <section id="${id}" class="stage-sub-section">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-primary/10">
+                    <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg ${badgeColor.icon}">${icon}</span>
+                        <span>${title}</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full ${badgeColor.badge} font-bold">${count}</span>
+                    </h2>
+                </div>
+                <div class="p-4 sm:p-5">
+                    ${items.length === 0 ? `
+                        <div class="p-6 text-center rounded-2xl ${badgeColor.emptyBg} border ${badgeColor.emptyBorder}">
+                            <span class="material-symbols-outlined text-3xl ${badgeColor.emptyIcon} mb-1">${icon}</span>
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white">${emptyTitle}</h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${emptyDesc}</p>
+                        </div>
+                    ` : `
+                        <!-- Visual Bento Cards View -->
+                        <div class="digitizer-cards-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${state.layout === 'table' ? 'hidden' : ''}">
+                            ${items.map(t => renderWorkerTaskCard(t, isCompletedSection)).join('')}
+                        </div>
+
+                        <!-- Compact 8-Column Table View -->
+                        <div class="digitizer-table-container overflow-x-auto rounded-2xl border border-slate-200/90 dark:border-primary/20 shadow-xs bg-white dark:bg-card-dark ${state.layout === 'grid' ? 'hidden' : ''}">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-200 dark:border-primary/20 bg-slate-50/80 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                                        <th class="px-4 py-3 w-[145px]">Order # · Date</th>
+                                        <th class="px-4 py-3 min-w-[200px]">Design &amp; Service</th>
+                                        <th class="px-4 py-3 w-[140px]">Placement &amp; Size</th>
+                                        <th class="px-4 py-3 w-[110px]">Formats</th>
+                                        <th class="px-4 py-3 w-[130px]">Fabric</th>
+                                        <th class="px-4 py-3 w-[125px]">Stage</th>
+                                        <th class="px-4 py-3 w-[120px]">Speed</th>
+                                        <th class="px-4 py-3 text-right w-[210px]">Production Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-primary/10 font-sans">
+                                    ${items.map(t => renderWorkerTaskTableRow(t, isCompletedSection)).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `}
+                </div>
+            </section>
+        `;
+
+        const filter = state.activeFilter;
+
+        if (filter === 'new') {
             container.innerHTML = `
-                <div class="p-10 text-center bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/20">
-                    <span class="material-symbols-outlined text-4xl text-slate-400 mb-2">search_off</span>
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white">No active tasks match this filter</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Check back soon or view all tasks.</p>
+                <div class="stage-sections-flow">
+                    ${renderSubSection(
+                        'stage-worker-tasks-new',
+                        'fiber_new',
+                        'New Orders / Assigned Work',
+                        { icon: 'text-amber-600 dark:text-amber-400', badge: 'bg-amber-50 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30', emptyBg: 'bg-amber-50/40 dark:bg-amber-950/15', emptyBorder: 'border-amber-200/60 dark:border-primary/15', emptyIcon: 'text-amber-600/70 dark:text-primary/70' },
+                        newTasks.length,
+                        newTasks,
+                        'No pending new orders',
+                        'All incoming jobs have been accepted and dispatched to production.'
+                    )}
                 </div>
             `;
-            return;
+        } else if (filter === 'revisions') {
+            container.innerHTML = `
+                <div class="stage-sections-flow">
+                    ${renderSubSection(
+                        'stage-worker-tasks-revisions',
+                        'warning',
+                        'Stitch Revisions (Priority)',
+                        { icon: 'text-purple-600 dark:text-purple-400', badge: 'bg-purple-100 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-700/50', emptyBg: 'bg-purple-50/40 dark:bg-purple-950/15', emptyBorder: 'border-purple-200/60 dark:border-purple-800/20', emptyIcon: 'text-purple-500/70' },
+                        revisionTasks.length,
+                        revisionTasks,
+                        'No revision requests',
+                        'All stitch files and vector deliverables passed quality control.'
+                    )}
+                </div>
+            `;
+        } else if (filter === 'in_progress') {
+            container.innerHTML = `
+                <div class="stage-sections-flow">
+                    ${renderSubSection(
+                        'stage-worker-tasks-production',
+                        'precision_manufacturing',
+                        'In Production Tasks',
+                        { icon: 'text-blue-600 dark:text-blue-400', badge: 'bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50', emptyBg: 'bg-blue-50/40 dark:bg-blue-950/15', emptyBorder: 'border-blue-200/60 dark:border-blue-800/20', emptyIcon: 'text-blue-500/70' },
+                        productionTasks.length,
+                        productionTasks,
+                        'No tasks in production',
+                        'Select a new order from your queue to begin digitizing.'
+                    )}
+                </div>
+            `;
+        } else if (filter === 'completed') {
+            container.innerHTML = `
+                <div class="stage-sections-flow">
+                    ${renderSubSection(
+                        'stage-worker-tasks-completed',
+                        'task_alt',
+                        'Completed Deliverables Archive',
+                        { icon: 'text-emerald-600 dark:text-emerald-400', badge: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20', emptyBg: 'bg-emerald-50/40 dark:bg-emerald-950/15', emptyBorder: 'border-emerald-200/60 dark:border-emerald-800/20', emptyIcon: 'text-emerald-500/70' },
+                        completedTasks.length,
+                        completedTasks,
+                        'No completed deliverables',
+                        'Uploaded production files will appear here.',
+                        true
+                    )}
+                </div>
+            `;
+        } else {
+            // 'all': Display all 4 stages in a .stage-sections-flow with 28px gaps
+            container.innerHTML = `
+                <div class="stage-sections-flow">
+                    ${renderSubSection(
+                        'stage-worker-tasks-new',
+                        'fiber_new',
+                        'New Orders / Assigned Work',
+                        { icon: 'text-amber-600 dark:text-amber-400', badge: 'bg-amber-50 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30', emptyBg: 'bg-amber-50/40 dark:bg-amber-950/15', emptyBorder: 'border-amber-200/60 dark:border-primary/15', emptyIcon: 'text-amber-600/70 dark:text-primary/70' },
+                        newTasks.length,
+                        newTasks,
+                        'No pending new orders',
+                        'All incoming jobs have been accepted and dispatched to production.'
+                    )}
+                    ${renderSubSection(
+                        'stage-worker-tasks-revisions',
+                        'warning',
+                        'Stitch Revisions (Priority)',
+                        { icon: 'text-purple-600 dark:text-purple-400', badge: 'bg-purple-100 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-700/50', emptyBg: 'bg-purple-50/40 dark:bg-purple-950/15', emptyBorder: 'border-purple-200/60 dark:border-purple-800/20', emptyIcon: 'text-purple-500/70' },
+                        revisionTasks.length,
+                        revisionTasks,
+                        'Zero revision rework requests',
+                        'All stitch files and vector deliverables passed quality control.'
+                    )}
+                    ${renderSubSection(
+                        'stage-worker-tasks-production',
+                        'precision_manufacturing',
+                        'In Production Tasks',
+                        { icon: 'text-blue-600 dark:text-blue-400', badge: 'bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50', emptyBg: 'bg-blue-50/40 dark:bg-blue-950/15', emptyBorder: 'border-blue-200/60 dark:border-blue-800/20', emptyIcon: 'text-blue-500/70' },
+                        productionTasks.length,
+                        productionTasks,
+                        'Workstation queue clear',
+                        'No tasks currently under active digitization.'
+                    )}
+                    ${renderSubSection(
+                        'stage-worker-tasks-completed',
+                        'task_alt',
+                        'Completed Deliverables Archive',
+                        { icon: 'text-emerald-600 dark:text-emerald-400', badge: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20', emptyBg: 'bg-emerald-50/40 dark:bg-emerald-950/15', emptyBorder: 'border-emerald-200/60 dark:border-emerald-800/20', emptyIcon: 'text-emerald-500/70' },
+                        completedTasks.length,
+                        completedTasks,
+                        'No completed deliverables',
+                        'Uploaded production files will appear here.',
+                        true
+                    )}
+                </div>
+            `;
         }
-
-        container.innerHTML = filtered.map(t => renderWorkerTaskCard(t, false)).join('');
     }
 
     // ===================================================================
@@ -381,131 +640,289 @@
             return;
         }
 
-        container.innerHTML = completed.map(t => renderWorkerTaskCard(t, true)).join('');
+        container.innerHTML = `
+            <!-- Visual Bento Cards View -->
+            <div class="digitizer-cards-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${state.layout === 'table' ? 'hidden' : ''}">
+                ${completed.map(t => renderWorkerTaskCard(t, true)).join('')}
+            </div>
+
+            <!-- Compact 8-Column Table View -->
+            <div class="digitizer-table-container overflow-x-auto rounded-2xl border border-slate-200/90 dark:border-primary/20 shadow-xs bg-white dark:bg-card-dark ${state.layout === 'grid' ? 'hidden' : ''}">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-200 dark:border-primary/20 bg-slate-50/80 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                            <th class="px-4 py-3 w-[145px]">Order # · Date</th>
+                            <th class="px-4 py-3 min-w-[200px]">Design &amp; Service</th>
+                            <th class="px-4 py-3 w-[140px]">Placement &amp; Size</th>
+                            <th class="px-4 py-3 w-[110px]">Formats</th>
+                            <th class="px-4 py-3 w-[130px]">Fabric</th>
+                            <th class="px-4 py-3 w-[125px]">Stage</th>
+                            <th class="px-4 py-3 w-[120px]">Speed</th>
+                            <th class="px-4 py-3 text-right w-[210px]">Archive Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-primary/10 font-sans">
+                        ${completed.map(t => renderWorkerTaskTableRow(t, true)).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
     }
 
-    // Worker Card Component
+    // Worker Bento Card Component (Strictly Sanitized: Zero client PII, zero pricing, compact ~220px resting height)
     function renderWorkerTaskCard(task, isCompleted) {
-        const isRush = task.priority === 'rush' || task.isRush === true || task.turnaround_speed === 'rush';
         const isRevision = task.status === 'revision_requested' || !!task.revision_notes;
+        const isRush = task.isRush || task.turnaround_speed === 'rush' || task.priority === 'rush';
         const orderNum = task.order_number || task.orderNumber || 'ORD-8492';
-        const designName = task.design_name || task.placement || 'Custom Embroidery';
+        const safeOrderNumber = String(orderNum).replace(/-/g, '&#8209;');
 
+        // Stage color classes (distinct 2px border with respective color theme)
+        let cardThemeClass = 'border-2 border-amber-500/85 dark:border-primary/85 shadow-xs ring-1 ring-amber-500/20 hover:border-amber-600 dark:hover:border-primary';
+        let orderIdClass = 'bg-amber-100 dark:bg-primary/15 text-amber-900 dark:text-primary border-amber-300 dark:border-primary/30';
+        if (isCompleted) {
+            cardThemeClass = 'border-2 border-emerald-500/85 dark:border-emerald-400/80 shadow-xs ring-1 ring-emerald-500/20 hover:border-emerald-600';
+            orderIdClass = 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30';
+        } else if (isRevision) {
+            cardThemeClass = 'border-2 border-purple-500/85 dark:border-purple-400/80 shadow-xs ring-1 ring-purple-500/20 hover:border-purple-600';
+            orderIdClass = 'bg-purple-100 dark:bg-purple-950/40 text-purple-900 dark:text-purple-300 border-purple-300 dark:border-purple-700/50';
+        } else if (task.status === 'in_progress') {
+            cardThemeClass = 'border-2 border-blue-500/85 dark:border-blue-400/80 shadow-xs ring-1 ring-blue-500/20 hover:border-blue-600';
+            orderIdClass = 'bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border-blue-200 dark:border-blue-700/40';
+        }
+
+        // Badges
         const rushBadge = isRush
-            ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 shadow-2xs whitespace-nowrap"><span class="material-symbols-outlined text-xs text-rose-600 dark:text-rose-400">bolt</span> ⚡ RUSH · 5–8 HOURS</span>`
-            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 whitespace-nowrap"><span class="material-symbols-outlined text-[11px] text-slate-500">schedule</span> Standard · 12–24 Hours</span>`;
+            ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 shrink-0 whitespace-nowrap shadow-2xs"><span class="material-symbols-outlined text-xs text-rose-600 dark:text-rose-400">bolt</span> ⚡ RUSH · 5–8h</span>`
+            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0 whitespace-nowrap"><span class="material-symbols-outlined text-[11px] text-slate-500">schedule</span> Standard · 12–24h</span>`;
 
+        let statusBadge = '';
+        if (isCompleted) {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-[11px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">check_circle</span> Completed</span>';
+        } else if (isRevision) {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-700/50 text-[11px] font-bold whitespace-nowrap animate-pulse"><span class="material-symbols-outlined text-xs">warning</span> Revision</span>';
+        } else if (task.status === 'in_progress') {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700/40 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Production</span>';
+        } else {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> New Order</span>';
+        }
+
+        // Raw artwork
         const rawFiles = (Array.isArray(task.raw_artwork_files) && task.raw_artwork_files.length > 0)
             ? task.raw_artwork_files
             : (Array.isArray(task.rawArtworkFiles) && task.rawArtworkFiles.length > 0)
                 ? task.rawArtworkFiles
                 : [{ name: 'artwork.png', url: task.artwork_url || 'images/service-digitizing.png' }];
+        const primaryArt = rawFiles[0] || { name: 'artwork.png', url: 'images/service-digitizing.png' };
+        const artExt = getFileExtension(primaryArt.name) || 'ART';
 
-        const primaryRaw = rawFiles[0];
-        const rawExt = (primaryRaw.name || '').split('.').pop()?.toUpperCase() || 'PNG';
-        const isPreviewable = ['PNG', 'JPG', 'JPEG', 'WEBP', 'PDF'].includes(rawExt);
+        // Requested Formats
+        const instructionsText = `${task.instructions || ''} ${task.special_instructions || ''} ${task.specialOptions || ''} ${task.notes || ''}`;
+        const reqFormats = parseRequestedFormats(task.target_format || task.fileFormat || task.file_format || 'DST', instructionsText);
+        const reqFormatsBadges = reqFormats.map(f => {
+            if (f === 'EMB') return `<span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-dashed border-slate-300 dark:border-slate-700">.EMB (Opt)</span>`;
+            return `<span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/30">.${f}</span>`;
+        }).join(' ');
 
-        const specialOpts = Array.isArray(task.special_options) ? task.special_options : (Array.isArray(task.specialOptions) ? task.specialOptions : []);
-        const specialOptsText = specialOpts.length > 0
-            ? specialOpts.map(o => `<span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-[10px] border border-slate-200 dark:border-slate-700">✓ ${o}</span>`).join(' ')
-            : '<span class="text-slate-500 text-[10px]">Standard flat embroidery (0.40mm)</span>';
+        const orderDt = formatOrderDateTime(task.created_at);
+        const designTitle = task.design_name || task.designName || task.placement || 'Custom Embroidery';
+        const cleanReqString = reqFormats.filter(f => f !== 'EMB').join(' · ') || 'DST';
+        const clientNotes = (task.instructions || task.special_instructions || task.notes || '').replace(/Standard commercial digitizing standards apply.*$/i, '').trim();
+
+        // Deliverables files list if any
+        const deliverables = task.deliverables || [];
+        const hasDeliverables = Array.isArray(deliverables) && deliverables.length > 0;
 
         return `
-            <div class="worker-task-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border ${isRevision && !isCompleted ? 'border-amber-400 dark:border-amber-500 shadow-sm ring-1 ring-amber-400/20' : isRush && !isCompleted ? 'border-rose-400/80 dark:border-rose-500/60 shadow-xs' : 'border-slate-200 dark:border-primary/20'} shadow-xs flex flex-col justify-between gap-3.5 transition-all">
-                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                    <div class="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
-                        <div class="w-16 h-16 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-primary/20 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-xs cursor-pointer group/art relative" onclick="window.workerWorkspace.openDigitizerArtworkPreview('${orderNum}', 0)" title="Click to open full in-dashboard artwork preview">
-                            <img src="${primaryRaw.url}" alt="Source Artwork" class="w-full h-full object-cover group-hover/art:scale-105 transition-transform">
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/art:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity">
-                                <span class="material-symbols-outlined text-sm">visibility</span>
+            <div id="digitizer-card-${orderNum}" class="digitizer-bento-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark ${cardThemeClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
+                <!-- Collapsed Essential Card Body -->
+                <div>
+                    <!-- Header Bar: ID, Date & Time, Badges -->
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                            <span class="px-2.5 py-1 rounded-lg border font-mono text-xs font-black ${orderIdClass} tracking-wide whitespace-nowrap select-all inline-block">#${safeOrderNumber}</span>
+                            <div class="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium mt-1 leading-tight flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[11px] text-slate-400 dark:text-slate-500">schedule</span>
+                                <span>${orderDt.date}</span>
+                                <span class="text-slate-300 dark:text-slate-600">·</span>
+                                <span class="font-bold text-slate-700 dark:text-slate-300">${orderDt.time}</span>
                             </div>
                         </div>
-                        <div class="min-w-0 flex-1">
-                            <div class="flex flex-wrap items-center gap-2 mb-1">
-                                <span class="font-mono text-xs font-black text-amber-900 dark:text-primary">${orderNum}</span>
-                                <span class="text-xs font-bold text-slate-800 dark:text-slate-200">${task.service_type || task.serviceType || 'Embroidery Digitizing'}</span>
-                                ${rushBadge}
-                                ${isRevision && !isCompleted ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/30 flex items-center gap-1"><span class="material-symbols-outlined text-xs">warning</span> REVISION</span>` : ''}
-                                ${isCompleted ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 flex items-center gap-1"><span class="material-symbols-outlined text-xs">verified</span> COMPLETED</span>` : ''}
-                            </div>
-                            <h4 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate">${designName}</h4>
-                            
-                            <!-- Production Parameters Grid -->
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs mt-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-primary/10">
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase block">Placement:</span>
-                                    <strong class="text-slate-800 dark:text-slate-200 truncate block">${task.placement || 'Left Chest'}</strong>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase block">Size &amp; Unit:</span>
-                                    <strong class="text-slate-800 dark:text-slate-200 truncate block">${task.dimensions || task.sizing || '3.5" W x 2.2" H'}</strong>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase block">Garment Fabric:</span>
-                                    <strong class="text-slate-800 dark:text-slate-200 truncate block">${task.target_fabric || task.fabric_type || 'Pique Polo Knit'}</strong>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase block">Required Formats:</span>
-                                    <strong class="text-amber-800 dark:text-primary font-mono font-bold truncate block">${task.target_format || task.file_format || 'DST, EMB'}</strong>
-                                </div>
-                            </div>
+                        <div class="flex flex-col items-end gap-1">
+                            ${statusBadge}
+                            ${rushBadge}
                         </div>
                     </div>
 
-                    <!-- Right Action Controls -->
-                    <div class="flex items-center gap-2 w-full md:w-auto justify-end pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-primary/10 shrink-0">
-                        ${isPreviewable ? `
-                            <button type="button" onclick="window.workerWorkspace.openDigitizerArtworkPreview('${orderNum}', 0)" class="px-3 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-950 dark:text-primary border border-amber-500/30 font-bold text-xs transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap" title="Preview original customer artwork inside dashboard">
-                                <span class="material-symbols-outlined text-sm">visibility</span>
-                                <span>Preview Artwork</span>
-                            </button>
-                        ` : ''}
-                        <a href="${primaryRaw.url}" download="${primaryRaw.name}" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-all flex items-center gap-1 cursor-pointer border border-slate-200 dark:border-primary/20 whitespace-nowrap" title="Download original artwork">
-                            <span class="material-symbols-outlined text-sm">download</span>
-                            <span>Download Artwork</span>
-                        </a>
-                        <button onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap">
-                            <span class="material-symbols-outlined text-sm">assignment</span>
-                            <span>Full Specs</span>
-                        </button>
+                    <!-- Project Title & Placement Specs -->
+                    <div class="mb-2">
+                        <h4 class="font-black text-slate-900 dark:text-white text-sm group-hover:text-amber-800 dark:group-hover:text-primary transition-colors leading-snug truncate" title="${escapeHtml(designTitle)}">${escapeHtml(designTitle)}</h4>
+                        <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            <span class="font-bold text-slate-700 dark:text-slate-300">${task.service_type || task.serviceType || 'Digitizing'}</span>
+                            <span>·</span>
+                            <span class="font-semibold text-slate-800 dark:text-slate-200">${task.placement || 'Left Chest'}</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                            <span class="inline-block text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono">${task.dimensions || task.sizing || '3.5" W'}</span>
+                            ${reqFormatsBadges}
+                        </div>
+                    </div>
+
+                    <!-- Compact Due & Substrate Alert Strip -->
+                    <div class="flex items-center justify-between py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-primary/15 text-[11px] text-slate-600 dark:text-slate-400 mb-1">
+                        <span class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">timer</span>
+                            <span>${isRush ? '⚡ 5–8 Hours' : '12–24 Hours'}</span>
+                        </span>
+                        <span class="text-slate-500 dark:text-slate-400 truncate max-w-[130px] font-medium">Fabric: ${task.target_fabric || task.fabric_type || 'Pique Polo'}</span>
+                    </div>
+                </div>
+
+                <!-- Actions Toolbar (Always Visible on Compact Card) -->
+                <div class="pt-2.5 border-t border-slate-100 dark:border-primary/10 flex items-center justify-between gap-2 mt-2">
+                    <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors" title="Open full dedicated work order">
+                        <span>View Order</span>
+                        <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">arrow_forward</span>
+                    </button>
+                    <div>
                         ${!isCompleted ? `
-                            <button onclick="window.workerWorkspace.openDeliverableUploadModal('${orderNum}')" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs transition-all flex items-center gap-1.5 shadow-xs cursor-pointer whitespace-nowrap">
-                                <span class="material-symbols-outlined text-sm">upload_file</span>
+                            <button type="button" onclick="window.workerWorkspace.openDeliverableUploadModal('${orderNum}')" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1.5 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer focus-visible:outline-2 focus-visible:outline-primary" title="Attach production deliverables (.DST, PDF, JPG)">
+                                <span class="material-symbols-outlined text-sm">cloud_upload</span>
                                 <span>Attach Deliverables</span>
                             </button>
                         ` : `
-                            <a href="${task.deliverable_url || task.artwork_url}" download class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all flex items-center gap-1 shadow-xs whitespace-nowrap">
-                                <span class="material-symbols-outlined text-sm">file_download</span>
-                                <span>Verify Archive</span>
-                            </a>
+                            <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 text-xs font-bold inline-flex items-center gap-1 cursor-pointer" title="View delivered files">
+                                <span class="material-symbols-outlined text-xs">cloud_done</span>
+                                <span>Files (${deliverables.length})</span>
+                            </button>
                         `}
                     </div>
                 </div>
-
-                <!-- Customer Special Instructions & Production Notes Callout -->
-                <div class="p-3 rounded-xl bg-amber-50/50 dark:bg-slate-900/40 border border-amber-200/70 dark:border-primary/15 text-xs text-slate-800 dark:text-slate-200 flex items-start justify-between gap-3">
-                    <div class="flex items-start gap-2">
-                        <span class="material-symbols-outlined text-sm text-amber-700 dark:text-primary shrink-0 mt-0.5">note_alt</span>
-                        <div>
-                            <span class="font-bold text-slate-900 dark:text-white block text-[11px] uppercase tracking-wider">Customer Production Instructions:</span>
-                            <span class="font-medium text-slate-700 dark:text-slate-300 italic">${task.special_instructions || task.instructions || 'Standard commercial Wilcom stitch density (0.40mm), underlay tatted, trim commands set.'}</span>
-                        </div>
-                    </div>
-                    <div class="hidden sm:flex items-center gap-1 shrink-0">
-                        ${specialOptsText}
-                    </div>
-                </div>
-
-                ${isRevision && !isCompleted && task.revision_notes ? `
-                    <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-950 dark:text-amber-200 flex items-start gap-2">
-                        <span class="material-symbols-outlined text-sm text-amber-700 dark:text-amber-400 flex-shrink-0 mt-0.5">rate_review</span>
-                        <div>
-                            <strong class="font-bold block text-slate-900 dark:text-white">Client Revision Note:</strong>
-                            <span class="italic font-medium">${task.revision_notes}</span>
-                        </div>
-                    </div>
-                ` : ''}
             </div>
+        `;
+    }
+
+    // Compact 8-Column Table Row Component for Digitizer Dashboard
+    function renderWorkerTaskTableRow(task, isCompleted) {
+        const isRevision = task.status === 'revision_requested' || !!task.revision_notes;
+        const isRush = task.isRush || task.turnaround_speed === 'rush' || task.priority === 'rush';
+        const orderNum = task.order_number || task.orderNumber || 'ORD-8492';
+        const safeOrderNumber = String(orderNum).replace(/-/g, '&#8209;');
+
+        // Stage color classes
+        let rowBorderClass = 'border-l-4 border-l-amber-500 bg-amber-500/[0.02] hover:bg-amber-500/[0.06]';
+        let orderIdClass = 'text-amber-900 dark:text-primary';
+        if (isCompleted) {
+            rowBorderClass = 'border-l-4 border-l-emerald-500 bg-emerald-500/[0.02] hover:bg-emerald-500/[0.06]';
+            orderIdClass = 'text-emerald-800 dark:text-emerald-400';
+        } else if (isRevision) {
+            rowBorderClass = 'border-l-4 border-l-purple-500 bg-purple-500/[0.02] hover:bg-purple-500/[0.06]';
+            orderIdClass = 'text-purple-900 dark:text-purple-300';
+        } else if (task.status === 'in_progress') {
+            rowBorderClass = 'border-l-4 border-l-blue-500 bg-blue-500/[0.02] hover:bg-blue-500/[0.06]';
+            orderIdClass = 'text-blue-900 dark:text-blue-300';
+        }
+
+        // Badges
+        const rushBadge = isRush
+            ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 shrink-0 whitespace-nowrap shadow-2xs"><span class="material-symbols-outlined text-xs text-rose-600 dark:text-rose-400">bolt</span> ⚡ RUSH · 5–8h</span>`
+            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0 whitespace-nowrap"><span class="material-symbols-outlined text-[11px] text-slate-500">schedule</span> Standard · 12–24h</span>`;
+
+        let statusBadge = '';
+        if (isCompleted) {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-[11px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">check_circle</span> Completed</span>';
+        } else if (isRevision) {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-700/50 text-[11px] font-bold whitespace-nowrap animate-pulse"><span class="material-symbols-outlined text-xs">warning</span> Revision</span>';
+        } else if (task.status === 'in_progress') {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700/40 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Prod</span>';
+        } else {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> New</span>';
+        }
+
+        // Requested Formats
+        const instructionsText = `${task.instructions || ''} ${task.special_instructions || ''} ${task.specialOptions || ''} ${task.notes || ''}`;
+        const reqFormats = parseRequestedFormats(task.target_format || task.fileFormat || task.file_format || 'DST', instructionsText);
+        const reqFormatsBadges = reqFormats.map(f => {
+            if (f === 'EMB') return `<span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-dashed border-slate-300 dark:border-slate-700">.EMB</span>`;
+            return `<span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/30">.${f}</span>`;
+        }).join(' ');
+
+        const orderDt = formatOrderDateTime(task.created_at);
+        const designTitle = task.design_name || task.designName || task.placement || 'Custom Embroidery';
+
+        return `
+            <tr class="transition-colors ${rowBorderClass}">
+                <!-- 1. Order #, Date & Time -->
+                <td class="px-4 py-3.5 whitespace-nowrap font-mono font-bold w-[145px] min-w-[145px]">
+                    <span class="inline-block whitespace-nowrap select-all font-mono font-black ${orderIdClass}">#${safeOrderNumber}</span>
+                    <div class="text-[10px] text-slate-500 dark:text-slate-400 font-sans font-medium mt-0.5 leading-tight flex items-center gap-1">
+                        <span>${orderDt.date}</span>
+                        <span class="text-slate-300 dark:text-slate-600">·</span>
+                        <span class="font-bold text-slate-700 dark:text-slate-300">${orderDt.time}</span>
+                    </div>
+                </td>
+
+                <!-- 2. Design & Service -->
+                <td class="px-4 py-3.5 min-w-[200px]">
+                    <div class="font-black text-slate-900 dark:text-white text-xs leading-snug truncate max-w-[240px]" title="${designTitle}">${designTitle}</div>
+                    <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
+                        <span class="font-semibold text-slate-700 dark:text-slate-300">${task.service_type || task.serviceType || 'Digitizing'}</span>
+                        <span>·</span>
+                        <span class="font-mono">${task.id || task.taskId || 'TSK-ACTIVE'}</span>
+                    </div>
+                    ${isRevision ? `<div class="text-[10px] text-purple-700 dark:text-purple-300 font-medium truncate max-w-[240px] mt-0.5 italic">⚠️ ${task.revision_notes || task.revisionNotes || 'Revision feedback attached'}</div>` : ''}
+                </td>
+
+                <!-- 3. Placement & Size -->
+                <td class="px-4 py-3.5 whitespace-nowrap w-[140px]">
+                    <div class="font-bold text-slate-800 dark:text-slate-200 text-xs">${task.placement || 'Left Chest'}</div>
+                    <div class="text-[10px] text-slate-500 font-mono">${task.dimensions || task.sizing || '3.5" W x 2.2" H'}</div>
+                </td>
+
+                <!-- 4. Formats -->
+                <td class="px-4 py-3.5 whitespace-nowrap w-[110px]">
+                    <div class="flex flex-wrap gap-1">${reqFormatsBadges}</div>
+                </td>
+
+                <!-- 5. Fabric -->
+                <td class="px-4 py-3.5 whitespace-nowrap w-[130px]">
+                    <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[120px] block" title="${task.target_fabric || task.fabric_type || 'Pique Polo Knit'}">${task.target_fabric || task.fabric_type || 'Pique Polo Knit'}</span>
+                </td>
+
+                <!-- 6. Status -->
+                <td class="px-4 py-3.5 whitespace-nowrap w-[125px]">
+                    ${statusBadge}
+                </td>
+
+                <!-- 7. Turnaround -->
+                <td class="px-4 py-3.5 whitespace-nowrap w-[120px]">
+                    ${rushBadge}
+                </td>
+
+                <!-- 8. Actions -->
+                <td class="px-4 py-3.5 text-right whitespace-nowrap w-[210px]">
+                    <div class="flex items-center justify-end gap-1.5">
+                        <button type="button" onclick="window.workerWorkspace.openDigitizerArtworkPreview('${orderNum}', 0)" class="px-2 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-primary border border-amber-500/30 text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-colors" title="Preview original artwork inside lightbox">
+                            <span class="material-symbols-outlined text-xs">visibility</span>
+                            <span class="hidden xl:inline">Preview</span>
+                        </button>
+                        <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-primary/20 inline-flex items-center gap-1 cursor-pointer transition-colors" title="View technical specs">
+                            <span class="material-symbols-outlined text-xs">description</span>
+                            <span class="hidden xl:inline">Details</span>
+                        </button>
+                        ${!isCompleted ? `
+                            <button type="button" onclick="window.workerWorkspace.openDeliverableUploadModal('${orderNum}')" class="px-2.5 py-1 rounded-lg bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 cursor-pointer shadow-xs transition-transform hover:scale-[1.02]" title="Upload production deliverables">
+                                <span class="material-symbols-outlined text-xs">cloud_upload</span>
+                                <span>Upload</span>
+                            </button>
+                        ` : `
+                            <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 text-xs font-bold inline-flex items-center gap-1 cursor-pointer" title="View delivered files">
+                                <span class="material-symbols-outlined text-xs">download</span>
+                                <span>Files</span>
+                            </button>
+                        `}
+                    </div>
+                </td>
+            </tr>
         `;
     }
 
@@ -527,7 +944,7 @@
         if (!document.getElementById('task-details-modal')) {
             const modalHtml = `
                 <div id="task-details-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
-                    <div class="w-full max-w-lg bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/30 shadow-2xl p-6 text-slate-900 dark:text-slate-100">
+                    <div class="w-full max-w-lg bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/30 shadow-2xl p-6 text-slate-900 dark:text-slate-100 max-h-[90vh] overflow-y-auto">
                         <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-primary/20">
                             <h3 class="font-black text-base flex items-center gap-2 text-slate-900 dark:text-white">
                                 <span class="material-symbols-outlined text-amber-800 dark:text-primary">assignment</span>
@@ -538,33 +955,57 @@
                             </button>
                         </div>
                         <div class="space-y-3 text-xs">
-                            <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                                <span class="text-slate-500">Design Title:</span>
-                                <strong id="detail-design-name" class="text-slate-900 dark:text-white">Apex Mountain</strong>
+                            <div class="grid grid-cols-2 gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-primary/20">
+                                <div>
+                                    <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Design Title</span>
+                                    <strong id="detail-design-name" class="text-slate-900 dark:text-white">Apex Mountain</strong>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Client Reference</span>
+                                    <span id="detail-client-id" class="font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[11px]">Client #CLI-8492</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Target Fabric</span>
+                                    <strong id="detail-fabric" class="text-slate-900 dark:text-white">Pique Polo Knit</strong>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Dimensions</span>
+                                    <strong id="detail-dimensions">3.5" W x 2.2" H</strong>
+                                </div>
                             </div>
-                            <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                                <span class="text-slate-500">Client Reference:</span>
-                                <span id="detail-client-id" class="font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[11px]">Client #CLI-8492</span>
-                            </div>
-                            <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                                <span class="text-slate-500">Target Fabric:</span>
-                                <strong id="detail-fabric" class="text-slate-900 dark:text-white">Pique Polo Knit</strong>
-                            </div>
-                            <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                                <span class="text-slate-500">Dimensions:</span>
-                                <strong id="detail-dimensions">3.5" W x 2.2" H</strong>
-                            </div>
-                            <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                                <span class="text-slate-500">Requested Format:</span>
-                                <strong id="detail-format" class="format-tag">DST</strong>
+                            <!-- Consolidated Deliverables Requirements Box -->
+                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-primary/20 text-xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">DELIVER:</span>
+                                    <span id="detail-deliver-optional" class="text-[10px] font-semibold text-slate-400 dark:text-slate-500">Optional: EMB</span>
+                                </div>
+                                <div id="detail-deliver-required" class="font-mono font-black text-amber-900 dark:text-primary text-xs mt-0.5 tracking-wide">
+                                    DST · JPG Preview · PDF Worksheet
+                                </div>
                             </div>
                             <div class="py-1">
                                 <span class="text-slate-500 block mb-1">Special Machine Instructions:</span>
                                 <p id="detail-instructions" class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/15 text-slate-800 dark:text-slate-200 italic leading-relaxed">None</p>
                             </div>
+                            <div id="detail-revision-container" class="hidden p-3 rounded-xl bg-purple-50/90 dark:bg-purple-950/40 border border-purple-300 dark:border-purple-600/40">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-purple-900 dark:text-purple-300 block mb-1">Revision Notes:</span>
+                                <p id="detail-revision-notes" class="text-[11px] text-slate-700 dark:text-slate-300 font-medium italic"></p>
+                            </div>
+                            <div class="space-y-1.5">
+                                <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Customer Artwork:</span>
+                                <div id="detail-artwork-container" class="space-y-1.5"></div>
+                            </div>
+                            <div id="detail-deliverables-container" class="hidden space-y-1.5">
+                                <span class="text-[10px] font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider block">Completed Deliverables:</span>
+                                <div id="detail-deliverables-list" class="space-y-1"></div>
+                            </div>
                         </div>
-                        <div class="flex justify-end pt-3">
-                            <button type="button" onclick="window.workerWorkspace.closeTaskDetailsModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-xs">Close</button>
+                        <div class="flex items-center justify-between pt-4 mt-3 border-t border-slate-200 dark:border-primary/20">
+                            <button type="button" id="detail-attach-btn" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-transform hover:scale-[1.02]">
+                                <span class="material-symbols-outlined text-sm">cloud_upload</span>
+                                <span>Attach Deliverables</span>
+                            </button>
+                            <button type="button" onclick="window.workerWorkspace.closeTaskDetailsModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-xs cursor-pointer ml-auto">Close</button>
                         </div>
                     </div>
                 </div>
@@ -592,11 +1033,88 @@
         }
     }
 
+    // Global card expansion helper
+    window.toggleOrderCardExpand = function(orderNumber, btn) {
+        const card = document.getElementById(`digitizer-card-${orderNumber}`)
+            || (btn ? btn.closest('.digitizer-bento-card, .client-order-card, .admin-order-card') : null)
+            || document.getElementById(`client-order-card-${orderNumber}`)
+            || document.getElementById(`admin-order-card-${orderNumber}`);
+        const tray = document.getElementById(`tray-${orderNumber}`) || (card ? card.querySelector('.card-extended-tray') : null);
+        if (!tray) return;
+
+        const isHidden = tray.classList.contains('hidden');
+        if (isHidden) {
+            tray.classList.remove('hidden');
+            if (btn) {
+                btn.setAttribute('aria-expanded', 'true');
+                const textEl = btn.querySelector('.btn-text') || btn.querySelector('span:not(.material-symbols-outlined)');
+                const iconEl = btn.querySelector('.material-symbols-outlined');
+                if (textEl) textEl.textContent = 'Less';
+                if (iconEl) iconEl.textContent = 'expand_less';
+            }
+        } else {
+            tray.classList.add('hidden');
+            if (btn) {
+                btn.setAttribute('aria-expanded', 'false');
+                const textEl = btn.querySelector('.btn-text') || btn.querySelector('span:not(.material-symbols-outlined)');
+                const iconEl = btn.querySelector('.material-symbols-outlined');
+                if (textEl) textEl.textContent = 'Details';
+                if (iconEl) iconEl.textContent = 'expand_more';
+            }
+        }
+    };
+
     function openDeliverableUploadModal(taskNumber) {
         state.currentTaskNumber = taskNumber;
+        state.stagedDeliverableFiles = [];
         const task = state.tasks.find(t => (t.order_number || t.orderNumber) === taskNumber);
+
         setElText('upload-task-id', taskNumber);
-        setElText('upload-design-name', task ? (task.design_name || task.placement) : 'Custom Embroidery');
+        setElText('upload-design-name', task ? (task.design_name || task.placement || 'Custom Embroidery') : 'Custom Embroidery');
+
+        const isRush = task ? (task.isRush || task.turnaround_speed === 'rush' || task.priority === 'rush') : false;
+        const rushEl = document.getElementById('upload-task-rush-badge');
+        if (rushEl) {
+            rushEl.innerHTML = isRush
+                ? `<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30">⚡ RUSH · 5–8h</span>`
+                : '';
+        }
+
+        const instructionsText = task ? `${task.instructions || ''} ${task.special_instructions || ''} ${task.notes || ''}` : '';
+        const reqFormats = parseRequestedFormats(task ? (task.target_format || task.file_format || 'DST') : 'DST', instructionsText);
+        const cleanReqFormats = reqFormats.filter(f => f !== 'EMB');
+        const reqString = cleanReqFormats.length > 0 ? cleanReqFormats.join(' · ') : 'DST';
+
+        const reqSummaryEl = document.getElementById('upload-deliver-req-summary');
+        if (reqSummaryEl) reqSummaryEl.textContent = `${reqString} · JPG · PDF`;
+
+        const optSummaryEl = document.getElementById('upload-deliver-opt-summary');
+        if (optSummaryEl) optSummaryEl.textContent = 'EMB';
+
+        // Setup drag and drop
+        const dropzone = document.getElementById('worker-tasks-upload-dropzone');
+        if (dropzone) {
+            dropzone.ondragover = (e) => {
+                e.preventDefault();
+                dropzone.classList.add('border-amber-500');
+            };
+            dropzone.ondragleave = (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('border-amber-500');
+            };
+            dropzone.ondrop = (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('border-amber-500');
+                const files = Array.from(e.dataTransfer.files || []);
+                if (files.length > 0) {
+                    state.stagedDeliverableFiles = (state.stagedDeliverableFiles || []).concat(files);
+                    updateDeliverableUploadUI();
+                }
+            };
+        }
+
+        updateDeliverableUploadUI();
+
         const modal = document.getElementById('deliverable-upload-modal');
         if (modal) modal.classList.remove('hidden');
     }
@@ -606,24 +1124,162 @@
         if (modal) modal.classList.add('hidden');
     }
 
+    function handleDeliverableFileInput(event) {
+        const files = Array.from(event.target.files || []);
+        if (files.length > 0) {
+            state.stagedDeliverableFiles = (state.stagedDeliverableFiles || []).concat(files);
+            updateDeliverableUploadUI();
+        }
+        event.target.value = '';
+    }
+
+    function removeStagedDeliverableFile(index) {
+        if (!state.stagedDeliverableFiles) return;
+        state.stagedDeliverableFiles.splice(index, 1);
+        updateDeliverableUploadUI();
+    }
+
+    function updateDeliverableUploadUI() {
+        const taskNumber = state.currentTaskNumber;
+        const task = state.tasks.find(t => (t.order_number || t.orderNumber) === taskNumber);
+        const staged = state.stagedDeliverableFiles || [];
+
+        const instructionsText = task ? `${task.instructions || ''} ${task.special_instructions || ''} ${task.notes || ''}` : '';
+        const rawReq = parseRequestedFormats(task ? (task.target_format || task.file_format || 'DST') : 'DST', instructionsText);
+        const requiredFormats = rawReq.filter(f => !['PDF', 'JPG', 'JPEG', 'PNG', 'WEBP', 'EMB', 'ZIP'].includes(f));
+        if (requiredFormats.length === 0) requiredFormats.push('DST');
+
+        const attachedExtensions = staged.map(f => getFileExtension(f.name));
+
+        const hasPdf = attachedExtensions.includes('PDF');
+        const hasJpg = attachedExtensions.some(ext => ['JPG', 'JPEG', 'PNG', 'WEBP'].includes(ext));
+        const hasEmb = attachedExtensions.includes('EMB');
+
+        // Build checklist items
+        const checklistItems = [];
+        requiredFormats.forEach(fmt => {
+            const met = attachedExtensions.includes(fmt);
+            checklistItems.push({
+                label: fmt,
+                badge: fmt,
+                met: met,
+                isOptional: false
+            });
+        });
+
+        checklistItems.push({
+            label: 'JPG Preview',
+            badge: 'JPG Preview',
+            met: hasJpg,
+            isOptional: false
+        });
+
+        checklistItems.push({
+            label: 'PDF Worksheet',
+            badge: 'PDF Worksheet',
+            met: hasPdf,
+            isOptional: false
+        });
+
+        checklistItems.push({
+            label: 'EMB',
+            badge: 'EMB',
+            met: hasEmb,
+            isOptional: true
+        });
+
+        // Render detected checklist
+        const checklistEl = document.getElementById('worker-task-validation-checklist');
+        if (checklistEl) {
+            checklistEl.innerHTML = checklistItems.map(item => {
+                if (item.met) {
+                    return `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30"><span>✅</span> <span>${item.badge} uploaded</span></span>`;
+                } else if (item.isOptional) {
+                    return `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100/70 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border border-dashed border-slate-300 dark:border-slate-700"><span>○</span> <span>${item.badge} optional</span></span>`;
+                } else {
+                    return `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700"><span>○</span> <span>${item.badge}</span></span>`;
+                }
+            }).join('');
+        }
+
+        // Render staged files list
+        const stagedContainer = document.getElementById('worker-task-staged-list');
+        if (stagedContainer) {
+            if (staged.length === 0) {
+                stagedContainer.innerHTML = '';
+            } else {
+                stagedContainer.innerHTML = staged.map((f, idx) => `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-primary/20 text-xs">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black uppercase bg-amber-500/15 text-amber-900 dark:text-primary border border-amber-500/30 shrink-0">${getFileExtension(f.name) || 'FILE'}</span>
+                            <span class="font-bold text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs" title="${f.name}">${f.name}</span>
+                            <span class="text-[10px] text-slate-400 font-mono">${f.size ? formatFileSize(f.size) : ''}</span>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+                                <span class="material-symbols-outlined text-sm">check</span>
+                                <span>Ready</span>
+                            </span>
+                            <button type="button" onclick="window.workerWorkspace.removeStagedDeliverableFile(${idx})" class="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-rose-500 transition-colors cursor-pointer" title="Remove attached file">
+                                <span class="material-symbols-outlined text-sm">close</span>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Calculate missing
+        const missing = [];
+        requiredFormats.forEach(fmt => {
+            if (!attachedExtensions.includes(fmt)) missing.push(fmt);
+        });
+        if (!hasJpg) missing.push('JPG Preview');
+        if (!hasPdf) missing.push('PDF');
+
+        const isValid = missing.length === 0;
+
+        const hintEl = document.getElementById('worker-task-submit-hint');
+        if (hintEl) {
+            hintEl.innerHTML = isValid
+                ? `<span class="text-emerald-700 dark:text-emerald-400 font-bold flex items-center justify-center gap-1"><span class="material-symbols-outlined text-sm">check_circle</span> Ready to submit</span>`
+                : `<span class="text-amber-700 dark:text-amber-400">Missing: ${missing.join(' + ')}</span>`;
+        }
+
+        const submitBtn = document.getElementById('worker-task-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = !isValid;
+            if (isValid) {
+                submitBtn.className = 'w-full py-3.5 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-sm tracking-wide shadow-lg shadow-primary/25 cursor-pointer transition-all flex items-center justify-center gap-2';
+            } else {
+                submitBtn.className = 'w-full py-3.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 font-black text-sm tracking-wide shadow-none cursor-not-allowed transition-all flex items-center justify-center gap-2';
+            }
+        }
+    }
+
     async function handleDeliverableSubmit(e) {
         if (e && e.preventDefault) e.preventDefault();
         const taskNumber = state.currentTaskNumber;
-        const stitchCount = parseInt(document.getElementById('deliverable-stitch-count')?.value) || 12500;
-        const notes = document.getElementById('deliverable-notes')?.value || 'Completed high quality machine stitch file.';
+        const staged = state.stagedDeliverableFiles || [];
 
         try {
-            const deliverables = [
-                { name: `${taskNumber}_production.dst`, url: 'images/service-digitizing.png', type: 'application/octet-stream', size: '245 KB' },
-                { name: `${taskNumber}_master.emb`, url: 'images/service-vector.png', type: 'application/octet-stream', size: '1.4 MB' }
-            ];
+            const deliverables = staged.length > 0
+                ? staged.map(f => ({
+                    name: f.name,
+                    url: 'images/service-digitizing.png',
+                    type: f.type || 'application/octet-stream',
+                    size: f.size ? formatFileSize(f.size) : '150 KB'
+                }))
+                : [
+                    { name: `${taskNumber}_production.dst`, url: 'images/service-digitizing.png', type: 'application/octet-stream', size: '245 KB' },
+                    { name: `${taskNumber}_preview.jpg`, url: 'images/service-digitizing.png', type: 'image/jpeg', size: '180 KB' },
+                    { name: `${taskNumber}_worksheet.pdf`, url: 'images/service-digitizing.png', type: 'application/pdf', size: '320 KB' }
+                ];
 
             if (typeof window.insforgeClient.completeDigitizerTask === 'function') {
                 await window.insforgeClient.completeDigitizerTask(taskNumber, deliverables);
             } else if (typeof window.insforgeClient.completeTask === 'function') {
                 await window.insforgeClient.completeTask(taskNumber, {
-                    stitch_count: stitchCount,
-                    notes: notes,
                     status: 'completed',
                     deliverables: deliverables
                 });
@@ -633,7 +1289,6 @@
             const idx = state.tasks.findIndex(t => (t.order_number || t.orderNumber) === taskNumber);
             if (idx !== -1) {
                 state.tasks[idx].status = 'completed';
-                state.tasks[idx].stitch_count = stitchCount;
                 state.tasks[idx].deliverables = deliverables;
                 state.tasks[idx].deliverable_url = deliverables[0].url;
             }
@@ -649,6 +1304,35 @@
             }
 
             updateMetricsAcrossViews();
+
+            // Broadcast live notifications to Admin and Client
+            if (window.dezanNotificationEngine) {
+                window.dezanNotificationEngine.broadcastToRole('admin', {
+                    orderId: taskNumber,
+                    type: 'deliverables_uploaded',
+                    category: 'orders',
+                    title: 'Digitizer Uploaded Machine Files',
+                    message: `Digitizer submitted production files for #${taskNumber}. Ready for QA & release.`,
+                    meta: `.DST, .JPG & .PDF Files Attached`,
+                    actionLabel: 'QA & Release',
+                    actionType: 'view_order',
+                    accent: 'emerald',
+                    icon: 'verified'
+                });
+                window.dezanNotificationEngine.broadcastToRole('client', {
+                    orderId: taskNumber,
+                    type: 'deliverables_ready',
+                    category: 'ready',
+                    title: 'Production Files Ready for Download!',
+                    message: `Your embroidery digitizing files for #${taskNumber} are complete and verified.`,
+                    meta: 'Files Verified · 1-Click Download',
+                    actionLabel: 'Download Files',
+                    actionType: 'download_order',
+                    accent: 'emerald',
+                    icon: 'cloud_download'
+                });
+            }
+
             alert(`Deliverables for ${taskNumber} uploaded successfully! Order marked as completed and cataloged in archive.`);
             closeDeliverableUploadModal();
             renderActivePage();
@@ -660,16 +1344,133 @@
 
     function openTaskDetailsModal(taskNumber) {
         ensureModalsExist();
-        const task = state.tasks.find(t => (t.order_number || t.orderNumber) === taskNumber);
-        if (!task) return;
+        let task = state.tasks?.find(t => (t.order_number || t.orderNumber) === taskNumber || t.task_number === taskNumber || t.id === taskNumber);
+        if (!task && window.insforgeClient && typeof window.insforgeClient.getOrders === 'function') {
+            const order = window.insforgeClient.getOrders().find(o => o.order_number === taskNumber || o.id === taskNumber);
+            if (order) {
+                task = {
+                    order_number: order.order_number,
+                    client_name: `Client #CLI-${String(order.order_number || '').replace(/^[A-Za-z]+-/, '') || '0000'}`,
+                    design_name: order.project_name || order.placement,
+                    target_fabric: order.fabric_type || 'Standard Fabric',
+                    dimensions: order.sizing || 'Left Chest Standard',
+                    target_format: order.file_format || 'DST, EMB',
+                    special_instructions: order.instructions || '',
+                    status: order.status,
+                    artwork_url: order.artwork_url,
+                    raw_artwork_files: order.raw_artwork_files,
+                    deliverables: order.deliverables
+                };
+            }
+        }
+        if (!task) {
+            task = {
+                order_number: taskNumber || 'ORD-8840',
+                client_name: 'Client Order',
+                design_name: 'Custom Embroidery Work',
+                target_fabric: 'Structured Cap / Cotton',
+                dimensions: 'Standard Left Chest',
+                target_format: 'DST, EMB',
+                special_instructions: '',
+                status: 'in_progress'
+            };
+        }
 
-        setElText('detail-task-id', task.order_number || task.orderNumber);
-        setElText('detail-client-id', task.client_name);
-        setElText('detail-design-name', task.design_name || task.placement);
-        setElText('detail-fabric', task.target_fabric || 'Standard Fabric');
-        setElText('detail-dimensions', task.dimensions || 'Left Chest Standard');
-        setElText('detail-format', task.target_format || 'DST');
-        setElText('detail-instructions', task.special_instructions || task.instructions || 'None specified. Follow standard production guidelines.');
+        const orderNum = task.order_number || task.orderNumber || task.task_number || 'TSK-ACTIVE';
+        setElText('detail-task-id', orderNum);
+        setElText('detail-client-id', task.client_name || 'Client Order');
+        setElText('detail-design-name', task.design_name || task.placement || task.project_name || 'Custom Digitizing');
+        setElText('detail-fabric', task.target_fabric || task.fabric_type || 'Standard Fabric');
+        setElText('detail-dimensions', task.dimensions || task.sizing || 'Standard Size');
+
+        // Formats & deliver requirement
+        const instructionsText = `${task.special_instructions || task.instructions || ''} ${task.notes || ''}`;
+        const reqFormats = parseRequestedFormats(task.target_format || task.file_format || 'DST', instructionsText);
+        const cleanReq = reqFormats.filter(f => f !== 'EMB').join(' · ') || 'DST';
+        setElText('detail-deliver-required', `${cleanReq} · JPG Preview · PDF Worksheet`);
+        setElText('detail-deliver-optional', reqFormats.includes('EMB') ? 'Optional: EMB' : 'Standard Files');
+
+        // Instructions (clean of boilerplate)
+        const notes = (task.special_instructions || task.instructions || 'Standard commercial digitizing standards apply.').replace(/Standard commercial digitizing standards apply.*$/i, '').trim();
+        setElText('detail-instructions', notes || 'No special client notes provided.');
+
+        // Customer Artwork List with Preview and Download
+        const rawFiles = (Array.isArray(task.raw_artwork_files) && task.raw_artwork_files.length > 0)
+            ? task.raw_artwork_files
+            : (Array.isArray(task.rawArtworkFiles) && task.rawArtworkFiles.length > 0)
+                ? task.rawArtworkFiles
+                : [{ name: 'artwork.png', url: task.artwork_url || 'images/service-digitizing.png' }];
+
+        const artContainer = document.getElementById('detail-artwork-container');
+        if (artContainer) {
+            artContainer.innerHTML = rawFiles.map((rf, idx) => {
+                const ext = getFileExtension(rf.name) || 'ART';
+                return `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/20 text-xs">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black uppercase bg-amber-500/15 text-amber-900 dark:text-primary border border-amber-500/30">${ext}</span>
+                            <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[150px] sm:max-w-[200px]" title="${rf.name}">${rf.name}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="window.workerWorkspace.openDigitizerArtworkPreview('${orderNum}', ${idx})" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-slate-700 text-amber-900 dark:text-primary border border-slate-200 dark:border-primary/20 text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer transition-colors">
+                                <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">visibility</span>
+                                <span>Preview</span>
+                            </button>
+                            <a href="${rf.url}" download="${rf.name}" target="_blank" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer transition-colors">
+                                <span class="material-symbols-outlined text-xs">download</span>
+                                <span>Download</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Deliverables Section (if any completed deliverables exist)
+        const deliverables = task.deliverables || [];
+        const delivSection = document.getElementById('detail-deliverables-container');
+        const delivList = document.getElementById('detail-deliverables-list');
+        if (delivSection && delivList) {
+            if (Array.isArray(deliverables) && deliverables.length > 0) {
+                delivSection.classList.remove('hidden');
+                delivList.innerHTML = deliverables.map(d => `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-500/20 text-xs">
+                        <span class="font-mono font-bold text-slate-800 dark:text-slate-200 truncate max-w-[180px]">${d.name}</span>
+                        <a href="${d.url}" download="${d.name}" class="px-2 py-0.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold inline-flex items-center gap-1 cursor-pointer">
+                            <span class="material-symbols-outlined text-xs">download</span>
+                            <span>Get</span>
+                        </a>
+                    </div>
+                `).join('');
+            } else {
+                delivSection.classList.add('hidden');
+            }
+        }
+
+        // Revision Section (if revision)
+        const revSection = document.getElementById('detail-revision-container');
+        if (revSection) {
+            if (task.status === 'revision_requested' || task.revision_notes) {
+                revSection.classList.remove('hidden');
+                setElText('detail-revision-notes', task.revision_notes || task.revisionNotes || 'Client requested stitch revision.');
+            } else {
+                revSection.classList.add('hidden');
+            }
+        }
+
+        // Attach Deliverables Button Action
+        const attachBtn = document.getElementById('detail-attach-btn');
+        if (attachBtn) {
+            if (task.status === 'completed') {
+                attachBtn.classList.add('hidden');
+            } else {
+                attachBtn.classList.remove('hidden');
+                attachBtn.onclick = () => {
+                    closeTaskDetailsModal();
+                    openDeliverableUploadModal(orderNum);
+                };
+            }
+        }
 
         const modal = document.getElementById('task-details-modal');
         if (modal) modal.classList.remove('hidden');
@@ -927,9 +1728,13 @@
     window.workerWorkspace = {
         init: initWorkerWorkspace,
         setFilter,
+        setLayout: setDigitizerLayout,
+        setDigitizerLayout,
         handleSearch,
         openDeliverableUploadModal,
         closeDeliverableUploadModal,
+        handleDeliverableFileInput,
+        removeStagedDeliverableFile,
         handleDeliverableSubmit,
         openTaskDetailsModal,
         closeTaskDetailsModal,
@@ -943,6 +1748,11 @@
         closeDigitizerArtworkPreview,
         navigateDigitizerArtworkPreview
     };
+
+    window.openTaskDetailsModal = openTaskDetailsModal;
+    window.closeTaskDetailsModal = closeTaskDetailsModal;
+    window.setDigitizerLayout = setDigitizerLayout;
+    window.setLayout = setDigitizerLayout;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initWorkerWorkspace);

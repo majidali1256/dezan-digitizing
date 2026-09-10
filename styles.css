@@ -764,3 +764,116 @@ header a img[src*="logo.png"] {
     -webkit-clip-path: inset(0 50% 0 0);
     will-change: clip-path;
 }
+
+/* ==========================================================================
+   Dezan Notification Center Luxury Styles
+   ========================================================================== */
+#dezan-notification-panel {
+    background-color: #ffffff !important;
+    transform-origin: top right;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(212, 175, 53, 0.3);
+    z-index: 100 !important;
+}
+
+.dark #dezan-notification-panel {
+    background-color: #12100c !important;
+    box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(212, 175, 53, 0.35);
+}
+
+#dezan-notification-container.is-open {
+    z-index: 100 !important;
+    position: relative;
+}
+
+#dezan-notif-header,
+#dezan-notif-footer {
+    background-color: #f8fafc !important;
+}
+
+.dark #dezan-notif-header,
+.dark #dezan-notif-footer {
+    background-color: #16140d !important;
+}
+
+#dezan-notif-tabs,
+#dezan-notif-body {
+    background-color: #ffffff !important;
+    overscroll-behavior: contain;
+}
+
+.dark #dezan-notif-tabs,
+.dark #dezan-notif-body {
+    background-color: #12100c !important;
+}
+
+#dezan-notif-body::-webkit-scrollbar {
+    width: 5px;
+}
+
+#dezan-notif-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#dezan-notif-body::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 53, 0.35);
+    border-radius: 9999px;
+}
+
+#dezan-notif-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 175, 53, 0.6);
+}
+
+.notif-card {
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: #ffffff !important;
+}
+
+.dark .notif-card {
+    background-color: #17150e !important;
+}
+
+.notif-card:hover {
+    transform: translateY(-1px);
+    background-color: #f8fafc !important;
+}
+
+.dark .notif-card:hover {
+    background-color: #1d1a12 !important;
+}
+
+/* ===================================================================
+   EXPANDABLE BENTO CARD TRAY & GMAIL-STYLE DELIVERABLES UPLOAD
+   =================================================================== */
+.card-extended-tray {
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: traySlideDown 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes traySlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-extended-tray.hidden {
+    display: none !important;
+}
+
+/* Gmail-style simplified upload dropzone */
+.gmail-upload-area {
+    border: 2px dashed rgba(212, 175, 53, 0.35);
+    background: rgba(212, 175, 53, 0.03);
+    border-radius: 1rem;
+    transition: all 0.2s ease;
+}
+
+.gmail-upload-area:hover,
+.gmail-upload-area.dragover {
+    border-color: #d4af35;
+    background: rgba(212, 175, 53, 0.08);
+}

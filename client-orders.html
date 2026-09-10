@@ -28,7 +28,7 @@
         }
     </script>
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="client-workspace.css" />
+    <link rel="stylesheet" href="client-workspace.css?v=3.7" />
 </head>
 
 <body data-client-page="orders" class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30 transition-colors duration-200">
@@ -119,27 +119,51 @@
         <!-- Filter Controls Bar -->
         <div class="p-4 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 shadow-xs mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3.5">
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none" id="order-filter-tabs">
-                <button onclick="window.clientWorkspace.setFilter('all')" data-filter="all" class="client-filter-pill active">
-                    All Orders
+                <button type="button" onclick="window.clientWorkspace.setFilter('all')" data-filter="all" class="client-dist-pill pill-all active focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>All orders</span>
+                    <span id="client-pill-count-all">0</span>
                 </button>
-                <button onclick="window.clientWorkspace.setFilter('in_progress')" data-filter="in_progress" class="client-filter-pill">
-                    In Production
+                <button type="button" onclick="window.clientWorkspace.setFilter('in_progress')" data-filter="in_progress" class="client-dist-pill pill-production focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>In production</span>
+                    <span id="client-pill-count-production">0</span>
                 </button>
-                <button onclick="window.clientWorkspace.setFilter('completed')" data-filter="completed" class="client-filter-pill">
-                    Delivered / Ready
+                <button type="button" onclick="window.clientWorkspace.setFilter('quotes')" data-filter="quotes" class="client-dist-pill pill-quotes focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>Quotes &amp; Estimates</span>
+                    <span id="client-pill-count-quotes">0</span>
                 </button>
-                <button onclick="window.clientWorkspace.setFilter('revision_requested')" data-filter="revision_requested" class="client-filter-pill">
-                    Revisions
+                <button type="button" onclick="window.clientWorkspace.setFilter('revision_requested')" data-filter="revision_requested" class="client-dist-pill pill-revisions focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>Revisions</span>
+                    <span id="client-pill-count-revisions">0</span>
                 </button>
-                <button onclick="window.clientWorkspace.setFilter('unpaid')" data-filter="unpaid" class="client-filter-pill">
-                    Payment Due
+                <button type="button" onclick="window.clientWorkspace.setFilter('unpaid')" data-filter="unpaid" class="client-dist-pill pill-due focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>Payment Due</span>
+                    <span id="client-pill-count-due">0</span>
+                </button>
+                <button type="button" onclick="window.clientWorkspace.setFilter('completed')" data-filter="completed" class="client-dist-pill pill-completed focus-visible:outline-2 focus-visible:outline-primary">
+                    <span>Delivered</span>
+                    <span id="client-pill-count-completed">0</span>
                 </button>
             </div>
 
-            <!-- Search input -->
-            <div class="relative w-full md:w-64">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
-                <input type="text" id="order-search-input" oninput="window.clientWorkspace.handleSearch(event)" placeholder="Search order #, design..." class="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary" />
+            <!-- Right Controls: Density Switcher & Search input -->
+            <div class="flex items-center gap-2.5 w-full md:w-auto">
+                <!-- Density Switcher: Cards vs Table -->
+                <div class="flex items-center bg-slate-100 dark:bg-slate-900 p-0.5 rounded-xl border border-primary/20 dark:border-primary/25 text-xs shrink-0">
+                    <button type="button" onclick="window.clientWorkspace.setLayout('grid')" id="client-layout-toggle-grid" class="px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Visual Cards View" aria-pressed="true">
+                        <span class="material-symbols-outlined text-sm">grid_view</span>
+                        <span class="text-[11px] hidden sm:inline">Cards</span>
+                    </button>
+                    <button type="button" onclick="window.clientWorkspace.setLayout('table')" id="client-layout-toggle-table" class="px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Compact Table View" aria-pressed="false">
+                        <span class="material-symbols-outlined text-sm">table_rows</span>
+                        <span class="text-[11px] hidden sm:inline">Table</span>
+                    </button>
+                </div>
+
+                <!-- Search input -->
+                <div class="relative flex-1 md:w-64">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                    <input type="text" id="order-search-input" oninput="window.clientWorkspace.handleSearch(event)" placeholder="Search order #, design..." class="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/20 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary" />
+                </div>
             </div>
         </div>
 
@@ -177,7 +201,7 @@
                         <span>Reference Photo or Problem Picture</span>
                         <span class="text-[10px] font-normal lowercase text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">(optional)</span>
                     </label>
-                    <div id="revision-photo-dropzone" onclick="document.getElementById('revision-photo-file').click()" class="border-2 border-dashed border-slate-300 dark:border-primary/30 hover:border-primary rounded-xl p-3.5 sm:p-4 text-center cursor-pointer bg-slate-50/50 dark:bg-slate-950/40 transition-all hover:bg-slate-100/60 dark:hover:bg-slate-900/60">
+                    <div id="revision-photo-dropzone" onclick="document.getElementById('revision-photo-file').click()" ondragover="event.preventDefault(); this.classList.add('border-primary', 'bg-amber-50/20');" ondragleave="this.classList.remove('border-primary', 'bg-amber-50/20');" ondrop="window.clientWorkspace.handleRevisionPhotoDrop(event)" class="border-2 border-dashed border-slate-300 dark:border-primary/30 hover:border-primary rounded-xl p-3.5 sm:p-4 text-center cursor-pointer bg-slate-50/50 dark:bg-slate-950/40 transition-all hover:bg-slate-100/60 dark:hover:bg-slate-900/60">
                         <span class="material-symbols-outlined text-amber-600 dark:text-primary text-2xl mb-1">add_a_photo</span>
                         <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Upload Photo or Screenshot</p>
                         <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Attach a photo of the stitch-out, garment, or marked-up artwork to show what needs fixing. (Optional)</p>
@@ -210,50 +234,94 @@
         </div>
     </div>
 
-    <!-- ===== ORDER DETAILS INSPECT MODAL ===== -->
+    <!-- ===== ORDER DETAILS INSPECT MODAL (CONSOLIDATED) ===== -->
     <div id="order-details-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="w-full max-w-lg bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/30 shadow-2xl p-6 text-slate-900 dark:text-slate-100">
+        <div class="w-full max-w-lg bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/30 shadow-2xl p-6 text-slate-900 dark:text-slate-100 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-primary/20">
-                <h3 class="font-black text-base flex items-center gap-2 text-slate-900 dark:text-white">
+                <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-amber-700 dark:text-primary">visibility</span>
-                    <span>Order Specification Drawer</span>
-                </h3>
-                <button onclick="window.clientWorkspace.closeOrderDetailsModal()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+                    <div>
+                        <h3 class="font-black text-base text-slate-900 dark:text-white" id="drawer-modal-title">Work Order Specifications</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400" id="drawer-design-name">Sample</p>
+                    </div>
+                </div>
+                <button onclick="window.clientWorkspace.closeOrderDetailsModal()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 cursor-pointer">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-            <div class="space-y-3 text-xs">
-                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                    <span class="text-slate-500">Order ID:</span>
-                    <strong id="drawer-order-id" class="font-mono text-amber-900 dark:text-primary">ORD-NEW</strong>
+            <div class="space-y-3.5 text-xs">
+                <!-- Top Key-Value Grid -->
+                <div class="grid grid-cols-2 gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-primary/20">
+                    <div>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Order ID</span>
+                        <strong id="drawer-order-id" class="font-mono text-amber-900 dark:text-primary text-xs">ORD-NEW</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Service &amp; Tier</span>
+                        <span class="text-slate-900 dark:text-white font-bold"><span id="drawer-service">Digitizing</span> (<span id="drawer-plan">Standard</span>)</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Status</span>
+                        <strong id="drawer-status" class="capitalize text-amber-800 dark:text-primary text-xs">In Progress</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Total Amount</span>
+                        <strong id="drawer-amount" class="text-sm font-black text-slate-900 dark:text-white">$15.00</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Target Fabric</span>
+                        <strong id="drawer-fabric" class="text-slate-900 dark:text-white">Pique Polo Knit</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Dimensions</span>
+                        <strong id="drawer-dimensions" class="text-slate-900 dark:text-white">3.5" W x 2.2" H</strong>
+                    </div>
                 </div>
-                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                    <span class="text-slate-500">Design Name:</span>
-                    <strong id="drawer-design-name" class="text-slate-900 dark:text-white">Sample</strong>
+
+                <!-- Formats & Deliverables Specifications Box -->
+                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-primary/20 text-xs">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">DELIVERABLES:</span>
+                        <span id="drawer-format-req" class="font-mono font-black text-amber-900 dark:text-primary text-xs">DST · JPG Preview · PDF Worksheet</span>
+                    </div>
                 </div>
-                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                    <span class="text-slate-500">Service &amp; Tier:</span>
-                    <span><strong id="drawer-service">Digitizing</strong> (<span id="drawer-plan">Standard</span>)</span>
+
+                <!-- Client Special Instructions / Notes -->
+                <div id="drawer-notes-container" class="space-y-1">
+                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Your Instructions:</span>
+                    <p id="drawer-instructions" class="p-2.5 rounded-xl bg-amber-50/50 dark:bg-slate-900 border border-amber-200/60 dark:border-primary/20 text-slate-800 dark:text-slate-200 italic leading-relaxed">None</p>
                 </div>
-                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                    <span class="text-slate-500">Status:</span>
-                    <strong id="drawer-status" class="capitalize text-amber-800 dark:text-primary">In Progress</strong>
+
+                <!-- Submitted Artwork Section -->
+                <div class="space-y-1.5">
+                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Submitted Artwork:</span>
+                    <div id="drawer-artwork-container" class="space-y-1.5"></div>
                 </div>
-                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                    <span class="text-slate-500">Target Fabric:</span>
-                    <strong id="drawer-fabric">Pique Polo Knit</strong>
-                </div>
-                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-primary/10">
-                    <span class="text-slate-500">Dimensions:</span>
-                    <strong id="drawer-dimensions">3.5" W x 2.2" H</strong>
-                </div>
-                <div class="flex justify-between py-1">
-                    <span class="text-slate-500">Amount:</span>
-                    <strong id="drawer-amount" class="text-sm font-black text-slate-900 dark:text-white">$15.00</strong>
+
+                <!-- Completed Deliverables Section (if completed) -->
+                <div id="drawer-deliverables-container" class="hidden space-y-1.5">
+                    <span class="text-[10px] font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider block">Finished Production Files:</span>
+                    <div id="drawer-deliverables-list" class="space-y-1"></div>
                 </div>
             </div>
-            <div class="flex justify-end pt-4">
-                <button type="button" onclick="window.clientWorkspace.closeOrderDetailsModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-xs">Close</button>
+
+            <!-- Action Buttons Footer -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-4 mt-3 border-t border-slate-100 dark:border-primary/10">
+                <div class="flex items-center gap-2">
+                    <button type="button" id="drawer-pay-btn" class="hidden px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-transform hover:scale-[1.02]">
+                        <span class="material-symbols-outlined text-sm">credit_card</span>
+                        <span id="drawer-pay-btn-text">Pay Now</span>
+                    </button>
+                    <button type="button" id="drawer-request-revision-btn" onclick="window.clientWorkspace.openRevisionFromDrawer()" class="hidden px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-transform hover:scale-[1.02]">
+                        <span class="material-symbols-outlined text-sm">rate_review</span>
+                        <span>Request Revision</span>
+                    </button>
+                    <button type="button" id="drawer-invoice-btn" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs inline-flex items-center gap-1 cursor-pointer">
+                        <span class="material-symbols-outlined text-sm">receipt_long</span>
+                        <span>Invoice</span>
+                    </button>
+                </div>
+                <button type="button" onclick="window.clientWorkspace.closeOrderDetailsModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-xs cursor-pointer ml-auto">Close</button>
             </div>
         </div>
     </div>
@@ -286,8 +354,9 @@
 
     <!-- Scripts -->
     <script src="js/insforge-client.js"></script>
+    <script src="js/notifications-manager.js"></script>
     <script src="js/order-quote-modal.js"></script>
-    <script src="js/client-workspace.js"></script>
+    <script src="js/client-workspace.js?v=3.7"></script>
 </body>
 
 </html>

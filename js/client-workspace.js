@@ -24,10 +24,29 @@
         selectedService: 'Digitizing',
         selectedPlan: 'Hat / Left Chest Logos',
         artworkFiles: [],
-        stitchOutPhoto: null
+        stitchOutPhoto: null,
+        layout: localStorage.getItem('dezan_client_layout') || 'grid'
     };
 
     const state = window.clientWorkspaceState;
+
+    /**
+     * Universal Company Date & Time Formatter
+     * Returns explicit readable date and exact time (e.g. Sep 9, 2026 · 09:30 AM)
+     */
+    function formatOrderDateTime(dateVal) {
+        if (!dateVal) return { date: 'Recently', time: 'Just now', full: 'Recently' };
+        const d = new Date(dateVal);
+        if (isNaN(d.getTime())) return { date: 'Recently', time: 'Just now', full: 'Recently' };
+        const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        return {
+            date: dateStr,
+            time: timeStr,
+            full: `${dateStr} · ${timeStr}`
+        };
+    }
+    window.formatOrderDateTime = formatOrderDateTime;
 
     // ----- Initialize Workspace -----
     async function initClientWorkspace() {
@@ -102,7 +121,7 @@
     async function loadClientData() {
         try {
             const orders = await window.insforgeClient.getOrders();
-            state.orders = Array.isArray(orders) ? orders : [];
+            state.orders = (Array.isArray(orders) && orders.length > 0) ? orders : getFallbackOrders();
         } catch (e) {
             console.warn('Failed to load orders, using fallback:', e);
             state.orders = getFallbackOrders();
@@ -118,6 +137,25 @@
         }
 
         updateMetricsAcrossViews();
+    }
+
+    function isQuoteRecord(o) {
+        if (!o) return false;
+        const num = (o.order_number || '').toUpperCase();
+        const status = (o.status || '').toLowerCase();
+        const service = (o.service_type || '').toLowerCase();
+        return o.is_quote === true ||
+               num.startsWith('QUO-') ||
+               status === 'quote_requested' ||
+               status === 'quote_ready' ||
+               status === 'quote_pending' ||
+               status.includes('quote') ||
+               service.includes('quote');
+    }
+
+    function isPaymentDue(o) {
+        if (!o || isQuoteRecord(o)) return false;
+        return (o.payment_status === 'unpaid' || o.payment_status === 'pending' || o.payment_status === 'payment_due');
     }
 
     function getFallbackOrders() {
@@ -136,6 +174,52 @@
                 target_fabric: 'Pique Polo Knit',
                 dimensions: '3.5" W x 2.2" H',
                 format: 'DST (Tajima)'
+            },
+            {
+                id: 'quo-104',
+                order_number: 'QUO-7215',
+                design_name: 'Falcon Motorsport Jacket Back Quote',
+                service_type: 'Custom Quote',
+                plan: 'Jacket Backs',
+                status: 'quote_requested',
+                is_quote: true,
+                amount: 45.00,
+                payment_status: 'unpaid',
+                created_at: new Date(Date.now() - 3600000 * 8).toISOString(),
+                artwork_url: 'images/service-digitizing.png',
+                target_fabric: 'Leather & Heavy Denim',
+                dimensions: '11.5" W x 9.0" H',
+                format: 'EMB, DST, PES'
+            },
+            {
+                id: 'ord-105',
+                order_number: 'ORD-8240',
+                design_name: 'Pacific Coast Marina Cap Revision',
+                service_type: 'Digitizing',
+                plan: 'Hat / Left Chest Logos',
+                status: 'revision_requested',
+                amount: 15.00,
+                payment_status: 'paid',
+                created_at: new Date(Date.now() - 86400000 * 1).toISOString(),
+                artwork_url: 'images/service-vector.png',
+                target_fabric: 'Structured Twill Cap',
+                dimensions: '2.8" W x 2.0" H',
+                format: 'DST (Tajima)'
+            },
+            {
+                id: 'ord-106',
+                order_number: 'ORD-8511',
+                design_name: 'Iron Horse Biker Club Emblem',
+                service_type: 'Digitizing',
+                plan: 'Standard Embroidered Patch',
+                status: 'in_progress',
+                amount: 25.00,
+                payment_status: 'unpaid',
+                created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
+                artwork_url: 'images/service-digitizing.png',
+                target_fabric: 'Heavy Twill',
+                dimensions: '4.5" W x 4.0" H',
+                format: 'DST'
             },
             {
                 id: 'ord-102',
@@ -174,24 +258,42 @@
     // ----- Metrics Calculation -----
     function updateMetricsAcrossViews() {
         const orders = state.orders || [];
-        const isQuote = (o) => (o.order_number || '').startsWith('QUO-') || o.status === 'quote_pending' || o.status === 'quote_requested' || o.is_quote;
-        const openOrders = orders.filter(o => o.status !== 'completed' && !isQuote(o)).length;
-        const completedOrders = orders.filter(o => o.status === 'completed').length;
-        const quotesCount = orders.filter(o => isQuote(o)).length;
+        const allCount = orders.length;
+        const quotesCount = orders.filter(o => isQuoteRecord(o)).length;
+        const revisionsCount = orders.filter(o => !isQuoteRecord(o) && o.status === 'revision_requested').length;
+        const completedCount = orders.filter(o => !isQuoteRecord(o) && o.status === 'completed').length;
+        const productionCount = orders.filter(o => !isQuoteRecord(o) && o.status !== 'completed' && o.status !== 'revision_requested').length;
+        const dueCount = orders.filter(o => isPaymentDue(o)).length;
         
         let balanceDue = 0;
         orders.forEach(o => {
-            if (!isQuote(o) && (o.payment_status === 'unpaid' || o.payment_status === 'pending')) {
+            if (isPaymentDue(o)) {
                 const p = o.price !== undefined ? o.price : (o.amount !== undefined ? o.amount : 0);
                 balanceDue += parseFloat(p || 0);
             }
         });
 
         // Update DOM elements if present
-        setElText('metric-open-orders', openOrders);
-        setElText('metric-completed-orders', completedOrders);
+        setElText('metric-open-orders', productionCount + revisionsCount);
+        setElText('metric-completed-orders', completedCount);
         setElText('metric-quotes-count', quotesCount);
         setElText('metric-balance-due', `$${balanceDue.toFixed(2)}`);
+
+        // Client orders 6 stage pill counter badges
+        setElText('client-pill-count-all', allCount);
+        setElText('client-pill-count-production', productionCount);
+        setElText('client-pill-count-quotes', quotesCount);
+        setElText('client-pill-count-revisions', revisionsCount);
+        setElText('client-pill-count-due', dueCount);
+        setElText('client-pill-count-completed', completedCount);
+
+        // Dashboard stage pill badges (if present)
+        setElText('client-dash-pill-all', allCount);
+        setElText('client-dash-pill-production', productionCount);
+        setElText('client-dash-pill-quotes', quotesCount);
+        setElText('client-dash-pill-revisions', revisionsCount);
+        setElText('client-dash-pill-due', dueCount);
+        setElText('client-dash-pill-completed', completedCount);
 
         // Badges in navigation
         setElText('nav-badge-orders', orders.length);
@@ -250,7 +352,7 @@
 
         // Active production section
         if (active.length > 0) {
-            html += `<div class="mb-4"><h3 class="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-primary mb-2 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> In Production & Active (${active.length})</h3><div class="space-y-3">`;
+            html += `<div class="mb-4"><h3 class="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-primary mb-2 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> In Production & Active (${active.length})</h3><div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">`;
             active.forEach(order => {
                 html += renderClientOrderCard(order, false);
             });
@@ -259,7 +361,7 @@
 
         // Recent completed downloads
         if (completed.length > 0) {
-            html += `<div><h3 class="text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-2 flex items-center gap-1.5"><span class="material-symbols-outlined text-sm">cloud_download</span> Ready for Download</h3><div class="space-y-3">`;
+            html += `<div><h3 class="text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-2 flex items-center gap-1.5"><span class="material-symbols-outlined text-sm">cloud_download</span> Ready for Download</h3><div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">`;
             completed.slice(0, 3).forEach(order => {
                 html += renderClientOrderCard(order, true);
             });
@@ -276,112 +378,523 @@
         const container = document.getElementById('orders-list-container');
         if (!container) return;
 
-        let filtered = [...state.orders];
+        if (!state.orders || state.orders.length === 0) {
+            state.orders = getFallbackOrders();
+            updateMetricsAcrossViews();
+        }
+
+        let orders = [...state.orders];
 
         // Search query filter
         if (state.searchQuery) {
             const q = state.searchQuery.toLowerCase();
-            filtered = filtered.filter(o =>
+            orders = orders.filter(o =>
                 (o.design_name || '').toLowerCase().includes(q) ||
+                (o.project_name || '').toLowerCase().includes(q) ||
                 (o.order_number || '').toLowerCase().includes(q) ||
                 (o.service_type || '').toLowerCase().includes(q) ||
                 (o.plan || '').toLowerCase().includes(q)
             );
         }
 
-        // Filter tab
-        if (state.activeFilter === 'in_progress') {
-            filtered = filtered.filter(o => o.status !== 'completed');
-        } else if (state.activeFilter === 'completed') {
-            filtered = filtered.filter(o => o.status === 'completed');
-        } else if (state.activeFilter === 'revision_requested') {
-            filtered = filtered.filter(o => o.status === 'revision_requested');
-        } else if (state.activeFilter === 'unpaid') {
-            filtered = filtered.filter(o => o.payment_status === 'unpaid' || o.payment_status === 'pending');
-        }
+        const activeFilter = state.activeFilter || 'all';
 
-        if (filtered.length === 0) {
+        // Categorize into the 5 stages
+        const productionOrders = orders.filter(o => !isQuoteRecord(o) && o.status !== 'completed' && o.status !== 'revision_requested');
+        const quotesOrders = orders.filter(o => isQuoteRecord(o));
+        const revisionOrders = orders.filter(o => !isQuoteRecord(o) && o.status === 'revision_requested');
+        const dueOrders = orders.filter(o => isPaymentDue(o));
+        const completedOrders = orders.filter(o => !isQuoteRecord(o) && o.status === 'completed');
+
+        // Check if no orders match search at all
+        if (orders.length === 0) {
             container.innerHTML = `
-                <div class="p-10 text-center bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/20">
+                <div class="p-10 text-center bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/20 shadow-xs">
                     <span class="material-symbols-outlined text-4xl text-slate-400 mb-2">search_off</span>
                     <h3 class="text-base font-bold text-slate-900 dark:text-white">No orders matching your criteria</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">Try adjusting your filters or search keywords.</p>
-                    <button onclick="window.clientWorkspace.resetFilter()" class="px-3.5 py-1.5 rounded-xl border border-primary/30 text-primary-dark dark:text-primary font-bold text-xs hover:bg-primary/10">Show All Orders</button>
+                    <button onclick="window.clientWorkspace.resetFilter()" class="px-3.5 py-1.5 rounded-xl border border-primary/30 text-primary-dark dark:text-primary font-bold text-xs hover:bg-primary/10 cursor-pointer">Show All Orders</button>
                 </div>
             `;
             return;
         }
 
-        container.innerHTML = filtered.map(o => renderClientOrderCard(o, o.status === 'completed')).join('');
+        function renderStageSection({ id, title, subtitle, icon, badgePillClass, iconColorClass, count, list, emptyText, actionHtml, filterKey }) {
+            const isTarget = (activeFilter === 'all' || activeFilter === filterKey);
+            const hiddenClass = isTarget ? '' : 'hidden';
+
+            let bodyHtml = '';
+            if (list.length === 0) {
+                bodyHtml = `
+                    <div class="p-8 text-center bg-slate-50/50 dark:bg-slate-900/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                        <span class="material-symbols-outlined text-3xl text-slate-400 mb-1">${icon}</span>
+                        <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">${emptyText}</p>
+                        ${actionHtml ? `<div class="mt-3">${actionHtml}</div>` : ''}
+                    </div>
+                `;
+            } else if (state.layout === 'table') {
+                bodyHtml = `
+                    <div class="overflow-x-auto rounded-xl border border-slate-200/80 dark:border-primary/20 shadow-2xs">
+                        <table class="w-full text-left text-xs min-w-[980px]">
+                            <thead class="bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-primary/20 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                                <tr>
+                                    <th class="px-4 py-3 w-[145px]">Order #, Date &amp; Time</th>
+                                    <th class="px-4 py-3 min-w-[200px]">Design &amp; Service</th>
+                                    <th class="px-4 py-3 w-[140px]">Specs &amp; Fabric</th>
+                                    <th class="px-4 py-3 w-[110px]">Format</th>
+                                    <th class="px-4 py-3 w-[110px]">Price</th>
+                                    <th class="px-4 py-3 w-[125px]">Status</th>
+                                    <th class="px-4 py-3 w-[260px] text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-primary/10">
+                                ${list.map(o => renderClientOrderTableRow(o, o.status === 'completed')).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                bodyHtml = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        ${list.map(o => renderClientOrderCard(o, o.status === 'completed')).join('')}
+                    </div>
+                `;
+            }
+
+            return `
+                <section id="${id}" class="stage-sub-section ${hiddenClass}" data-filter-target="${filterKey}">
+                    <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-primary/10 bg-slate-50/60 dark:bg-slate-900/40 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-xl ${iconColorClass}">${icon}</span>
+                            <div>
+                                <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                                    <span>${title}</span>
+                                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold ${badgePillClass}">${count}</span>
+                                </h3>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400">${subtitle}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 sm:p-5">
+                        ${bodyHtml}
+                    </div>
+                </section>
+            `;
+        }
+
+        const sections = [
+            renderStageSection({
+                id: 'stage-client-production',
+                title: 'In Production & Active Jobs',
+                subtitle: 'Designs currently in digitizing, stitch optimization, or QA review',
+                icon: 'precision_manufacturing',
+                iconColorClass: 'text-blue-600 dark:text-blue-400',
+                badgePillClass: 'bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/30',
+                count: productionOrders.length,
+                list: productionOrders,
+                emptyText: 'No active production orders right now.',
+                actionHtml: '<button onclick="window.clientWorkspace.openNewOrderModal()" class="px-3.5 py-1.5 bg-primary text-background-dark font-bold text-xs rounded-xl shadow-xs cursor-pointer">Place New Order</button>',
+                filterKey: 'in_progress'
+            }),
+            renderStageSection({
+                id: 'stage-client-quotes',
+                title: 'Quotes & Estimates',
+                subtitle: 'Dedicated custom appraisals and stitch estimations pending review',
+                icon: 'request_quote',
+                iconColorClass: 'text-sky-600 dark:text-sky-400',
+                badgePillClass: 'bg-sky-50 text-sky-800 border border-sky-200 dark:bg-sky-500/15 dark:text-sky-400 dark:border-sky-500/30',
+                count: quotesOrders.length,
+                list: quotesOrders,
+                emptyText: 'No open custom quotes requested yet.',
+                actionHtml: '<button onclick="window.clientWorkspace.openNewQuoteModal()" class="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer">Request Free Quote</button>',
+                filterKey: 'quotes'
+            }),
+            renderStageSection({
+                id: 'stage-client-revisions',
+                title: 'Revisions In Progress',
+                subtitle: 'Modifications, stitch density adjustments, or size recalculations requested',
+                icon: 'history_edu',
+                iconColorClass: 'text-purple-600 dark:text-purple-400',
+                badgePillClass: 'bg-purple-50 text-purple-800 border border-purple-200 dark:bg-purple-500/15 dark:text-purple-400 dark:border-purple-500/30',
+                count: revisionOrders.length,
+                list: revisionOrders,
+                emptyText: 'No orders undergoing revisions. All projects are running smoothly!',
+                actionHtml: '',
+                filterKey: 'revision_requested'
+            }),
+            renderStageSection({
+                id: 'stage-client-due',
+                title: 'Payment Due',
+                subtitle: 'Orders requiring payment settlement to release final machine stitch files',
+                icon: 'pending_actions',
+                iconColorClass: 'text-rose-600 dark:text-rose-400',
+                badgePillClass: 'bg-rose-50 text-rose-800 border border-rose-200 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/30',
+                count: dueOrders.length,
+                list: dueOrders,
+                emptyText: 'All settled! No pending invoices or payments due.',
+                actionHtml: '',
+                filterKey: 'unpaid'
+            }),
+            renderStageSection({
+                id: 'stage-client-completed',
+                title: 'Delivered & Download Ready',
+                subtitle: 'Finished machine stitch files (DST, PES, EMB) and vector redraws ready for production',
+                icon: 'verified',
+                iconColorClass: 'text-emerald-600 dark:text-emerald-400',
+                badgePillClass: 'bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30',
+                count: completedOrders.length,
+                list: completedOrders,
+                emptyText: 'No completed orders yet. Ready deliverables will appear here for download.',
+                actionHtml: '',
+                filterKey: 'completed'
+            })
+        ];
+
+        container.innerHTML = `
+            <div class="stage-sections-flow">
+                ${sections.join('')}
+            </div>
+        `;
+
+        updateLayoutToggleButtons();
     }
 
-    // Card Component
+    function getFileExtension(filename) {
+        if (!filename) return 'ART';
+        const clean = filename.split('?')[0].split('#')[0];
+        const parts = clean.split('.');
+        if (parts.length < 2) return 'ART';
+        return parts.pop().toUpperCase();
+    }
+
+    function setLayout(mode) {
+        state.layout = mode;
+        try {
+            localStorage.setItem('dezan_client_layout', mode);
+        } catch (e) {}
+        updateLayoutToggleButtons();
+        renderActivePage();
+    }
+
+    function updateLayoutToggleButtons() {
+        const gridBtn = document.getElementById('client-layout-toggle-grid');
+        const tableBtn = document.getElementById('client-layout-toggle-table');
+        if (!gridBtn || !tableBtn) return;
+        if (state.layout === 'table') {
+            tableBtn.className = 'px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2';
+            tableBtn.setAttribute('aria-pressed', 'true');
+            gridBtn.className = 'px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2';
+            gridBtn.setAttribute('aria-pressed', 'false');
+        } else {
+            gridBtn.className = 'px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2';
+            gridBtn.setAttribute('aria-pressed', 'true');
+            tableBtn.className = 'px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2';
+            tableBtn.setAttribute('aria-pressed', 'false');
+        }
+    }
+
+    // Global card expansion helper for client workspace
+    if (!window.toggleOrderCardExpand) {
+        window.toggleOrderCardExpand = function(orderNumber, btn) {
+            const card = document.getElementById(`client-card-${orderNumber}`)
+                || document.getElementById(`digitizer-card-${orderNumber}`)
+                || document.getElementById(`admin-card-${orderNumber}`)
+                || (btn ? btn.closest('.digitizer-bento-card, .client-order-card, .admin-order-card') : null);
+            const tray = document.getElementById(`tray-${orderNumber}`) || (card ? card.querySelector('.card-extended-tray') : null);
+            if (!tray) return;
+
+            const isHidden = tray.classList.contains('hidden');
+            if (isHidden) {
+                tray.classList.remove('hidden');
+                if (btn) {
+                    btn.setAttribute('aria-expanded', 'true');
+                    const textEl = btn.querySelector('.btn-text') || btn.querySelector('span:not(.material-symbols-outlined)');
+                    const iconEl = btn.querySelector('.material-symbols-outlined');
+                    if (textEl) textEl.textContent = 'Less';
+                    if (iconEl) iconEl.textContent = 'expand_less';
+                }
+            } else {
+                tray.classList.add('hidden');
+                if (btn) {
+                    btn.setAttribute('aria-expanded', 'false');
+                    const textEl = btn.querySelector('.btn-text') || btn.querySelector('span:not(.material-symbols-outlined)');
+                    const iconEl = btn.querySelector('.material-symbols-outlined');
+                    if (textEl) textEl.textContent = 'Details';
+                    if (iconEl) iconEl.textContent = 'expand_more';
+                }
+            }
+        };
+    }
+
+    /**
+     * Compact Bento Card Component for Client Workspace (~220px Matching Digitizer & Admin)
+     */
     function renderClientOrderCard(order, isCompleted) {
-        const statusClass = order.status || 'in_progress';
-        const formattedDate = order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently';
+        const isQuote = isQuoteRecord(order);
         const isPaid = (order.payment_status === 'paid');
-        const price = (order.price !== undefined ? order.price : (order.amount !== undefined ? order.amount : 15));
+        const isRevision = order.status === 'revision_requested';
+        const isRush = order.turnaround_speed === 'rush' || order.isRush || order.priority === 'rush';
+        const safeOrderNumber = String(order.order_number || (isQuote ? 'QUO-REQ' : 'DZ-ORD')).replace(/-/g, '&#8209;');
+        const orderDt = formatOrderDateTime(order.created_at);
+        const price = (order.price !== undefined ? order.price : (order.amount !== undefined ? order.amount : (isQuote ? 0 : 15)));
         const priceFormatted = `$${parseFloat(price).toFixed(2)}`;
 
-        const paymentBadge = isPaid
-            ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 text-[10px] font-bold">Paid</span>'
-            : '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/30 text-[10px] font-black flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">pending_actions</span> Due</span>';
+        // Card styling classes matching stage color themes (distinct 2px border)
+        let cardThemeClass = 'border-2 border-amber-500/85 dark:border-primary/85 shadow-xs ring-1 ring-amber-500/20 hover:border-amber-600 dark:hover:border-primary';
+        let orderIdClass = 'bg-amber-100 dark:bg-primary/15 text-amber-900 dark:text-primary border-amber-300 dark:border-primary/30';
+
+        if (isCompleted) {
+            cardThemeClass = 'border-2 border-emerald-500/85 dark:border-emerald-400/80 shadow-xs ring-1 ring-emerald-500/20 hover:border-emerald-600';
+            orderIdClass = 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30';
+        } else if (isRevision) {
+            cardThemeClass = 'border-2 border-purple-500/85 dark:border-purple-400/80 shadow-xs ring-1 ring-purple-500/20 hover:border-purple-600';
+            orderIdClass = 'bg-purple-100 dark:bg-purple-950/40 text-purple-900 dark:text-purple-300 border-purple-300 dark:border-purple-700/50';
+        } else if (isQuote) {
+            cardThemeClass = 'border-2 border-sky-500/85 dark:border-sky-400/80 shadow-xs ring-1 ring-sky-500/20 hover:border-sky-600';
+            orderIdClass = 'bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-300 border-sky-200 dark:border-sky-700/40';
+        } else if (!isPaid) {
+            cardThemeClass = 'border-2 border-rose-500/85 dark:border-rose-400/80 shadow-xs ring-1 ring-rose-500/20 hover:border-rose-600';
+            orderIdClass = 'bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-300 border-rose-200 dark:border-rose-700/40';
+        } else if (order.status === 'in_progress' || order.status === 'assigned') {
+            cardThemeClass = 'border-2 border-blue-500/85 dark:border-blue-400/80 shadow-xs ring-1 ring-blue-500/20 hover:border-blue-600';
+            orderIdClass = 'bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border-blue-200 dark:border-blue-700/40';
+        }
+
+        // Badges
+        const rushBadge = isRush
+            ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 shrink-0 whitespace-nowrap shadow-2xs"><span class="material-symbols-outlined text-xs text-rose-600 dark:text-rose-400">bolt</span> ⚡ RUSH · 5–8h</span>`
+            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0 whitespace-nowrap"><span class="material-symbols-outlined text-[11px] text-slate-500">schedule</span> Standard · 12–24h</span>`;
+
+        let statusBadge = '';
+        if (isCompleted) {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-[11px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">check_circle</span> Completed</span>';
+        } else if (isRevision) {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-700/50 text-[11px] font-bold whitespace-nowrap animate-pulse"><span class="material-symbols-outlined text-xs">warning</span> Revision</span>';
+        } else if (isQuote) {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-300 border border-sky-200 dark:border-sky-700/40 text-[11px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">request_quote</span> Free Quote</span>';
+        } else if (!isPaid) {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 text-[11px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">pending_actions</span> Payment Due</span>';
+        } else if (order.status === 'in_progress' || order.status === 'assigned') {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700/40 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Production</span>';
+        } else {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> New Order</span>';
+        }
+
+        const paymentBadge = isQuote
+            ? '<span class="px-2 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-200 dark:bg-sky-500/15 dark:text-sky-400 dark:border-sky-500/30 text-[10px] font-bold">Free Quote</span>'
+            : (isPaid
+                ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 text-[10px] font-bold">Paid</span>'
+                : '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/30 text-[10px] font-black flex items-center gap-0.5"><span class="material-symbols-outlined text-[11px]">pending</span> Due</span>');
+
+        // Artwork
+        const artUrl = order.artwork_url || order.deliverable_url || '#';
+        const artName = order.artwork_name || (order.artwork_url ? order.artwork_url.split('/').pop().split('?')[0] : 'Artwork.png');
+        const artExt = (artName.split('.').pop() || 'ART').toUpperCase();
+        const clientNotes = (order.special_instructions || order.instructions || order.notes || '').replace(/Standard commercial digitizing standards apply.*$/i, '').trim();
+        const deliverables = order.deliverables || [];
+        const hasDeliverables = Array.isArray(deliverables) && deliverables.length > 0;
 
         return `
-            <div class="client-order-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border ${!isPaid ? 'border-rose-200 dark:border-rose-500/30 ring-1 ring-rose-500/10' : 'border-slate-200 dark:border-primary/20'} shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div class="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
-                    <div class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-primary/20 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-xs">
-                        ${order.artwork_url ? `<img src="${order.artwork_url}" alt="Artwork" class="w-full h-full object-cover">` : `<span class="material-symbols-outlined text-2xl text-amber-600 dark:text-primary">brush</span>`}
+            <div id="client-card-${order.order_number}" class="client-order-card digitizer-bento-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark ${cardThemeClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
+                <!-- Collapsed Resting Card (~220px) -->
+                <div>
+                    <!-- Header Bar: ID, Date & Time, Status & Badges -->
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                            <span class="px-2.5 py-1 rounded-lg border font-mono text-xs font-black ${orderIdClass} tracking-wide whitespace-nowrap select-all inline-block">#${safeOrderNumber}</span>
+                            <div class="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium mt-1 leading-tight flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[11px] text-slate-400 dark:text-slate-500">schedule</span>
+                                <span>${orderDt.date}</span>
+                                <span class="text-slate-300 dark:text-slate-600">·</span>
+                                <span class="font-bold text-slate-700 dark:text-slate-300">${orderDt.time}</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end gap-1">
+                            ${statusBadge}
+                            ${isRush ? rushBadge : paymentBadge}
+                        </div>
                     </div>
-                    <div class="min-w-0">
-                        <div class="flex flex-wrap items-center gap-2 mb-1">
-                            <span class="font-mono text-xs font-extrabold text-amber-900 dark:text-primary">${order.order_number || 'ORD-NEW'}</span>
-                            <span class="status-badge ${statusClass}">${(order.status || 'in_progress').replace('_', ' ')}</span>
-                            ${paymentBadge}
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">• ${formattedDate}</span>
+
+                    <!-- Project Information -->
+                    <div class="mb-2">
+                        <h4 class="font-black text-slate-900 dark:text-white text-sm group-hover:text-amber-800 dark:group-hover:text-primary transition-colors leading-snug truncate" title="${order.design_name || order.project_name || 'Custom Design'}">${order.design_name || order.project_name || 'Custom Design'}</h4>
+                        <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            <span class="font-bold text-slate-700 dark:text-slate-300">${order.service_type || (isQuote ? 'Custom Quote' : 'Digitizing')}</span>
+                            <span>·</span>
+                            <span class="font-semibold text-slate-800 dark:text-slate-200">${order.placement || 'Left Chest'}</span>
                         </div>
-                        <h4 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate">${order.design_name || order.project_name || 'Custom Design'}</h4>
-                        <div class="flex flex-wrap items-center gap-3 text-xs text-slate-600 dark:text-slate-300 mt-1">
-                            <span class="font-semibold text-slate-800 dark:text-slate-200">${order.service_type || 'Digitizing'}</span>
-                            <span>• Plan: <strong>${order.plan || order.plan_name || 'Standard'}</strong></span>
-                            <span class="font-bold ${isPaid ? 'text-slate-700 dark:text-slate-300' : 'text-rose-600 dark:text-rose-400'}">• Amount: <strong>${priceFormatted}</strong></span>
-                            ${order.stitch_count ? `<span>• Stitches: <strong>${order.stitch_count.toLocaleString()}</strong></span>` : ''}
-                            ${order.format ? `<span>• Format: <strong class="uppercase">${order.format}</strong></span>` : ''}
+                        <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                            <span class="inline-block text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono">${order.sizing || '3.5" W'}</span>
+                            ${order.format || order.file_format ? `<span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/30 uppercase">.${order.format || order.file_format}</span>` : '<span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/30">.DST</span>'}
                         </div>
+                    </div>
+
+                    <!-- Compact Due / Turnaround Alert Strip -->
+                    <div class="flex items-center justify-between py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-primary/15 text-[11px] text-slate-600 dark:text-slate-400 mb-1">
+                        <span class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">timer</span>
+                            <span>${isRush ? '⚡ 5–8 Hours' : '12–24 Hours'}</span>
+                        </span>
+                        <span class="text-slate-500 dark:text-slate-400 truncate max-w-[130px] font-medium">Fabric: ${order.fabric_type || order.fabricType || 'Pique Polo'}</span>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 w-full md:w-auto justify-end pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-primary/10 flex-wrap">
-                    ${!isPaid ? `
-                        <button onclick="window.clientWorkspace.openClientInvoiceModal('${order.id || order.order_number}')" class="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs flex items-center gap-1.5 shadow-xs transition-all hover:scale-105 cursor-pointer" title="Complete order and pay balance">
-                            <span class="material-symbols-outlined text-sm">credit_card</span>
-                            <span>Complete Order (${priceFormatted})</span>
-                        </button>
-                        <button onclick="window.clientWorkspace.removeOrder('${order.id || order.order_number}', '${order.order_number || ''}')" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 font-bold text-xs border border-rose-200 dark:border-rose-800/60 flex items-center gap-1 transition-all cursor-pointer shadow-2xs" title="Remove unpaid order">
-                            <span class="material-symbols-outlined text-sm text-rose-600 dark:text-rose-400">delete</span>
-                            <span>Remove</span>
-                        </button>
-                    ` : ''}
-                    ${isCompleted ? `
-                        <a href="${order.deliverable_url || order.artwork_url || '#'}" download class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all flex items-center gap-1.5 shadow-xs whitespace-nowrap cursor-pointer">
-                            <span class="material-symbols-outlined text-sm">download</span>
-                            <span>Download Files</span>
-                        </a>
-                        <button onclick="window.clientWorkspace.openRevisionModal('${order.order_number}')" class="px-3 py-2 rounded-xl border border-red-300 dark:border-red-500/30 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 font-bold text-xs transition-colors flex items-center gap-1 whitespace-nowrap cursor-pointer" title="Request free revision">
-                            <span class="material-symbols-outlined text-sm">history_edu</span>
-                            <span>Revision</span>
-                        </button>
-                    ` : (isPaid ? `
-                        <button onclick="window.clientWorkspace.openOrderDetailsModal('${order.order_number}')" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-xs transition-all flex items-center gap-1 whitespace-nowrap cursor-pointer">
-                            <span class="material-symbols-outlined text-sm">visibility</span>
-                            <span>Inspect Specs</span>
-                        </button>
-                    ` : '')}
-                    <button onclick="window.clientWorkspace.openClientInvoiceModal('${order.id || order.order_number}')" class="p-2 rounded-xl border border-slate-200 dark:border-primary/20 text-slate-600 dark:text-slate-300 hover:text-amber-800 dark:hover:text-primary transition-colors cursor-pointer" title="View Invoice & Receipt">
-                        <span class="material-symbols-outlined text-base">receipt_long</span>
+                <!-- Actions Toolbar (Always Visible on Compact Card) -->
+                <div class="pt-2.5 border-t border-slate-100 dark:border-primary/10 flex items-center justify-between gap-2 mt-2">
+                    <button type="button" onclick="window.clientWorkspace.openOrderDetailsModal('${order.order_number}')" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors" title="Open dedicated order detail screen">
+                        <span>View Order</span>
+                        <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">arrow_forward</span>
                     </button>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-black text-slate-900 dark:text-white mr-1">${priceFormatted}</span>
+                        ${isQuote ? `
+                            <button type="button" onclick="window.clientWorkspace.openNewOrderModal('${order.design_name || ''}')" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer">
+                                <span>Convert</span>
+                            </button>
+                        ` : !isPaid ? `
+                            <button type="button" onclick="window.clientWorkspace.openClientInvoiceModal('${order.id || order.order_number}')" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer" title="Complete order and settle balance">
+                                <span class="material-symbols-outlined text-xs">credit_card</span>
+                                <span>Pay</span>
+                            </button>
+                        ` : isCompleted ? `
+                            <a href="${order.deliverable_url || order.artwork_url || '#'}" download class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs inline-flex items-center gap-1 shadow-xs cursor-pointer" title="Download completed embroidery files">
+                                <span class="material-symbols-outlined text-xs">download</span>
+                                <span>Files</span>
+                            </a>
+                        ` : ''}
+                    </div>
                 </div>
             </div>
+        `;
+    }
+
+    /**
+     * Compact 7-Column Table Row Component for Client Orders List View
+     */
+    function renderClientOrderTableRow(order, isCompleted) {
+        const isQuote = isQuoteRecord(order);
+        const isPaid = (order.payment_status === 'paid');
+        const isRevision = order.status === 'revision_requested';
+        const isRush = order.turnaround_speed === 'rush' || order.isRush || order.priority === 'rush';
+        const safeOrderNumber = String(order.order_number || (isQuote ? 'QUO-REQ' : 'DZ-ORD')).replace(/-/g, '&#8209;');
+        const orderDt = formatOrderDateTime(order.created_at);
+        const price = (order.price !== undefined ? order.price : (order.amount !== undefined ? order.amount : (isQuote ? 0 : 15)));
+        const priceFormatted = `$${parseFloat(price).toFixed(2)}`;
+
+        let rowBorderClass = 'border-l-4 border-l-amber-500 bg-amber-500/[0.02] hover:bg-amber-500/[0.06]';
+        let orderIdClass = 'text-amber-900 dark:text-primary';
+        if (isCompleted) {
+            rowBorderClass = 'border-l-4 border-l-emerald-500 bg-emerald-500/[0.02] hover:bg-emerald-500/[0.06]';
+            orderIdClass = 'text-emerald-800 dark:text-emerald-400';
+        } else if (isRevision) {
+            rowBorderClass = 'border-l-4 border-l-purple-500 bg-purple-500/[0.02] hover:bg-purple-500/[0.06]';
+            orderIdClass = 'text-purple-900 dark:text-purple-300';
+        } else if (isQuote) {
+            rowBorderClass = 'border-l-4 border-l-sky-500 bg-sky-500/[0.02] hover:bg-sky-500/[0.06]';
+            orderIdClass = 'text-sky-900 dark:text-sky-300';
+        } else if (!isPaid) {
+            rowBorderClass = 'border-l-4 border-l-rose-500 bg-rose-500/[0.02] hover:bg-rose-500/[0.06]';
+            orderIdClass = 'text-rose-900 dark:text-rose-300';
+        } else if (order.status === 'in_progress' || order.status === 'assigned') {
+            rowBorderClass = 'border-l-4 border-l-blue-500 bg-blue-500/[0.02] hover:bg-blue-500/[0.06]';
+            orderIdClass = 'text-blue-900 dark:text-blue-300';
+        }
+
+        let statusBadge = '';
+        if (isCompleted) {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-[11px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">check_circle</span> Completed</span>';
+        } else if (isRevision) {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-700/50 text-[11px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">warning</span> Revision</span>';
+        } else if (isQuote) {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-300 border border-sky-200 dark:border-sky-700/40 text-[11px] font-bold whitespace-nowrap">Free Quote</span>';
+        } else if (!isPaid) {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 text-[11px] font-bold whitespace-nowrap">Payment Due</span>';
+        } else {
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700/40 text-[11px] font-bold whitespace-nowrap">In Production</span>';
+        }
+
+        const paymentBadge = isQuote
+            ? '<span class="px-2 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-200 dark:bg-sky-500/15 dark:text-sky-400 dark:border-sky-500/30 text-[10px] font-bold">Quote</span>'
+            : (isPaid
+                ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 text-[10px] font-bold">Paid</span>'
+                : '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/30 text-[10px] font-black">Due</span>');
+
+        return `
+            <tr class="transition-colors ${rowBorderClass}">
+                <!-- 1. Order #, Date & Time -->
+                <td class="px-4 py-3.5 whitespace-nowrap font-mono font-bold w-[145px] min-w-[145px]">
+                    <span class="inline-block whitespace-nowrap select-all font-mono font-black ${orderIdClass}">#${safeOrderNumber}</span>
+                    <div class="text-[10px] text-slate-500 dark:text-slate-400 font-sans font-medium mt-0.5 leading-tight flex items-center gap-1">
+                        <span>${orderDt.date}</span>
+                        <span class="text-slate-300 dark:text-slate-600">·</span>
+                        <span class="font-bold text-slate-700 dark:text-slate-300">${orderDt.time}</span>
+                    </div>
+                </td>
+
+                <!-- 2. Design & Service -->
+                <td class="px-4 py-3.5 min-w-[200px]">
+                    <div class="font-black text-slate-900 dark:text-white text-xs leading-snug truncate max-w-[240px]" title="${order.design_name || order.project_name || 'Custom Design'}">${order.design_name || order.project_name || 'Custom Design'}</div>
+                    <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
+                        <span class="font-semibold text-slate-700 dark:text-slate-300">${order.service_type || (isQuote ? 'Custom Quote' : 'Digitizing')}</span>
+                        <span>·</span>
+                        <span class="font-mono">${order.plan || order.plan_name || 'Standard'}</span>
+                    </div>
+                </td>
+
+                <!-- 3. Specs & Fabric -->
+                <td class="px-4 py-3.5 whitespace-nowrap w-[140px]">
+                    <div class="font-bold text-slate-800 dark:text-slate-200 text-xs">${order.placement || 'Left Chest'}</div>
+                    <div class="text-[10px] text-slate-500 truncate max-w-[130px]">${order.fabric_type || order.fabricType || 'Pique Polo'}</div>
+                </td>
+
+                <!-- 4. Format -->
+                <td class="px-4 py-3.5 whitespace-nowrap w-[110px]">
+                    <span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/30 uppercase">.${order.format || order.file_format || 'DST'}</span>
+                </td>
+
+                <!-- 5. Price & Payment -->
+                <td class="px-4 py-3.5 whitespace-nowrap w-[110px]">
+                    <span class="font-black text-slate-900 dark:text-slate-100 text-xs block leading-tight">${priceFormatted}</span>
+                    <div class="mt-1">${paymentBadge}</div>
+                </td>
+
+                <!-- 6. Status -->
+                <td class="px-4 py-3.5 whitespace-nowrap w-[125px]">
+                    ${statusBadge}
+                </td>
+
+                <!-- 7. Actions -->
+                <td class="px-4 py-3.5 w-[260px] min-w-[260px] text-right whitespace-nowrap">
+                    <div class="inline-flex items-center justify-end gap-1.5 flex-nowrap shrink-0">
+                        <button type="button" onclick="window.clientWorkspace.openOrderDetailsModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-[11px] inline-flex items-center gap-1 cursor-pointer transition-colors" title="View technical specs">
+                            <span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">description</span>
+                            <span>Details</span>
+                        </button>
+                        ${isQuote ? `
+                            <button type="button" onclick="window.clientWorkspace.openNewOrderModal('${order.design_name || ''}')" class="px-2.5 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-slate-950 font-black text-[11px] inline-flex items-center gap-1 shadow-2xs cursor-pointer">
+                                <span>Convert</span>
+                            </button>
+                        ` : !isPaid ? `
+                            <button type="button" onclick="window.clientWorkspace.openClientInvoiceModal('${order.id || order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-slate-950 font-black text-[11px] inline-flex items-center gap-1 shadow-2xs cursor-pointer">
+                                <span class="material-symbols-outlined text-xs">credit_card</span>
+                                <span>Pay</span>
+                            </button>
+                        ` : isCompleted ? `
+                            <a href="${order.deliverable_url || order.artwork_url || '#'}" download class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] inline-flex items-center gap-1 shadow-2xs cursor-pointer">
+                                <span class="material-symbols-outlined text-xs">download</span>
+                                <span>Files</span>
+                            </a>
+                            <button type="button" onclick="window.clientWorkspace.openRevisionModal('${order.order_number}')" class="px-2 py-1.5 rounded-lg border border-purple-300 dark:border-purple-600/40 text-purple-700 dark:text-purple-300 hover:bg-purple-50 text-[11px] font-bold cursor-pointer" title="Request revision">
+                                <span class="material-symbols-outlined text-xs">history_edu</span>
+                            </button>
+                        ` : `
+                            <button type="button" onclick="window.clientWorkspace.openClientInvoiceModal('${order.id || order.order_number}')" class="px-2 py-1.5 rounded-lg border border-slate-200 dark:border-primary/20 text-slate-600 dark:text-slate-300 hover:text-primary text-[11px] font-bold cursor-pointer" title="Invoice">
+                                <span class="material-symbols-outlined text-xs">receipt</span>
+                            </button>
+                        `}
+                    </div>
+                </td>
+            </tr>
         `;
     }
 
@@ -392,99 +905,316 @@
         const container = document.getElementById('quotes-list-container');
         if (!container) return;
 
-        const quotes = state.orders.filter(o => (o.order_number || '').startsWith('QUO-') || o.status === 'quote_pending' || o.is_quote);
+        if (!state.orders || state.orders.length === 0) {
+            state.orders = getFallbackOrders();
+            updateMetricsAcrossViews();
+        }
+
+        let quotes = state.orders.filter(o => isQuoteRecord(o));
+
+        // Update pill counts
+        const totalCount = quotes.length;
+        const pendingCount = quotes.filter(q => q.status === 'quote_pending' || !q.price || q.price == 0).length;
+        const readyCount = quotes.filter(q => q.status === 'quote_ready' || (q.price && q.price > 0)).length;
+
+        setElText('client-quote-pill-count-all', totalCount);
+        setElText('client-quote-pill-count-pending', pendingCount);
+        setElText('client-quote-pill-count-ready', readyCount);
+
+        // Search query filter
+        if (state.searchQuery) {
+            const q = state.searchQuery.toLowerCase();
+            quotes = quotes.filter(o =>
+                (o.design_name || '').toLowerCase().includes(q) ||
+                (o.project_name || '').toLowerCase().includes(q) ||
+                (o.order_number || '').toLowerCase().includes(q) ||
+                (o.target_fabric || o.fabric_type || '').toLowerCase().includes(q) ||
+                (o.service_type || '').toLowerCase().includes(q)
+            );
+        }
+
+        // Active tab filter
+        const activeFilter = state.activeFilter || 'all';
+        if (activeFilter === 'pending') {
+            quotes = quotes.filter(q => q.status === 'quote_pending' || !q.price || q.price == 0);
+        } else if (activeFilter === 'ready') {
+            quotes = quotes.filter(q => q.status === 'quote_ready' || (q.price && q.price > 0));
+        }
 
         if (quotes.length === 0) {
             container.innerHTML = `
-                <div class="p-10 text-center bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/20">
-                    <span class="material-symbols-outlined text-4xl text-amber-500 mb-2">request_quote</span>
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white">No custom quotes requested yet</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">Have a jacket back or complex artwork? Request a free 12-24h estimation with itemized stitch count.</p>
-                    <button onclick="window.clientWorkspace.openNewQuoteModal()" class="px-4 py-2.5 rounded-xl bg-primary text-background-dark font-black text-xs shadow-md hover:brightness-110">Request Custom Quote</button>
+                <div class="p-10 text-center bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/20 shadow-xs">
+                    <span class="material-symbols-outlined text-4xl text-sky-500 mb-2">request_quote</span>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white">${state.searchQuery ? 'No matching custom quotes found' : 'No custom quotes in this category'}</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">${state.searchQuery ? 'Try adjusting your search terms or clearing your search filter.' : 'Have a jacket back or complex artwork? Request a free 12–24h estimation.'}</p>
+                    <div class="flex items-center justify-center gap-2">
+                        ${state.searchQuery ? `<button onclick="window.clientWorkspace.resetFilter()" class="px-3.5 py-1.5 rounded-xl border border-primary/30 text-primary-dark dark:text-primary font-bold text-xs hover:bg-primary/10 cursor-pointer">Clear Search</button>` : ''}
+                        <button onclick="window.clientWorkspace.openNewQuoteModal()" class="px-4 py-2 rounded-xl bg-primary text-background-dark font-black text-xs shadow-xs hover:brightness-110 cursor-pointer">+ Request Free Quote</button>
+                    </div>
                 </div>
             `;
+            updateLayoutToggleButtons();
             return;
         }
 
-        container.innerHTML = quotes.map(quote => `
-            <div class="client-order-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/20 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div class="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
-                    <div class="w-14 h-14 rounded-xl bg-amber-500/10 text-amber-800 dark:text-primary flex items-center justify-center flex-shrink-0 border border-amber-500/20">
-                        <span class="material-symbols-outlined text-2xl">request_quote</span>
-                    </div>
-                    <div class="min-w-0">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="font-mono text-xs font-bold text-amber-900 dark:text-primary">${quote.order_number || 'QUO-REQ'}</span>
-                            <span class="status-badge quote_pending">Under Review</span>
-                        </div>
-                        <h4 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate">${quote.design_name || 'Complex Embroidery Quote'}</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Est. Turnaround: 12-24 Hours • Fabric: ${quote.target_fabric || 'Not specified'}</p>
-                    </div>
+        if (state.layout === 'table') {
+            container.innerHTML = `
+                <div class="overflow-x-auto rounded-xl border border-slate-200/80 dark:border-primary/20 shadow-2xs">
+                    <table class="w-full text-left text-xs min-w-[980px]">
+                        <thead class="bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-primary/20 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                            <tr>
+                                <th class="px-4 py-3 w-[145px]">Quote #, Date &amp; Time</th>
+                                <th class="px-4 py-3 min-w-[200px]">Design &amp; Service</th>
+                                <th class="px-4 py-3 w-[140px]">Specs &amp; Fabric</th>
+                                <th class="px-4 py-3 w-[110px]">Format</th>
+                                <th class="px-4 py-3 w-[110px]">Est. Price</th>
+                                <th class="px-4 py-3 w-[125px]">Status</th>
+                                <th class="px-4 py-3 w-[260px] text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-primary/10">
+                            ${quotes.map(q => renderClientOrderTableRow(q, false)).join('')}
+                        </tbody>
+                    </table>
                 </div>
-                <div class="flex items-center gap-2 w-full md:w-auto justify-end">
-                    <button onclick="window.clientWorkspace.openOrderDetailsModal('${quote.order_number}')" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-xs transition-all flex items-center gap-1 whitespace-nowrap">
-                        <span class="material-symbols-outlined text-sm">visibility</span>
-                        <span>View Details</span>
-                    </button>
-                    <button onclick="window.clientWorkspace.openNewOrderModal('${quote.design_name}')" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs transition-all flex items-center gap-1 shadow-xs whitespace-nowrap">
-                        <span>Convert to Order</span>
-                        <span class="material-symbols-outlined text-xs">arrow_forward</span>
-                    </button>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5">
+                    ${quotes.map(q => renderClientOrderCard(q, false)).join('')}
                 </div>
-            </div>
-        `).join('');
+            `;
+        }
+
+        updateLayoutToggleButtons();
     }
 
     // ===================================================================
     //  PAGE 4: INVOICES VIEW (client-invoices.html)
     // ===================================================================
+    function renderClientInvoiceCard(inv) {
+        const isPaid = (inv.payment_status === 'paid');
+        const invDt = formatOrderDateTime(inv.created_at);
+        const amount = parseFloat(inv.price !== undefined ? inv.price : (inv.amount || 15)).toFixed(2);
+        const invNumber = String(inv.order_number || 'INV-8842').replace(/-/g, '&#8209;');
+
+        const borderClass = isPaid
+            ? 'border-2 border-emerald-500/85 dark:border-emerald-400/80 shadow-xs ring-1 ring-emerald-500/20 hover:border-emerald-600'
+            : 'border-2 border-rose-500/85 dark:border-rose-400/80 shadow-xs ring-1 ring-rose-500/20 hover:border-rose-600';
+
+        const badgeClass = isPaid
+            ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30'
+            : 'bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-300 border border-rose-200 dark:border-rose-700/40';
+
+        const statusPill = isPaid
+            ? '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-[11px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">check_circle</span> Settled / Paid</span>'
+            : '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 text-[11px] font-bold whitespace-nowrap animate-pulse"><span class="material-symbols-outlined text-xs">pending_actions</span> Balance Due</span>';
+
+        return `
+            <div class="client-order-card digitizer-bento-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark ${borderClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
+                <div>
+                    <!-- Header Bar -->
+                    <div class="flex items-start justify-between gap-2 mb-2.5">
+                        <div>
+                            <span class="px-2.5 py-1 rounded-lg border font-mono text-xs font-black ${badgeClass} tracking-wide whitespace-nowrap select-all inline-block">#INV-${invNumber}</span>
+                            <div class="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium mt-1 leading-tight flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[11px] text-slate-400 dark:text-slate-500">schedule</span>
+                                <span>${invDt.date}</span>
+                                <span class="text-slate-300 dark:text-slate-600">·</span>
+                                <span class="font-bold text-slate-700 dark:text-slate-300">${invDt.time}</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end gap-1.5">
+                            ${statusPill}
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">${isPaid ? 'PayPal Protected' : 'Due Upon Delivery'}</span>
+                        </div>
+                    </div>
+
+                    <!-- Project Info -->
+                    <div class="mb-3">
+                        <h4 class="font-black text-slate-900 dark:text-white text-sm group-hover:text-amber-800 dark:group-hover:text-primary transition-colors leading-snug truncate" title="${inv.design_name || 'Embroidery Deliverable'}">${inv.design_name || 'Embroidery Deliverable'}</h4>
+                        <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            <span class="font-bold text-slate-700 dark:text-slate-300">${inv.service_type || 'Digitizing'}</span>
+                            <span>·</span>
+                            <span class="font-mono text-[11px]">${inv.plan || inv.plan_name || 'Standard Flat Rate'}</span>
+                        </div>
+                    </div>
+
+                    <!-- Amount Chip -->
+                    <div class="flex items-center justify-between p-2.5 rounded-xl ${isPaid ? 'bg-emerald-50/70 dark:bg-emerald-950/25 border border-emerald-200 dark:border-emerald-500/20' : 'bg-rose-50/70 dark:bg-rose-950/25 border border-rose-200 dark:border-rose-500/20'} mb-3 text-xs">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Total Billed</span>
+                            <strong class="text-base font-black ${isPaid ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'}">$${amount}</strong>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Terms</span>
+                            <span class="font-bold text-slate-800 dark:text-slate-200 text-xs">${isPaid ? 'Settled in Full' : 'Net Immediate'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions Toolbar -->
+                <div class="pt-2.5 border-t border-slate-100 dark:border-primary/10 flex items-center justify-between gap-2 mt-2">
+                    <button type="button" onclick="window.clientWorkspace.openClientInvoiceModal('${inv.id || inv.order_number}')" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors" title="Open official invoice document">
+                        <span>View Invoice</span>
+                        <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">arrow_forward</span>
+                    </button>
+                    <div>
+                        ${isPaid ? `
+                            <button type="button" onclick="window.clientWorkspace.openClientInvoiceModal('${inv.id || inv.order_number}')" class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25 text-emerald-800 dark:text-emerald-300 font-black text-xs inline-flex items-center gap-1 border border-emerald-300 dark:border-emerald-500/30 cursor-pointer">
+                                <span class="material-symbols-outlined text-xs">verified</span>
+                                <span>Receipt</span>
+                            </button>
+                        ` : `
+                            <button type="button" onclick="window.clientWorkspace.openClientInvoiceModal('${inv.id || inv.order_number}')" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer">
+                                <span class="material-symbols-outlined text-xs">credit_card</span>
+                                <span>Pay $${amount}</span>
+                            </button>
+                        `}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderClientInvoiceTableRow(inv) {
+        const isPaid = (inv.payment_status === 'paid');
+        const invDt = formatOrderDateTime(inv.created_at);
+        const amount = parseFloat(inv.price !== undefined ? inv.price : (inv.amount || 15)).toFixed(2);
+        const invNumber = String(inv.order_number || 'INV-8842').replace(/-/g, '&#8209;');
+
+        const borderLeft = isPaid
+            ? 'border-l-4 border-emerald-500 hover:bg-emerald-50/20 dark:hover:bg-emerald-950/20'
+            : 'border-l-4 border-rose-500 hover:bg-rose-50/20 dark:hover:bg-rose-950/20';
+
+        const statusBadge = isPaid
+            ? '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-[10px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">check_circle</span> Paid</span>'
+            : '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 text-[10px] font-bold whitespace-nowrap animate-pulse"><span class="material-symbols-outlined text-xs">pending_actions</span> Due</span>';
+
+        return `
+            <tr class="${borderLeft} transition-colors">
+                <td class="px-4 py-3">
+                    <span class="font-mono text-xs font-black text-slate-900 dark:text-white">#INV-${invNumber}</span>
+                    <div class="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium mt-0.5 flex items-center gap-1">
+                        <span>${invDt.date}</span>
+                        <span class="text-slate-300 dark:text-slate-600">·</span>
+                        <span class="font-bold text-slate-700 dark:text-slate-300">${invDt.time}</span>
+                    </div>
+                </td>
+                <td class="px-4 py-3">
+                    <h5 class="font-bold text-slate-900 dark:text-white text-xs truncate max-w-[220px]" title="${inv.design_name || 'Embroidery Deliverable'}">${inv.design_name || 'Embroidery Deliverable'}</h5>
+                    <span class="text-[11px] text-slate-500 dark:text-slate-400">${inv.service_type || 'Digitizing'}</span>
+                </td>
+                <td class="px-4 py-3 font-mono font-black text-xs ${isPaid ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'}">
+                    $${amount}
+                </td>
+                <td class="px-4 py-3">
+                    ${statusBadge}
+                </td>
+                <td class="px-4 py-3 text-xs text-slate-600 dark:text-slate-400">
+                    <span class="font-semibold">${isPaid ? 'PayPal Protected' : 'Due Upon Delivery'}</span>
+                </td>
+                <td class="px-4 py-3 text-right">
+                    <div class="flex items-center justify-end gap-1.5">
+                        <button type="button" onclick="window.clientWorkspace.openClientInvoiceModal('${inv.id || inv.order_number}')" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs inline-flex items-center gap-1 cursor-pointer">
+                            <span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">receipt_long</span>
+                            <span>Invoice</span>
+                        </button>
+                        ${!isPaid ? `
+                            <button type="button" onclick="window.clientWorkspace.openClientInvoiceModal('${inv.id || inv.order_number}')" class="px-3 py-1 rounded-lg bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs cursor-pointer">
+                                <span>Pay</span>
+                            </button>
+                        ` : ''}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+
     function renderInvoicesView() {
         const container = document.getElementById('invoices-list-container');
         if (!container) return;
 
-        const invoices = state.orders || [];
+        if (!state.orders || state.orders.length === 0) {
+            state.orders = getFallbackOrders();
+            updateMetricsAcrossViews();
+        }
+
+        let invoices = state.orders.filter(o => !isQuoteRecord(o));
+
+        // Update pill counts
+        const totalCount = invoices.length;
+        const paidCount = invoices.filter(i => i.payment_status === 'paid').length;
+        const unpaidCount = invoices.filter(i => i.payment_status !== 'paid').length;
+
+        setElText('client-inv-pill-count-all', totalCount);
+        setElText('client-inv-pill-count-paid', paidCount);
+        setElText('client-inv-pill-count-due', unpaidCount);
+
+        // Search query filter
+        if (state.searchQuery) {
+            const q = state.searchQuery.toLowerCase();
+            invoices = invoices.filter(inv =>
+                (inv.design_name || '').toLowerCase().includes(q) ||
+                (inv.order_number || '').toLowerCase().includes(q) ||
+                (inv.service_type || '').toLowerCase().includes(q) ||
+                (inv.plan || '').toLowerCase().includes(q)
+            );
+        }
+
+        // Active tab filter
+        const activeFilter = state.activeFilter || 'all';
+        if (activeFilter === 'paid') {
+            invoices = invoices.filter(i => i.payment_status === 'paid');
+        } else if (activeFilter === 'unpaid') {
+            invoices = invoices.filter(i => i.payment_status !== 'paid');
+        }
 
         if (invoices.length === 0) {
             container.innerHTML = `
-                <div class="p-10 text-center bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/20">
+                <div class="p-10 text-center bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/20 shadow-xs">
                     <span class="material-symbols-outlined text-4xl text-slate-400 mb-2">payments</span>
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white">No invoices on file</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">When orders are placed, official invoices and receipts will appear here.</p>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white">${state.searchQuery ? 'No matching invoices found' : 'No invoices on file in this category'}</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">${state.searchQuery ? 'Try clearing your search query or adjusting your keyword.' : 'When production orders are confirmed, itemized invoices and PayPal receipts will appear here.'}</p>
+                    <div class="flex items-center justify-center gap-2">
+                        ${state.searchQuery ? `<button onclick="window.clientWorkspace.resetFilter()" class="px-3.5 py-1.5 rounded-xl border border-primary/30 text-primary-dark dark:text-primary font-bold text-xs hover:bg-primary/10 cursor-pointer">Clear Search</button>` : ''}
+                        <button onclick="window.clientWorkspace.openNewOrderModal()" class="px-4 py-2 rounded-xl bg-primary text-background-dark font-black text-xs shadow-xs hover:brightness-110 cursor-pointer">+ Create New Order</button>
+                    </div>
                 </div>
             `;
+            updateLayoutToggleButtons();
             return;
         }
 
-        container.innerHTML = invoices.map(inv => {
-            const isPaid = inv.payment_status === 'paid';
-            return `
-                <div class="client-order-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/20 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                    <div class="flex items-center gap-3.5 min-w-0">
-                        <div class="w-12 h-12 rounded-xl ${isPaid ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25'} border flex items-center justify-center flex-shrink-0">
-                            <span class="material-symbols-outlined text-2xl">${isPaid ? 'check_circle' : 'pending'}</span>
-                        </div>
-                        <div class="min-w-0">
-                            <div class="flex items-center gap-2 mb-0.5">
-                                <span class="font-mono text-xs font-bold text-slate-500 dark:text-slate-400">INV-${inv.order_number || '000'}</span>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${isPaid ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' : 'bg-rose-500/15 text-rose-700 dark:text-rose-300'}">${inv.payment_status || 'unpaid'}</span>
-                            </div>
-                            <h4 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate">${inv.design_name || 'Embroidery Deliverable'}</h4>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">${inv.service_type || 'Digitizing'} &bull; ${inv.plan || 'Flat Rate'}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-                        <div class="text-right">
-                            <span class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">$${parseFloat(inv.amount || 0).toFixed(2)}</span>
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400 block">${isPaid ? 'Settled via PayPal' : 'Due Upon Delivery'}</span>
-                        </div>
-                        <button onclick="window.clientWorkspace.openClientInvoiceModal('${inv.id || inv.order_number}')" class="px-4 py-2 rounded-xl ${isPaid ? 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200' : 'bg-primary hover:bg-primary-hover text-background-dark font-black'} text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
-                            <span class="material-symbols-outlined text-sm">receipt</span>
-                            <span>${isPaid ? 'View Receipt' : 'Pay Now'}</span>
-                        </button>
-                    </div>
+        if (state.layout === 'table') {
+            container.innerHTML = `
+                <div class="overflow-x-auto rounded-xl border border-slate-200/80 dark:border-primary/20 shadow-2xs">
+                    <table class="w-full text-left text-xs min-w-[900px]">
+                        <thead class="bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-primary/20 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                            <tr>
+                                <th class="px-4 py-3 w-[155px]">Invoice #, Date &amp; Time</th>
+                                <th class="px-4 py-3 min-w-[200px]">Design &amp; Service</th>
+                                <th class="px-4 py-3 w-[130px]">Amount</th>
+                                <th class="px-4 py-3 w-[150px]">Payment Status</th>
+                                <th class="px-4 py-3 w-[150px]">Method / Terms</th>
+                                <th class="px-4 py-3 w-[200px] text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-primary/10">
+                            ${invoices.map(inv => renderClientInvoiceTableRow(inv)).join('')}
+                        </tbody>
+                    </table>
                 </div>
             `;
-        }).join('');
+        } else {
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5">
+                    ${invoices.map(inv => renderClientInvoiceCard(inv)).join('')}
+                </div>
+            `;
+        }
+
+        updateLayoutToggleButtons();
     }
 
     // ===================================================================
@@ -702,21 +1432,172 @@
         }
     }
 
+    function previewArtworkModal(url, title) {
+        let zoomModal = document.getElementById('client-artwork-zoom-modal');
+        if (!zoomModal) {
+            const zoomHtml = `
+                <div id="client-artwork-zoom-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4" onclick="if(event.target === this) this.classList.add('hidden')">
+                    <div class="relative max-w-3xl w-full bg-white dark:bg-card-dark rounded-2xl overflow-hidden shadow-2xl p-4">
+                        <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-200 dark:border-primary/20">
+                            <h4 id="client-zoom-modal-title" class="font-bold text-sm text-slate-900 dark:text-white">Artwork Preview</h4>
+                            <button onclick="document.getElementById('client-artwork-zoom-modal').classList.add('hidden')" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 cursor-pointer">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <div class="flex items-center justify-center max-h-[70vh] overflow-hidden rounded-xl bg-slate-950/10">
+                            <img id="client-zoom-modal-img" src="" alt="Zoom Preview" class="max-h-[70vh] w-auto object-contain">
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', zoomHtml);
+            zoomModal = document.getElementById('client-artwork-zoom-modal');
+        }
+        const img = document.getElementById('client-zoom-modal-img');
+        const titleEl = document.getElementById('client-zoom-modal-title');
+        if (img) img.src = url;
+        if (titleEl) titleEl.textContent = title || 'Artwork Preview';
+        zoomModal.classList.remove('hidden');
+    }
+
     function openOrderDetailsModal(orderNumber) {
-        const order = state.orders.find(o => o.order_number === orderNumber);
+        let order = state.orders?.find(o => o.order_number === orderNumber || o.id === orderNumber);
+        if (!order && window.insforgeClient && typeof window.insforgeClient.getOrders === 'function') {
+            order = window.insforgeClient.getOrders().find(o => o.order_number === orderNumber || o.id === orderNumber);
+        }
+        if (!order && state.orders && state.orders.length > 0) {
+            order = state.orders[0];
+        }
         if (!order) return;
 
-        setElText('drawer-order-id', order.order_number);
-        setElText('drawer-design-name', order.design_name);
-        setElText('drawer-service', order.service_type);
-        setElText('drawer-plan', order.plan);
-        setElText('drawer-status', (order.status || 'in_progress').replace('_', ' '));
-        setElText('drawer-amount', `$${parseFloat(order.amount || 0).toFixed(2)}`);
-        setElText('drawer-fabric', order.target_fabric || 'Standard Garment');
-        setElText('drawer-dimensions', order.dimensions || 'Standard Size');
+        state.currentDrawerOrder = order;
+
+        setElText('drawer-order-id', order.order_number || 'ORD-ACTIVE');
+        setElText('drawer-design-name', order.design_name || order.project_name || order.placement || 'Custom Digitizing');
+        setElText('drawer-service', order.service_type || 'Digitizing');
+        setElText('drawer-plan', order.plan || order.plan_name || 'Standard');
+        setElText('drawer-status', (order.status || 'in_progress').replace(/_/g, ' '));
+        setElText('drawer-amount', `$${parseFloat(order.amount || order.price || 0).toFixed(2)}`);
+        setElText('drawer-fabric', order.target_fabric || order.fabric_type || 'Standard Garment');
+        setElText('drawer-dimensions', order.dimensions || order.sizing || 'Standard Size');
+
+        // Deliverables Requirement / Format Box
+        const formatStr = order.format || order.file_format || 'DST, EMB';
+        setElText('drawer-format-req', `${formatStr.toUpperCase()} · JPG Preview · PDF Worksheet`);
+
+        // Client Instructions (clean, zero boilerplate)
+        const notes = (order.instructions || order.special_instructions || order.notes || '').replace(/Standard commercial digitizing standards apply.*$/i, '').trim();
+        setElText('drawer-instructions', notes || 'No special instructions provided.');
+
+        // Submitted Artwork List with Lightbox Preview and Download
+        const artFiles = (Array.isArray(order.raw_artwork_files) && order.raw_artwork_files.length > 0)
+            ? order.raw_artwork_files
+            : (Array.isArray(order.rawArtworkFiles) && order.rawArtworkFiles.length > 0)
+                ? order.rawArtworkFiles
+                : (order.artwork_url ? [{ name: 'artwork.png', url: order.artwork_url }] : []);
+
+        const artContainer = document.getElementById('drawer-artwork-container');
+        if (artContainer) {
+            if (artFiles.length > 0) {
+                artContainer.innerHTML = artFiles.map((rf) => {
+                    const ext = getFileExtension(rf.name || rf.url || 'ART') || 'ART';
+                    const isImg = ['PNG', 'JPG', 'JPEG', 'WEBP', 'SVG'].includes(ext);
+                    return `
+                        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/20 text-xs">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black uppercase bg-amber-500/15 text-amber-900 dark:text-primary border border-amber-500/30">${ext}</span>
+                                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[150px] sm:max-w-[200px]" title="${rf.name}">${rf.name}</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                ${isImg ? `
+                                    <button type="button" onclick="window.clientWorkspace.previewArtworkModal('${rf.url}', '${rf.name}')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-slate-700 text-amber-900 dark:text-primary border border-slate-200 dark:border-primary/20 text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer transition-colors">
+                                        <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">visibility</span>
+                                        <span>Preview</span>
+                                    </button>
+                                ` : ''}
+                                <a href="${rf.url}" download="${rf.name}" target="_blank" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer transition-colors">
+                                    <span class="material-symbols-outlined text-xs">download</span>
+                                    <span>Download</span>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                artContainer.innerHTML = '<p class="text-slate-400 italic text-[11px]">No artwork file attached.</p>';
+            }
+        }
+
+        // Completed Deliverables List
+        const deliverables = order.deliverables || (order.deliverable_url ? [{ name: `${order.order_number}.dst`, url: order.deliverable_url, format: 'DST' }] : []);
+        const delivCont = document.getElementById('drawer-deliverables-container');
+        const delivList = document.getElementById('drawer-deliverables-list');
+        const isCompleted = order.status === 'completed' || order.status === 'delivered' || order.status === 'ready';
+        if (delivCont && delivList) {
+            if (isCompleted && deliverables.length > 0) {
+                delivCont.classList.remove('hidden');
+                delivList.innerHTML = deliverables.map(del => `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-500/20 text-xs">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <span class="material-symbols-outlined text-xs text-emerald-600">task_alt</span>
+                            <span class="font-mono text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-300">${del.format || 'FILE'}</span>
+                            <span class="font-mono font-bold text-slate-800 dark:text-slate-200 truncate max-w-[180px]">${del.name}</span>
+                        </div>
+                        <a href="${del.url}" download="${del.name}" class="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer">
+                            <span class="material-symbols-outlined text-xs">download</span>
+                            <span>Download</span>
+                        </a>
+                    </div>
+                `).join('');
+            } else {
+                delivCont.classList.add('hidden');
+            }
+        }
+
+        // Contextual Buttons: Pay Now & Revision
+        const isPaid = (order.payment_status === 'paid');
+        const isQuote = (order.is_quote || (order.order_number && order.order_number.startsWith('QUO-')) || order.status === 'quote_requested');
+        const payBtn = document.getElementById('drawer-pay-btn');
+        if (payBtn) {
+            if (!isPaid && !isQuote) {
+                payBtn.classList.remove('hidden');
+                const amount = parseFloat(order.amount || order.price || 15).toFixed(2);
+                setElText('drawer-pay-btn-text', `Pay Now ($${amount})`);
+                payBtn.onclick = () => {
+                    closeOrderDetailsModal();
+                    openClientInvoiceModal(order.id || order.order_number);
+                };
+            } else {
+                payBtn.classList.add('hidden');
+            }
+        }
+
+        const revBtn = document.getElementById('drawer-request-revision-btn');
+        if (revBtn) {
+            if (isCompleted) {
+                revBtn.classList.remove('hidden');
+            } else {
+                revBtn.classList.add('hidden');
+            }
+        }
+
+        const invBtn = document.getElementById('drawer-invoice-btn');
+        if (invBtn) {
+            invBtn.onclick = () => {
+                closeOrderDetailsModal();
+                openClientInvoiceModal(order.id || order.order_number);
+            };
+        }
 
         const modal = document.getElementById('order-details-modal');
         if (modal) modal.classList.remove('hidden');
+    }
+
+    function openRevisionFromDrawer() {
+        if (!state.currentDrawerOrder) return;
+        const orderNum = state.currentDrawerOrder.order_number;
+        closeOrderDetailsModal();
+        openRevisionModal(orderNum);
     }
 
     function closeOrderDetailsModal() {
@@ -780,9 +1661,8 @@
         clearRevisionPhoto();
     }
 
-    function handleRevisionPhotoSelected(event) {
-        const file = event.target.files && event.target.files[0];
-        if (!file) return;
+    function handleRevisionPhotoFile(file) {
+        if (!file || !file.type.startsWith('image/')) return;
         state.stitchOutPhoto = file;
         const previewCard = document.getElementById('revision-photo-preview-card');
         const previewImg = document.getElementById('revision-photo-preview-img');
@@ -796,6 +1676,18 @@
             };
             reader.readAsDataURL(file);
         }
+    }
+
+    function handleRevisionPhotoSelected(event) {
+        const file = event.target.files && event.target.files[0];
+        if (file) handleRevisionPhotoFile(file);
+    }
+
+    function handleRevisionPhotoDrop(event) {
+        event.preventDefault();
+        event.currentTarget.classList.remove('border-primary', 'bg-amber-50/20');
+        const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+        if (file) handleRevisionPhotoFile(file);
     }
 
     function clearRevisionPhoto() {
@@ -844,6 +1736,46 @@
 
             closeRevisionModal();
             clearRevisionPhoto();
+            // Broadcast live notifications
+            if (window.dezanNotificationEngine) {
+                window.dezanNotificationEngine.broadcastToRole('admin', {
+                    orderId: orderNumber,
+                    type: 'revision_requested',
+                    category: 'revisions',
+                    title: 'Customer Requested Stitch Revision',
+                    message: `Revision requested on #${orderNumber}: "${notes.substring(0, 80)}${notes.length > 80 ? '...' : ''}"`,
+                    meta: 'Urgent Revision · Free Revision Guarantee',
+                    actionLabel: 'Review Revision',
+                    actionType: 'view_revision',
+                    accent: 'purple',
+                    icon: 'change_circle'
+                });
+                window.dezanNotificationEngine.broadcastToRole('digitizer', {
+                    orderId: orderNumber,
+                    type: 'revision_task',
+                    category: 'revisions',
+                    title: 'Stitch Revision Assigned',
+                    message: `Customer feedback received for #${orderNumber}: "${notes.substring(0, 80)}${notes.length > 80 ? '...' : ''}"`,
+                    meta: 'Urgent Revision · Quality Check',
+                    actionLabel: 'Open Workbench',
+                    actionType: 'open_task',
+                    accent: 'purple',
+                    icon: 'change_circle'
+                });
+                window.dezanNotificationEngine.addNotification({
+                    orderId: orderNumber,
+                    type: 'revision_progress',
+                    category: 'production',
+                    title: 'Revision Request Received & Queued',
+                    message: `Your technical revision notes for #${orderNumber} have been sent to our master digitizer.`,
+                    meta: 'Turnaround: 4-8 hours · Zero extra charge',
+                    actionLabel: 'View Order',
+                    actionType: 'view_order',
+                    accent: 'purple',
+                    icon: 'change_circle'
+                });
+            }
+
             if (notesInput) notesInput.value = '';
             await loadClientData();
             renderActivePage();
@@ -909,12 +1841,15 @@
 
     function setFilter(type) {
         state.activeFilter = type;
-        const pills = document.querySelectorAll('.client-filter-pill');
+        const pills = document.querySelectorAll('.client-dist-pill, .client-filter-pill, #order-filter-tabs button, #quote-filter-tabs button, #invoice-filter-tabs button');
         pills.forEach(p => {
-            if (p.getAttribute('data-filter') === type) {
+            const pFilter = p.getAttribute('data-filter');
+            if (pFilter === type) {
                 p.classList.add('active');
+                p.setAttribute('aria-pressed', 'true');
             } else {
                 p.classList.remove('active');
+                p.setAttribute('aria-pressed', 'false');
             }
         });
         renderActivePage();
@@ -922,13 +1857,15 @@
 
     function resetFilter() {
         state.searchQuery = '';
-        const searchInput = document.getElementById('order-search-input');
-        if (searchInput) searchInput.value = '';
+        ['order-search-input', 'quote-search-input', 'invoice-search-input'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
         setFilter('all');
     }
 
     function handleSearch(e) {
-        state.searchQuery = e.target.value.trim();
+        state.searchQuery = (e && e.target ? e.target.value : (typeof e === 'string' ? e : '')).trim();
         renderActivePage();
     }
 
@@ -940,6 +1877,14 @@
                 openNewOrderModal();
             } else if (action === 'request_quote') {
                 openNewQuoteModal();
+            }
+            if (params.has('order')) {
+                const orderNum = params.get('order');
+                setTimeout(() => openOrderDetailsModal(orderNum), 350);
+            }
+            if (params.has('revision')) {
+                const orderNum = params.get('revision');
+                setTimeout(() => openRevisionModal(orderNum), 350);
             }
         } catch (e) {
             console.warn('URL action parse warning:', e);
@@ -998,18 +1943,22 @@
         loadData: loadClientData,
         setFilter,
         resetFilter,
+        setLayout,
         handleSearch,
         openNewOrderModal,
         closeNewOrderModal,
         openNewQuoteModal,
         openOrderDetailsModal,
         closeOrderDetailsModal,
+        previewArtworkModal,
+        openRevisionFromDrawer,
         openClientInvoiceModal,
         closeClientInvoiceModal,
         removeOrder,
         openRevisionModal,
         closeRevisionModal,
         handleRevisionPhotoSelected,
+        handleRevisionPhotoDrop,
         clearRevisionPhoto,
         submitRevision,
         handleProfileSave,

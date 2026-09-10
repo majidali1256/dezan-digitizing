@@ -28,8 +28,93 @@
         }
     </script>
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="admin-workspace.css">
+    <link rel="stylesheet" href="admin-workspace.css?v=3.6">
     <style>
+        /* Explicit Pill Colors & States - immune to caching */
+        #stage-jumper-pills .stage-jump-pill.pill-all { background: #f1f5f9 !important; color: #1e293b !important; border: 1px solid #cbd5e1 !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-all > span:last-child { background: #e2e8f0 !important; color: #0f172a !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-all[aria-pressed="true"] { background: #0f172a !important; color: #ffffff !important; border-color: #0f172a !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-all[aria-pressed="true"] > span:last-child { background: rgba(255,255,255,0.25) !important; color: #ffffff !important; }
+
+        #stage-jumper-pills .stage-jump-pill.pill-new { background: #fef3c7 !important; color: #92400e !important; border: 1px solid #fcd34d !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-new > span:last-child { background: #fde68a !important; color: #78350f !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-new[aria-pressed="true"] { background: #f59e0b !important; color: #0f172a !important; border-color: #d97706 !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-new[aria-pressed="true"] > span:last-child { background: rgba(0,0,0,0.15) !important; color: #0f172a !important; }
+
+        #stage-jumper-pills .stage-jump-pill.pill-revisions { background: #f3e8ff !important; color: #6b21a8 !important; border: 1px solid #d8b4fe !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-revisions > span:last-child { background: #e9d5ff !important; color: #581c87 !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-revisions[aria-pressed="true"] { background: #9333ea !important; color: #ffffff !important; border-color: #7e22ce !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-revisions[aria-pressed="true"] > span:last-child { background: rgba(255,255,255,0.25) !important; color: #ffffff !important; }
+
+        #stage-jumper-pills .stage-jump-pill.pill-quotes { background: #ffe4e6 !important; color: #9f1239 !important; border: 1px solid #fecdd3 !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-quotes > span:last-child { background: #fecdd3 !important; color: #881337 !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-quotes[aria-pressed="true"] { background: #e11d48 !important; color: #ffffff !important; border-color: #be123c !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-quotes[aria-pressed="true"] > span:last-child { background: rgba(255,255,255,0.25) !important; color: #ffffff !important; }
+
+        #stage-jumper-pills .stage-jump-pill.pill-production { background: #dbeafe !important; color: #1e40af !important; border: 1px solid #bfdbfe !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-production > span:last-child { background: #bfdbfe !important; color: #1e3a8a !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-production[aria-pressed="true"] { background: #2563eb !important; color: #ffffff !important; border-color: #1d4ed8 !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-production[aria-pressed="true"] > span:last-child { background: rgba(255,255,255,0.25) !important; color: #ffffff !important; }
+
+        #stage-jumper-pills .stage-jump-pill.pill-completed { background: #d1fae5 !important; color: #065f46 !important; border: 1px solid #a7f3d0 !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-completed > span:last-child { background: #a7f3d0 !important; color: #064e3b !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-completed[aria-pressed="true"] { background: #059669 !important; color: #ffffff !important; border-color: #047857 !important; }
+        #stage-jumper-pills .stage-jump-pill.pill-completed[aria-pressed="true"] > span:last-child { background: rgba(255,255,255,0.25) !important; color: #ffffff !important; }
+
+        .dark #stage-jumper-pills .stage-jump-pill.pill-all { background: #1e293b !important; color: #e2e8f0 !important; border-color: #334155 !important; }
+        .dark #stage-jumper-pills .stage-jump-pill.pill-new { background: rgba(120, 53, 15, 0.35) !important; color: #fde68a !important; border-color: rgba(217, 119, 6, 0.4) !important; }
+        .dark #stage-jumper-pills .stage-jump-pill.pill-revisions { background: rgba(88, 28, 135, 0.35) !important; color: #e9d5ff !important; border-color: rgba(147, 51, 234, 0.4) !important; }
+        .dark #stage-jumper-pills .stage-jump-pill.pill-quotes { background: rgba(159, 18, 57, 0.35) !important; color: #fecdd3 !important; border-color: rgba(225, 29, 72, 0.4) !important; }
+        .dark #stage-jumper-pills .stage-jump-pill.pill-production { background: rgba(30, 58, 138, 0.35) !important; color: #bfdbfe !important; border-color: rgba(37, 99, 235, 0.4) !important; }
+        .dark #stage-jumper-pills .stage-jump-pill.pill-completed { background: rgba(6, 78, 59, 0.35) !important; color: #a7f3d0 !important; border-color: rgba(5, 150, 105, 0.4) !important; }
+
+        .dark #stage-jumper-pills .stage-jump-pill.pill-all[aria-pressed="true"] { background: #f8fafc !important; color: #0f172a !important; border-color: #f8fafc !important; }
+        .dark #stage-jumper-pills .stage-jump-pill.pill-new[aria-pressed="true"] { background: #fbbf24 !important; color: #0f172a !important; border-color: #f59e0b !important; }
+        .dark #stage-jumper-pills .stage-jump-pill.pill-revisions[aria-pressed="true"] { background: #a855f7 !important; color: #ffffff !important; border-color: #9333ea !important; }
+        .dark #stage-jumper-pills .stage-jump-pill.pill-quotes[aria-pressed="true"] { background: #f43f5e !important; color: #ffffff !important; border-color: #e11d48 !important; }
+        .dark #stage-jumper-pills .stage-jump-pill.pill-production[aria-pressed="true"] { background: #3b82f6 !important; color: #ffffff !important; border-color: #2563eb !important; }
+        .dark #stage-jumper-pills .stage-jump-pill.pill-completed[aria-pressed="true"] { background: #10b981 !important; color: #ffffff !important; border-color: #059669 !important; }
+
+        /* Stage Sections Distinct Spacing & Card Architecture */
+        .stage-sections-flow {
+            background: #f8fafc;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            border-top: 1px solid var(--admin-border, rgba(226, 232, 240, 0.8));
+        }
+        .dark .stage-sections-flow {
+            background: rgba(15, 23, 42, 0.6);
+            border-top-color: rgba(255, 255, 255, 0.08);
+        }
+        .stage-sub-section {
+            background: var(--admin-surface, #ffffff);
+            border: 1px solid var(--admin-border, #e2e8f0);
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+            overflow: hidden;
+            scroll-margin-top: 152px;
+        }
+        .stage-sub-section.hidden {
+            display: none !important;
+        }
+        .stage-sub-section:not(.hidden) + .stage-sub-section:not(.hidden) {
+            margin-top: 28px;
+        }
+        @media (max-width: 639px) {
+            .stage-sections-flow {
+                padding: 14px;
+                gap: 20px;
+            }
+            .stage-sub-section {
+                border-radius: 12px;
+            }
+            .stage-sub-section:not(.hidden) + .stage-sub-section:not(.hidden) {
+                margin-top: 20px;
+            }
+        }
+
         @media print {
             body {
                 background: white !important;
@@ -70,7 +155,7 @@
 
 
     <!-- ===== HEADER ===== -->
-    <header class="sticky top-0 z-40 bg-white/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-primary/20 dark:border-primary/25">
+    <header class="sticky top-0 z-50 bg-white/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-primary/20 dark:border-primary/25">
         <div class="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
             <a href="index.html" class="flex items-center gap-2 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                 <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover shadow-md shadow-primary/20">
@@ -222,28 +307,32 @@
 
                 <!-- Stage Quick-Jump Pills (Clicking smoothly jumps to that dedicated stage) -->
                 <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none" id="stage-jumper-pills" aria-label="Filter orders by stage">
-                    <button onclick="setStageScope('all')" data-stage-target="all" aria-pressed="true" class="stage-jump-pill px-3 py-2 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 shadow-xs cursor-pointer whitespace-nowrap transition-all flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                    <button onclick="setStageScope('all')" data-stage-target="all" aria-pressed="true" class="stage-jump-pill pill-all px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                         <span>All orders</span>
-                        <span class="px-2 py-0.2 rounded-full bg-black/20 text-[10px]" id="pill-count-all">0</span>
+                        <span class="px-2 py-0.2 rounded-full text-[10px]" id="pill-count-all">0</span>
                     </button>
-                    <button onclick="setStageScope('stage-unassigned-sub')" data-stage-target="stage-unassigned-sub" class="stage-jump-pill px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 hover:border-amber-500 cursor-pointer whitespace-nowrap transition-all flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                        <span>Needs attention</span>
-                        <span class="px-2 py-0.2 rounded-full bg-amber-100 dark:bg-amber-500/20 text-[10px]" id="pill-count-unassigned">0</span>
+                    <button onclick="setStageScope('stage-new-sub')" data-stage-target="stage-new-sub" class="stage-jump-pill pill-new px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                        <span>New Orders</span>
+                        <span class="px-2 py-0.2 rounded-full text-[10px]" id="pill-count-new">0</span>
                     </button>
-                    <button onclick="setStageScope('stage-in-progress-sub')" data-stage-target="stage-in-progress-sub" class="stage-jump-pill px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-blue-800 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30 hover:border-blue-500 cursor-pointer whitespace-nowrap transition-all flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                        <span>In production</span>
-                        <span class="px-2 py-0.2 rounded-full bg-blue-100 dark:bg-blue-500/20 text-[10px]" id="pill-count-in-progress">0</span>
+                    <button onclick="setStageScope('stage-revisions-sub')" data-stage-target="stage-revisions-sub" class="stage-jump-pill pill-revisions px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                        <span>Revisions</span>
+                        <span class="px-2 py-0.2 rounded-full text-[10px]" id="pill-count-revisions">0</span>
                     </button>
-                    <button onclick="setStageScope('stage-incomplete-sub')" data-stage-target="stage-incomplete-sub" class="stage-jump-pill px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 hover:border-rose-500 cursor-pointer whitespace-nowrap transition-all flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                    <button onclick="setStageScope('stage-incomplete-sub')" data-stage-target="stage-incomplete-sub" class="stage-jump-pill pill-quotes px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                         <span>Quotes & payment</span>
-                        <span class="px-2 py-0.2 rounded-full bg-rose-100 dark:bg-rose-500/20 text-[10px]" id="pill-count-unpaid">0</span>
+                        <span class="px-2 py-0.2 rounded-full text-[10px]" id="pill-count-unpaid">0</span>
                     </button>
-                    <button onclick="setStageScope('stage-completed-sub')" data-stage-target="stage-completed-sub" class="stage-jump-pill px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 hover:border-emerald-500 cursor-pointer whitespace-nowrap transition-all flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                    <button onclick="setStageScope('stage-in-progress-sub')" data-stage-target="stage-in-progress-sub" class="stage-jump-pill pill-production px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                        <span>In production</span>
+                        <span class="px-2 py-0.2 rounded-full text-[10px]" id="pill-count-in-progress">0</span>
+                    </button>
+                    <button onclick="setStageScope('stage-completed-sub')" data-stage-target="stage-completed-sub" class="stage-jump-pill pill-completed px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
                         <span>Completed</span>
-                        <span class="px-2 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-[10px]" id="pill-count-completed">0</span>
+                        <span class="px-2 py-0.2 rounded-full text-[10px]" id="pill-count-completed">0</span>
                     </button>
-                    <!-- Legacy hidden span for pill-count-revisions if referenced -->
-                    <span id="pill-count-revisions" class="hidden">0</span>
+                    <!-- Hidden compatibility span for legacy tests -->
+                    <span id="pill-count-unassigned" class="hidden">0</span>
                 </div>
             </div>
 
@@ -263,21 +352,25 @@
                 </div>
             </div>
 
-            <!-- =============================================================== -->
-            <!-- STAGE 1: ACTION REQUIRED / NEEDS WORKER & ACTIVE REVISIONS      -->
-            <!-- =============================================================== -->
-            <div id="stage-unassigned-sub" class="stage-sub-section border-b border-primary/15 dark:border-primary/20 transition-all scroll-mt-36">
-                <div class="px-5 py-4 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-b border-amber-500/15 flex flex-wrap items-center justify-between gap-2">
+            <!-- Flow container for stage cards with distinct separation gaps -->
+            <div class="stage-sections-flow p-4 sm:p-6 bg-slate-100/70 dark:bg-slate-950/50 flex flex-col gap-6 sm:gap-8 border-t border-primary/15 dark:border-primary/20">
+
+                <!-- =============================================================== -->
+                <!-- STAGE 1: NEW ORDERS (AWAITING DIGITIZER DISPATCH)               -->
+                <!-- =============================================================== -->
+                <div id="stage-new-sub" class="stage-sub-section bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 rounded-2xl shadow-xs overflow-hidden transition-all scroll-mt-36">
+                <div class="px-5 py-4 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border-b border-amber-500/20 flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-800 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
-                            <span class="material-symbols-outlined text-base">assignment_late</span>
+                            <span class="material-symbols-outlined text-base">fiber_new</span>
                         </div>
                         <div>
                             <div class="flex items-center gap-2">
-                                <h4 class="text-sm font-black text-slate-900 dark:text-white">Needs attention</h4>
-                                <span id="badge-stage-unassigned" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/30">0 Orders</span>
+                                <h4 class="text-sm font-black text-slate-900 dark:text-white">New Orders</h4>
+                                <span id="badge-stage-new" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/30">0 Orders</span>
+                                <span id="badge-stage-unassigned" class="hidden">0 Orders</span>
                             </div>
-                            <p class="text-[11px] text-slate-600 dark:text-slate-400">Incoming bookings awaiting digitizer dispatch and active client revision requests.</p>
+                            <p class="text-[11px] text-slate-600 dark:text-slate-400">Incoming bookings awaiting digitizer dispatch and initial setup.</p>
                         </div>
                     </div>
                     <!-- Right Actions: Batch auto-assign existing unassigned orders -->
@@ -301,11 +394,11 @@
                     </button>
                 </div>
                 <!-- Cards Container -->
-                <div id="stage-unassigned-cards" class="stage-cards-container p-5 bg-amber-50/20 dark:bg-amber-950/10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div id="stage-new-cards" class="stage-cards-container p-5 bg-amber-50/20 dark:bg-amber-950/10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     <!-- Rendered by JS -->
                 </div>
                 <!-- Table Container -->
-                <div id="stage-unassigned-table" class="stage-table-container hidden overflow-x-auto">
+                <div id="stage-new-table" class="stage-table-container hidden overflow-x-auto">
                     <table class="w-full text-left text-xs min-w-[1200px]">
                         <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-primary/10 dark:border-primary/15 z-10 text-[11px]">
                             <tr>
@@ -318,37 +411,40 @@
                                 <th class="px-4 py-3.5 text-right whitespace-nowrap w-[360px] min-w-[360px]">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="stage-unassigned-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
+                        <tbody id="stage-new-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
                             <!-- Rendered by JS -->
                         </tbody>
                     </table>
                 </div>
+                <!-- Hidden compatibility wrappers for legacy code -->
+                <div id="stage-unassigned-cards" class="hidden"></div>
+                <table class="hidden"><tbody id="stage-unassigned-tbody"></tbody></table>
             </div>
 
             <!-- =============================================================== -->
-            <!-- STAGE 2: ACTIVE PIPELINE / IN PRODUCTION                       -->
+            <!-- STAGE 2: REVISIONS (ACTIVE CLIENT REVISION REQUESTS)            -->
             <!-- =============================================================== -->
-            <div id="stage-in-progress-sub" class="stage-sub-section border-b border-primary/15 dark:border-primary/20 transition-all scroll-mt-36">
-                <div class="px-5 py-4 bg-gradient-to-r from-blue-500/10 via-blue-500/5 to-transparent border-b border-blue-500/15 flex flex-wrap items-center justify-between gap-2">
+            <div id="stage-revisions-sub" class="stage-sub-section bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 rounded-2xl shadow-xs overflow-hidden transition-all scroll-mt-36">
+                <div class="px-5 py-4 bg-gradient-to-r from-purple-500/15 via-purple-500/5 to-transparent border-b border-purple-500/20 flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-800 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
-                            <span class="material-symbols-outlined text-base">precision_manufacturing</span>
+                        <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-800 dark:text-purple-400 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-base">published_with_changes</span>
                         </div>
                         <div>
                             <div class="flex items-center gap-2">
-                                <h4 class="text-sm font-black text-slate-900 dark:text-white">In production</h4>
-                                <span id="badge-stage-in-progress" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-blue-500/20 text-blue-900 dark:text-blue-300 border border-blue-500/30">0 Orders</span>
+                                <h4 class="text-sm font-black text-slate-900 dark:text-white">Revisions</h4>
+                                <span id="badge-stage-revisions" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-purple-500/20 text-purple-900 dark:text-purple-300 border border-purple-500/30">0 Orders</span>
                             </div>
-                            <p class="text-[11px] text-slate-600 dark:text-slate-400">Orders actively being digitized, undergoing stitch simulation, and in QA review.</p>
+                            <p class="text-[11px] text-slate-600 dark:text-slate-400">Active client revision requests, density tweaks, and stitch adjustments requiring urgent digitizer rework.</p>
                         </div>
                     </div>
                 </div>
                 <!-- Cards Container -->
-                <div id="stage-in-progress-cards" class="stage-cards-container p-5 bg-blue-50/20 dark:bg-blue-950/10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div id="stage-revisions-cards" class="stage-cards-container p-5 bg-purple-50/20 dark:bg-purple-950/10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     <!-- Rendered by JS -->
                 </div>
                 <!-- Table Container -->
-                <div id="stage-in-progress-table" class="stage-table-container hidden overflow-x-auto">
+                <div id="stage-revisions-table" class="stage-table-container hidden overflow-x-auto">
                     <table class="w-full text-left text-xs min-w-[1200px]">
                         <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-primary/10 dark:border-primary/15 z-10 text-[11px]">
                             <tr>
@@ -357,11 +453,11 @@
                                 <th class="px-4 py-3.5 whitespace-nowrap w-[200px] min-w-[200px]">Design Specs</th>
                                 <th class="px-4 py-3.5 whitespace-nowrap w-[110px] min-w-[110px]">Price & Payment</th>
                                 <th class="px-4 py-3.5 whitespace-nowrap w-[125px] min-w-[125px]">Status</th>
-                                <th class="px-4 py-3.5 whitespace-nowrap w-[145px] min-w-[145px]">Assigned Digitizer</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[145px] min-w-[145px]">Worker Dispatch</th>
                                 <th class="px-4 py-3.5 text-right whitespace-nowrap w-[360px] min-w-[360px]">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="stage-in-progress-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
+                        <tbody id="stage-revisions-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
                             <!-- Rendered by JS -->
                         </tbody>
                     </table>
@@ -371,7 +467,7 @@
             <!-- =============================================================== -->
             <!-- STAGE 3: INCOMPLETE BOOKINGS, PAYMENT DUE & QUOTES              -->
             <!-- =============================================================== -->
-            <div id="stage-incomplete-sub" class="stage-sub-section border-b border-primary/15 dark:border-primary/20 transition-all scroll-mt-36">
+            <div id="stage-incomplete-sub" class="stage-sub-section bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 rounded-2xl shadow-xs overflow-hidden transition-all scroll-mt-36">
                 <div class="px-5 py-4 bg-gradient-to-r from-rose-500/10 via-rose-500/5 to-transparent border-b border-rose-500/15 flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-800 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
@@ -412,9 +508,52 @@
             </div>
 
             <!-- =============================================================== -->
+            <!-- STAGE 4: ACTIVE PIPELINE / IN PRODUCTION                       -->
+            <!-- =============================================================== -->
+            <div id="stage-in-progress-sub" class="stage-sub-section bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 rounded-2xl shadow-xs overflow-hidden transition-all scroll-mt-36">
+                <div class="px-5 py-4 bg-gradient-to-r from-blue-500/10 via-blue-500/5 to-transparent border-b border-blue-500/15 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-800 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-base">precision_manufacturing</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="text-sm font-black text-slate-900 dark:text-white">In production</h4>
+                                <span id="badge-stage-in-progress" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-blue-500/20 text-blue-900 dark:text-blue-300 border border-blue-500/30">0 Orders</span>
+                            </div>
+                            <p class="text-[11px] text-slate-600 dark:text-slate-400">Orders actively being digitized, undergoing stitch simulation, and in QA review.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Cards Container -->
+                <div id="stage-in-progress-cards" class="stage-cards-container p-5 bg-blue-50/20 dark:bg-blue-950/10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <!-- Rendered by JS -->
+                </div>
+                <!-- Table Container -->
+                <div id="stage-in-progress-table" class="stage-table-container hidden overflow-x-auto">
+                    <table class="w-full text-left text-xs min-w-[1200px]">
+                        <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-primary/10 dark:border-primary/15 z-10 text-[11px]">
+                            <tr>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[140px] min-w-[140px]">Order ID</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[180px] min-w-[180px]">Client & Company</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[200px] min-w-[200px]">Design Specs</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[110px] min-w-[110px]">Price & Payment</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[125px] min-w-[125px]">Status</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap w-[145px] min-w-[145px]">Assigned Digitizer</th>
+                                <th class="px-4 py-3.5 text-right whitespace-nowrap w-[360px] min-w-[360px]">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stage-in-progress-tbody" class="divide-y divide-slate-200 dark:divide-primary/10">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- =============================================================== -->
             <!-- STAGE 4: COMPLETED PRODUCTION ARCHIVE                           -->
             <!-- =============================================================== -->
-            <div id="stage-completed-sub" class="stage-sub-section transition-all scroll-mt-36">
+            <div id="stage-completed-sub" class="stage-sub-section bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 rounded-2xl shadow-xs overflow-hidden transition-all scroll-mt-36">
                 <div class="px-5 py-4 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border-b border-emerald-500/15 flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-800 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
@@ -453,6 +592,8 @@
                     </table>
                 </div>
             </div>
+            <!-- End Stage Sections Flow Container -->
+            </div>
         </section>
 
         <!-- =================================================================== -->
@@ -472,8 +613,8 @@
 
     </main>
 
-    <!-- ===== ASSIGN WORKER MODAL ===== -->
-    <div id="assign-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <!-- ===== ASSIGN DIGITIZER MODAL ===== -->
+    <div id="assign-modal" class="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="w-full max-w-md bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl p-6 relative">
             <div class="flex items-center justify-between pb-3 border-b border-primary/15 dark:border-primary/20 mb-4">
                 <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -1170,7 +1311,25 @@
 
     <!-- Scripts -->
     <script src="js/insforge-client.js"></script>
-    <script src="js/admin-workspace.js"></script>
+    <script src="js/notifications-manager.js"></script>
+    <script src="js/admin-workspace.js?v=3.8"></script>
+    <script>
+        // Inline Stage Scoping Safeguard: guarantees instant isolation even on cached browsers
+        if (typeof window.setStageScope === 'function') {
+            const originalSetStageScope = window.setStageScope;
+            window.setStageScope = function(scopeKey) {
+                originalSetStageScope(scopeKey);
+                // Secondary safety sweep: ensure all non-matching stage sub-sections are strictly hidden
+                document.querySelectorAll('.stage-sub-section').forEach(el => {
+                    if (scopeKey === 'all' || el.id === scopeKey) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                });
+            };
+        }
+    </script>
 
 </body>
 

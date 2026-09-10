@@ -1604,3 +1604,414 @@ The Worker Studio provides an isolated, production-focused environment for embro
     - Verified Order Mode preserves rush card visibility and +$5 rush fee calculation.
     - Captured visual screenshot: `quote_step2_no_rush_fee.png`.
   - Quality gates: 30/30 pages validated (`deep_button_link_validator.js`), 10/10 tests pass (`npm test`).
+
+---
+
+## 35. Complete 20-Point Production Launch Checklist & Global Rule Enforcement (Implemented & Live)
+- **Problem & Requirement**:
+  - Verify and deliver the complete 20-point production launch, technical SEO, compliance, and user retention standard.
+  - Automatically mandate this 20-point standard across all future projects.
+- **Implemented Artifacts**:
+  1. `robots.txt`: Comprehensive crawler configuration allowing all public marketing and service pages, pointing to `sitemap.xml`, and disallowing private portals (`/admin-*`, `/client-*`, `/worker-*`), APIs (`/api/`, `/server/`), and internal configs.
+  2. `sitemap.xml`: Complete, validated XML sitemap with all 11 public URLs, lastmod dates, prioritized indexing (1.0 for Home, 0.9 for Services/Pricing, 0.8 for Portfolio), and change frequencies.
+  3. `404.html`: Bespoke, high-retention error page themed around "Lost a Stitch? Page Not Found" with glowing needle badge, dark luxury / warm light canvas parity, quick-jump bento cards to key services, and unified header/footer navigation.
+  4. `js/cookie-consent.js`: Lightweight, accessible glassmorphism floating banner offering "Accept All" and "Essential Only" options, linked to `privacy.html`, with persistent choice storage in `localStorage`.
+  5. `js/analytics.js`: Modular Google Analytics 4 (GA4) loader with consent-awareness and fallback mock mode.
+  6. Global Auto-Loader in `app.js`: Auto-injects cookie consent and analytics utilities across all pages.
+  7. Permanent Agent Rule (`.agents/rules/website_production_checklist_rule.md`): Established mandatory requirement to automatically create or suggest the 20-point checklist on all current and future projects.
+
+### 35.1 Mobile Order Notes Textarea Clipping Elimination
+- **Problem**: In the Step 2 order/quote modal on mobile viewports, the "Production Notes / Special Instructions" `<textarea>` was set to `rows="2"`, while having a long 85-character placeholder. On mobile widths (~320–360px), the placeholder text wrapped onto 3 lines, causing the 3rd line ("curve adjustments...") to be sliced horizontally and clipped by the bottom border.
+- **Solution & Architecture**:
+  - Upgraded `<textarea id="order-notes">` across both `js/order-quote-modal.js` and `client-portal.html` to `rows="3"` with `min-h-[72px]`, `leading-relaxed`, and `resize-none`.
+  - Refined placeholder copy to concise, professional industry terms: `"Thread colors, underlay preferences, size details, or special instructions..."`.
+  - Visual verification with Playwright confirmed complete zero-clipping and comfortable vertical padding on mobile (`390x844`).
+
+### 35.2 Mobile Pricing Card 3 HTML Comment Parsing Fix (`pricing.html`)
+- **Problem**: On `pricing.html` on mobile viewports, Card 3 (*Realistic / Pet Portrait*) appeared completely stripped of its white rounded pill card styling—its circular pet icon, text, and price floated bare and misaligned on the canvas background.
+- **Root Cause**: On line 298, the HTML comment closer had an errant backslash: `<!-- ... --\>` instead of `-->`. This caused browser HTML parsers (WebKit / Safari / Chromium) to fail to close the comment cleanly, swallowing and corrupting the outer `<div class="... bg-white ...">` container tag.
+- **Fix & Verification**: Corrected `<!-- Mobile Card 3: ... --\>` to standard `-->`. Playwright mobile visual verification (390×844) confirmed Card 3 renders with identical white pill background, rounded-2xl radius, 1px border, and horizontal alignment matching Cards 1 and 2.
+
+### 35.3 Stage 1 Service Choice Distinct Colors & 10–12% Box Scale Up
+- **Requirement**: Restore distinct colors for each service card in the Stage 1 modal to maximize visual distinction, and enlarge box sizes by 10–12%:
+  1. **Embroidery Digitizing**: Warm Light Brown / Golden Amber (`bg-[#fffdf8]`, `border-[#f2ddb3]`, icon `bg-[#fef3d6] text-[#b8860b]`, badge `bg-[#fef3d6] text-[#9a7810]`).
+  2. **Vector Art Conversion**: Tech Sapphire Blue (`bg-[#f8faff]`, `border-[#cce0fc]`, icon `bg-[#e8f1fd] text-[#1d68d8]`, badge `bg-[#dbeafe] text-[#1d68d8]`).
+  3. **Realistic / Pet Portrait Digitizing**: Rich Royal Violet / Purple (`bg-[#faf6fe]`, `border-[#e4d4f8]`, icon `bg-[#f3e8ff] text-[#7c3aed]`, badge `bg-[#ede9fe] text-[#6d28d9]`).
+  4. **Dimensions & Scaling**: Increased inner padding from `p-2 sm:p-3` to `p-2.5 sm:p-3.5`, icon boxes from `w-9 sm:w-11` to `w-10 sm:w-12`, card spacing to `space-y-2 sm:space-y-3`, and typography by ~10–12% for a more substantial, tactile feel.
+- **Synchronized Across**: `js/order-quote-modal.js` and `client-portal.html`.
+- **Verification**: Captured Playwright mobile screenshot (`service_cards_mobile_fixed.png`) confirming 3 distinctly colored cards with balanced, generous sizing.
+
+### 35.4 Stage 1 Service Choice Premium Craftsmanship Icons Restoration & WebKit Sizing Hardening
+- **Problem**: In the Stage 1 service selection modal on mobile devices (iOS Safari / WebKit), the icon containers rendered as completely blank, empty colored rounded boxes with no icons inside.
+- **Root Causes**:
+  1. **Invalid Tailwind Utility Classes**: The SVGs were configured with `w-5.5 h-5.5 sm:w-6.5 sm:h-6.5`. Because Tailwind CSS defaults to integer spacing (`w-5`, `w-6`, `w-7`), fractional classes like `w-5.5` emit zero CSS declarations.
+  2. **Missing SVG Dimensions on WebKit**: Without explicit width/height attributes or valid CSS dimensions, WebKit/Blink browsers compute SVG dimensions inside flex containers as 0×0 px, collapsing them into total invisibility.
+- **Solution & Premium Restoration**:
+  1. **Replaced Generic Outlines with Bespoke Craftsmanship SVGs**:
+     - **Embroidery Digitizing**: Handcrafted Cap + Collared Polo Shirt with embroidered crest and stitch paths (`viewBox="0 0 56 56"`).
+     - **Vector Art Conversion**: Bespoke Bezier Pen Tool with node curves, anchor handles, and drawing path (`viewBox="0 0 56 56"`).
+     - **Realistic / Pet Portrait**: Detailed circular embroidery hoop with shaded realistic pet portrait and angled needle (`viewBox="0 0 56 56"`).
+  2. **Triple-Layer Dimension Hardening**:
+     - Explicit HTML attributes: `width="24" height="24"`.
+     - Valid responsive Tailwind classes: `class="w-6 h-6 sm:w-7 sm:h-7 shrink-0"`.
+     - Inline style fallback: `style="width: 24px; height: 24px; min-width: 24px; min-height: 24px;"`.
+  3. **Synchronized Across**: `js/order-quote-modal.js` and `client-portal.html`.
+- **Verification**: Headless Chromium verified bounding rects (`24x24 px`) across all 3 cards with zero collapsing, and visual screenshot `service_icons_verified_mobile.png` confirmed razor-sharp rendering on iPhone viewport (`390x844`).
+
+### 35.5 Unified Order Distribution Navigation System (Admin 6-Pill & Digitizer 5-Pill)
+- **User Requirements**:
+  1. Add an order distribution navigation bar with distinct background colors for each stage to enable immediate recognition and seamless navigation.
+  2. Tab sequence requested:
+     - **All orders**
+     - **New Orders**
+     - **Revisions**
+     - **Quotes & payment** (Admin ONLY)
+     - **In production**
+     - **Completed**
+  3. Boundary condition: *"as quotes is not for digitizer, work accordingly"* $\rightarrow$ Digitizers must never see quotes or payments, keeping the Digitizer view strictly to 5 stages.
+- **Color Palette System (Light & Dark Mode)**:
+  - **All orders**: Slate neutral (`bg-[#f1f5f9] text-[#1e293b]`, active `bg-[#0f172a] text-white`)
+  - **New Orders**: Warm Amber (`bg-[#fef3c7] text-[#92400e]`, active `bg-[#d97706] text-white`)
+  - **Revisions**: Royal Violet / Purple (`bg-[#f3e8ff] text-[#6b21a8]`, active `bg-[#9333ea] text-white`)
+  - **Quotes & payment** (Admin Only): Coral Rose (`bg-[#ffe4e6] text-[#9f1239]`, active `bg-[#e11d48] text-white`)
+  - **In production**: Technical Sapphire Blue (`bg-[#dbeafe] text-[#1e40af]`, active `bg-[#2563eb] text-white`)
+  - **Completed**: Fresh Emerald Green (`bg-[#dcfce7] text-[#166534]`, active `bg-[#16a34a] text-white`)
+- **Implementations**:
+  1. **Admin Workspace (`admin-orders.html`, `admin-workspace.css`, `js/admin-workspace.js`)**:
+     - Sub-sections ordered cleanly: `stage-new-sub` $\rightarrow$ `stage-revisions-sub` $\rightarrow$ `stage-incomplete-sub` (Quotes & payment due) $\rightarrow$ `stage-in-progress-sub` (In production) $\rightarrow$ `stage-completed-sub` (Completed).
+     - `#stage-jumper-pills` with 6 distinct color pills, dynamic counter badges, and accessible ARIA attributes.
+     - `renderAdminOrders()` calculates exact counts across all 5 operational groups + union for total.
+     - `renderAdminInsights()` updated to chart all 5 operational groups.
+  2. **Digitizer Studio Portal (`worker-portal.html`, `worker-workspace.css`)**:
+     - Added `#digitizer-distribution-nav` with 5 pills (strictly omitting quotes).
+     - Implemented `setDigitizerTabFilter(type)` with live badge counts and stage-specific empty states.
+  3. **Digitizer Tasks Workbench (`worker-tasks.html`, `js/worker-workspace.js`)**:
+     - Replaced legacy filter buttons with the 5 distinct color pills.
+     - `renderTasksWorkbenchView()` filters dynamically across `'all'`, `'new'`, `'revisions'`, `'in_progress'`, and `'completed'`.
+- **Stage Isolation & Filter Scoping (`setStageScope`)**:
+  - **All orders**: Displays all 5 operational stage sections continuously (`classList.remove('hidden')`).
+  - **New Orders**: Strictly isolates and displays ONLY `stage-new-sub`; all other 4 sections (`stage-revisions-sub`, `stage-incomplete-sub`, `stage-in-progress-sub`, `stage-completed-sub`) are hidden (`display: none !important`).
+  - **Revisions**: Strictly isolates and displays ONLY `stage-revisions-sub`.
+  - **Quotes & payment**: Strictly isolates and displays ONLY `stage-incomplete-sub`.
+  - **In production**: Strictly isolates and displays ONLY `stage-in-progress-sub`.
+  - **Completed**: Strictly isolates and displays ONLY `stage-completed-sub`.
+  - **Table Layout Compatibility**: Fully supported in both Bento Grid and Table views—when a stage section is hidden, its corresponding table is also cleanly hidden.
+  - **Search & Filter Status Bar**: Dynamically updates text (e.g. `Showing only New Orders (15 orders)` or `81 orders across all stages`) with accessible `role="status"` and `Reset filters` shortcut.
+  - **Strict Order Categorization & Quotes Isolation Partitioning**:
+    - **Guiding Invariant**: New Orders (`stageNewOrders`) MUST NEVER contain quotes (`QUO-*`, `is_quote === true`, `quote_requested`, `quote_ready`, `Pending Quote`, zero-dollar quotes) or unpaid bookings (`payment_status: 'unpaid'` / `'payment_due'`). All quotes and payment-hold bookings are strictly housed in their own dedicated section: **Quotes & payment due** (`stageQuotesOrders`, Stage 3).
+    - `isQuote(o)` helper:
+      - `o.is_quote === true`
+      - `o.status === 'quote_requested' || o.status === 'quote_ready'`
+      - `order_number.toUpperCase().startsWith('QUO-')`
+      - `o.order_type === 'quote' || o.service_type === 'quote'`
+      - `o.payment_method === 'Pending Quote'`
+      - `o.status === 'pending' && (!o.price || Number(o.price) === 0)`
+    - `isPaymentDue(o)` helper: Checks for `unpaid`, `pending`, or `payment_due` payment statuses.
+    - **Partition Sequence**:
+      1. `stageCompletedOrders`: `status === 'completed'`
+      2. `stageRevisionOrders`: `(status === 'revision_requested' || is_revision === true) && !isQuote(o)` (client rework requests prioritized)
+      3. `stageQuotesOrders` (Stage 3 - Dedicated Section): Evaluated BEFORE `stageNewOrders`. Captures all items matching `isQuote(o) || isPaymentDue(o)`.
+      4. `stageNewOrders` (Stage 1 - New Paid Orders): Strictly confirmed, fully paid bookings (`payment_status === 'paid'`) that are unassigned (`!assigned_digitizer_id || status === 'pending_review' || status === 'new' || status === 'pending'`) and strictly excluded from quotes (`!stageQuotesOrders.includes(o)`).
+      5. `stageProductionOrders` (Stage 4 - In Production): All remaining assigned, active production jobs being crafted by digitizers.
+      6. `cancelled`: Excluded from operational queues.
+    - Every active order maps to exactly 1 stage; sum across all 5 stages equals total active orders (e.g. 84 active orders: 9 New + 5 Revisions + 36 Quotes/Payment Due + 27 In Production + 7 Completed).
+  - **Pill Visual Styling & Contrast**:
+    - Immune to CSS caching via versioned link tags (`admin-workspace.css?v=3.6`, `worker-workspace.css?v=3.5`) and high-specificity embedded head styles with `!important`.
+    - Removed generic active/hover yellow overrides so `In production` is solid sapphire blue (`#2563eb`), `New Orders` is warm amber (`#f59e0b`), `Revisions` is royal purple (`#9333ea`), `Quotes` is coral rose (`#e11d48`), `Completed` is emerald green (`#059669`), and `All orders` is dark slate (`#0f172a`).
+- **Stage Sections Gap & Card Architecture (`stage-sections-flow`)**:
+  - Previously, all 5 stage subsections were stacked directly on top of each other inside `#master-orders-section` with only a 1px border dividing them, causing tables and cards to look crammed and glued together.
+  - Introduced `.stage-sections-flow` container wrapping all 5 stage subsections with a subtle canvas background (`bg-slate-100/70 dark:bg-slate-950/50`), `p-4 sm:p-6`, and `gap-6 sm:gap-8` (28px - 60px visual breathing room).
+  - Converted each `.stage-sub-section` into an independent rounded card surface (`bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 rounded-2xl shadow-xs overflow-hidden`).
+  - Added fallback CSS rule `.stage-sub-section:not(.hidden) + .stage-sub-section:not(.hidden) { margin-top: 28px; }` ensuring clean spacing even if flex gap isn't supported.
+  - Enhanced empty table state in `renderStageSection()` to display a centered, comfortable empty-state banner with an inbox icon, preventing collapsed 0-pixel table rows.
+  - Bumped stylesheet version to `admin-workspace.css?v=3.6`.
+- **Stage Isolation Safeguards & Script Cache Immunity (`admin-workspace.js?v=3.8`)**:
+  - Found that older browser sessions retained a cached version of `js/admin-workspace.js` where `setStageScope` only indexed `stage-unassigned-sub` instead of the newly introduced `stage-new-sub` and `stage-revisions-sub`, causing those two sections to remain visible when clicking "Quotes & payment" or other stage pills.
+  - Implemented dynamic DOM sweep in `setStageScope()` using `document.querySelectorAll('.stage-sub-section')` to ensure no stage subsection can ever escape isolation regardless of ID.
+  - Added an inline stage scoping safeguard directly inside `<script>` in `admin-orders.html` that executes synchronously before any DOM events.
+  - Added cache buster `js/admin-workspace.js?v=3.8` across all admin pages (`admin-orders.html`, `admin-portal.html`, `admin-clients.html`, `admin-catalog.html`, `admin-team.html`).
+  - Verified with `scripts/verify_quotes_isolation.js` that clicking Quotes & payment strictly hides `stage-new-sub`, `stage-revisions-sub`, `stage-in-progress-sub`, and `stage-completed-sub` while isolating `stage-incomplete-sub`.
+  - Verified with `scripts/verify_no_quotes_in_new_orders.js` that New Orders contains 0 quotes (`QUO-*`), 0 unpaid records, and exactly 9 paid, dispatch-ready orders (`ORD-`/`DZ-`).
+- **Automated Verification**:
+  - Playwright test suites `scripts/verify_isolated_tabs.js`, `scripts/verify_mobile_pills.js`, `scripts/verify_sections_gap.js`, `scripts/verify_quotes_isolation.js`, and `scripts/verify_no_quotes_in_new_orders.js` passed 100% with 0 errors across Desktop (1440x900) and Mobile iPhone (390x844).
+  - Measured exact 60px vertical gap between visible adjacent sections in both Cards and Table views (`PASS: YES`).
+  - Confirmed 100% isolation on each tab click, zero quotes in New Orders, and exact count distribution across all 5 stages.
+
+---
+
+## 24. Role-Specific Notification Center Architecture (Live & Verified)
+- **Centralized Engine (`js/notifications-manager.js`)**:
+  - Singleton engine (`window.dezanNotificationEngine`) with auto-mounting into header action bars before the theme toggle.
+  - Role-specific contextual intelligence supporting three distinct dashboards:
+    1. **Admin HQ (`admin-portal.html`, `admin-orders.html`)**:
+       - Notification categories: New Orders, Free Quote Appraisals, Client Revisions, Digitizer Deliverables Submitted for QA, Payments Received.
+       - Metadata: Displays client name, company, order value ($), and turnaround requirements.
+       - Actions: "Assign Digitizer", "Appraise Quote", "Review Revision", "QA & Release", "View Invoice".
+    2. **Digitizer Studio (`worker-portal.html`, `worker-tasks.html`)**:
+       - Notification categories: New Tasks Assigned, Stitch Revisions, Priority/Rush Deadlines, QA Approvals.
+       - **Strict Zero-PII & Zero-Pricing Guarantee**: Client names, emails, phones, and commercial amounts are 100% masked from digitizer notification cards. Displays only sanitized work order numbers, placement, sizing, machine format requirements, and stitch density calibrations.
+       - Actions: "Open Workbench", "Inspect Specs", "View Archive".
+    3. **Client Portal (`client-portal.html`, `client-orders.html`)**:
+       - Notification categories: Order In Production, Deliverables Ready for Download, Custom Quote Appraisal Ready, Revision In Progress, Payment Receipts.
+       - Actions: "Download Files", "Track Progress", "Review & Pay", "View Order".
+- **Zero Bleed-Through & 100% Solid Opacity (`styles.css` & `js/notifications-manager.js`)**:
+  - Panel background is engineered with 100% solid opaque `#ffffff` in light mode and `#12100c` in dark luxury mode (`background-color: #ffffff !important;`) with elevated `z-index: 100 !important;`.
+  - Fixed translucent bleed-through where underlying table headers (`& PAYMENT STATUS WORKER DISPATCH`), page buttons, and order cards bled through into the dropdown.
+  - Added `#dezan-notification-container.is-open { z-index: 100 !important; }` and elevated parent `<header>` to `z-index: 70` when panel is open.
+  - Added dynamic scroll reset `scrollTop = 0` on panel open to prevent the top notification card from clipping.
+- **Every Single Button Fully Functional & Verified**:
+  - **Header Controls**:
+    - Sound toggle button: Interactive volume_up / volume_off state persisted in `localStorage['dezan_notif_sound']`.
+    - Mark all as read button: Instantly transitions all unread notifications to read, clears badge, and updates count to "All caught up".
+    - Close button: Smoothly dismisses the panel and restores header z-index.
+  - **Notification Card Controls**:
+    - Primary Action Button:
+      - "Assign Digitizer": Pre-fills and opens `#assign-modal` directly on `admin-orders.html`.
+      - "Appraise Quote": Pre-fills and opens `#set-quote-price-modal` for quotes (`QUO-4769`).
+      - "Review Revision": Pre-fills and opens `#admin-revision-modal` with client revision notes (`ORD-8837`).
+      - "Open Workbench": Directly opens `#task-details-modal` on `worker-tasks.html` with target task preloaded.
+      - "Download Files" / "Track Progress": Directly opens `#order-details-modal` on `client-orders.html`.
+    - Read/Unread Toggle Button (`.notif-mark-btn`): Flips read state, recalculates unread badge counter, and updates card styling without closing the panel.
+    - Dismiss/Delete Button (`.notif-delete-btn`): Removes card with instant re-indexing and count update.
+  - **Filter Tabs**:
+    - Segmented filter pills (`All`, `Unread`, and role contextual tabs `Orders`, `Revisions`, `Quotes`, `In Production`, `Files Ready`) dynamically filter cards without page reloads.
+  - **Footer Controls**:
+    - `+ Test Alert` button: Generates realistic mock order notification tailored to the active role with Web Audio chime.
+    - `Clear Read` button: Purges all read notifications in one click, keeping the inbox tidy.
+- **Automated Verification**:
+  - Comprehensive automated Playwright test suite `tests/notifications.test.js`: **47 passed, 0 failed** across all 4 test suites (Admin HQ, Digitizer Studio, Client Portal, Mobile Viewport).
+  - Multi-viewport screenshots captured and verified:
+    - `scratch/screenshots/admin-notification-panel-desktop.png` (zero bleed-through, 100% solid opacity, pristine typography).
+    - `scratch/screenshots/worker-notification-panel-desktop.png` (workbench modal activation, zero-PII masking).
+    - `scratch/screenshots/client-notification-panel-desktop.png` (order details modal activation).
+    - `scratch/screenshots/client-notification-panel-mobile.png` (iPhone 390x844, zero horizontal overflow, $\ge 44$px touch targets).
+
+---
+
+### 35.6 Digitizer Studio 5-Stage & Client Portal 6-Stage Architecture & Breathing Room System
+- **User Requirements & Context**:
+  - Extend the visual distinction, color theming, and stage isolation established in `admin-orders.html` to both **Digitizer Studio** (`worker-portal.html`, `worker-tasks.html`) and **Client Portal** (`client-portal.html`, `client-orders.html`) so that every dashboard provides crystal-clear visual hierarchy, distinct stage color palettes, and easy navigation without cramped or cluttered lists.
+- **Digitizer Studio Engine (`worker-portal.html`, `worker-tasks.html`, `worker-workspace.css`, `js/worker-workspace.js`)**:
+  1. **5 Distinct Stages (Strictly Omitting Quotes & Commercial PII)**:
+     - **All orders**: Slate neutral (`bg-[#f1f5f9] text-[#1e293b]`, active `bg-[#0f172a] text-white`)
+     - **New Orders**: Warm Amber (`bg-[#fef3c7] text-[#92400e]`, active `bg-[#d97706] text-white`)
+     - **Revisions**: Royal Violet / Purple rework queue (`bg-[#f3e8ff] text-[#6b21a8]`, active `bg-[#9333ea] text-white`)
+     - **In production**: Technical Sapphire Blue (`bg-[#dbeafe] text-[#1e40af]`, active `bg-[#2563eb] text-white`)
+     - **Completed**: Fresh Emerald Green (`bg-[#dcfce7] text-[#166534]`, active `bg-[#16a34a] text-white`)
+  2. **Digitizer Privacy & Zero-PII Constraint**:
+     - Quotes (`QUO-*`), client names, email addresses, phone numbers, company names, and commercial dollar pricing ($) are strictly stripped and excluded from all digitizer tasks and views.
+  3. **Breathing Room Container (`.stage-sections-flow`)**:
+     - Wrapped stage subsections inside `.stage-sections-flow` container with `28px` container flex gap + `28px` margin fallback (total `56px` optical gap between adjacent stage card surfaces).
+     - Each `.stage-sub-section` is an independent rounded card surface (`bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 rounded-2xl shadow-xs overflow-hidden`).
+  4. **Interactive Stage Scoping**:
+     - Clicking any stage pill cleanly isolates that specific stage subsection (`hidden: false`) while immediately hiding all other stage subsections (`hidden: true`). Selecting "All orders" restores the continuous flow of all stage subsections.
+  5. **Card Visual Distinction (`task-theme-*`)**:
+     - `task-theme-new`: Amber border-l-4 and warm subtle tint.
+     - `task-theme-revision`: Royal purple border-l-4 and violet subtle tint.
+     - `task-theme-production`: Sapphire blue border-l-4 and blue subtle tint.
+     - `task-theme-completed`: Emerald green border-l-4 and green subtle tint.
+- **Client Portal Engine (`client-portal.html`, `client-orders.html`, `client-workspace.css`, `js/client-workspace.js`)**:
+  1. **6 Distinct Stages (Complete Customer Lifecycle)**:
+     - **All activity / orders**: Slate neutral (`bg-[#f1f5f9] text-[#1e293b]`, active `bg-[#0f172a] text-white`)
+     - **In production**: Technical Sapphire Blue (`bg-[#dbeafe] text-[#1e40af]`, active `bg-[#2563eb] text-white`)
+     - **Quotes & Estimates**: Dedicated Sky Blue / Cyan (`bg-[#e0f2fe] text-[#0369a1]`, active `bg-[#0284c7] text-white`)
+     - **Revisions**: Royal Violet / Purple rework queue (`bg-[#f3e8ff] text-[#6b21a8]`, active `bg-[#9333ea] text-white`)
+     - **Payment Due**: Coral Rose (`bg-[#ffe4e6] text-[#9f1239]`, active `bg-[#e11d48] text-white`)
+     - **Completed / Delivered**: Fresh Emerald Green (`bg-[#dcfce7] text-[#166534]`, active `bg-[#16a34a] text-white`)
+  2. **Breathing Room Container (`.stage-sections-flow`)**:
+     - Wrapped customer stages into `.stage-sections-flow` container with `56px` optical gap between card surfaces across both Dashboard (`client-portal.html`) and Orders (`client-orders.html`):
+       - `#stage-client-production` / `#section-open-orders`
+       - `#stage-client-quotes` / `#section-quotes`
+       - `#stage-client-revisions` / `#section-revisions`
+       - `#stage-client-due` / `#section-due-orders`
+       - `#stage-client-completed` / `#section-completed-orders`
+  3. **Interactive Stage Scoping**:
+     - Clicking any stage pill (`.client-dist-pill` / `.client-filter-pill`) isolates the corresponding section and hides non-matching sections.
+     - Live pill counters (`#client-pill-count-*` and `#client-dash-pill-*`) accurately report order volume per stage.
+  4. **Card Visual Distinction (`order-theme-*`)**:
+     - `order-theme-production`: Blue border-l-4 (`border-l-blue-500 bg-blue-50/40 dark:bg-blue-950/20`)
+     - `order-theme-quote`: Sky blue border-l-4 (`border-l-sky-500 bg-sky-50/45 dark:bg-sky-950/20`)
+     - `order-theme-revision`: Purple border-l-4 (`border-l-purple-500 bg-purple-50/45 dark:bg-purple-950/20`)
+     - `order-theme-due`: Rose border-l-4 (`border-l-rose-500 bg-rose-50/45 dark:bg-rose-950/20`)
+     - `order-theme-completed`: Emerald border-l-4 (`border-l-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20`)
+  5. **Empty Database Demonstration Fallbacks**:
+     - Added `getClientFallbackOrders()` and `getFallbackOrders()` with rich multi-stage orders ensuring first-time demo clients experience all 5 stages immediately out-of-the-box.
+- **Automated Multi-Viewport Verification (`scripts/verify_digitizer_and_client_flow.js`)**:
+  - Tested across Desktop (1440x900) and Mobile iPhone (390x844).
+  - Digitizer Studio: All 4 stage subsections found, optical gap confirmed at exactly `56.0px` (`PASS: YES`), tab isolation confirmed (Revisions isolated, others hidden).
+  - Client Orders: All 6 stage pills found, all 5 stage subsections found, optical gap confirmed at exactly `56.0px` (`PASS: YES`), tab isolation confirmed (Quotes isolated, others hidden; Production isolated, others hidden).
+  - Client Dashboard: All 6 stage pills found, all 5 stage subsections found, optical gap confirmed at exactly `56.0px` (`PASS: YES`), tab isolation confirmed.
+  - Visual screenshots saved to artifact directory:
+    - `digitizer_studio_all_orders_desktop.png` & `digitizer_studio_mobile.png`
+    - `client_orders_all_desktop.png`, `client_orders_quotes_isolated.png`, `client_orders_mobile.png`
+    - `client_dashboard_all_desktop.png`, `client_dashboard_quotes_isolated.png`, `client_dashboard_mobile.png`
+
+### 35.7 Digitizer Studio Bento Grid & Table Architecture, Lightbox Preview, Specs Modal & Client Revision Picture Attachment
+- **User Requirements & Context**:
+  1. *"Why order boxes are so big in digitzer dashboard, it should be like in admin, bith grid and list."* -> Bloated order cards in Digitizer Studio (`worker-portal.html`) reduced to sleek, compact Bento cards (~220px) matching `admin-orders.html`, with dual Grid (Cards) and Table (List) layout switcher.
+  2. *"he can preview and view more details"* -> Digitizer can preview original artwork directly in an in-dashboard lightbox and view complete sanitized engineering specifications & customer notes in a technical specs modal.
+  3. *"also client can attach picturw with instruction for revision"* -> Client can attach photos/screenshots of physical sew-out defects or marked-up artwork alongside their revision instructions in Client Portal (`client-portal.html` and `client-orders.html`), viewable by both digitizer and admin.
+- **Digitizer Studio Architecture (`worker-portal.html`, `js/worker-workspace.js`)**:
+  1. **Compact Bento Cards Grid View (`renderDigitizerOrderCard`)**:
+     - Card height constrained to ~220px with crisp 2-column or 3-column auto-flow grid (`grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5`).
+     - Contains Order ID, Turnaround / Rush badge, Design Name, Placement & Size, Format & Fabric pills, and stage border color (`border-l-4`).
+     - Includes in-card artwork preview button and single-row bottom toolbar with `Details` and `Attach Deliverables` buttons.
+     - Revision cards feature high-visibility purple callout with customer feedback snippet and defect sew-out photo chip.
+     - **Strict PII & Price Masking**: Client name, email, phone, and commercial dollar pricing are 100% masked and excluded.
+  2. **Structured Table List View (`renderDigitizerOrderTableRow`)**:
+     - 8 clean columns: `ORDER #`, `DESIGN & SERVICE`, `PLACEMENT & SIZE`, `FORMATS`, `FABRIC`, `STATUS`, `TURNAROUND`, `ACTIONS`.
+     - Stage-themed `border-l-4` indicating order state (Amber = New, Purple = Revision, Blue = Production, Green = Completed).
+     - Compact single-line action buttons with zero wrapping.
+  3. **Density & Layout Switcher**:
+     - Toggle between Cards (Grid) and Table (List) via `#digitizer-layout-toggle-grid` and `#digitizer-layout-toggle-table`.
+     - Layout state persisted across sessions via `localStorage.getItem('dezan_digitizer_layout')`.
+  4. **In-Dashboard Artwork Lightbox (`openDigitizerArtworkPreview`, `closeDigitizerArtworkPreview`)**:
+     - Dark luxury lightbox overlay (`#digitizer-artwork-preview-modal`) with dark checkerboard canvas.
+     - Supports PNG, JPG, WEBP, and PDF preview with zoom, download button, counter, and keyboard shortcuts (Left/Right arrows, Escape).
+     - Non-previewable vector/source formats (AI, EPS, CDR, PSD, DST) display a clean fallback card with direct download CTA.
+  5. **Technical Work Order Specs Modal (`openTaskDetailsModal`, `closeTaskDetailsModal`)**:
+     - Sanitized engineering parameters: Placement, Exact Dimensions, Fabric Type, Machine Formats, 3D Puff / Options.
+     - Wilcom ES calibration standards: Underlay sequence, Stitch density (0.40mm), Pull compensation (0.17-0.22mm), Needle recommendation (75/11 Sharp/Ballpoint).
+     - Customer production notes & client stitch-out revision notes with click-to-zoom defect photos.
+     - Includes direct "Attach Deliverables" trigger button.
+  6. **Dedicated Production Deliverables Upload Modal (`openDeliverableUploadModal`, `closeDigitizerUploadModal`)**:
+     - Centered high-contrast modal with drag-and-drop dropzone and file browser.
+     - Live QA Checklist checking for required files: PDF Worksheet (`.pdf`), JPG Preview (`.jpg`/`.png`), and requested machine formats (`.dst`, `.pes`, etc.), with `.EMB` source file optional.
+     - Submit button unlocks only when all required deliverable file formats are attached.
+- **Client Revision Picture Attachment Engine (`client-portal.html`, `client-orders.html`, `js/client-workspace.js`)**:
+  1. **Drag-and-Drop Photo Upload Dropzone**:
+     - Integrated into `#revision-request-modal` in both `client-portal.html` and `client-orders.html`.
+     - Supports drag-and-drop (`ondragover`, `ondrop`) and file browser selection (`accept="image/*"`).
+     - Displays live thumbnail preview (`#stitch-out-preview-card` / `#revision-photo-preview-card`) with filename, filesize, and remove button.
+  2. **Persistence & Safe Routing**:
+     - File is uploaded to InsForge storage / base64 data URI and persisted inside `stitch_out_photos` on the order record.
+     - Order status transitions to `revision_requested` and broadcasts `order_revision_requested` event.
+     - Digitizer Studio immediately displays the revision card with defect photo chip, clickable to open full-resolution zoom modal.
+  3. **Client Orders Drawer Integration**:
+     - Added prominent "Request Revision" action button (`#drawer-request-revision-btn`) inside `#order-details-modal` on completed/delivered orders.
+- **Visual QA Verification (Playwright Multi-Viewport Audit)**:
+  - Verified across Desktop (1512x982) and Mobile (390x844).
+  - Screenshots confirmed:
+    - `digitizer_studio_grid_fullpage.png`: Compact ~220px Bento cards across all 4 stages with artwork preview and action buttons.
+    - `digitizer_studio_table_fullpage.png`: Structured 8-column table with stage-themed left borders.
+    - `digitizer_artwork_preview_lightbox.png`: Clean in-dashboard lightbox with dark canvas, format badges, and download CTA.
+    - `digitizer_details_specs_modal.png`: Sanitized technical parameters, Wilcom calibrations, and revision notes.
+    - `digitizer_deliverables_upload_modal.png`: Deliverables upload modal with QA checklist and dropzone.
+    - `digitizer_studio_mobile_grid.png` & `digitizer_studio_mobile_table.png`: Mobile-responsive grid and table with bottom navigation bar.
+    - `client_revision_modal_photo.png`: Client revision modal with live defect photo thumbnail preview.
+    - `client_orders_drawer_revision_btn.png`: Client orders specification drawer featuring "Request Revision" CTA.
+
+### 35.8 Full Dashboard Suite Harmonization: Respective Stage Border Themes, Universal Density Switchers, and Exact Date & Time
+- **User Mandates**:
+  1. *"you worked on Studio Queue but not on other pages, always work on all. work on whole dashboard accoedinly. continue"* -> Applied the unified compact Bento card, density switcher (`Cards` vs `Table`), exact Date & Time (`Sep 9, 2026 · 09:30 AM`), and dedicated `[ Details ]` button across ALL pages in the entire dashboard suite (Worker, Admin, and Client portals).
+  2. *"give brown boarder to this as well, give to every type of order with respective its colour theme"* -> Every order card and table row across ALL dashboard pages has a distinct `border-2` (and `border-l-4` in tables) matching its respective stage color theme:
+     - **New Orders / Assigned Work**: Warm brown / amber border (`border-2 border-amber-500/85 dark:border-primary/85 shadow-xs ring-1 ring-amber-500/20 hover:border-amber-600 dark:hover:border-primary`).
+     - **Stitch Revisions**: Purple border (`border-2 border-purple-500/85 dark:border-purple-400/80 shadow-xs ring-1 ring-purple-500/20 hover:border-purple-600`).
+     - **In Production**: Blue border (`border-2 border-blue-500/85 dark:border-blue-400/80 shadow-xs ring-1 ring-blue-500/20 hover:border-blue-600`).
+     - **Completed / Delivered**: Emerald green border (`border-2 border-emerald-500/85 dark:border-emerald-400/80 shadow-xs ring-1 ring-emerald-500/20 hover:border-emerald-600`).
+     - **Quotes & Estimates**: Sky blue border (`border-2 border-sky-500/85 dark:border-sky-400/80 shadow-xs ring-1 ring-sky-500/20 hover:border-sky-600`).
+     - **Payment Due / Unpaid**: Coral rose border (`border-2 border-rose-500/85 dark:border-rose-400/80 shadow-xs ring-1 ring-rose-500/20 hover:border-rose-600`).
+- **Comprehensive Page Coverage**:
+  1. **Worker Dashboard Suite**:
+     - `worker-portal.html` (Studio Queue): Bento cards with `border-2` stage themes, universal Date & Time, Details button, Artwork preview lightbox, Density Switcher (Cards & Table).
+     - `worker-tasks.html` (Active Tasks Workbench): Bento cards with `border-2` stage themes, universal Date & Time, Details button, single-row artwork chip, density switcher (Cards & Table), stage-colored table rows.
+     - `worker-archive.html` (Completed Deliverables Archive): Bento cards with `border-2 border-emerald-500/85`, universal Date & Time, Details button, Files button, density switcher (Cards & Table), emerald table rows.
+  2. **Client Dashboard Suite**:
+     - `client-portal.html` (Client Dashboard): Orders with `border-2` stage themes, exact Date & Time, details and action buttons.
+     - `client-orders.html` (Client Orders): Bento cards with `border-2` stage themes, exact Date & Time, Details button, density switcher (Cards & Table), stage-colored table rows.
+     - `client-quotes.html` (Client Quotes): Cards with `border-2 border-sky-500/85`, exact Date & Time, View Details button, Convert to Order CTA.
+     - `client-invoices.html` (Client Invoices): Cards with `border-2` (emerald for paid, rose for unpaid), exact Date & Time, View Receipt and Pay Now CTAs.
+  3. **Admin Dashboard Suite**:
+     - `admin-orders.html` (Admin All Orders): Bento cards with `border-2` stage themes, exact Date & Time, Details button, action buttons, density switcher (Cards & Table), stage-colored table rows (`border-l-4`).
+     - `admin-portal.html` (Admin Dashboard Overview): Stage charts, order activity trends, payment overview, and quick links to orders.
+- **Mobile Responsiveness Verification**:
+  - Strict 390px viewport check verified with zero horizontal overflow (`scrollWidth === clientWidth === 390px`).
+  - Touch targets $\ge 44$px.
+  - Fixed mobile bottom navigation docks on all portals.
+
+### 35.9 100% Visual & Functional Parity: Bento Cards & Table List Options Across All Dashboard Pages
+- **User Mandates**:
+  1. *"what happened to this, fix this first, also check every dashboard if there is any kind of ui problem fix it."*
+  2. *"you only worked on My Orders Page Not on other, all pages should have cards like this and list option"*
+- **Architectural Implementation**:
+  1. **`client-portal.html` (Main Client Overview)**:
+     - Embedded density switcher (`[ ⊞ Cards ] [ ☰ Table ]`) in the controls toolbar.
+     - Modernized all 5 order stages (`#active-orders-container`, `#quotes-container`, `#revisions-orders-container`, `#due-orders-container`, `#completed-orders-container`) to dynamically render either the 3-column Bento Grid (~220px cards with stage borders) or the 7-column Table with `border-l-4` indicators.
+  2. **`client-quotes.html` (Custom Quotes)**:
+     - Added toolbar with Filter pills (`All Quotes`, `Under Review`, `Ready to Order`), Density Switcher (`[ ⊞ Cards ] [ ☰ Table ]`), and Search input.
+     - Upgraded `renderQuotesView()` in `js/client-workspace.js` to render 3-column Bento cards in Grid mode and 7-column table in Table mode.
+     - Integrated Quote Specification Drawer (`#order-details-modal`).
+  3. **`client-invoices.html` (Invoices & Billing)**:
+     - Added toolbar with Filter pills (`All Invoices`, `Settled / Paid`, `Payment Due`), Density Switcher (`[ ⊞ Cards ] [ ☰ Table ]`), and Search input.
+     - Upgraded `renderInvoicesView()` in `js/client-workspace.js` to render itemized Bento cards with `border-2` (emerald for paid, rose for due) and a clean 6-column invoice table with `border-l-4` stage indicators.
+  4. **Universal State Synchronization (`localStorage.getItem('dezan_client_layout')`)**:
+     - Synchronized density toggle across `client-portal.html`, `client-orders.html`, `client-quotes.html`, and `client-invoices.html`. Switching layout mode on any page immediately updates and persists across all views.
+- **Visual QA Verification (Playwright Multi-Viewport)**:
+  - Desktop (1440x900) & Mobile (390x844):
+    - `client_quotes_cards_desktop.png`: 3-column Bento grid with sky blue borders and convert CTAs.
+    - `client_quotes_table_desktop.png`: 7-column structured table with `border-l-4` stage indicators.
+    - `client_quotes_mobile_390.png`: Mobile-optimized, zero horizontal overflow (`scrollWidth === clientWidth === 390px`).
+    - `client_invoices_cards_desktop.png`: Itemized cards with emerald / rose borders and Pay / Receipt CTAs.
+    - `client_invoices_table_desktop.png`: 6-column itemized invoice table with `border-l-4` indicators.
+    - `client_invoices_mobile_390.png`: Mobile-optimized, zero horizontal overflow.
+    - `client_orders_cards_desktop.png`: Bento cards across all 5 order stages.
+    - `client_orders_table_desktop.png`: Structured table layout.
+    - `client_portal_cards_desktop.png`: Overview dashboard with Bento cards.
+    - `client_portal_table_desktop.png`: Overview dashboard with table view.
+
+### 35.11 Single "View Order" Button & Consolidated Modals Across All 3 Dashboards (Worker, Client, Admin)
+- **User Mandate**:
+  1. *"i dont want two button like details and view order, i want only view order, dont give two button to any card"*
+  2. *"both content should be in view order button, also work end to end on all dashboards, everu button should be workable"*
+- **Architecture & Technical Decisions**:
+  1. **Strictly Single Action Button on Every Card (Zero Dual Buttons)**:
+     - Eliminated the dual-button combination (`[ Details ⌄ ]` and `[ View Order → ]`) from cards across all three workspaces:
+       - **Worker Dashboard** (`js/worker-workspace.js`, `worker-tasks.html`, `worker-portal.html`)
+       - **Client Dashboard** (`js/client-workspace.js`, `client-orders.html`, `client-quotes.html`, `client-portal.html`, `client-invoices.html`)
+       - **Admin Dashboard** (`js/admin-workspace.js`, `admin-orders.html`, `admin-portal.html`)
+     - Eliminated the in-place accordion tray (`.card-extended-tray`) from resting cards to keep them ultra-clean, compact, and scannable.
+     - Card Action Bar layout standard:
+       - Left: `<button ...><span>View Order</span><span class="material-symbols-outlined ...">arrow_forward</span></button>`
+       - Right: Primary conversion/workflow CTA (`[ Attach Deliverables ]`, `[ 💳 Pay ]`, `[ Assign ]`, `[ Convert ]`, `[ Files ]`).
+  2. **Consolidation of All Extended Details into the `View Order` Modal**:
+     - All content previously split between card trays and separate views is now consolidated inside the dedicated `View Order` modal for each role:
+       - **Deliverable Requirements Badge**: Unified requirement strip (`DELIVER: DST · JPG · PDF | Optional: EMB`) with zero redundant format text.
+       - **Specifications Grid**: Placement, dimensions, target fabric, turnaround priority with rush badges.
+       - **Sanitized Client Instructions**: Client special notes with technical physics/density boilerplate (`Standard commercial digitizing standards apply...`) permanently removed.
+       - **Customer Uploaded Artwork**: Complete files list with interactive thumbnail preview, lightbox viewer trigger, and direct download buttons.
+       - **Completed Deliverables**: Full list of machine stitch files with format tags and instant download buttons.
+  3. **End-to-End Interactivity & Functional Workable Buttons**:
+     - **Worker Workbench**:
+       - `[ View Order → ]` opens `#task-details-modal`.
+       - Inside modal, `[ Attach Deliverables ]` opens `#deliverable-upload-modal` with Gmail-style multi-file dropzone and live extension detection checklist.
+     - **Client Workbench**:
+       - `[ View Order → ]` opens `#order-details-modal` or `#client-invoice-modal`.
+       - Inside modal, `[ Pay Now ]` triggers checkout invoice settlement modal; `[ Request Revision ]` triggers `#revision-request-modal` with photo attachment and correction instructions.
+     - **Admin Workbench**:
+       - `[ View Order → ]` opens `#admin-order-details-modal`.
+       - Inside modal, `[ Assign Digitizer ]` opens `#assign-modal` (elevated to `z-[60]` for seamless stacking above the details dialog).
+       - Inside modal, `[ Client History ]` opens client booking history; `[ Tax Invoice ]` triggers printable invoice.
+  4. **Automated Playwright Multi-Viewport Verification (`scripts/verify_single_view_order_cards.js`)**:
+     - 100% test pass rate across Desktop (1440x900) and Mobile (390x844).
+     - Verified:
+       - 0 cards with "Details" button across all dashboards.
+       - 0 `.card-extended-tray` elements on initial card load.
+       - 100% of cards feature single `[ View Order → ]` button alongside the primary action CTA.
+       - Modals open with consolidated specifications, artwork attachments, and deliverables.
+       - Secondary triggers (`Attach Deliverables`, `Request Revision`, `Assign Digitizer`, `Close`) execute and dismiss cleanly without errors.
+     - Generated visual artifacts:
+       - `worker_single_button_cards_desktop.png`
+       - `worker_single_button_cards_mobile.png`
+       - `worker_view_order_modal_verified.png`
+       - `worker_modal_deliverables_upload_verified.png`
+       - `client_single_button_cards_desktop.png`
+       - `client_single_button_cards_mobile.png`
+       - `client_view_order_modal_verified.png`
+       - `client_portal_view_order_modal_verified.png`
+       - `client_modal_revision_request_verified.png`
+       - `admin_single_button_cards_desktop.png`
+       - `admin_single_button_cards_mobile.png`
+       - `admin_view_order_modal_verified.png`
+       - `admin_modal_assign_digitizer_verified.png`
+
+

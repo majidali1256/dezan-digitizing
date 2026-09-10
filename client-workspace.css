@@ -127,28 +127,432 @@ body[data-client-page] header a {
 }
 
 /* ===== FILTER TABS ===== */
+/* ===== 6-STAGE DISTRIBUTION PILLS SYSTEM ===== */
+.client-dist-pill,
 .client-filter-pill {
-    padding: 6px 14px;
-    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border-radius: 9999px;
     font-size: 12px;
     font-weight: 700;
-    transition: all 0.15s ease;
+    line-height: 1;
+    border: 1px solid transparent;
     cursor: pointer;
-    border: 1px solid var(--client-border);
-    background-color: var(--client-surface);
-    color: var(--client-muted);
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    user-select: none;
+    text-decoration: none;
 }
 
+.client-dist-pill:hover,
 .client-filter-pill:hover {
-    color: var(--client-text);
-    border-color: var(--client-gold);
+    transform: translateY(-1px);
 }
 
-.client-filter-pill.active {
-    background-color: var(--client-gold);
+.client-dist-pill:active,
+.client-filter-pill:active {
+    transform: translateY(0);
+}
+
+/* 1. All Orders: Neutral Slate */
+.client-dist-pill.pill-all,
+.client-filter-pill.pill-all {
+    background: #f1f5f9;
+    color: #1e293b;
+    border-color: #cbd5e1;
+}
+.client-dist-pill.pill-all > span:last-child,
+.client-filter-pill.pill-all > span:last-child {
+    background: #e2e8f0;
     color: #0f172a;
-    border-color: var(--client-gold);
-    box-shadow: 0 2px 6px rgba(212, 175, 53, 0.25);
+    padding: 1px 7px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 800;
+}
+.client-dist-pill.pill-all[aria-pressed="true"],
+.client-filter-pill.pill-all.active {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #0f172a;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.25);
+}
+.client-dist-pill.pill-all[aria-pressed="true"] > span:last-child,
+.client-filter-pill.pill-all.active > span:last-child {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+.dark .client-dist-pill.pill-all,
+.dark .client-filter-pill.pill-all {
+    background: rgba(30, 41, 59, 0.7);
+    color: #e2e8f0;
+    border-color: rgba(148, 163, 184, 0.25);
+}
+.dark .client-dist-pill.pill-all > span:last-child,
+.dark .client-filter-pill.pill-all > span:last-child {
+    background: rgba(51, 65, 85, 0.8);
+    color: #f8fafc;
+}
+.dark .client-dist-pill.pill-all[aria-pressed="true"],
+.dark .client-filter-pill.pill-all.active {
+    background: #334155;
+    color: #ffffff;
+    border-color: #475569;
+}
+.dark .client-dist-pill.pill-all[aria-pressed="true"] > span:last-child,
+.dark .client-filter-pill.pill-all.active > span:last-child {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+/* 2. In Production: Technical Sapphire Blue */
+.client-dist-pill.pill-production,
+.client-filter-pill.pill-production {
+    background: #dbeafe;
+    color: #1e40af;
+    border-color: #bfdbfe;
+}
+.client-dist-pill.pill-production > span:last-child,
+.client-filter-pill.pill-production > span:last-child {
+    background: #bfdbfe;
+    color: #1e3a8a;
+    padding: 1px 7px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 800;
+}
+.client-dist-pill.pill-production[aria-pressed="true"],
+.client-filter-pill.pill-production.active {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #1d4ed8;
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.35);
+}
+.client-dist-pill.pill-production[aria-pressed="true"] > span:last-child,
+.client-filter-pill.pill-production.active > span:last-child {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+.dark .client-dist-pill.pill-production,
+.dark .client-filter-pill.pill-production {
+    background: rgba(30, 58, 138, 0.35);
+    color: #bfdbfe;
+    border-color: rgba(59, 130, 246, 0.4);
+}
+.dark .client-dist-pill.pill-production > span:last-child,
+.dark .client-filter-pill.pill-production > span:last-child {
+    background: rgba(59, 130, 246, 0.3);
+    color: #dbeafe;
+}
+.dark .client-dist-pill.pill-production[aria-pressed="true"],
+.dark .client-filter-pill.pill-production.active {
+    background: #3b82f6;
+    color: #ffffff;
+    border-color: #2563eb;
+}
+.dark .client-dist-pill.pill-production[aria-pressed="true"] > span:last-child,
+.dark .client-filter-pill.pill-production.active > span:last-child {
+    background: rgba(15, 23, 42, 0.2);
+    color: #ffffff;
+}
+
+/* 3. Quotes & Estimates: Dedicated Sky Blue / Cyan */
+.client-dist-pill.pill-quotes,
+.client-filter-pill.pill-quotes {
+    background: #e0f2fe;
+    color: #0369a1;
+    border-color: #bae6fd;
+}
+.client-dist-pill.pill-quotes > span:last-child,
+.client-filter-pill.pill-quotes > span:last-child {
+    background: #bae6fd;
+    color: #0c4a6e;
+    padding: 1px 7px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 800;
+}
+.client-dist-pill.pill-quotes[aria-pressed="true"],
+.client-filter-pill.pill-quotes.active {
+    background: #0284c7;
+    color: #ffffff;
+    border-color: #0369a1;
+    box-shadow: 0 3px 10px rgba(2, 132, 199, 0.35);
+}
+.client-dist-pill.pill-quotes[aria-pressed="true"] > span:last-child,
+.client-filter-pill.pill-quotes.active > span:last-child {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+.dark .client-dist-pill.pill-quotes,
+.dark .client-filter-pill.pill-quotes {
+    background: rgba(14, 116, 144, 0.35);
+    color: #bae6fd;
+    border-color: rgba(6, 182, 212, 0.4);
+}
+.dark .client-dist-pill.pill-quotes > span:last-child,
+.dark .client-filter-pill.pill-quotes > span:last-child {
+    background: rgba(6, 182, 212, 0.3);
+    color: #e0f2fe;
+}
+.dark .client-dist-pill.pill-quotes[aria-pressed="true"],
+.dark .client-filter-pill.pill-quotes.active {
+    background: #0ea5e9;
+    color: #0f172a;
+    border-color: #0284c7;
+}
+.dark .client-dist-pill.pill-quotes[aria-pressed="true"] > span:last-child,
+.dark .client-filter-pill.pill-quotes.active > span:last-child {
+    background: rgba(15, 23, 42, 0.2);
+    color: #0f172a;
+}
+
+/* 4. Revisions: Royal Violet / Purple */
+.client-dist-pill.pill-revisions,
+.client-filter-pill.pill-revisions {
+    background: #f3e8ff;
+    color: #6b21a8;
+    border-color: #e9d5ff;
+}
+.client-dist-pill.pill-revisions > span:last-child,
+.client-filter-pill.pill-revisions > span:last-child {
+    background: #e9d5ff;
+    color: #581c87;
+    padding: 1px 7px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 800;
+}
+.client-dist-pill.pill-revisions[aria-pressed="true"],
+.client-filter-pill.pill-revisions.active {
+    background: #9333ea;
+    color: #ffffff;
+    border-color: #7e22ce;
+    box-shadow: 0 3px 10px rgba(147, 51, 234, 0.35);
+}
+.client-dist-pill.pill-revisions[aria-pressed="true"] > span:last-child,
+.client-filter-pill.pill-revisions.active > span:last-child {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+.dark .client-dist-pill.pill-revisions,
+.dark .client-filter-pill.pill-revisions {
+    background: rgba(126, 34, 206, 0.35);
+    color: #e9d5ff;
+    border-color: rgba(168, 85, 247, 0.4);
+}
+.dark .client-dist-pill.pill-revisions > span:last-child,
+.dark .client-filter-pill.pill-revisions > span:last-child {
+    background: rgba(168, 85, 247, 0.3);
+    color: #f3e8ff;
+}
+.dark .client-dist-pill.pill-revisions[aria-pressed="true"],
+.dark .client-filter-pill.pill-revisions.active {
+    background: #a855f7;
+    color: #ffffff;
+    border-color: #9333ea;
+}
+.dark .client-dist-pill.pill-revisions[aria-pressed="true"] > span:last-child,
+.dark .client-filter-pill.pill-revisions.active > span:last-child {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+/* 5. Payment Due: Coral Rose */
+.client-dist-pill.pill-due,
+.client-filter-pill.pill-due {
+    background: #ffe4e6;
+    color: #9f1239;
+    border-color: #fecdd3;
+}
+.client-dist-pill.pill-due > span:last-child,
+.client-filter-pill.pill-due > span:last-child {
+    background: #fecdd3;
+    color: #881337;
+    padding: 1px 7px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 800;
+}
+.client-dist-pill.pill-due[aria-pressed="true"],
+.client-filter-pill.pill-due.active {
+    background: #e11d48;
+    color: #ffffff;
+    border-color: #be123c;
+    box-shadow: 0 3px 10px rgba(225, 29, 72, 0.35);
+}
+.client-dist-pill.pill-due[aria-pressed="true"] > span:last-child,
+.client-filter-pill.pill-due.active > span:last-child {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+.dark .client-dist-pill.pill-due,
+.dark .client-filter-pill.pill-due {
+    background: rgba(159, 18, 57, 0.35);
+    color: #fecdd3;
+    border-color: rgba(244, 63, 94, 0.4);
+}
+.dark .client-dist-pill.pill-due > span:last-child,
+.dark .client-filter-pill.pill-due > span:last-child {
+    background: rgba(244, 63, 94, 0.3);
+    color: #ffe4e6;
+}
+.dark .client-dist-pill.pill-due[aria-pressed="true"],
+.dark .client-filter-pill.pill-due.active {
+    background: #f43f5e;
+    color: #ffffff;
+    border-color: #e11d48;
+}
+.dark .client-dist-pill.pill-due[aria-pressed="true"] > span:last-child,
+.dark .client-filter-pill.pill-due.active > span:last-child {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+/* 6. Completed / Delivered: Fresh Emerald Green */
+.client-dist-pill.pill-completed,
+.client-filter-pill.pill-completed {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #bbf7d0;
+}
+.client-dist-pill.pill-completed > span:last-child,
+.client-filter-pill.pill-completed > span:last-child {
+    background: #bbf7d0;
+    color: #14532d;
+    padding: 1px 7px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 800;
+}
+.client-dist-pill.pill-completed[aria-pressed="true"],
+.client-filter-pill.pill-completed.active {
+    background: #16a34a;
+    color: #ffffff;
+    border-color: #15803d;
+    box-shadow: 0 3px 10px rgba(22, 163, 74, 0.35);
+}
+.client-dist-pill.pill-completed[aria-pressed="true"] > span:last-child,
+.client-filter-pill.pill-completed.active > span:last-child {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+.dark .client-dist-pill.pill-completed,
+.dark .client-filter-pill.pill-completed {
+    background: rgba(22, 101, 52, 0.35);
+    color: #bbf7d0;
+    border-color: rgba(34, 197, 94, 0.4);
+}
+.dark .client-dist-pill.pill-completed > span:last-child,
+.dark .client-filter-pill.pill-completed > span:last-child {
+    background: rgba(34, 197, 94, 0.3);
+    color: #dcfce7;
+}
+.dark .client-dist-pill.pill-completed[aria-pressed="true"],
+.dark .client-filter-pill.pill-completed.active {
+    background: #22c55e;
+    color: #0f172a;
+    border-color: #16a34a;
+}
+.dark .client-dist-pill.pill-completed[aria-pressed="true"] > span:last-child,
+.dark .client-filter-pill.pill-completed.active > span:last-child {
+    background: rgba(15, 23, 42, 0.2);
+    color: #0f172a;
+}
+
+/* ===== STAGE SECTIONS FLOW & BREATHING ROOM ===== */
+.stage-sections-flow {
+    background: #f8fafc;
+    padding: 24px;
+    border-radius: 20px;
+    border: 1px solid var(--client-border);
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin-bottom: 24px;
+}
+.dark .stage-sections-flow {
+    background: rgba(15, 23, 42, 0.6);
+    border-color: var(--client-border);
+}
+
+.stage-sub-section {
+    background: var(--client-surface);
+    border: 1px solid var(--client-border);
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    overflow: hidden;
+    scroll-margin-top: 152px;
+}
+.stage-sub-section.hidden {
+    display: none !important;
+}
+.stage-sub-section:not(.hidden) + .stage-sub-section:not(.hidden) {
+    margin-top: 28px;
+}
+.stage-sub-section > div:first-child {
+    background: var(--client-surface);
+    border-color: var(--client-border);
+    padding: 18px 22px;
+}
+
+/* Client Order Card Stage Themes & Accents */
+.order-theme-new {
+    border-left: 4px solid #f59e0b !important;
+    background: rgba(254, 243, 199, 0.25) !important;
+}
+.dark .order-theme-new {
+    border-left-color: #fbbf24 !important;
+    background: rgba(245, 158, 11, 0.08) !important;
+}
+
+.order-theme-production {
+    border-left: 4px solid #3b82f6 !important;
+    background: rgba(219, 234, 254, 0.25) !important;
+}
+.dark .order-theme-production {
+    border-left-color: #60a5fa !important;
+    background: rgba(59, 130, 246, 0.08) !important;
+}
+
+.order-theme-quote {
+    border-left: 4px solid #0284c7 !important;
+    background: rgba(224, 242, 254, 0.35) !important;
+}
+.dark .order-theme-quote {
+    border-left-color: #38bdf8 !important;
+    background: rgba(14, 116, 144, 0.12) !important;
+}
+
+.order-theme-revision {
+    border-left: 4px solid #a855f7 !important;
+    background: rgba(243, 232, 255, 0.35) !important;
+    box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.2) !important;
+}
+.dark .order-theme-revision {
+    border-left-color: #c084fc !important;
+    background: rgba(168, 85, 247, 0.1) !important;
+}
+
+.order-theme-due {
+    border-left: 4px solid #f43f5e !important;
+    background: rgba(255, 228, 230, 0.35) !important;
+    box-shadow: 0 0 0 1px rgba(244, 63, 94, 0.2) !important;
+}
+.dark .order-theme-due {
+    border-left-color: #fb7185 !important;
+    background: rgba(244, 63, 94, 0.1) !important;
+}
+
+.order-theme-completed {
+    border-left: 4px solid #10b981 !important;
+    background: rgba(220, 252, 231, 0.25) !important;
+}
+.dark .order-theme-completed {
+    border-left-color: #34d399 !important;
+    background: rgba(16, 185, 129, 0.08) !important;
 }
 
 /* ===== ORDER CARDS & DRAWERS ===== */

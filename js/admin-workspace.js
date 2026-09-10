@@ -136,27 +136,49 @@
         }
 
         /**
-         * Filter / isolate a specific stage or view all 4 continuous stages
+         * Filter / isolate a specific stage or view all continuous stages
          */
         function setStageScope(scopeKey) {
             currentStageScope = scopeKey;
-            const stageIds = ['stage-unassigned-sub', 'stage-in-progress-sub', 'stage-incomplete-sub', 'stage-completed-sub'];
+            window.currentStageScope = scopeKey;
 
-            stageIds.forEach(id => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                if (scopeKey === 'all' || scopeKey === id) {
-                    el.classList.remove('hidden');
-                } else {
-                    el.classList.add('hidden');
-                }
-            });
+            // Target all stage sub-sections dynamically so none can ever escape
+            const sections = document.querySelectorAll('.stage-sub-section');
+            if (sections && sections.length > 0) {
+                sections.forEach(el => {
+                    if (scopeKey === 'all' || el.id === scopeKey) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                });
+            } else {
+                const stageIds = ['stage-new-sub', 'stage-revisions-sub', 'stage-incomplete-sub', 'stage-in-progress-sub', 'stage-completed-sub'];
+                stageIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    if (scopeKey === 'all' || scopeKey === id) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                });
+            }
 
             document.querySelectorAll('.stage-jump-pill').forEach(btn => {
-                btn.setAttribute('aria-pressed', String(btn.dataset.stageTarget === scopeKey));
+                const target = btn.dataset.stageTarget;
+                const isSelected = (scopeKey === 'all' && target === 'all') || (target === scopeKey);
+                btn.setAttribute('aria-pressed', String(isSelected));
             });
             renderAdminOrders();
+
+            // If scrolled far down below orders, bring top of orders section into view
+            const ordersSection = document.getElementById('master-orders-section');
+            if (ordersSection && window.scrollY > ordersSection.offsetTop + 150) {
+                ordersSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
+        window.setStageScope = setStageScope;
 
         function setFilter(filterName) {
             if (adminPage !== 'orders') { window.location.href = adminPages.orders + '?stage=' + encodeURIComponent(filterName); return; }
@@ -164,19 +186,19 @@
             const select = document.getElementById('filter-status');
             if (select) select.value = filterName;
 
-            if (filterName === 'pending_review' || filterName === 'revision_requested') {
-                jumpToStage('stage-unassigned-sub');
+            if (filterName === 'pending_review') {
+                setStageScope('stage-new-sub');
+            } else if (filterName === 'revision_requested') {
+                setStageScope('stage-revisions-sub');
             } else if (filterName === 'in_progress') {
-                jumpToStage('stage-in-progress-sub');
-            } else if (filterName === 'unpaid') {
-                jumpToStage('stage-incomplete-sub');
+                setStageScope('stage-in-progress-sub');
+            } else if (filterName === 'unpaid' || filterName === 'quote') {
+                setStageScope('stage-incomplete-sub');
             } else if (filterName === 'completed') {
-                jumpToStage('stage-completed-sub');
+                setStageScope('stage-completed-sub');
             } else {
                 setStageScope('all');
             }
-
-            renderAdminOrders();
         }
 
         function setFilterAndScroll(filterName) {
@@ -329,16 +351,42 @@
             updateAdminAutoAssignUI();
             if (adminPage === 'orders') {
                 const params = new URLSearchParams(window.location.search);
-                if (params.has('q')) {
-                    document.getElementById('admin-search-input').value = params.get('q');
-                    handleSearchInput();
+                if (params.has('q') || params.has('search')) {
+                    const searchVal = params.get('q') || params.get('search');
+                    const searchInput = document.getElementById('admin-search-input');
+                    if (searchInput) {
+                        searchInput.value = searchVal;
+                        handleSearchInput();
+                    }
                 }
                 if (params.has('stage')) {
                     const stage = params.get('stage');
-                    if (['unassigned','in-progress','incomplete','completed'].some(key => stage === 'stage-' + key + '-sub')) setStageScope(stage);
+                    if (['new','revisions','in-progress','incomplete','completed','unassigned'].some(key => stage === 'stage-' + key + '-sub')) setStageScope(stage);
                     else setFilter(stage);
                 }
                 if (params.get('focus') === 'search') focusAdminSearch();
+
+                // Direct modal deep-linking from notifications
+                if (params.has('assign')) {
+                    const orderNum = params.get('assign');
+                    setTimeout(() => { if (typeof openAssignModal === 'function') openAssignModal(orderNum); }, 350);
+                }
+                if (params.has('quote')) {
+                    const orderNum = params.get('quote');
+                    setTimeout(() => { if (typeof openSetQuotePriceModal === 'function') openSetQuotePriceModal(orderNum); }, 350);
+                }
+                if (params.has('revision')) {
+                    const orderNum = params.get('revision');
+                    setTimeout(() => { if (typeof openAdminRevisionModal === 'function') openAdminRevisionModal(orderNum); }, 350);
+                }
+                if (params.has('invoice')) {
+                    const orderNum = params.get('invoice');
+                    setTimeout(() => { if (typeof openInvoiceModal === 'function') openInvoiceModal(orderNum); }, 350);
+                }
+                if (params.has('order')) {
+                    const orderNum = params.get('order');
+                    setTimeout(() => { if (typeof openAdminOrderDetailsModal === 'function') openAdminOrderDetailsModal(orderNum); }, 350);
+                }
             }
 
             // Register Realtime Listener for Instant Admin Updates
@@ -468,55 +516,96 @@
         }
 
         /**
-         * Render Master Orders across 4 dedicated operational stages
+         * Render Master Orders across dedicated operational stages:
+         * 1. New Orders (Awaiting Digitizer Dispatch)
+         * 2. Revisions (Active Client Revision Requests)
+         * 3. Quotes & Payment Due (Pending payment or quote approval)
+         * 4. In Production (Actively being digitized / in QA)
+         * 5. Completed (Delivered and verified archive)
          */
         function renderAdminOrders() {
             const allOrders = window.insforgeClient.getOrders();
             const searchInput = (document.getElementById('admin-search-input')?.value || '').toLowerCase().trim();
 
-            // 4. Stage 4: Completed Production Archive
-            // Criteria: completed status
-            const stage4Orders = allOrders.filter(o => o.status === 'completed');
+            const isQuote = (o) => Boolean(
+                o.is_quote === true ||
+                o.status === 'quote_requested' ||
+                o.status === 'quote_ready' ||
+                (typeof o.order_number === 'string' && o.order_number.toUpperCase().startsWith('QUO-')) ||
+                o.order_type === 'quote' ||
+                o.service_type === 'quote' ||
+                o.payment_method === 'Pending Quote' ||
+                (o.status === 'pending' && (!o.price || Number(o.price) === 0))
+            );
 
-            // 3. Stage 3: Incomplete Bookings, Payment Due & Quotes
-            // Criteria: Unpaid or pending checkout, or quotes (mutually exclusive from Stage 4)
-            const stage3Orders = allOrders.filter(o => {
-                return o.status !== 'completed' && o.status !== 'cancelled' && (o.payment_status === 'unpaid' || o.payment_status === 'pending' || o.is_quote === true || o.status === 'quote_requested');
+            const isPaymentDue = (o) => Boolean(
+                o.payment_status === 'unpaid' ||
+                o.payment_status === 'pending' ||
+                o.payment_status === 'payment_due'
+            );
+
+            // 5. Stage 5: Completed Production Archive
+            const stageCompletedOrders = allOrders.filter(o => o.status === 'completed');
+
+            // 2. Stage 2: Revisions (urgent rework requests)
+            const stageRevisionOrders = allOrders.filter(o => {
+                if (stageCompletedOrders.includes(o) || o.status === 'cancelled') return false;
+                return (o.status === 'revision_requested' || o.is_revision === true) && !isQuote(o);
             });
 
-            // 1. Stage 1: Action Required / Needs Assignment & Revisions
-            // Criteria: Paid, not completed, not cancelled, and needs worker or active revision
-            const stage1Orders = allOrders.filter(o => {
-                if (stage4Orders.includes(o) || stage3Orders.includes(o) || o.status === 'cancelled') return false;
-                const isNeedsWorker = !o.assigned_digitizer_id || o.status === 'pending_review';
-                const isRevision = o.status === 'revision_requested';
-                return isNeedsWorker || isRevision;
+            // 3. Stage 3: Quotes & Incomplete Payment Due (dedicated stage for all quotes and unpaid bookings)
+            const stageQuotesOrders = allOrders.filter(o => {
+                if (stageCompletedOrders.includes(o) || stageRevisionOrders.includes(o) || o.status === 'cancelled') return false;
+                return isQuote(o) || isPaymentDue(o);
             });
 
-            // 2. Stage 2: Active Pipeline / In Production
-            // Criteria: Paid, assigned, no revision requested, not completed
-            const stage2Orders = allOrders.filter(o => {
-                if (stage4Orders.includes(o) || stage3Orders.includes(o) || stage1Orders.includes(o) || o.status === 'cancelled') return false;
+            // 1. Stage 1: New Incoming Orders (paid, confirmed bookings awaiting digitizer dispatch; strictly NO quotes and NO unpaid)
+            const stageNewOrders = allOrders.filter(o => {
+                if (stageCompletedOrders.includes(o) || stageRevisionOrders.includes(o) || stageQuotesOrders.includes(o) || o.status === 'cancelled') return false;
+                return (!o.assigned_digitizer_id || o.status === 'pending_review' || o.status === 'new' || o.status === 'pending');
+            });
+
+            // 4. Stage 4: In Production (paid, assigned, actively being digitized)
+            const stageProductionOrders = allOrders.filter(o => {
+                if (stageCompletedOrders.includes(o) || stageRevisionOrders.includes(o) || stageQuotesOrders.includes(o) || stageNewOrders.includes(o) || o.status === 'cancelled') return false;
                 return true;
             });
 
-            renderAdminInsights(allOrders, [stage1Orders, stage2Orders, stage3Orders, stage4Orders]);
+            // Compatibility union for legacy unassigned stage references
+            const stageUnassignedUnion = [...stageNewOrders, ...stageRevisionOrders];
+
+            renderAdminInsights(allOrders, [stageNewOrders, stageRevisionOrders, stageQuotesOrders, stageProductionOrders, stageCompletedOrders]);
 
             // Update Header & Pill Counts
-            const totalCount = stage1Orders.length + stage2Orders.length + stage3Orders.length + stage4Orders.length;
+            const totalCount = stageNewOrders.length + stageRevisionOrders.length + stageQuotesOrders.length + stageProductionOrders.length + stageCompletedOrders.length;
             if (document.getElementById('pill-count-all')) document.getElementById('pill-count-all').textContent = totalCount;
-            if (document.getElementById('pill-count-unassigned')) document.getElementById('pill-count-unassigned').textContent = stage1Orders.length;
-            if (document.getElementById('pill-count-in-progress')) document.getElementById('pill-count-in-progress').textContent = stage2Orders.length;
-            if (document.getElementById('pill-count-unpaid')) document.getElementById('pill-count-unpaid').textContent = stage3Orders.length;
-            if (document.getElementById('pill-count-completed')) document.getElementById('pill-count-completed').textContent = stage4Orders.length;
+            if (document.getElementById('pill-count-new')) document.getElementById('pill-count-new').textContent = stageNewOrders.length;
+            if (document.getElementById('pill-count-revisions')) document.getElementById('pill-count-revisions').textContent = stageRevisionOrders.length;
+            if (document.getElementById('pill-count-unassigned')) document.getElementById('pill-count-unassigned').textContent = stageUnassignedUnion.length;
+            if (document.getElementById('pill-count-unpaid')) document.getElementById('pill-count-unpaid').textContent = stageQuotesOrders.length;
+            if (document.getElementById('pill-count-in-progress')) document.getElementById('pill-count-in-progress').textContent = stageProductionOrders.length;
+            if (document.getElementById('pill-count-completed')) document.getElementById('pill-count-completed').textContent = stageCompletedOrders.length;
             if (document.getElementById('quick-badge-orders')) document.getElementById('quick-badge-orders').textContent = totalCount;
 
-            if (document.getElementById('badge-stage-unassigned')) document.getElementById('badge-stage-unassigned').textContent = `${stage1Orders.length} Orders`;
-            if (document.getElementById('badge-stage-in-progress')) document.getElementById('badge-stage-in-progress').textContent = `${stage2Orders.length} In Progress`;
-            if (document.getElementById('badge-stage-incomplete')) document.getElementById('badge-stage-incomplete').textContent = `${stage3Orders.length} Pending Payment`;
-            if (document.getElementById('badge-stage-completed')) document.getElementById('badge-stage-completed').textContent = `${stage4Orders.length} Completed`;
+            // Section Badges
+            if (document.getElementById('badge-stage-new')) document.getElementById('badge-stage-new').textContent = `${stageNewOrders.length} Orders`;
+            if (document.getElementById('badge-stage-revisions')) document.getElementById('badge-stage-revisions').textContent = `${stageRevisionOrders.length} Orders`;
+            if (document.getElementById('badge-stage-unassigned')) document.getElementById('badge-stage-unassigned').textContent = `${stageUnassignedUnion.length} Orders`;
+            if (document.getElementById('badge-stage-incomplete')) document.getElementById('badge-stage-incomplete').textContent = `${stageQuotesOrders.length} Quotes & Unpaid`;
+            if (document.getElementById('badge-stage-in-progress')) document.getElementById('badge-stage-in-progress').textContent = `${stageProductionOrders.length} In Progress`;
+            if (document.getElementById('badge-stage-completed')) document.getElementById('badge-stage-completed').textContent = `${stageCompletedOrders.length} Completed`;
 
-            // Instant Search Filtering across all 4 stages
+            // Auto-assign batch button in Stage 1
+            const assignAllBtn = document.getElementById('assign-all-pending-btn');
+            if (assignAllBtn) {
+                if (stageNewOrders.length > 0) {
+                    assignAllBtn.classList.remove('hidden');
+                } else {
+                    assignAllBtn.classList.add('hidden');
+                }
+            }
+
+            // Instant Search Filtering across all stages
             const filterBySearch = (orders) => {
                 if (!searchInput) return orders;
                 return orders.filter(o => {
@@ -530,20 +619,42 @@
             };
 
             const scopedOrders = {
-                'stage-unassigned-sub': stage1Orders, 'stage-in-progress-sub': stage2Orders,
-                'stage-incomplete-sub': stage3Orders, 'stage-completed-sub': stage4Orders
+                'stage-new-sub': stageNewOrders,
+                'stage-revisions-sub': stageRevisionOrders,
+                'stage-unassigned-sub': stageUnassignedUnion,
+                'stage-incomplete-sub': stageQuotesOrders,
+                'stage-in-progress-sub': stageProductionOrders,
+                'stage-completed-sub': stageCompletedOrders
             };
-            const visibleOrders = scopedOrders[currentStageScope] || [...stage1Orders, ...stage2Orders, ...stage3Orders, ...stage4Orders];
+            const visibleOrders = scopedOrders[currentStageScope] || [...stageNewOrders, ...stageRevisionOrders, ...stageQuotesOrders, ...stageProductionOrders, ...stageCompletedOrders];
             const result = document.getElementById('admin-search-results');
-            if (result) result.textContent = `${filterBySearch(visibleOrders).length} orders${searchInput ? ' matching your search' : ''} · ${currentStageScope === 'all' ? 'All stages' : 'Selected stage'}`;
+            if (result) {
+                const stageLabels = {
+                    'all': 'All stages',
+                    'stage-new-sub': 'New Orders',
+                    'stage-revisions-sub': 'Revisions',
+                    'stage-incomplete-sub': 'Quotes & payment',
+                    'stage-in-progress-sub': 'In production',
+                    'stage-completed-sub': 'Completed'
+                };
+                const currentLabel = stageLabels[currentStageScope] || 'All stages';
+                const count = filterBySearch(visibleOrders).length;
+                if (currentStageScope === 'all') {
+                    result.textContent = `${count} orders across all stages${searchInput ? ' matching your search' : ''}`;
+                } else {
+                    result.textContent = `Showing only ${currentLabel} (${count} order${count === 1 ? '' : 's'})${searchInput ? ' matching your search' : ''}`;
+                }
+            }
 
             // Render each stage independently with custom empty states
-            renderStageSection('unassigned', filterBySearch(stage1Orders), searchInput, 'All incoming orders have assigned digitizers, with no active revision requests pending.');
-            renderStageSection('in-progress', filterBySearch(stage2Orders), searchInput, 'No orders actively in production undergoing digitization at this moment.');
-            renderStageSection('incomplete', filterBySearch(stage3Orders), searchInput, 'All client balances and invoices are settled. No incomplete bookings or unpaid quotes.');
-            renderStageSection('completed', filterBySearch(stage4Orders), searchInput, 'No completed production orders archived yet.');
+            renderStageSection('new', filterBySearch(stageNewOrders), searchInput, 'All incoming orders have assigned digitizers.');
+            renderStageSection('revisions', filterBySearch(stageRevisionOrders), searchInput, 'No active client revision requests pending.');
+            renderStageSection('incomplete', filterBySearch(stageQuotesOrders), searchInput, 'All client balances and invoices are settled. No incomplete bookings or unpaid quotes.');
+            renderStageSection('in-progress', filterBySearch(stageProductionOrders), searchInput, 'No orders actively in production undergoing digitization at this moment.');
+            renderStageSection('completed', filterBySearch(stageCompletedOrders), searchInput, 'No completed production orders archived yet.');
 
-            // Compatibility Bridge for Legacy Selectors (#admin-orders-tbody)
+            // Compatibility Bridge for Legacy Selectors (#stage-unassigned-cards and #admin-orders-tbody)
+            renderStageSection('unassigned', filterBySearch(stageUnassignedUnion), searchInput, 'All incoming orders have assigned digitizers, with no active revision requests pending.');
             const legacyTbody = document.getElementById('admin-orders-tbody');
             if (legacyTbody) {
                 const combined = filterBySearch(allOrders);
@@ -589,8 +700,11 @@
                         : emptyMessage;
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="7" class="text-center py-8 text-slate-500 dark:text-slate-400 font-medium text-xs">
-                                ${msg}
+                            <td colspan="7" class="text-center py-10 px-4 text-slate-500 dark:text-slate-400 font-medium text-xs bg-slate-50/40 dark:bg-slate-900/30">
+                                <div class="flex flex-col items-center justify-center gap-1.5 py-2">
+                                    <span class="material-symbols-outlined text-xl text-slate-400 dark:text-slate-500">inbox</span>
+                                    <span>${msg}</span>
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -622,7 +736,7 @@
                     type: 'completed',
                     label: 'Completed',
                     rowClass: 'bg-emerald-50/70 hover:bg-emerald-100/75 dark:bg-emerald-950/25 dark:hover:bg-emerald-900/40 border-l-4 border-l-emerald-500 dark:border-l-emerald-400',
-                    cardClass: 'border-emerald-300 dark:border-emerald-500/40 bg-emerald-50/40 dark:bg-emerald-950/25 ring-1 ring-emerald-500/20',
+                    cardClass: 'border-2 border-emerald-500/85 dark:border-emerald-400/80 shadow-xs ring-1 ring-emerald-500/20 hover:border-emerald-600',
                     orderIdClass: 'text-emerald-800 dark:text-emerald-300',
                     accentBadge: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/40'
                 };
@@ -633,7 +747,7 @@
                     type: 'revision',
                     label: 'Revision',
                     rowClass: 'bg-purple-50/80 hover:bg-purple-100/85 dark:bg-purple-950/30 dark:hover:bg-purple-900/45 border-l-4 border-l-purple-500 dark:border-l-purple-400',
-                    cardClass: 'border-purple-300 dark:border-purple-500/50 bg-purple-50/40 dark:bg-purple-950/30 ring-1 ring-purple-500/30',
+                    cardClass: 'border-2 border-purple-500/85 dark:border-purple-400/80 shadow-xs ring-1 ring-purple-500/20 hover:border-purple-600',
                     orderIdClass: 'text-purple-900 dark:text-purple-300',
                     accentBadge: 'bg-purple-100 text-purple-900 dark:bg-purple-500/25 dark:text-purple-200 border-purple-300 dark:border-purple-500/40'
                 };
@@ -644,7 +758,7 @@
                     type: 'quote',
                     label: 'Quote',
                     rowClass: 'bg-sky-50/75 hover:bg-sky-100/80 dark:bg-sky-950/25 dark:hover:bg-sky-900/40 border-l-4 border-l-sky-500 dark:border-l-sky-400',
-                    cardClass: 'border-sky-300 dark:border-sky-500/40 bg-sky-50/40 dark:bg-sky-950/25 ring-1 ring-sky-500/20',
+                    cardClass: 'border-2 border-sky-500/85 dark:border-sky-400/80 shadow-xs ring-1 ring-sky-500/20 hover:border-sky-600',
                     orderIdClass: 'text-sky-800 dark:text-sky-300',
                     accentBadge: 'bg-sky-100 text-sky-900 dark:bg-sky-500/20 dark:text-sky-300 border-sky-300 dark:border-sky-500/35'
                 };
@@ -655,7 +769,7 @@
                     type: 'unpaid',
                     label: 'Payment Due',
                     rowClass: 'bg-rose-50/75 hover:bg-rose-100/80 dark:bg-rose-950/25 dark:hover:bg-rose-900/40 border-l-4 border-l-rose-500 dark:border-l-rose-400',
-                    cardClass: 'border-rose-300 dark:border-rose-500/40 bg-rose-50/40 dark:bg-rose-950/25 ring-1 ring-rose-500/20',
+                    cardClass: 'border-2 border-rose-500/85 dark:border-rose-400/80 shadow-xs ring-1 ring-rose-500/20 hover:border-rose-600',
                     orderIdClass: 'text-rose-800 dark:text-rose-300',
                     accentBadge: 'bg-rose-100 text-rose-900 dark:bg-rose-500/20 dark:text-rose-300 border-rose-300 dark:border-rose-500/35'
                 };
@@ -666,7 +780,7 @@
                     type: 'in_progress',
                     label: 'In Production',
                     rowClass: 'bg-blue-50/70 hover:bg-blue-100/75 dark:bg-blue-950/25 dark:hover:bg-blue-900/40 border-l-4 border-l-blue-500 dark:border-l-blue-400',
-                    cardClass: 'border-blue-300 dark:border-blue-500/40 bg-blue-50/40 dark:bg-blue-950/25 ring-1 ring-blue-500/20',
+                    cardClass: 'border-2 border-blue-500/85 dark:border-blue-400/80 shadow-xs ring-1 ring-blue-500/20 hover:border-blue-600',
                     orderIdClass: 'text-blue-800 dark:text-blue-300',
                     accentBadge: 'bg-blue-100 text-blue-900 dark:bg-blue-500/20 dark:text-blue-300 border-blue-300 dark:border-blue-500/35'
                 };
@@ -677,7 +791,7 @@
                 type: 'new_work',
                 label: 'New Work',
                 rowClass: 'bg-amber-50/75 hover:bg-amber-100/80 dark:bg-amber-950/25 dark:hover:bg-amber-900/40 border-l-4 border-l-amber-500 dark:border-l-amber-400',
-                cardClass: 'border-amber-300 dark:border-amber-500/40 bg-amber-50/40 dark:bg-amber-950/25 ring-1 ring-amber-500/20',
+                cardClass: 'border-2 border-amber-500/85 dark:border-primary/85 shadow-xs ring-1 ring-amber-500/20 hover:border-amber-600 dark:hover:border-primary',
                 orderIdClass: 'text-amber-800 dark:text-primary',
                 accentBadge: 'bg-amber-100 text-amber-950 dark:bg-amber-500/20 dark:text-amber-300 border-amber-300 dark:border-amber-500/35'
             };
@@ -759,168 +873,133 @@
             `;
         }
 
+        // Global card expansion helper for admin workspace
+        if (!window.toggleOrderCardExpand) {
+            window.toggleOrderCardExpand = function(orderNumber, btn) {
+                const card = document.getElementById(`admin-card-${orderNumber}`)
+                    || document.getElementById(`client-card-${orderNumber}`)
+                    || document.getElementById(`digitizer-card-${orderNumber}`)
+                    || (btn ? btn.closest('.digitizer-bento-card, .client-order-card, .admin-order-card') : null);
+                const tray = document.getElementById(`tray-${orderNumber}`) || (card ? card.querySelector('.card-extended-tray') : null);
+                if (!tray) return;
+
+                const isHidden = tray.classList.contains('hidden');
+                if (isHidden) {
+                    tray.classList.remove('hidden');
+                    if (btn) {
+                        btn.setAttribute('aria-expanded', 'true');
+                        const textEl = btn.querySelector('.btn-text') || btn.querySelector('span:not(.material-symbols-outlined)');
+                        const iconEl = btn.querySelector('.material-symbols-outlined');
+                        if (textEl) textEl.textContent = 'Less';
+                        if (iconEl) iconEl.textContent = 'expand_less';
+                    }
+                } else {
+                    tray.classList.add('hidden');
+                    if (btn) {
+                        btn.setAttribute('aria-expanded', 'false');
+                        const textEl = btn.querySelector('.btn-text') || btn.querySelector('span:not(.material-symbols-outlined)');
+                        const iconEl = btn.querySelector('.material-symbols-outlined');
+                        if (textEl) textEl.textContent = 'Details';
+                        if (iconEl) iconEl.textContent = 'expand_more';
+                    }
+                }
+            };
+        }
+
         /**
-         * Modular Visual Bento Card Renderer
+         * Modular Visual Bento Card Renderer (Matching Digitizer Studio Compact Bento Standard ~220px)
          */
         function renderAdminOrderCard(order, stageKey) {
             const isPaid = order.payment_status === 'paid';
             const isRevision = order.status === 'revision_requested';
             const isUnassigned = !order.assigned_digitizer_id;
             const isRush = order.turnaround_speed === 'rush';
+            const isQuote = order.is_quote || (order.order_number && order.order_number.startsWith('QUO-')) || order.status === 'quote_requested';
             const theme = getOrderColorTheme(order);
+            const safeOrderNumber = String(order.order_number || '').replace(/-/g, '&#8209;');
+            const orderDt = formatOrderDateTime(order.created_at);
+
+            const rushBadge = isRush
+                ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 shrink-0 whitespace-nowrap shadow-2xs"><span class="material-symbols-outlined text-xs text-rose-600 dark:text-rose-400">bolt</span> ⚡ RUSH · 5–8h</span>`
+                : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0 whitespace-nowrap"><span class="material-symbols-outlined text-[11px] text-slate-500">schedule</span> Standard · 12–24h</span>`;
 
             const assignedText = order.assigned_digitizer_name
-                ? `<span class="inline-flex items-center gap-1 font-semibold text-slate-800 dark:text-slate-200"><span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">badge</span> ${order.assigned_digitizer_name}</span>`
+                ? `<span class="inline-flex items-center gap-1 font-bold text-slate-800 dark:text-slate-200"><span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">badge</span> ${order.assigned_digitizer_name.split('(')[0].trim()}</span>`
                 : '<span class="inline-flex items-center gap-1 font-bold text-amber-800 dark:text-amber-400"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Unassigned</span>';
 
+            const artworkFiles = getOrderArtworkFiles(order);
+            const primaryArt = artworkFiles[0] || { name: 'artwork.png', url: order.artwork_url || '#' };
+            const artExt = (getFileExtension(primaryArt.name) || getFileExtension(primaryArt.url) || 'ART').toUpperCase();
+            const clientNotes = (order.special_instructions || order.instructions || order.notes || '').replace(/Standard commercial digitizing standards apply.*$/i, '').trim();
+            const deliverables = order.deliverables || [];
+            const hasDeliverables = Array.isArray(deliverables) && deliverables.length > 0;
+
             return `
-                <div class="admin-order-card p-5 rounded-2xl ${theme.cardClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
+                <div id="admin-card-${order.order_number}" class="admin-order-card digitizer-bento-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark ${theme.cardClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
+                    <!-- Collapsed Resting Card (~220px) -->
                     <div>
-                        <!-- Header Bar: ID, Date, Status & Payment Badges -->
-                        <div class="flex items-start justify-between gap-2 mb-3">
+                        <!-- Header Bar: ID, Date & Time, Status & Payment Badges -->
+                        <div class="flex items-start justify-between gap-2 mb-2">
                             <div>
-                                <span class="font-mono text-xs font-black ${theme.orderIdClass} tracking-wide whitespace-nowrap" style="white-space: nowrap !important; word-break: keep-all !important;">${String(order.order_number || '').replace(/-/g, '&#8209;')}</span>
-                                <span class="text-[11px] text-slate-500 block font-medium">${order.created_at ? formatTimeAgo(order.created_at) : 'Recent'}</span>
+                                <span class="px-2.5 py-1 rounded-lg border font-mono text-xs font-black ${theme.orderIdClass} tracking-wide whitespace-nowrap select-all inline-block">#${safeOrderNumber}</span>
+                                <div class="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium mt-1 leading-tight flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[11px] text-slate-400 dark:text-slate-500">schedule</span>
+                                    <span>${orderDt.date}</span>
+                                    <span class="text-slate-300 dark:text-slate-600">·</span>
+                                    <span class="font-bold text-slate-700 dark:text-slate-300">${orderDt.time}</span>
+                                </div>
                             </div>
-                            <div class="flex flex-col items-end gap-1.5">
+                            <div class="flex flex-col items-end gap-1">
                                 ${getStatusBadge(order.status)}
-                                ${getPaymentBadge(order.payment_status)}
+                                ${isRush ? rushBadge : getPaymentBadge(order.payment_status)}
                             </div>
                         </div>
 
                         <!-- Project Information -->
-                        <div class="mb-3">
-                            <div class="flex items-start justify-between gap-2">
-                                <h4 class="font-black text-slate-900 dark:text-white text-sm group-hover:text-amber-800 dark:group-hover:text-primary transition-colors leading-tight">${order.project_name}</h4>
-                                ${isRush ? `
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 shrink-0 whitespace-nowrap shadow-2xs" title="Expedited 5-8h delivery (+$5 rush fee included)">
-                                        <span class="material-symbols-outlined text-xs text-rose-600 dark:text-rose-400">bolt</span> ⚡ RUSH · 5–8 HOURS
-                                    </span>
-                                ` : `
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 shrink-0 whitespace-nowrap">
-                                        <span class="material-symbols-outlined text-[11px] text-slate-500">schedule</span> Standard · 12–24 Hours
-                                    </span>
-                                `}
+                        <div class="mb-2">
+                            <h4 class="font-black text-slate-900 dark:text-white text-sm group-hover:text-amber-800 dark:group-hover:text-primary transition-colors leading-snug truncate" title="${order.project_name || 'Custom Design'}">${order.project_name || 'Custom Design'}</h4>
+                            <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                <button type="button" onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="font-bold text-slate-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-primary transition-colors cursor-pointer inline-flex items-center gap-0.5 truncate max-w-[130px]" title="Inspect client history: ${order.client_name} (${order.client_email})">
+                                    <span class="material-symbols-outlined text-xs text-slate-400">person</span>
+                                    <span>${order.client_name}</span>
+                                </button>
+                                <span>·</span>
+                                <span class="font-mono text-[11px]">${assignedText}</span>
                             </div>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">${order.placement || 'Standard'} · ${order.sizing || 'Default Size'}</p>
                             <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-                                ${order.fabric_type ? `<span class="inline-block text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60">Fabric: ${order.fabric_type}</span>` : ''}
-                                ${order.file_format ? `<span class="inline-block text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 font-mono">Format: ${order.file_format}</span>` : ''}
+                                <span class="inline-block text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono">${order.placement || 'Left Chest'} · ${order.sizing || 'Default Size'}</span>
+                                ${order.file_format ? `<span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/30 uppercase">.${order.file_format}</span>` : '<span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/30">.DST</span>'}
                             </div>
                         </div>
 
-                        <!-- STAGE 3 SPECIAL: Outstanding Payment / Quote Alert Box -->
-                        ${(!isPaid || order.is_quote || (order.order_number && order.order_number.startsWith('QUO-'))) ? `
-                            <div class="p-3 rounded-xl ${(order.is_quote || (order.order_number && order.order_number.startsWith('QUO-'))) ? 'bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-500/30' : 'bg-rose-50/90 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/30'} mb-3 flex items-center justify-between text-xs">
-                                <div>
-                                    <span class="text-[10px] font-black uppercase tracking-wider ${(order.is_quote || (order.order_number && order.order_number.startsWith('QUO-'))) ? 'text-blue-800 dark:text-blue-400' : 'text-rose-800 dark:text-rose-400'} block">
-                                        ${(order.is_quote || (order.order_number && order.order_number.startsWith('QUO-'))) ? (order.price ? 'Quote Priced: $' + Number(order.price).toFixed(2) : 'Pending Quote Review') : 'Checkout Unsettled'}
-                                    </span>
-                                    <span class="font-black ${(order.is_quote || (order.order_number && order.order_number.startsWith('QUO-'))) ? 'text-blue-950 dark:text-blue-200' : 'text-rose-950 dark:text-rose-200'}">
-                                        ${(order.is_quote || (order.order_number && order.order_number.startsWith('QUO-'))) ? (order.price ? 'Awaiting client payment' : 'Needs admin pricing estimation') : ('$' + Number(order.price || 0).toFixed(2) + ' due (' + (order.payment_method || 'Invoice') + ')')}
-                                    </span>
-                                </div>
-                                ${(order.is_quote || (order.order_number && order.order_number.startsWith('QUO-'))) ? `
-                                    <button onclick="openSetQuotePriceModal('${order.order_number}')" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-black text-[11px] flex items-center gap-1 shadow-xs cursor-pointer" title="Set or Update Quote Price">
-                                        <span class="material-symbols-outlined text-xs">price_change</span>
-                                        <span>${order.price ? 'Update Price' : 'Give Price'}</span>
-                                    </button>
-                                ` : `
-                                    <button onclick="openPaymentReminderModal('${order.order_number}')" class="px-2 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] flex items-center gap-1 shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Send 1-Click Payment Reminder Email">
-                                        <span class="material-symbols-outlined text-xs">forward_to_inbox</span>
-                                        <span>Remind</span>
-                                    </button>
-                                `}
-                            </div>
-                        ` : ''}
-
-                        <!-- STAGE 1 SPECIAL: Active Revision Request Specs Banner -->
-                        ${isRevision ? `
-                            <div class="p-3 rounded-xl bg-orange-50/90 dark:bg-orange-950/40 border border-orange-300 dark:border-orange-500/40 mb-3 flex items-center justify-between text-xs">
-                                <div>
-                                    <span class="text-[10px] font-black uppercase text-orange-900 dark:text-orange-300 block">Stitch-Out Revision</span>
-                                    <span class="font-semibold text-slate-700 dark:text-slate-300 text-[11px]">Client requested adjustment</span>
-                                </div>
-                                <button onclick="openAdminRevisionModal('${order.order_number}')" class="px-2 py-1 rounded-lg bg-orange-500 hover:bg-orange-600 text-slate-950 font-black text-[11px] flex items-center gap-1 shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                                    <span class="material-symbols-outlined text-xs">rate_review</span>
-                                    <span>Specs</span>
-                                </button>
-                            </div>
-                        ` : ''}
-
-                        <!-- Interactive Client Box (Click to open full historical dossier) -->
-                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-primary/10 dark:border-primary/15 mb-3 text-xs">
-                            <div class="flex items-center justify-between">
-                                <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white hover:text-amber-700 dark:hover:text-primary transition-colors cursor-pointer text-left group/c focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                                    <span class="material-symbols-outlined text-sm text-slate-400 group-hover/c:text-amber-700 dark:group-hover/c:text-primary">person</span>
-                                    <span class="underline decoration-dotted underline-offset-2">${order.client_name}</span>
-                                </button>
-                                <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="text-[10px] font-bold text-amber-700 dark:text-primary flex items-center gap-0.5 hover:underline cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                                    <span>History</span>
-                                    <span class="material-symbols-outlined text-[12px]">history</span>
-                                </button>
-                            </div>
-                            <p class="text-[11px] text-slate-500 ml-5 mt-0.5">${order.client_company || 'Independent'} · ${order.client_email}</p>
-                        </div>
-
-                        <!-- Worker Assignment Chip -->
-                        <div class="mb-3 flex items-center justify-between text-xs px-1">
-                            <span class="text-[10px] font-bold uppercase text-slate-400">Worker:</span>
-                            <div>${assignedText}</div>
-                        </div>
-
-                        <!-- Attachments & Deliverables -->
-                        <div class="flex flex-wrap items-center gap-1.5 mb-4">
-                            ${renderAdminArtworkChips(order)}
-                            ${order.deliverables && order.deliverables.length > 0 ? order.deliverables.map(d => `
-                                <a href="${d.url}" target="_blank" class="inline-flex items-center gap-0.5 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                                    <span class="material-symbols-outlined text-xs">download</span> ${d.format}
-                                </a>
-                            `).join('') : ''}
+                        <!-- Compact Due & Fabric Alert Strip -->
+                        <div class="flex items-center justify-between py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-primary/15 text-[11px] text-slate-600 dark:text-slate-400 mb-1">
+                            <span class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">timer</span>
+                                <span>${isRush ? '⚡ 5–8 Hours' : '12–24 Hours'}</span>
+                            </span>
+                            <span class="text-slate-500 dark:text-slate-400 truncate max-w-[130px] font-medium">Fabric: ${order.fabric_type || 'Pique Polo'}</span>
                         </div>
                     </div>
 
-                    <!-- Actions Toolbar -->
-                    <div class="pt-3 border-t border-primary/15 dark:border-primary/20 flex flex-wrap items-center justify-between gap-2">
-                        <div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase block">Total</span>
-                            <span class="text-base font-black text-slate-900 dark:text-white">$${Number(order.price || 0).toFixed(2)}</span>
-                        </div>
-                        <div class="flex items-center gap-1.5 flex-wrap">
-                            <button onclick="openAdminOrderDetailsModal('${order.order_number}')" class="px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[11px] cursor-pointer inline-flex items-center gap-1 shadow-xs transition-all focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="Inspect complete client specifications, production notes, and artwork">
-                                <span class="material-symbols-outlined text-xs">visibility</span>
-                                <span>Details</span>
-                            </button>
-                            <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="px-3 py-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 font-bold text-[11px] cursor-pointer inline-flex items-center gap-1 shadow-xs focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2" title="View client's complete historical dossier">
-                                <span class="material-symbols-outlined text-xs">history</span>
-                                <span>History</span>
-                            </button>
-                            ${(order.is_quote || (order.order_number && order.order_number.startsWith('QUO-'))) ? `
-                                <button onclick="openSetQuotePriceModal('${order.order_number}')" class="px-3 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/15 text-blue-900 dark:text-blue-300 border border-blue-300 dark:border-blue-500/30 font-black text-[11px] cursor-pointer inline-flex items-center gap-1 shadow-xs" title="Give or update price quote">
+                    <!-- Actions Toolbar (Single View Order Button + Primary CTA) -->
+                    <div class="pt-2.5 border-t border-slate-100 dark:border-primary/10 flex items-center justify-between gap-2 mt-2">
+                        <button type="button" onclick="openAdminOrderDetailsModal('${order.order_number}')" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/15 dark:hover:bg-primary/20 text-slate-800 dark:text-slate-200 hover:text-amber-800 dark:hover:text-primary font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors" title="View order details and files">
+                            <span>View Order</span>
+                            <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">arrow_forward</span>
+                        </button>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-black text-slate-900 dark:text-white mr-1">$${Number(order.price || 0).toFixed(2)}</span>
+                            ${(!order.is_quote && order.status !== 'quote_requested' && !(order.order_number && order.order_number.startsWith('QUO-'))) ? `
+                                <button type="button" onclick="openAssignModal('${order.order_number}')" class="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer" title="Assign or Reassign Digitizer">
+                                    <span class="material-symbols-outlined text-xs">person_add</span>
+                                    <span>${order.assigned_digitizer_id ? 'Reassign' : 'Assign'}</span>
+                                </button>
+                            ` : (order.is_quote || (order.order_number && order.order_number.startsWith('QUO-'))) ? `
+                                <button type="button" onclick="openSetQuotePriceModal('${order.order_number}')" class="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer" title="Set or Update Quote Price">
                                     <span class="material-symbols-outlined text-xs">price_change</span>
                                     <span>${order.price ? 'Update Price' : 'Give Price'}</span>
                                 </button>
-                            ` : ''}
-                            ${isRevision ? `
-                                <button onclick="openAdminRevisionModal('${order.order_number}')" class="px-3 py-2 rounded-lg bg-orange-100 hover:bg-orange-200 dark:bg-orange-500/20 text-orange-950 dark:text-orange-300 border border-orange-300 dark:border-orange-500/40 font-black text-[11px] cursor-pointer inline-flex items-center gap-1 shadow-xs focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                                    <span class="material-symbols-outlined text-xs">rate_review</span>
-                                    <span>Specs</span>
-                                </button>
-                            ` : ''}
-                            ${(!isPaid && !order.is_quote && !(order.order_number && order.order_number.startsWith('QUO-'))) ? `
-                                <button onclick="openPaymentReminderModal('${order.order_number}')" class="px-3 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/15 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 font-bold text-[11px] cursor-pointer inline-flex items-center gap-1 shadow-xs focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                                    <span class="material-symbols-outlined text-xs">forward_to_inbox</span>
-                                    <span>Remind</span>
-                                </button>
-                            ` : ''}
-                            <button onclick="openInvoiceModal('${order.order_number}')" class="px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 font-bold text-[11px] cursor-pointer inline-flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                                <span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">receipt</span>
-                                <span>Invoice</span>
-                            </button>
-                            ${(!order.is_quote && order.status !== 'quote_requested' && !(order.order_number && order.order_number.startsWith('QUO-'))) ? `
-                            <button onclick="openAssignModal('${order.order_number}')" class="px-3 py-2 rounded-lg bg-amber-100 dark:bg-primary/15 hover:bg-amber-200 text-amber-900 dark:text-primary font-bold text-[11px] border border-amber-300 dark:border-primary/30 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-                                ${order.assigned_digitizer_id ? 'Reassign' : 'Assign'}
-                            </button>
                             ` : ''}
                         </div>
                     </div>
@@ -937,6 +1016,7 @@
             const isRevision = order.status === 'revision_requested';
             const isRush = order.turnaround_speed === 'rush';
             const theme = getOrderColorTheme(order);
+            const orderDt = formatOrderDateTime(order.created_at);
             
             // Format worker display (Primary name + secondary specialty subtitle or neat unassigned pill)
             let assignedMarkup = '';
@@ -961,10 +1041,15 @@
 
             return `
                 <tr class="transition-colors ${theme.rowClass}">
-                    <td class="px-4 py-3.5 w-[140px] min-w-[140px] whitespace-nowrap font-mono font-bold">
+                    <td class="px-4 py-3.5 w-[145px] min-w-[145px] whitespace-nowrap font-mono font-bold">
                         <span class="inline-block whitespace-nowrap select-all font-mono font-black ${theme.orderIdClass}" style="white-space: nowrap !important; word-break: keep-all !important; letter-spacing: -0.01em;">
                             ${safeOrderNumber}
                         </span>
+                        <div class="text-[10px] text-slate-500 dark:text-slate-400 font-sans font-medium mt-0.5 leading-tight flex items-center gap-1">
+                            <span>${orderDt.date}</span>
+                            <span class="text-slate-300 dark:text-slate-600">·</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-300">${orderDt.time}</span>
+                        </div>
                     </td>
                     <td class="px-4 py-3.5 w-[180px] min-w-[180px]">
                         <button onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="group/client inline-flex items-center gap-1.5 text-left cursor-pointer hover:text-amber-700 dark:hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
@@ -1539,6 +1624,24 @@
             return new Date(isoString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         }
 
+        /**
+         * Universal Company Date & Time Formatter
+         * Returns explicit readable date and exact time (e.g. Sep 9, 2026 · 09:30 AM)
+         */
+        function formatOrderDateTime(dateVal) {
+            if (!dateVal) return { date: 'Recently', time: 'Just now', full: 'Recently' };
+            const d = new Date(dateVal);
+            if (isNaN(d.getTime())) return { date: 'Recently', time: 'Just now', full: 'Recently' };
+            const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            return {
+                date: dateStr,
+                time: timeStr,
+                full: `${dateStr} · ${timeStr}`
+            };
+        }
+        window.formatOrderDateTime = formatOrderDateTime;
+
         function getStatusBadge(status) {
             switch(status) {
                 case 'completed':
@@ -1863,6 +1966,34 @@ Email: fdezan91@gmail.com`;
                 closeAssignModal();
                 await renderAllAdminData();
                 window.insforgeClient.showToast('Worker Dispatched', `Order ${orderNumber} assigned to ${workerName}.`, 'person_check', 'success');
+
+                // Broadcast live notifications to Digitizer and Client
+                if (window.dezanNotificationEngine) {
+                    window.dezanNotificationEngine.broadcastToRole('digitizer', {
+                        orderId: orderNumber,
+                        type: 'task_assigned',
+                        category: 'assigned',
+                        title: 'New Digitizing Task Assigned',
+                        message: `Order #${orderNumber} assigned to your workbench by Admin. Turnaround 12-24h.`,
+                        meta: 'Active Task · Needle 75/11 · Format: DST, EMB',
+                        actionLabel: 'Open Workbench',
+                        actionType: 'open_task',
+                        accent: 'blue',
+                        icon: 'precision_manufacturing'
+                    });
+                    window.dezanNotificationEngine.broadcastToRole('client', {
+                        orderId: orderNumber,
+                        type: 'in_production',
+                        category: 'production',
+                        title: 'Your Order is Now in Production',
+                        message: `Master digitizer assigned to #${orderNumber}. Stitch simulation in progress.`,
+                        meta: 'In Production · Turnaround 12-24h',
+                        actionLabel: 'Track Progress',
+                        actionType: 'track_order',
+                        accent: 'blue',
+                        icon: 'pending_actions'
+                    });
+                }
             } catch (err) {
                 console.error('Assignment error:', err);
                 alert(`⚠️ Error assigning worker: ${err.message}`);
@@ -2809,8 +2940,8 @@ Email: fdezan91@gmail.com`;
 // Lightweight, accessible charts use the same stage groups as the order queue.
 function renderAdminInsights(orders, stages) {
     if (!document.getElementById('admin-insights')) return;
-    const labels = ['Needs attention', 'In production', 'Quotes & payment', 'Completed'];
-    const keys = ['unassigned', 'in-progress', 'incomplete', 'completed'];
+    const labels = ['New Orders', 'Revisions', 'Quotes & payment', 'In production', 'Completed'];
+    const keys = ['new', 'revisions', 'incomplete', 'in-progress', 'completed'];
     const total = stages.reduce((n, group) => n + group.length, 0);
     document.getElementById('admin-stage-chart').innerHTML = stages.map((group, i) => `
         <button class="admin-bar-row" onclick="openAdminChartStage('stage-${keys[i]}-sub')" aria-label="${labels[i]}: ${group.length} orders. Open this stage.">
