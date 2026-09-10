@@ -2188,3 +2188,46 @@ The Worker Studio provides an isolated, production-focused environment for embro
     - Selected digitizer and clicked "Assign & Dispatch".
     - Confirmed zero error dialogs caught.
     - Verified `orderStatus: 'in_progress'`, `assignedDigitizerId` updated, and task registered in `dezan_digitizer_tasks` with `taskNumber: 'TSK-2026-1395'`.
+
+### 35.16 Site-Wide 60/120 FPS Butter-Smooth Performance & Compositor Acceleration (Live & Verified)
+- **User Mandate & Problem Statement**:
+  - *"whole website should feel smoth like this end to end. no laggy"*
+  - Following the isolation and optimization of the adaptive order modal, the user requested that the entire website—including all public marketing pages, navigation, comparison sliders, feedback carousels, and client/worker/admin portals—deliver the same butter-smooth, 60/120 FPS, zero-lag experience without stutter during scrolling or cursor hover.
+- **Root Causes Identified**:
+  1. **Scroll-Chaining & Reflow During Scrolling**:
+     - `.header-scrolled` in `styles.css` modified `padding-top: 0.5rem` and `padding-bottom: 0.5rem` upon crossing 20px scroll threshold, causing continuous full-document reflow (layout thrashing) and jitter on every scroll pass.
+     - `initStickyHeader()` in `app.js` listened to `window.addEventListener('scroll')` on every raw tick without `{ passive: true }` and without `requestAnimationFrame`, blocking the browser compositor thread.
+  2. **Perpetual Global Mousemove Listener**:
+     - `initCompareSlider()` in `app.js` attached `window.addEventListener('mousemove')` permanently on page load, running JavaScript on every single pixel of cursor movement across the entire viewport.
+  3. **Synthetic Smooth Scrolling Interference**:
+     - Global `html { scroll-behavior: smooth; }` fought native trackpad/mouse-wheel momentum physics on macOS and high-refresh-rate displays.
+  4. **Unconstrained Backdrop Filters & Marquee Overhead**:
+     - Infinite marquee tracks and sticky navigation headers lacked dedicated GPU compositor layer isolation, forcing the browser to repaint dynamic contents under heavy `backdrop-filter: blur(12px)`.
+  5. **Broad Transition Recalculation**:
+     - Universal `transition: all` caused style recalculation on layout properties during rapid cursor hover.
+- **Architectural Solutions**:
+  1. **Compositor-Native Fluid Scrolling**:
+     - Replaced global `scroll-behavior: smooth` with `scroll-behavior: auto`, enabling native 60/120 FPS GPU compositor inertia.
+     - Scoped `scroll-behavior: smooth` strictly to in-page hash anchors via `@media (prefers-reduced-motion: no-preference) { :root:has(:target) { scroll-behavior: smooth; } }`.
+  2. **Reflow-Free Sticky Header**:
+     - Locked header dimensions: removed padding changes from `.header-scrolled` and `.dark .header-scrolled`, transitioning only hardware-accelerated `box-shadow` and background opacity.
+     - In `app.js`, refactored `initStickyHeader()` to use `{ passive: true }`, `window.requestAnimationFrame`, and state diffing (`scrolled !== isScrolled`) to completely free the compositor thread.
+  3. **On-Demand Drag Listeners for Comparison Slider**:
+     - Removed perpetual `window.addEventListener('mousemove')`. Pointer movement listeners are now dynamically attached to `window` *only* during active dragging (`mousedown`/`touchstart`) and instantly removed on `mouseup`/`touchend`.
+     - Wrapped position calculations in `requestAnimationFrame` with `cancelAnimationFrame` debouncing.
+  4. **Full-Site GPU Hardware Layer Promotion**:
+     - Promoted `header`, `nav.fixed.bottom-0`, `#client-sticky-nav`, `#worker-sticky-nav`, `#admin-sticky-nav`, and `.sticky-toolbar` to dedicated GPU composite layers via `transform: translateZ(0); backface-visibility: hidden; isolation: isolate;`.
+     - Added `contain: paint layout;` and `transform: translateZ(0)` to `.marquee-wrapper`, `.marquee-track`, `#feedback-slide-track`, and `.carousel-track`.
+  5. **Site-Wide Silky Cursor Hover States**:
+     - Scoped `.transition-all` to composited properties: `transition-property: color, background-color, border-color, opacity, transform, box-shadow !important; transition-duration: 0.15s !important;`.
+     - Added `-webkit-tap-highlight-color: transparent` across all interactive elements.
+  6. **Global Silky Smooth Scrollbars**:
+     - Standardized modern lightweight scrollbars across all scrollable containers in WebKit and Firefox (`scrollbar-width: thin`).
+  7. **Offscreen Content Containment**:
+     - Added `content-visibility: auto; contain-intrinsic-size: 1px 500px;` to heavy sections like `#faq-accordion` and `#feedbacks-section`.
+- **Automated Verification (`scripts/verify_smooth_performance.js`)**:
+  - Desktop 1512x982 (`index.html`): Verified GPU composite layer isolation, marquee paint containment, rapid scroll down/up with zero reflow, header-scrolled state without layout shift, and rapid cursor hover across all navigation links. Screenshot: `smooth_public_desktop.png`.
+  - Mobile 390x844 (`services.html`): Verified bottom navigation GPU layer isolation and fluid touch response. Screenshot: `smooth_mobile_services.png`.
+  - Client Portal 1400x900 (`client-portal.html`): Verified sticky navigation GPU layer isolation, drawer isolation, and table scrolling. Screenshot: `smooth_client_portal.png`.
+  - Quality gates: `npm test` (10/10 passed), `deep_button_link_validator.js` (30/30 pages passed), `verify_review_pay_flow.js` (passed).
+

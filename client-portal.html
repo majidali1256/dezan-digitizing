@@ -416,7 +416,7 @@
     </nav>
 
     <!-- ===== ADAPTIVE PLACE ORDER & REQUEST QUOTE MODAL (2-STAGE SELECTION) ===== -->
-    <div id="new-order-modal" onclick="if(event.target === this) closeNewOrderModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex flex-col justify-center items-center p-2.5 sm:p-4 overflow-y-auto overscroll-contain">
+    <div id="new-order-modal" onclick="if(event.target === this) closeNewOrderModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex flex-col justify-center items-center p-2.5 sm:p-4 overflow-hidden">
         <style>
             @media screen and (max-width: 768px) {
                 #new-order-modal input:not([type="checkbox"]):not([type="radio"]),
@@ -431,6 +431,63 @@
             #new-order-modal button {
                 touch-action: manipulation;
             }
+            #new-order-modal {
+                overflow: hidden !important;
+            }
+            #new-order-modal .modal-card,
+            #new-order-modal #guest-checkout-modal > div,
+            #new-order-modal > div > div {
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
+                backface-visibility: hidden;
+                -webkit-backface-visibility: hidden;
+                isolation: isolate;
+            }
+            #new-order-modal #order-service-selection-view,
+            #new-order-modal #order-step-2-view > div.overflow-y-auto,
+            #new-order-modal #order-step-3-view > div.overflow-y-auto {
+                overflow-y: auto !important;
+                overscroll-behavior-y: contain !important;
+                -webkit-overflow-scrolling: touch !important;
+                scroll-behavior: smooth !important;
+                transform: translateZ(0) !important;
+                -webkit-transform: translateZ(0) !important;
+                will-change: scroll-position !important;
+                contain: content !important;
+            }
+            #new-order-modal #order-service-selection-view::-webkit-scrollbar,
+            #new-order-modal #order-step-2-view > div.overflow-y-auto::-webkit-scrollbar,
+            #new-order-modal #order-step-3-view > div.overflow-y-auto::-webkit-scrollbar {
+                width: 6px;
+            }
+            #new-order-modal #order-service-selection-view::-webkit-scrollbar-track,
+            #new-order-modal #order-step-2-view > div.overflow-y-auto::-webkit-scrollbar-track,
+            #new-order-modal #order-step-3-view > div.overflow-y-auto::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            #new-order-modal #order-service-selection-view::-webkit-scrollbar-thumb,
+            #new-order-modal #order-step-2-view > div.overflow-y-auto::-webkit-scrollbar-thumb,
+            #new-order-modal #order-step-3-view > div.overflow-y-auto::-webkit-scrollbar-thumb {
+                background: rgba(148, 163, 184, 0.35);
+                border-radius: 9999px;
+            }
+            .dark #new-order-modal #order-service-selection-view::-webkit-scrollbar-thumb,
+            .dark #new-order-modal #order-step-2-view > div.overflow-y-auto::-webkit-scrollbar-thumb,
+            .dark #new-order-modal #order-step-3-view > div.overflow-y-auto::-webkit-scrollbar-thumb {
+                background: rgba(212, 175, 53, 0.3);
+            }
+            #new-order-modal label,
+            #new-order-modal input,
+            #new-order-modal select,
+            #new-order-modal textarea {
+                transition-property: color, background-color, border-color !important;
+                transition-duration: 0.15s !important;
+                transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+            }
+            #new-order-modal .transition-all {
+                transition-property: color, background-color, border-color, box-shadow, transform !important;
+                transition-duration: 0.15s !important;
+            }
         </style>
         <div class="w-full sm:max-w-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-2xl shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[90vh] text-slate-900 dark:text-slate-100 overflow-hidden relative">
             
@@ -438,7 +495,7 @@
             <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mt-2 mb-0.5 sm:hidden flex-shrink-0"></div>
 
             <!-- Sticky Modal Header (Image 2 Target Design) -->
-            <div class="flex flex-col px-3.5 sm:px-6 pt-2 sm:pt-4 pb-2 sm:pb-3 border-b border-slate-200/80 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex-shrink-0 z-10 gap-2 sm:gap-2.5">
+            <div class="flex flex-col px-3.5 sm:px-6 pt-2 sm:pt-4 pb-2 sm:pb-3 border-b border-slate-200/80 dark:border-primary/15 bg-white dark:bg-card-dark flex-shrink-0 z-10 gap-2 sm:gap-2.5">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 pr-2">
                         <span class="material-symbols-outlined text-[#b89218] dark:text-primary text-2xl sm:text-3xl flex-shrink-0" id="order-modal-header-icon">shopping_cart</span>
@@ -868,7 +925,7 @@
                     </div>
 
                     <!-- Step 2 Sticky Form Action Buttons -->
-                    <div class="flex-shrink-0 px-4 py-3 sm:px-6 sm:py-3.5 border-t border-slate-200 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex items-center justify-between gap-2 shadow-lg sm:shadow-none pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+                    <div class="flex-shrink-0 px-4 py-3 sm:px-6 sm:py-3.5 border-t border-slate-200 dark:border-primary/15 bg-white dark:bg-card-dark flex items-center justify-between gap-2 shadow-lg sm:shadow-none pb-[max(0.75rem,env(safe-area-inset-bottom))]">
                         <button type="button" onclick="switchOrderServiceChoice()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer transition-colors flex items-center gap-1">
                             <span class="material-symbols-outlined text-sm">arrow_back</span>
                             <span>Back</span>
@@ -878,7 +935,7 @@
                                 Cancel
                             </button>
                             <button type="button" id="order-goto-review-btn" onclick="goToOrderReviewStep()" class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0">
-                                <span id="order-goto-review-btn-text">Review Order</span>
+                                <span id="order-goto-review-btn-text">Review &amp; Pay</span>
                                 <span class="material-symbols-outlined text-sm">arrow_forward</span>
                             </button>
                         </div>
@@ -1047,7 +1104,7 @@
                     </div>
 
                     <!-- Step 3 Sticky Form Action Buttons -->
-                    <div class="flex-shrink-0 px-4 py-3 sm:px-6 sm:py-3.5 border-t border-slate-200 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex items-center justify-between gap-2 shadow-lg sm:shadow-none pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+                    <div class="flex-shrink-0 px-4 py-3 sm:px-6 sm:py-3.5 border-t border-slate-200 dark:border-primary/15 bg-white dark:bg-card-dark flex items-center justify-between gap-2 shadow-lg sm:shadow-none pb-[max(0.75rem,env(safe-area-inset-bottom))]">
                         <button type="button" onclick="backToOrderDetailsStep()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer transition-colors flex items-center gap-1">
                             <span class="material-symbols-outlined text-sm">arrow_back</span>
                             <span>Edit Details</span>

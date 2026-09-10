@@ -63,9 +63,17 @@ async function runVerification() {
             isMobile: true,
             hasTouch: true
         });
+        await mobileContext.addInitScript(() => {
+            localStorage.setItem('dezan_consent', 'all');
+            sessionStorage.setItem('dezan_consent', 'all');
+        });
         const page = await mobileContext.newPage();
         await page.goto(`http://127.0.0.1:${PORT}/index.html`, { waitUntil: 'domcontentloaded' });
         await page.waitForTimeout(600);
+        await page.evaluate(() => {
+            const b = document.getElementById('dezan-cookie-banner');
+            if (b) b.remove();
+        });
 
         // 1. Open the modal in Order Mode for Embroidery Digitizing
         await page.evaluate(() => {
@@ -82,8 +90,8 @@ async function runVerification() {
         // Verify Step 2 CTA button text
         const step2BtnText = await page.$eval('#order-goto-review-btn', el => el.textContent.trim());
         console.log('✓ Step 2 button text:', JSON.stringify(step2BtnText));
-        if (!step2BtnText.includes('Review Order')) {
-            throw new Error(`Step 2 button should say "Review Order", found: "${step2BtnText}"`);
+        if (!step2BtnText.includes('Review & Pay')) {
+            throw new Error(`Step 2 button should say "Review & Pay", found: "${step2BtnText}"`);
         }
 
         // 2. Fill in customer & order details
@@ -112,8 +120,8 @@ async function runVerification() {
             await page.waitForTimeout(300);
         }
 
-        // 3. Click "Review Order →"
-        console.log('👉 Clicking "Review Order →" button...');
+        // 3. Click "Review & Pay →"
+        console.log('👉 Clicking "Review & Pay →" button...');
         await page.click('#order-goto-review-btn');
         await page.waitForTimeout(400);
 
@@ -209,9 +217,17 @@ async function runVerification() {
             viewport: { width: 1512, height: 982 },
             deviceScaleFactor: 2
         });
+        await desktopContext.addInitScript(() => {
+            localStorage.setItem('dezan_consent', 'all');
+            sessionStorage.setItem('dezan_consent', 'all');
+        });
         const desktopPage = await desktopContext.newPage();
         await desktopPage.goto(`http://127.0.0.1:${PORT}/pricing.html`, { waitUntil: 'domcontentloaded' });
         await desktopPage.waitForTimeout(600);
+        await desktopPage.evaluate(() => {
+            const b = document.getElementById('dezan-cookie-banner');
+            if (b) b.remove();
+        });
 
         // Open in Quote Mode
         await desktopPage.evaluate(() => {

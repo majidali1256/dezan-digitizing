@@ -457,22 +457,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-// ===== STICKY HEADER LOGIC =====
+// ===== STICKY HEADER LOGIC (60/120 FPS PASSIVE RAF COMPOSITOR) =====
 function initStickyHeader() {
     const header = document.querySelector('header');
     if (!header) return;
 
+    let isScrolled = false;
+    let ticking = false;
+
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 20) {
-            header.classList.add('header-scrolled');
-        } else {
-            header.classList.remove('header-scrolled');
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                const scrolled = window.scrollY > 15;
+                if (scrolled !== isScrolled) {
+                    isScrolled = scrolled;
+                    header.classList.toggle('header-scrolled', isScrolled);
+                }
+                ticking = false;
+            });
+            ticking = true;
         }
-    });
+    }, { passive: true });
 }
 
 // ===================================================================
-//  BEFORE / AFTER COMPARISON SLIDER
+//  BEFORE / AFTER COMPARISON SLIDER (GPU ACCELERATED & ON-DEMAND LISTENERS)
 // ===================================================================
 function initCompareSlider() {
     const slider = document.getElementById('hero-compare-slider');
@@ -482,49 +491,58 @@ function initCompareSlider() {
     if (!slider || !divider || (!beforeImg && !beforeDiv)) return;
 
     let isDragging = false;
+    let rafId = null;
 
     function updateSlider(clientX) {
-        const rect = slider.getBoundingClientRect();
-        let x = clientX - rect.left;
-        x = Math.max(0, Math.min(x, rect.width));
-        const pct = (x / rect.width) * 100;
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+            const rect = slider.getBoundingClientRect();
+            let x = clientX - rect.left;
+            x = Math.max(0, Math.min(x, rect.width));
+            const pct = (x / rect.width) * 100;
 
-        if (beforeImg) {
-            const rightInset = 100 - pct;
-            beforeImg.style.clipPath = `inset(0 ${rightInset}% 0 0)`;
-            beforeImg.style.webkitClipPath = `inset(0 ${rightInset}% 0 0)`;
-        } else if (beforeDiv) {
-            beforeDiv.style.width = pct + '%';
-        }
-        divider.style.left = pct + '%';
+            if (beforeImg) {
+                const rightInset = 100 - pct;
+                beforeImg.style.clipPath = `inset(0 ${rightInset}% 0 0)`;
+                beforeImg.style.webkitClipPath = `inset(0 ${rightInset}% 0 0)`;
+            } else if (beforeDiv) {
+                beforeDiv.style.width = pct + '%';
+            }
+            divider.style.left = pct + '%';
+        });
     }
 
-    // Mouse events
+    function onPointerMove(e) {
+        if (!isDragging) return;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        updateSlider(clientX);
+    }
+
+    function onPointerUp() {
+        if (!isDragging) return;
+        isDragging = false;
+        window.removeEventListener('mousemove', onPointerMove);
+        window.removeEventListener('mouseup', onPointerUp);
+        window.removeEventListener('touchmove', onPointerMove);
+        window.removeEventListener('touchend', onPointerUp);
+    }
+
+    // Mouse events: attach to window only when dragging starts to eliminate perpetual cursor lag
     slider.addEventListener('mousedown', (e) => {
         isDragging = true;
         updateSlider(e.clientX);
         e.preventDefault();
-    });
-    window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        updateSlider(e.clientX);
-    });
-    window.addEventListener('mouseup', () => {
-        isDragging = false;
+        window.addEventListener('mousemove', onPointerMove, { passive: true });
+        window.addEventListener('mouseup', onPointerUp, { passive: true });
     });
 
-    // Touch events
+    // Touch events: attach to window only when touch starts
     slider.addEventListener('touchstart', (e) => {
         isDragging = true;
         updateSlider(e.touches[0].clientX);
+        window.addEventListener('touchmove', onPointerMove, { passive: true });
+        window.addEventListener('touchend', onPointerUp, { passive: true });
     }, { passive: true });
-    window.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-        updateSlider(e.touches[0].clientX);
-    }, { passive: true });
-    window.addEventListener('touchend', () => {
-        isDragging = false;
-    });
 }
 
 //  LIGHTBOX FUNCTIONALITY

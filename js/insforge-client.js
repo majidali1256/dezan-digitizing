@@ -1756,6 +1756,7 @@ class InsForgeClient {
                 return {
                     id: t.id,
                     taskId: t.task_number || ('TSK-' + (t.order_number ? t.order_number.replace('ORD-', '') : '')),
+                    taskNumber: t.task_number || ('TSK-' + (t.order_number ? t.order_number.replace('ORD-', '') : '')),
                     orderNumber: t.order_number,
                     serviceType: t.service_type || 'Digitizing',
                     service_type: t.service_type || 'Digitizing',
@@ -1797,8 +1798,11 @@ class InsForgeClient {
 
         return assignedOrders.map(order => {
             const isRush = order.turnaround_speed === 'rush' || order.turnaroundSpeed === 'rush' || order.priority === 'rush';
+            const fallbackTaskNumber = 'TSK-' + order.order_number.replace('ORD-', '').replace('DZ-', '');
             return {
-                taskId: 'TSK-' + order.order_number.replace('ORD-', ''),
+                id: order.id,
+                taskId: fallbackTaskNumber,
+                taskNumber: fallbackTaskNumber,
                 orderNumber: order.order_number,
                 serviceType: order.service_type,
                 service_type: order.service_type,
@@ -2345,6 +2349,7 @@ class InsForgeClient {
         }
 
         // Sanitized technical task (Strict Data Masking)
+        const taskNumber = 'TSK-' + orderNumber.replace('ORD-', '').replace('DZ-', '');
         const isOrderRush = order && (order.turnaround_speed === 'rush' || order.turnaroundSpeed === 'rush' || order.priority === 'rush');
         const sanitizedTask = {
             id: this.generateUUID(),
@@ -2382,6 +2387,7 @@ class InsForgeClient {
             allTasks[taskIdx].assigned_digitizer_id = digitizerId;
             allTasks[taskIdx].status = 'in_progress';
             allTasks[taskIdx].assigned_at = assignedAt;
+            if (!allTasks[taskIdx].task_number) allTasks[taskIdx].task_number = taskNumber;
         } else {
             allTasks.unshift(sanitizedTask);
         }
@@ -2394,6 +2400,16 @@ class InsForgeClient {
             digitizerId: digitizerId,
             digitizerName: digitizerName
         });
+
+        // Attempt Node.js backend assignment if available
+        try {
+            await this.callBackendApi(`/orders/${encodeURIComponent(orderNumber)}/assign`, 'POST', {
+                digitizerId,
+                digitizerName
+            });
+        } catch (backendErr) {
+            console.warn('[Backend Assign Sync Fallback]:', backendErr.message);
+        }
 
         // Sync to InsForge PostgreSQL
         try {

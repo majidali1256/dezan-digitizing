@@ -25,9 +25,18 @@ body {
     font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-/* Dark Mode Transitions - targeted to specific properties */
+/* Compositor-native fluid scrolling with 60/120fps physics */
 html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    :root:has(:target) {
+        scroll-behavior: smooth;
+    }
 }
 
 html.dark {
@@ -597,15 +606,13 @@ nav.fixed.bottom-0 a:hover {
    Sticky Header & Nav Enhancements
    ============================================ */
 .header-scrolled {
-    background-color: rgba(248, 247, 246, 0.95);
-    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.1);
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+    background-color: rgba(248, 247, 246, 0.98);
+    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.08);
 }
 
 .dark .header-scrolled {
-    background-color: rgba(32, 29, 18, 0.95);
-    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.3);
+    background-color: rgba(32, 29, 18, 0.98);
+    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.35);
 }
 
 .nav-link-gold {
@@ -876,4 +883,132 @@ header a img[src*="logo.png"] {
 .gmail-upload-area.dragover {
     border-color: #d4af35;
     background: rgba(212, 175, 53, 0.08);
+}
+
+/* ===================================================================
+   SITE-WIDE GPU ACCELERATION & COMPOSITOR ISOLATION (SILKY 60/120 FPS)
+   - Eliminates nested scroll chaining & dual-scroll collisions
+   - Promotes all headers, navs, and scrollables to isolated GPU layers
+   - Eliminates multi-pass backdrop-blur overhead during scrolling & hovering
+   - Scopes cursor hover transitions site-wide to prevent layout thrashing
+   =================================================================== */
+
+/* Hardware layer isolation for all fixed and sticky chrome */
+header,
+nav.fixed.bottom-0,
+#client-sticky-nav,
+#worker-sticky-nav,
+#admin-sticky-nav,
+.sticky-toolbar {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    isolation: isolate;
+}
+
+/* GPU promotion & paint containment for infinite animations & carousels */
+.marquee-wrapper,
+.marquee-track,
+#feedback-slide-track,
+.carousel-track {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    will-change: transform;
+    contain: paint layout;
+}
+
+/* Offscreen containment for high-element sections on long pages */
+#faq-accordion,
+#feedbacks-section,
+.content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 500px;
+}
+
+/* Site-wide silky cursor hover states (prevents layout recalculation on hover) */
+a, button, input, select, textarea, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.transition-all {
+    transition-property: color, background-color, border-color, opacity, transform, box-shadow !important;
+    transition-duration: 0.15s !important;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Global modern smooth scrollbars across all scrollable containers */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+}
+
+.dark * {
+    scrollbar-color: rgba(212, 175, 53, 0.3) transparent;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.35);
+    border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 53, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.6);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 175, 53, 0.5);
+}
+
+/* Order & Quote modal isolation */
+#new-order-modal {
+    overflow: hidden !important;
+}
+
+#new-order-modal .modal-card,
+#new-order-modal #guest-checkout-modal > div,
+#new-order-modal > div > div,
+.global-dialog-modal > div,
+#staff-order-blocked-modal > div {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    isolation: isolate;
+}
+
+#new-order-modal #order-service-selection-view,
+#new-order-modal #order-step-2-view > div.overflow-y-auto,
+#new-order-modal #order-step-3-view > div.overflow-y-auto {
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+    will-change: scroll-position !important;
+    contain: content !important;
+}
+
+#new-order-modal label,
+#new-order-modal input,
+#new-order-modal select,
+#new-order-modal textarea {
+    transition-property: color, background-color, border-color !important;
+    transition-duration: 0.15s !important;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
 }

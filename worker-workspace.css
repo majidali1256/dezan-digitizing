@@ -580,3 +580,14 @@ body[data-worker-page] textarea:focus-visible {
     }
 }
 
+/* ===== WORKER STUDIO HARDWARE LAYER ISOLATION (60/120 FPS) ===== */
+#task-drawer,
+.worker-drawer,
+.worker-table-scroll,
+.workbench-scroll {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    isolation: isolate;
+}
+
