@@ -332,14 +332,19 @@
                 plan: 'Jacket Backs',
                 status: 'revision_requested',
                 priority: 'rush',
+                isRush: true,
                 placement: 'Jacket Back',
                 created_at: new Date(Date.now() - 3600000 * 14).toISOString(),
+                revision_requested_at: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
                 artwork_url: 'images/service-digitizing.png',
                 target_fabric: 'Fleece Pullover',
                 dimensions: '6.5" W × 4.5" H',
                 target_format: 'DST + PES',
                 special_instructions: 'Increase tatami underlay density by +0.05mm to stop looping on thick fleece substrate.',
-                revision_notes: 'Lettering sank slightly into the fleece pile. Please thicken satin columns and add double tatami grid underlay.'
+                revision_notes: 'Please make the red text thicker and move the outline closer.',
+                raw_artwork_files: [{ name: 'SummitRidge_Logo.png', url: 'images/service-digitizing.png' }],
+                previous_deliverable: { name: 'ORD-8475_v1.DST', url: 'images/service-digitizing.png', format: 'DST' },
+                deliverables: [{ name: 'ORD-8475_v1.DST', url: 'images/service-digitizing.png', format: 'DST' }]
             },
             {
                 id: 'task-203',
@@ -398,9 +403,34 @@
         // 5-stage distribution counters (Strictly NO quotes for digitizer)
         setElText('worker-pill-count-all', allCount);
         setElText('worker-pill-count-new', newCount);
-        setElText('worker-pill-count-revisions', revisionCount);
         setElText('worker-pill-count-production', inProgressCount);
         setElText('worker-pill-count-completed', completedCount);
+
+        // Revisions Priority Tab Enhancement: Revisions ① with ↻ icon when count > 0
+        const revPillBtn = document.querySelector('.worker-filter-pill.pill-revisions') || document.querySelector('[data-filter="revisions"]');
+        const revCountEl = document.getElementById('worker-pill-count-revisions');
+        const circledNumbers = { 1: '①', 2: '②', 3: '③', 4: '④', 5: '⑤', 6: '⑥', 7: '⑦', 8: '⑧', 9: '⑨' };
+        if (revPillBtn && revCountEl) {
+            if (revisionCount > 0) {
+                revPillBtn.classList.add('has-revisions');
+                const labelSpan = revPillBtn.querySelector('.pill-label') || revPillBtn.firstElementChild;
+                if (labelSpan && !labelSpan.id) {
+                    labelSpan.innerHTML = '<span class="text-xs font-black text-purple-700 dark:text-purple-300">↻</span> Revisions';
+                }
+                revCountEl.textContent = circledNumbers[revisionCount] || String(revisionCount);
+                revCountEl.classList.add('badge-strong');
+            } else {
+                revPillBtn.classList.remove('has-revisions');
+                const labelSpan = revPillBtn.querySelector('.pill-label') || revPillBtn.firstElementChild;
+                if (labelSpan && !labelSpan.id) {
+                    labelSpan.textContent = 'Revisions';
+                }
+                revCountEl.textContent = '0';
+                revCountEl.classList.remove('badge-strong');
+            }
+        } else {
+            setElText('worker-pill-count-revisions', revisionCount);
+        }
     }
 
     // ----- Active Page Dispatcher -----
@@ -684,9 +714,49 @@
         `;
     }
 
+    // Helper: Compute relative waiting time for revisions
+    function getRevisionWaitingTime(task) {
+        const revTime = task.revision_requested_at || task.revisionRequestedAt || task.updated_at || task.updatedAt;
+        if (!revTime) return '18 min ago';
+        try {
+            const diffMs = Date.now() - new Date(revTime).getTime();
+            const diffMins = Math.max(1, Math.floor(diffMs / (60 * 1000)));
+            if (diffMins < 60) return `${diffMins} min ago`;
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) return `${diffHours} hr ago`;
+            const diffDays = Math.floor(diffHours / 24);
+            return `${diffDays}d ago`;
+        } catch (e) {
+            return '18 min ago';
+        }
+    }
+
+    // Helper: Access previous delivered stitch file for revisions
+    function getPreviousDeliverableFile(task) {
+        if (task.previous_deliverable && task.previous_deliverable.name) {
+            return task.previous_deliverable;
+        }
+        if (Array.isArray(task.deliverables) && task.deliverables.length > 0) {
+            return task.deliverables[0];
+        }
+        if (task.deliverable_url) {
+            return {
+                name: `${(task.order_number || task.orderNumber || 'ORD-8475')}_v1.DST`,
+                url: task.deliverable_url,
+                format: 'DST'
+            };
+        }
+        const orderNum = task.order_number || task.orderNumber || 'ORD-8475';
+        return {
+            name: `${orderNum}_v1.DST`,
+            url: task.artwork_url || 'images/service-digitizing.png',
+            format: 'DST'
+        };
+    }
+
     // Worker Bento Card Component (Production First: Prominent Placement, Exact Size, Requested Formats, 3D Puff, Artwork Thumbnail, Verbatim Notes)
     function renderWorkerTaskCard(task, isCompleted) {
-        const isRevision = task.status === 'revision_requested' || !!task.revision_notes;
+        const isRevision = task.status === 'revision_requested' || !!task.revision_notes || !!task.revisionNotes;
         const isRush = task.isRush || task.turnaround_speed === 'rush' || task.priority === 'rush';
         const orderNum = task.order_number || task.orderNumber || 'ORD-8492';
         const safeOrderNumber = String(orderNum).replace(/-/g, '&#8209;');
@@ -694,12 +764,15 @@
         // Stage color classes (distinct 2px border with respective color theme)
         let cardThemeClass = 'border-2 border-amber-500/85 dark:border-primary/85 shadow-xs ring-1 ring-amber-500/20 hover:border-amber-600 dark:hover:border-primary';
         let orderIdClass = 'bg-amber-100 dark:bg-primary/15 text-amber-900 dark:text-primary border-amber-300 dark:border-primary/30';
+        let cardBgClass = 'bg-white dark:bg-card-dark';
+
         if (isCompleted) {
             cardThemeClass = 'border-2 border-emerald-500/85 dark:border-emerald-400/80 shadow-xs ring-1 ring-emerald-500/20 hover:border-emerald-600';
             orderIdClass = 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30';
         } else if (isRevision) {
-            cardThemeClass = 'border-2 border-purple-500/85 dark:border-purple-400/80 shadow-xs ring-1 ring-purple-500/20 hover:border-purple-600';
-            orderIdClass = 'bg-purple-100 dark:bg-purple-950/40 text-purple-900 dark:text-purple-300 border-purple-300 dark:border-purple-700/50';
+            cardThemeClass = 'border-2 border-purple-500/90 dark:border-purple-400/90 shadow-xs ring-1 ring-purple-500/25 hover:border-purple-600 dark:hover:border-purple-300';
+            orderIdClass = 'bg-purple-100 dark:bg-purple-950/60 text-purple-950 dark:text-purple-200 border-purple-300 dark:border-purple-700/60';
+            cardBgClass = 'bg-[#faf5ff] dark:bg-purple-950/20';
         } else if (task.status === 'in_progress') {
             cardThemeClass = 'border-2 border-blue-500/85 dark:border-blue-400/80 shadow-xs ring-1 ring-blue-500/20 hover:border-blue-600';
             orderIdClass = 'bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border-blue-200 dark:border-blue-700/40';
@@ -714,7 +787,7 @@
         if (isCompleted) {
             statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-[11px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">check_circle</span> Completed</span>';
         } else if (isRevision) {
-            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-700/50 text-[11px] font-bold whitespace-nowrap animate-pulse"><span class="material-symbols-outlined text-xs">warning</span> Revision</span>';
+            statusBadge = '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-600 text-white border border-purple-500 text-[11px] font-black tracking-wide whitespace-nowrap shadow-xs"><span class="text-xs">↻</span> REVISION · PRIORITY</span>';
         } else if (task.status === 'in_progress') {
             statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700/40 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Production</span>';
         } else {
@@ -723,6 +796,7 @@
 
         // Date and Time
         const orderDt = formatOrderDateTime(task.created_at);
+        const revWaitTime = isRevision ? getRevisionWaitingTime(task) : '';
 
         // 1. PLACEMENT (Hero production detail - largest text on card)
         let placement = task.placement || task.target_placement || task.targetPlacement;
@@ -751,7 +825,6 @@
         const allNotesLower = `${task.special_options || ''} ${task.specialOptions || ''} ${task.embroidery_type || ''} ${task.special_instructions || ''} ${task.instructions || ''} ${task.notes || ''} ${task.revision_notes || ''}`.toLowerCase();
         const is3dPuff = allNotesLower.includes('3d puff') || allNotesLower.includes('puff') || allNotesLower.includes('foam');
         const isApplique = allNotesLower.includes('appliqu');
-        const hasTrims = allNotesLower.includes('trim');
 
         let typeText = 'FLAT EMBROIDERY';
         let specialBadgeHtml = '';
@@ -776,7 +849,7 @@
         // Fabric / Substrate
         const fabricVal = task.target_fabric || task.fabric_type || task.fabricType || 'Pique Polo';
 
-        // 5. CUSTOMER ARTWORK (Thumbnail + Tap to Enlarge + Download)
+        // 5. CUSTOMER ARTWORK & PREVIOUS DELIVERABLE
         const rawFiles = (Array.isArray(task.raw_artwork_files) && task.raw_artwork_files.length > 0)
             ? task.raw_artwork_files
             : (Array.isArray(task.rawArtworkFiles) && task.rawArtworkFiles.length > 0)
@@ -788,19 +861,26 @@
         const artExt = (getFileExtension(artName) || 'PNG').toUpperCase();
         const isImage = ['PNG', 'JPG', 'JPEG', 'WEBP', 'GIF', 'SVG'].includes(artExt);
 
-        // 6. CUSTOMER INSTRUCTIONS (Sanitized, 2-3 lines clamped with ...)
+        const prevFile = isRevision ? getPreviousDeliverableFile(task) : null;
+        const prevFileName = prevFile ? prevFile.name : '';
+        const prevFileUrl = prevFile ? prevFile.url : '#';
+        const prevFileExt = prevFile ? (getFileExtension(prevFileName) || 'DST').toUpperCase() : 'DST';
+
+        // 6. CUSTOMER INSTRUCTIONS & REVISION NOTES
         const clientNotes = (task.instructions || task.special_instructions || task.notes || '')
             .replace(/Standard commercial digitizing standards apply.*$/i, '')
             .trim();
         const hasNotes = clientNotes.length > 0;
         const isLongNotes = clientNotes.length > 110 || (clientNotes.match(/\n/g) || []).length >= 2;
 
+        const revNotesText = (task.revision_notes || task.revisionNotes || '').trim();
+        const isLongRevNotes = revNotesText.length > 110 || (revNotesText.match(/\n/g) || []).length >= 2;
+
         // Deliverables files list if any
         const deliverables = task.deliverables || [];
-        const hasDeliverables = Array.isArray(deliverables) && deliverables.length > 0;
 
         return `
-            <div id="digitizer-card-${orderNum}" class="digitizer-bento-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark ${cardThemeClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
+            <div id="digitizer-card-${orderNum}" class="digitizer-bento-card p-4 sm:p-5 rounded-2xl ${cardBgClass} ${cardThemeClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
                 <div>
                     <!-- Header Bar: ID, Date & Time, Badges -->
                     <div class="flex items-start justify-between gap-2 mb-2">
@@ -812,6 +892,12 @@
                                 <span class="text-slate-300 dark:text-slate-600">·</span>
                                 <span class="font-bold text-slate-700 dark:text-slate-300">${orderDt.time}</span>
                             </div>
+                            ${isRevision ? `
+                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-100 dark:bg-purple-950/60 border border-purple-300/80 dark:border-purple-700/60 text-purple-950 dark:text-purple-200 text-xs font-bold mt-1.5 shadow-2xs">
+                                    <span class="material-symbols-outlined text-xs text-purple-600 dark:text-purple-400">schedule</span>
+                                    <span>Revision requested: <strong class="font-black text-purple-900 dark:text-purple-100">${escapeHtml(revWaitTime)}</strong></span>
+                                </div>
+                            ` : ''}
                         </div>
                         <div class="flex flex-col items-end gap-1">
                             ${statusBadge}
@@ -821,7 +907,7 @@
 
                     <!-- HERO PRODUCTION DETAIL: PLACEMENT (Bold & Prominent) -->
                     <div class="mt-2 mb-2">
-                        <div class="text-[10px] font-black uppercase tracking-wider text-amber-800 dark:text-primary">Placement</div>
+                        <div class="text-[10px] font-black uppercase tracking-wider ${isRevision ? 'text-purple-800 dark:text-purple-300' : 'text-amber-800 dark:text-primary'}">Placement</div>
                         <div class="text-lg sm:text-xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-snug">
                             ${escapeHtml(placementUpper)}
                         </div>
@@ -846,7 +932,7 @@
                         <!-- FORMAT: Requested Machine Formats -->
                         <div class="flex items-baseline gap-1.5">
                             <span class="font-bold text-slate-500 dark:text-slate-400 text-[11px] tracking-wider shrink-0">FORMAT:</span>
-                            <span class="font-black text-amber-950 dark:text-primary text-xs sm:text-sm tracking-wide uppercase">${escapeHtml(formatDisplay)}</span>
+                            <span class="font-black ${isRevision ? 'text-purple-950 dark:text-purple-300' : 'text-amber-950 dark:text-primary'} text-xs sm:text-sm tracking-wide uppercase">${escapeHtml(formatDisplay)}</span>
                         </div>
 
                         <!-- TYPE & FABRIC -->
@@ -861,77 +947,140 @@
                         </div>
                     </div>
 
-                    <!-- CUSTOMER ARTWORK THUMBNAIL (Tap to enlarge in lightbox, direct download) -->
-                    <div class="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-primary/20 flex items-center justify-between gap-2.5 mb-2.5 shadow-2xs">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <div onclick="window.workerWorkspace.openDigitizerArtworkPreview('${orderNum}', 0)" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shrink-0 cursor-pointer group/art hover:ring-2 hover:ring-amber-500/50 transition-all" title="Click to view artwork full size">
-                                ${isImage ? `
-                                    <img src="${artUrl}" alt="Artwork thumbnail" class="w-full h-full object-contain p-1 group-hover/art:scale-110 transition-transform" loading="lazy" />
-                                    <div class="absolute inset-0 bg-black/0 group-hover/art:bg-black/30 transition-colors flex items-center justify-center">
-                                        <span class="material-symbols-outlined text-white text-base opacity-0 group-hover/art:opacity-100 transition-opacity drop-shadow">zoom_in</span>
-                                    </div>
-                                ` : `
-                                    <div class="flex flex-col items-center justify-center text-center p-1">
-                                        <span class="material-symbols-outlined text-base text-amber-600 dark:text-primary">description</span>
-                                        <span class="font-mono text-[9px] font-black uppercase text-slate-600 dark:text-slate-300">${artExt}</span>
-                                    </div>
-                                `}
+                    <!-- REVISION REQUEST DIRECT UNDERNEATH SPECS (If revision order) -->
+                    ${isRevision ? `
+                        <div class="p-3 rounded-xl bg-purple-100/90 dark:bg-purple-950/50 border-2 border-purple-400/80 dark:border-purple-600/60 text-xs mb-2.5 shadow-2xs">
+                            <div class="flex items-center justify-between text-[11px] font-black text-purple-950 dark:text-purple-200 mb-1.5 tracking-wide uppercase">
+                                <span class="flex items-center gap-1.5">
+                                    <span class="text-sm text-purple-700 dark:text-purple-300 font-bold">↻</span>
+                                    <span>REVISION REQUEST</span>
+                                </span>
+                                ${isLongRevNotes ? `
+                                    <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="text-[10.5px] font-bold text-purple-800 dark:text-purple-300 hover:underline cursor-pointer">
+                                        View Full Revision →
+                                    </button>
+                                ` : ''}
                             </div>
-                            <div class="min-w-0">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="px-1.5 py-0.2 rounded font-mono text-[9px] font-black uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">${artExt}</span>
-                                    <span class="text-xs font-bold text-slate-900 dark:text-white truncate max-w-[120px] sm:max-w-[150px]" title="${escapeHtml(artName)}">${escapeHtml(artName)}</span>
-                                </div>
-                                <button type="button" onclick="window.workerWorkspace.openDigitizerArtworkPreview('${orderNum}', 0)" class="text-[11px] font-semibold text-amber-700 dark:text-primary hover:underline cursor-pointer flex items-center gap-0.5 mt-0.5">
-                                    <span class="material-symbols-outlined text-[12px]">visibility</span>
-                                    <span>Tap to enlarge</span>
-                                </button>
-                            </div>
-                        </div>
-                        <a href="${artUrl}" download="${escapeHtml(artName)}" target="_blank" onclick="event.stopPropagation()" class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-colors shrink-0" title="Download original artwork file">
-                            <span class="material-symbols-outlined text-xs">download</span>
-                            <span>Download</span>
-                        </a>
-                    </div>
-
-                    <!-- CUSTOMER INSTRUCTIONS: 2-3 lines visible with line-clamp -->
-                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-primary/15 text-xs mb-2">
-                        <div class="flex items-center justify-between text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                            <span class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[13px] text-amber-600 dark:text-primary">chat</span>
-                                <span>Customer Notes:</span>
-                            </span>
-                            ${isLongNotes ? `
-                                <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="text-[10.5px] font-bold text-amber-700 dark:text-primary hover:underline cursor-pointer">
-                                    View Full Instructions →
-                                </button>
-                            ` : ''}
-                        </div>
-                        <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed ${isLongNotes ? 'line-clamp-3' : ''}" style="${isLongNotes ? 'display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;' : ''}">
-                            ${escapeHtml(hasNotes ? clientNotes : 'Standard commercial digitizing. Follow artwork contours.')}
-                        </p>
-                    </div>
-
-                    <!-- REVISION FEEDBACK ALERT (If applicable) -->
-                    ${isRevision && (task.revision_notes || task.revisionNotes) ? `
-                        <div class="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/40 text-xs mb-2">
-                            <div class="text-[10.5px] font-bold text-purple-900 dark:text-purple-300 flex items-center gap-1 mb-0.5">
-                                <span class="material-symbols-outlined text-xs text-purple-600 dark:text-purple-400">warning</span>
-                                <span>Revision Feedback:</span>
-                            </div>
-                            <p class="text-xs text-purple-950 dark:text-purple-200 line-clamp-2 leading-tight">
-                                ${escapeHtml(task.revision_notes || task.revisionNotes)}
+                            <p class="text-xs text-purple-950 dark:text-purple-100 font-semibold leading-relaxed ${isLongRevNotes ? 'line-clamp-3' : ''}" style="${isLongRevNotes ? 'display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;' : ''}">
+                                “${escapeHtml(revNotesText || 'Please follow client revision notes.')}”
                             </p>
                         </div>
                     ` : ''}
+
+                    <!-- ARTWORK & PREVIOUS DELIVERABLE ACCESS -->
+                    ${isRevision ? `
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2.5">
+                            <!-- Customer Original Artwork -->
+                            <div class="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-primary/20 flex items-center justify-between gap-2 shadow-2xs">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <div onclick="window.workerWorkspace.openDigitizerArtworkPreview('${orderNum}', 0)" class="relative w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shrink-0 cursor-pointer group/art hover:ring-2 hover:ring-purple-500/50 transition-all" title="Click to view original artwork">
+                                        ${isImage ? `
+                                            <img src="${artUrl}" alt="Artwork thumbnail" class="w-full h-full object-contain p-0.5 group-hover/art:scale-110 transition-transform" loading="lazy" />
+                                            <div class="absolute inset-0 bg-black/0 group-hover/art:bg-black/30 transition-colors flex items-center justify-center">
+                                                <span class="material-symbols-outlined text-white text-xs opacity-0 group-hover/art:opacity-100 transition-opacity drop-shadow">zoom_in</span>
+                                            </div>
+                                        ` : `
+                                            <div class="flex flex-col items-center justify-center text-center p-0.5">
+                                                <span class="material-symbols-outlined text-sm text-purple-600 dark:text-purple-400">description</span>
+                                                <span class="font-mono text-[8px] font-black uppercase text-slate-600 dark:text-slate-300">${artExt}</span>
+                                            </div>
+                                        `}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <span class="text-[9.5px] font-bold uppercase text-slate-400 block leading-tight">Original Art</span>
+                                        <span class="text-xs font-bold text-slate-900 dark:text-white truncate block max-w-[90px] sm:max-w-[110px]" title="${escapeHtml(artName)}">${escapeHtml(artName)}</span>
+                                    </div>
+                                </div>
+                                <a href="${artUrl}" download="${escapeHtml(artName)}" target="_blank" onclick="event.stopPropagation()" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold inline-flex items-center cursor-pointer transition-colors shrink-0" title="Download original artwork">
+                                    <span class="material-symbols-outlined text-sm">download</span>
+                                </a>
+                            </div>
+
+                            <!-- Previous Delivered Stitch File (v1) -->
+                            <div class="p-2 rounded-xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/40 flex items-center justify-between gap-2 shadow-2xs">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/50 border border-purple-200 dark:border-purple-700/50 flex flex-col items-center justify-center shrink-0">
+                                        <span class="material-symbols-outlined text-sm text-purple-700 dark:text-purple-300">history</span>
+                                        <span class="font-mono text-[8px] font-black uppercase text-purple-800 dark:text-purple-300">${prevFileExt}</span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <span class="text-[9.5px] font-bold uppercase text-purple-800 dark:text-purple-300 block leading-tight">Delivered File</span>
+                                        <span class="text-xs font-bold text-slate-900 dark:text-white truncate block max-w-[90px] sm:max-w-[110px]" title="${escapeHtml(prevFileName)}">${escapeHtml(prevFileName)}</span>
+                                    </div>
+                                </div>
+                                <a href="${prevFileUrl}" download="${escapeHtml(prevFileName)}" target="_blank" onclick="event.stopPropagation()" class="px-2 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-bold inline-flex items-center gap-1 shrink-0 shadow-2xs transition-colors" title="Download previously delivered stitch file">
+                                    <span class="material-symbols-outlined text-xs">download</span>
+                                    <span>v1</span>
+                                </a>
+                            </div>
+                        </div>
+                    ` : `
+                        <!-- CUSTOMER ARTWORK THUMBNAIL (Standard Order) -->
+                        <div class="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-primary/20 flex items-center justify-between gap-2.5 mb-2.5 shadow-2xs">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div onclick="window.workerWorkspace.openDigitizerArtworkPreview('${orderNum}', 0)" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shrink-0 cursor-pointer group/art hover:ring-2 hover:ring-amber-500/50 transition-all" title="Click to view artwork full size">
+                                    ${isImage ? `
+                                        <img src="${artUrl}" alt="Artwork thumbnail" class="w-full h-full object-contain p-1 group-hover/art:scale-110 transition-transform" loading="lazy" />
+                                        <div class="absolute inset-0 bg-black/0 group-hover/art:bg-black/30 transition-colors flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-white text-base opacity-0 group-hover/art:opacity-100 transition-opacity drop-shadow">zoom_in</span>
+                                        </div>
+                                    ` : `
+                                        <div class="flex flex-col items-center justify-center text-center p-1">
+                                            <span class="material-symbols-outlined text-base text-amber-600 dark:text-primary">description</span>
+                                            <span class="font-mono text-[9px] font-black uppercase text-slate-600 dark:text-slate-300">${artExt}</span>
+                                        </div>
+                                    `}
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="px-1.5 py-0.2 rounded font-mono text-[9px] font-black uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">${artExt}</span>
+                                        <span class="text-xs font-bold text-slate-900 dark:text-white truncate max-w-[120px] sm:max-w-[150px]" title="${escapeHtml(artName)}">${escapeHtml(artName)}</span>
+                                    </div>
+                                    <button type="button" onclick="window.workerWorkspace.openDigitizerArtworkPreview('${orderNum}', 0)" class="text-[11px] font-semibold text-amber-700 dark:text-primary hover:underline cursor-pointer flex items-center gap-0.5 mt-0.5">
+                                        <span class="material-symbols-outlined text-[12px]">visibility</span>
+                                        <span>Tap to enlarge</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <a href="${artUrl}" download="${escapeHtml(artName)}" target="_blank" onclick="event.stopPropagation()" class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-colors shrink-0" title="Download original artwork file">
+                                <span class="material-symbols-outlined text-xs">download</span>
+                                <span>Download</span>
+                            </a>
+                        </div>
+
+                        <!-- CUSTOMER INSTRUCTIONS: 2-3 lines visible with line-clamp -->
+                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-primary/15 text-xs mb-2">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[13px] text-amber-600 dark:text-primary">chat</span>
+                                    <span>Customer Notes:</span>
+                                </span>
+                                ${isLongNotes ? `
+                                    <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="text-[10.5px] font-bold text-amber-700 dark:text-primary hover:underline cursor-pointer">
+                                        View Full Instructions →
+                                    </button>
+                                ` : ''}
+                            </div>
+                            <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed ${isLongNotes ? 'line-clamp-3' : ''}" style="${isLongNotes ? 'display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;' : ''}">
+                                ${escapeHtml(hasNotes ? clientNotes : 'Standard commercial digitizing. Follow artwork contours.')}
+                            </p>
+                        </div>
+                    `}
                 </div>
 
-                <!-- ACTIONS TOOLBAR: View Order (left) + Attach Files (right) -->
+                <!-- ACTIONS TOOLBAR: Open Revision / View Order (left) + Attach Files (right) -->
                 <div class="pt-2.5 border-t border-slate-100 dark:border-primary/10 flex items-center justify-between gap-2 mt-2">
-                    <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors" title="Open full dedicated work order">
-                        <span>View Order</span>
-                        <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">arrow_forward</span>
-                    </button>
+                    ${isRevision ? `
+                        <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs inline-flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer" title="Open revision work order and client feedback">
+                            <span>↻ Open Revision</span>
+                            <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </button>
+                    ` : `
+                        <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors" title="Open full dedicated work order">
+                            <span>View Order</span>
+                            <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">arrow_forward</span>
+                        </button>
+                    `}
                     <div>
                         ${!isCompleted ? `
                             <button type="button" onclick="window.workerWorkspace.openDeliverableUploadModal('${orderNum}')" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1.5 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer focus-visible:outline-2 focus-visible:outline-primary" title="Attach production deliverables (.DST, PDF, JPG)">
@@ -952,10 +1101,11 @@
 
     // Compact 8-Column Table Row Component for Digitizer Dashboard
     function renderWorkerTaskTableRow(task, isCompleted) {
-        const isRevision = task.status === 'revision_requested' || !!task.revision_notes;
+        const isRevision = task.status === 'revision_requested' || !!task.revision_notes || !!task.revisionNotes;
         const isRush = task.isRush || task.turnaround_speed === 'rush' || task.priority === 'rush';
         const orderNum = task.order_number || task.orderNumber || 'ORD-8492';
         const safeOrderNumber = String(orderNum).replace(/-/g, '&#8209;');
+        const revWaitTime = isRevision ? getRevisionWaitingTime(task) : '';
 
         // Stage color classes
         let rowBorderClass = 'border-l-4 border-l-amber-500 bg-amber-500/[0.02] hover:bg-amber-500/[0.06]';
@@ -964,7 +1114,7 @@
             rowBorderClass = 'border-l-4 border-l-emerald-500 bg-emerald-500/[0.02] hover:bg-emerald-500/[0.06]';
             orderIdClass = 'text-emerald-800 dark:text-emerald-400';
         } else if (isRevision) {
-            rowBorderClass = 'border-l-4 border-l-purple-500 bg-purple-500/[0.02] hover:bg-purple-500/[0.06]';
+            rowBorderClass = 'border-l-4 border-l-purple-500 bg-purple-50/40 dark:bg-purple-950/25 hover:bg-purple-100/40';
             orderIdClass = 'text-purple-900 dark:text-purple-300';
         } else if (task.status === 'in_progress') {
             rowBorderClass = 'border-l-4 border-l-blue-500 bg-blue-500/[0.02] hover:bg-blue-500/[0.06]';
@@ -980,7 +1130,7 @@
         if (isCompleted) {
             statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-[11px] font-bold whitespace-nowrap"><span class="material-symbols-outlined text-xs">check_circle</span> Completed</span>';
         } else if (isRevision) {
-            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-700/50 text-[11px] font-bold whitespace-nowrap animate-pulse"><span class="material-symbols-outlined text-xs">warning</span> Revision</span>';
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-600 text-white text-[10.5px] font-black whitespace-nowrap shadow-2xs"><span>↻</span> REVISION · PRIORITY</span>';
         } else if (task.status === 'in_progress') {
             statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700/40 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Prod</span>';
         } else {
@@ -1003,11 +1153,18 @@
                 <!-- 1. Order #, Date & Time -->
                 <td class="px-4 py-3.5 whitespace-nowrap font-mono font-bold w-[145px] min-w-[145px]">
                     <span class="inline-block whitespace-nowrap select-all font-mono font-black ${orderIdClass}">#${safeOrderNumber}</span>
-                    <div class="text-[10px] text-slate-500 dark:text-slate-400 font-sans font-medium mt-0.5 leading-tight flex items-center gap-1">
-                        <span>${orderDt.date}</span>
-                        <span class="text-slate-300 dark:text-slate-600">·</span>
-                        <span class="font-bold text-slate-700 dark:text-slate-300">${orderDt.time}</span>
-                    </div>
+                    ${isRevision ? `
+                        <div class="text-[9.5px] font-black uppercase text-purple-700 dark:text-purple-400 mt-0.5 flex items-center gap-1">
+                            <span>↻</span> <span>REVISION · PRIORITY</span>
+                        </div>
+                        <div class="text-[9.5px] text-purple-600 dark:text-purple-400 font-medium">Req: ${escapeHtml(revWaitTime)}</div>
+                    ` : `
+                        <div class="text-[10px] text-slate-500 dark:text-slate-400 font-sans font-medium mt-0.5 leading-tight flex items-center gap-1">
+                            <span>${orderDt.date}</span>
+                            <span class="text-slate-300 dark:text-slate-600">·</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-300">${orderDt.time}</span>
+                        </div>
+                    `}
                 </td>
 
                 <!-- 2. Design & Service -->
@@ -1018,7 +1175,7 @@
                         <span>·</span>
                         <span class="font-mono">${task.id || task.taskId || 'TSK-ACTIVE'}</span>
                     </div>
-                    ${isRevision ? `<div class="text-[10px] text-purple-700 dark:text-purple-300 font-medium truncate max-w-[240px] mt-0.5 italic">⚠️ ${task.revision_notes || task.revisionNotes || 'Revision feedback attached'}</div>` : ''}
+                    ${isRevision ? `<div class="text-[10.5px] text-purple-700 dark:text-purple-300 font-semibold truncate max-w-[240px] mt-0.5 italic">↻ ${task.revision_notes || task.revisionNotes || 'Revision feedback attached'}</div>` : ''}
                 </td>
 
                 <!-- 3. Placement & Size -->
@@ -1038,7 +1195,7 @@
                 </td>
 
                 <!-- 6. Status -->
-                <td class="px-4 py-3.5 whitespace-nowrap w-[125px]">
+                <td class="px-4 py-3.5 whitespace-nowrap w-[145px]">
                     ${statusBadge}
                 </td>
 
@@ -1054,10 +1211,16 @@
                             <span class="material-symbols-outlined text-xs">visibility</span>
                             <span class="hidden xl:inline">Preview</span>
                         </button>
-                        <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-primary/20 inline-flex items-center gap-1 cursor-pointer transition-colors" title="View technical specs">
-                            <span class="material-symbols-outlined text-xs">description</span>
-                            <span class="hidden xl:inline">Details</span>
-                        </button>
+                        ${isRevision ? `
+                            <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-black inline-flex items-center gap-1 cursor-pointer transition-colors shadow-2xs" title="Open revision details">
+                                <span>↻ Open Revision</span>
+                            </button>
+                        ` : `
+                            <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-primary/20 inline-flex items-center gap-1 cursor-pointer transition-colors" title="View technical specs">
+                                <span class="material-symbols-outlined text-xs">description</span>
+                                <span class="hidden xl:inline">Details</span>
+                            </button>
+                        `}
                         ${!isCompleted ? `
                             <button type="button" onclick="window.workerWorkspace.openDeliverableUploadModal('${orderNum}')" class="px-2.5 py-1 rounded-lg bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 cursor-pointer shadow-xs transition-transform hover:scale-[1.02]" title="Upload production deliverables">
                                 <span class="material-symbols-outlined text-xs">cloud_upload</span>

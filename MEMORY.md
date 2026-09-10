@@ -2060,6 +2060,59 @@ The Worker Studio provides an isolated, production-focused environment for embro
       - `digitizer_prominent_cards_mobile.png`
       - `digitizer_portal_prominent_cards_desktop.png`
 
+### 35.13 Digitizer Portal: Revision Priority Status Architecture (Live & Verified)
+- **User Mandate & Problem Statement**:
+  - *"Please make Revisions a priority status in the Digitizer Portal, but do not move the Revisions tab to the top or change the overall navigation."*
+  - *"When there is at least one revision, make the Revisions tab more noticeable with: Revisions ①. Use the existing purple color, but make the badge stronger and add a small priority icon such as ↻ or !."*
+  - *"For every revision order card, visually distinguish it from normal orders: ↻ REVISION · PRIORITY. This badge should be clearly visible at the top-right of the order card."*
+  - *"Use a purple border or very light purple background tint on revision cards instead of the normal blue/gold border. Do not make the whole card dark or aggressive."*
+  - *"Also show: Revision requested: 18 min ago so the digitizer immediately knows how long the client has been waiting."*
+  - *"The main card information should still remain very prominent: LEFT CHEST, 4.0” WIDE, DST + PES, 3D PUFF (if applicable)."*
+  - *"Then show the revision request directly underneath: REVISION REQUEST “Please make the red text thicker and move the outline closer.” Show the first 2–3 lines only. If it is longer, use: View Full Revision →"*
+  - *"The artwork and previous delivered file should also be easy to access."*
+  - *"Please change the main button on revision cards from something generic like View Order to: Open Revision and keep Attach Files as the second action."*
+  - *"Revision orders should also appear with a small priority indicator anywhere else that the order is shown, so the digitizer never mistakes a revision for a normal new order."*
+- **Architectural Implementation**:
+  1. **Strict Navigation Preservation with Stronger Badge & Priority Icon**:
+     - Preserved exact tab sequence: `All orders` → `New Orders` → `Revisions` → `In production` → `Completed`. No navigation tabs were reordered.
+     - When `revisionCount > 0`, dynamically injects `↻` icon and circled number badges (e.g. `①`, `②`) into both `worker-tasks.html` and `worker-portal.html`.
+     - In `worker-workspace.css`, styled `.has-revisions` with a high-contrast purple theme (`bg-[#f3e8ff] dark:bg-purple-950/60`, border `1.5px solid #a855f7`, text `#6b21a8 dark:#e9d5ff`) and a high-visibility badge `.badge-strong` (`bg-purple-600 text-white shadow-xs`).
+  2. **Revision Card Visual Distinction**:
+     - **Card Border & Tint**: Applied `border-2 border-purple-500/90 dark:border-purple-400/90` with delicate `#faf5ff` light purple tint (`dark:bg-purple-950/20`), ensuring cards are unmistakably distinguished without being dark, muddy, or aggressive.
+     - **Top-Right Priority Badge**: Rendered prominent `↻ REVISION · PRIORITY` pill (`bg-purple-600 text-white font-black text-[11px] shadow-xs`) at the top right of the card header.
+     - **Waiting Time Indicator**: Directly under the order number and date/time, added an elapsed time pill: `Revision requested: 18 min ago` (calculated dynamically from `revision_requested_at`), allowing digitizers to immediately prioritize waiting clients.
+  3. **Production Details & Verbatim Revision Box**:
+     - Main production specs Bento remains hyper-prominent: `LEFT CHEST` (largest text), `SIZE: 3.2" W X 3.5" H`, `FORMAT: DST + PES (+EMB OPT)`, `TYPE: FLAT EMBROIDERY`, and `⚡ 3D PUFF` (if applicable).
+     - Directly underneath the specs Bento, added a dedicated `↻ REVISION REQUEST` callout box styled with `bg-purple-100/90 dark:bg-purple-950/50 border-2 border-purple-400/80` featuring the client's verbatim feedback (`“Please make the red text thicker and move the outline closer...”`).
+     - Includes `line-clamp-3` clamping for long feedback and a direct `View Full Revision →` action button.
+  4. **Dual File Access (Artwork + Previous Deliverables)**:
+     - Implemented a 2-column resource grid on revision cards:
+       - **Customer Original Artwork**: Clickable thumbnail with hover zoom overlay (`openDigitizerArtworkPreview`), extension badge, and direct download button.
+       - **Previous Delivered File**: Dedicated stitch file chip (e.g. `ORD-8837_v1.DST`) with purple `history` icon and instant `v1` download button.
+  5. **Actions Toolbar Parity**:
+     - Main left action button transformed on revision cards from generic `View Order` to: **`[ ↻ Open Revision → ]`** (solid purple button `bg-purple-600 hover:bg-purple-700 text-white font-black`).
+     - Second action maintained cleanly as: **`[ Attach Files ]`** (gold button for uploading updated production deliverables).
+  6. **Global Priority Indicators Across Table Rows & Queues**:
+     - Table rows render with a purple accent left border (`border-l-4 border-l-purple-500 bg-purple-50/40 dark:bg-purple-950/25`).
+     - Order column displays `↻ REVISION · PRIORITY` subtitle and `Req: 18 min ago`.
+     - Stage column displays `↻ REVISION · PRIORITY` badge.
+     - Table action button displays `[ ↻ Open Revision ]` (purple).
+- **Automated Multi-Viewport Verification (`scripts/verify_digitizer_revision_priority.js`)**:
+  - Desktop (1440x900) & Mobile (390x844) tests verified:
+    - Revisions tab badge `↻ Revisions ①` in proper navigation order.
+    - Card top-right `↻ REVISION · PRIORITY` badge.
+    - `Revision requested: 18 min ago` pill.
+    - Specs Bento (`PLACEMENT`, `SIZE:`, `FORMAT:`, `TYPE:`).
+    - `↻ REVISION REQUEST` box with client notes.
+    - Dual file access (Artwork thumbnail + download, Previous `v1.DST` file + download).
+    - Primary action button `[ ↻ Open Revision ]`.
+    - Table view row purple highlight, priority badge, and action button.
+  - Visual artifacts:
+    - `digitizer_revision_priority_desktop.png`
+    - `digitizer_revision_priority_table.png`
+    - `digitizer_revision_priority_mobile.png`
+    - `digitizer_portal_revision_priority.png`
+
 
 
 

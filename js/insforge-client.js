@@ -335,11 +335,13 @@ const INITIAL_DEMO_ORDERS = [
         sizing: '3.2" W x 3.5" H',
         fabric_type: 'Cotton / Oxford Pique',
         file_format: 'DST, PES, EMB',
-        instructions: 'Client reported minor thread pull on Left Chest crest. Please increase pull compensation to 0.40mm for pique knit.',
-        revision_notes: 'Client reported minor thread pull on Left Chest crest. Physical defect photos attached. Increase pull compensation to 0.40mm for pique knit.',
+        instructions: 'Please make the red text thicker and move the outline closer. Increase pull compensation to 0.40mm for pique knit.',
+        revision_notes: 'Please make the red text thicker and move the outline closer. Increase pull compensation to 0.40mm for pique knit.',
+        revision_requested_at: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
         raw_artwork_files: [
             { name: 'apex_shield_vector.png', url: 'logo.png', size: 115000 }
         ],
+        previous_deliverable: { name: 'ORD-8837_v1.DST', url: 'images/service-digitizing.png', format: 'DST' },
         stitch_out_photos: [
             { name: 'defect_thread_pull.jpg', url: 'logo.png', size: 95000 }
         ],
@@ -351,7 +353,7 @@ const INITIAL_DEMO_ORDERS = [
         assigned_digitizer_name: 'Digitizer',
         assigned_at: new Date(Date.now() - 3600000 * 2).toISOString(),
         status: 'revision_requested',
-        deliverables: [],
+        deliverables: [{ name: 'ORD-8837_v1.DST', url: 'images/service-digitizing.png', format: 'DST' }],
         created_at: new Date(Date.now() - 3600000 * 5).toISOString()
     },
     {

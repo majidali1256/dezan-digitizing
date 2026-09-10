@@ -307,6 +307,52 @@ body[data-worker-page] header a {
     color: #ffffff;
 }
 
+/* Enhanced Noticeability When At Least One Revision Exists */
+.digitizer-dist-pill.pill-revisions.has-revisions,
+.worker-filter-pill.pill-revisions.has-revisions {
+    background: #f3e8ff !important;
+    color: #581c87 !important;
+    border: 1.5px solid #a855f7 !important;
+    box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.4), 0 2px 8px rgba(147, 51, 234, 0.18) !important;
+}
+.digitizer-dist-pill.pill-revisions.has-revisions > span:last-child,
+.worker-filter-pill.pill-revisions.has-revisions > span:last-child,
+.pill-revisions span.badge-strong {
+    background: #7e22ce !important;
+    color: #ffffff !important;
+    font-weight: 900 !important;
+    padding: 2px 7px !important;
+    border-radius: 9999px !important;
+    box-shadow: 0 1px 4px rgba(126, 34, 206, 0.4) !important;
+}
+.digitizer-dist-pill.pill-revisions.has-revisions[aria-pressed="true"],
+.worker-filter-pill.pill-revisions.has-revisions.active {
+    background: #7e22ce !important;
+    color: #ffffff !important;
+    border-color: #6b21a8 !important;
+    box-shadow: 0 3px 12px rgba(126, 34, 206, 0.45) !important;
+}
+.digitizer-dist-pill.pill-revisions.has-revisions[aria-pressed="true"] > span:last-child,
+.worker-filter-pill.pill-revisions.has-revisions.active > span:last-child {
+    background: rgba(255, 255, 255, 0.3) !important;
+    color: #ffffff !important;
+}
+.dark .digitizer-dist-pill.pill-revisions.has-revisions,
+.dark .worker-filter-pill.pill-revisions.has-revisions {
+    background: rgba(126, 34, 206, 0.5) !important;
+    color: #f3e8ff !important;
+    border: 1.5px solid #c084fc !important;
+    box-shadow: 0 0 0 1px rgba(192, 132, 252, 0.4), 0 2px 8px rgba(147, 51, 234, 0.3) !important;
+}
+.dark .digitizer-dist-pill.pill-revisions.has-revisions > span:last-child,
+.dark .worker-filter-pill.pill-revisions.has-revisions > span:last-child,
+.dark .pill-revisions span.badge-strong {
+    background: #a855f7 !important;
+    color: #ffffff !important;
+    font-weight: 900 !important;
+}
+
+
 /* 4. In Production: Technical Blue */
 .digitizer-dist-pill.pill-production,
 .worker-filter-pill.pill-production {
