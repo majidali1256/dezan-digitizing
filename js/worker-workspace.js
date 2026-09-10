@@ -206,13 +206,23 @@
     function applyWorkerMasking(task) {
         const orderNumber = task.order_number || task.orderNumber || (task.taskId ? task.taskId.replace('TSK-', 'ORD-') : 'ORD-8492');
         const idSuffix = String(orderNumber).replace(/[^0-9]/g, '').slice(-4) || '1234';
-        const designName = task.design_name || task.designName || task.placement || task.service_type || 'Custom Embroidery';
+        const designName = task.design_name || task.designName || task.project_name || task.projectName || 'Custom Embroidery';
+        
+        let placement = task.placement || task.target_placement || task.targetPlacement;
+        if (!placement || placement.toLowerCase().includes('digitizing') || placement.toLowerCase().includes('custom') || placement === 'Standard') {
+            const dName = (designName || '').toLowerCase();
+            if (dName.includes('cap') || dName.includes('hat')) placement = 'Cap Front';
+            else if (dName.includes('jacket') || dName.includes('back')) placement = 'Jacket Back';
+            else if (dName.includes('sleeve')) placement = 'Sleeve';
+            else placement = 'Left Chest';
+        }
+
         const targetFabric = task.target_fabric || task.targetFabric || task.fabric_type || task.fabricType || 'Pique Polo Knit';
-        const targetFormat = task.target_format || task.targetFormat || task.file_format || task.fileFormat || 'DST, EMB';
-        const dimensions = task.dimensions || task.sizing || '3.5" W x 2.2" H';
+        const targetFormat = task.target_format || task.targetFormat || task.file_format || task.fileFormat || 'DST + PES';
+        const dimensions = task.dimensions || task.sizing || '4.0" WIDE';
         const instructions = task.special_instructions || task.instructions || task.revision_notes || task.revisionNotes || 'Keep stitch density balanced for pique polo; minimal jump stitches on lettering.';
         const serviceType = task.service_type || task.serviceType || 'Digitizing';
-        const artworkUrl = task.artwork_url || (Array.isArray(task.rawArtworkFiles) && task.rawArtworkFiles[0]?.url) || (Array.isArray(task.raw_artwork_files) && task.raw_artwork_files[0]?.url) || 'images/left-chest-logos.png';
+        const artworkUrl = task.artwork_url || (Array.isArray(task.rawArtworkFiles) && task.rawArtworkFiles[0]?.url) || (Array.isArray(task.raw_artwork_files) && task.raw_artwork_files[0]?.url) || 'images/service-digitizing.png';
         const deliverableUrl = task.deliverable_url || (Array.isArray(task.deliverables) && task.deliverables[0]?.url) || artworkUrl;
 
         const isRush = task.turnaround_speed === 'rush' || task.turnaroundSpeed === 'rush' || task.priority === 'rush' || task.is_rush === true || task.isRush === true;
@@ -228,7 +238,7 @@
             order_number: orderNumber,
             orderNumber: orderNumber,
             design_name: designName,
-            placement: designName,
+            placement: placement,
             service_type: serviceType,
             serviceType: serviceType,
             target_fabric: targetFabric,
@@ -268,47 +278,51 @@
             {
                 id: 'task-201',
                 order_number: 'ORD-8492',
-                design_name: 'Apex Mountain Gear Left Chest',
+                design_name: 'Apex Mountain Gear',
                 service_type: 'Digitizing',
                 plan: 'Hat / Left Chest Logos',
                 status: 'in_progress',
                 priority: 'normal',
+                placement: 'Left Chest',
                 created_at: new Date(Date.now() - 3600000 * 3).toISOString(),
-                artwork_url: 'images/left-chest-logos.png',
-                target_fabric: 'Pique Polo Knit',
-                dimensions: '3.5" W x 2.2" H',
-                target_format: 'DST & EMB',
-                special_instructions: 'Keep stitch density balanced for pique polo; minimal jump stitches on lettering.'
+                artwork_url: 'images/service-digitizing.png',
+                target_fabric: 'Pique Polo',
+                dimensions: '4.0" WIDE',
+                target_format: 'DST + PES',
+                special_instructions: 'Keep the small text clear and add trims between all letters. Avoid excessive density on small satin borders.'
             },
             {
                 id: 'task-202',
                 order_number: 'ORD-8488',
-                design_name: 'Timberline Tactical Cap Emblem',
+                design_name: 'Timberline Tactical Cap',
                 service_type: 'Digitizing',
                 plan: 'Hat / Left Chest Logos',
                 status: 'in_progress',
                 priority: 'rush',
+                placement: 'Cap Front',
                 created_at: new Date(Date.now() - 3600000 * 6).toISOString(),
-                artwork_url: 'images/custom-hats.png',
-                target_fabric: 'Structured 6-Panel Cap (Twill)',
-                dimensions: '2.25" H x 4.0" W',
+                artwork_url: 'images/service-digitizing.png',
+                target_fabric: 'Structured 6-Panel Cap',
+                dimensions: '3.5" W × 2.2" H',
                 target_format: 'DST',
-                special_instructions: 'Center out sequence for structured cap frame. Add extra pull comp for cap center seam.'
+                special_options: ['3D Puff', 'Trims Between All Letters'],
+                special_instructions: '3D Puff cap design. Center out sequence for structured cap frame. Add extra pull comp for cap center seam.'
             },
             {
                 id: 'task-204',
                 order_number: 'ORD-8482',
-                design_name: 'Metro Fire Rescue Emblem',
-                service_type: 'Vectorizing',
-                plan: 'Vector Artwork',
+                design_name: 'Metro Fire Rescue Shield',
+                service_type: 'Digitizing',
+                plan: 'Jacket Backs',
                 status: 'in_progress',
                 priority: 'normal',
+                placement: 'Jacket Back',
                 created_at: new Date(Date.now() - 3600000 * 9).toISOString(),
-                artwork_url: 'images/commercial-multi-head-embroidery-machine.jpeg',
-                target_fabric: 'Screen Print / Sublimation Film',
-                dimensions: '12.0" W x 10.0" H',
-                target_format: 'AI, EPS, SVG, PDF',
-                special_instructions: 'Convert raster crest to clean CMYK vector paths with closed outlines and grouped color layers.'
+                artwork_url: 'images/service-digitizing.png',
+                target_fabric: 'Heavy Twill',
+                dimensions: '11.0" W × 9.5" H',
+                target_format: 'DST + EMB',
+                special_instructions: 'Clean tatami fills on the shield background with satin outlines. Group color stops logically.'
             },
             {
                 id: 'task-205',
@@ -318,11 +332,12 @@
                 plan: 'Jacket Backs',
                 status: 'revision_requested',
                 priority: 'rush',
+                placement: 'Jacket Back',
                 created_at: new Date(Date.now() - 3600000 * 14).toISOString(),
-                artwork_url: 'images/jacket-backs.png',
+                artwork_url: 'images/service-digitizing.png',
                 target_fabric: 'Fleece Pullover',
-                dimensions: '6.5" W x 4.5" H',
-                target_format: 'DST, EMB, PES',
+                dimensions: '6.5" W × 4.5" H',
+                target_format: 'DST + PES',
                 special_instructions: 'Increase tatami underlay density by +0.05mm to stop looping on thick fleece substrate.',
                 revision_notes: 'Lettering sank slightly into the fleece pile. Please thicken satin columns and add double tatami grid underlay.'
             },
@@ -669,7 +684,7 @@
         `;
     }
 
-    // Worker Bento Card Component (Strictly Sanitized: Zero client PII, zero pricing, compact ~220px resting height)
+    // Worker Bento Card Component (Production First: Prominent Placement, Exact Size, Requested Formats, 3D Puff, Artwork Thumbnail, Verbatim Notes)
     function renderWorkerTaskCard(task, isCompleted) {
         const isRevision = task.status === 'revision_requested' || !!task.revision_notes;
         const isRush = task.isRush || task.turnaround_speed === 'rush' || task.priority === 'rush';
@@ -706,27 +721,79 @@
             statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> New Order</span>';
         }
 
-        // Raw artwork
+        // Date and Time
+        const orderDt = formatOrderDateTime(task.created_at);
+
+        // 1. PLACEMENT (Hero production detail - largest text on card)
+        let placement = task.placement || task.target_placement || task.targetPlacement;
+        if (!placement || placement.toLowerCase().includes('digitizing') || placement.toLowerCase().includes('custom') || placement === 'Standard') {
+            const dName = (task.design_name || task.designName || '').toLowerCase();
+            if (dName.includes('cap') || dName.includes('hat')) placement = 'Cap Front';
+            else if (dName.includes('jacket') || dName.includes('back')) placement = 'Jacket Back';
+            else if (dName.includes('sleeve')) placement = 'Sleeve';
+            else placement = 'Left Chest';
+        }
+        const placementUpper = String(placement).trim().toUpperCase();
+
+        const designTitle = task.design_name || task.designName || '';
+
+        // 2. SIZE
+        const sizeVal = task.dimensions || task.sizing || '4.0" WIDE';
+
+        // 3. FILE FORMAT
+        const instructionsText = `${task.instructions || ''} ${task.special_instructions || ''} ${task.specialOptions || ''} ${task.notes || ''}`;
+        const reqFormats = parseRequestedFormats(task.target_format || task.fileFormat || task.file_format || 'DST', instructionsText);
+        const machineFormats = reqFormats.filter(f => !['PDF', 'JPG', 'JPEG', 'PNG', 'WEBP', 'EMB', 'ZIP'].includes(f));
+        if (machineFormats.length === 0) machineFormats.push('DST');
+        const formatDisplay = machineFormats.join(' + ') + (reqFormats.includes('EMB') ? ' (+EMB opt)' : '');
+
+        // 4. EMBROIDERY TYPE / SPECIAL OPTION (3D Puff, Appliqué, Trims)
+        const allNotesLower = `${task.special_options || ''} ${task.specialOptions || ''} ${task.embroidery_type || ''} ${task.special_instructions || ''} ${task.instructions || ''} ${task.notes || ''} ${task.revision_notes || ''}`.toLowerCase();
+        const is3dPuff = allNotesLower.includes('3d puff') || allNotesLower.includes('puff') || allNotesLower.includes('foam');
+        const isApplique = allNotesLower.includes('appliqu');
+        const hasTrims = allNotesLower.includes('trim');
+
+        let typeText = 'FLAT EMBROIDERY';
+        let specialBadgeHtml = '';
+        if (is3dPuff) {
+            typeText = '3D PUFF';
+            specialBadgeHtml = `
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-500/25 text-amber-950 dark:text-primary border border-amber-500/50 font-black text-[11px] tracking-wide shrink-0 shadow-2xs">
+                    <span class="text-amber-600 dark:text-primary font-bold">⚡</span>
+                    <span>3D PUFF</span>
+                </span>
+            `;
+        } else if (isApplique) {
+            typeText = 'APPLIQUÉ';
+            specialBadgeHtml = `
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-purple-500/20 text-purple-900 dark:text-purple-300 border border-purple-500/40 font-black text-[11px] tracking-wide shrink-0 shadow-2xs">
+                    <span>🧵</span>
+                    <span>APPLIQUÉ</span>
+                </span>
+            `;
+        }
+
+        // Fabric / Substrate
+        const fabricVal = task.target_fabric || task.fabric_type || task.fabricType || 'Pique Polo';
+
+        // 5. CUSTOMER ARTWORK (Thumbnail + Tap to Enlarge + Download)
         const rawFiles = (Array.isArray(task.raw_artwork_files) && task.raw_artwork_files.length > 0)
             ? task.raw_artwork_files
             : (Array.isArray(task.rawArtworkFiles) && task.rawArtworkFiles.length > 0)
                 ? task.rawArtworkFiles
                 : [{ name: 'artwork.png', url: task.artwork_url || 'images/service-digitizing.png' }];
         const primaryArt = rawFiles[0] || { name: 'artwork.png', url: 'images/service-digitizing.png' };
-        const artExt = getFileExtension(primaryArt.name) || 'ART';
+        const artUrl = primaryArt.url || task.artwork_url || 'images/service-digitizing.png';
+        const artName = primaryArt.name || 'artwork.png';
+        const artExt = (getFileExtension(artName) || 'PNG').toUpperCase();
+        const isImage = ['PNG', 'JPG', 'JPEG', 'WEBP', 'GIF', 'SVG'].includes(artExt);
 
-        // Requested Formats
-        const instructionsText = `${task.instructions || ''} ${task.special_instructions || ''} ${task.specialOptions || ''} ${task.notes || ''}`;
-        const reqFormats = parseRequestedFormats(task.target_format || task.fileFormat || task.file_format || 'DST', instructionsText);
-        const reqFormatsBadges = reqFormats.map(f => {
-            if (f === 'EMB') return `<span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-dashed border-slate-300 dark:border-slate-700">.EMB (Opt)</span>`;
-            return `<span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/30">.${f}</span>`;
-        }).join(' ');
-
-        const orderDt = formatOrderDateTime(task.created_at);
-        const designTitle = task.design_name || task.designName || task.placement || 'Custom Embroidery';
-        const cleanReqString = reqFormats.filter(f => f !== 'EMB').join(' · ') || 'DST';
-        const clientNotes = (task.instructions || task.special_instructions || task.notes || '').replace(/Standard commercial digitizing standards apply.*$/i, '').trim();
+        // 6. CUSTOMER INSTRUCTIONS (Sanitized, 2-3 lines clamped with ...)
+        const clientNotes = (task.instructions || task.special_instructions || task.notes || '')
+            .replace(/Standard commercial digitizing standards apply.*$/i, '')
+            .trim();
+        const hasNotes = clientNotes.length > 0;
+        const isLongNotes = clientNotes.length > 110 || (clientNotes.match(/\n/g) || []).length >= 2;
 
         // Deliverables files list if any
         const deliverables = task.deliverables || [];
@@ -734,7 +801,6 @@
 
         return `
             <div id="digitizer-card-${orderNum}" class="digitizer-bento-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark ${cardThemeClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
-                <!-- Collapsed Essential Card Body -->
                 <div>
                     <!-- Header Bar: ID, Date & Time, Badges -->
                     <div class="flex items-start justify-between gap-2 mb-2">
@@ -753,31 +819,114 @@
                         </div>
                     </div>
 
-                    <!-- Project Title & Placement Specs -->
-                    <div class="mb-2">
-                        <h4 class="font-black text-slate-900 dark:text-white text-sm group-hover:text-amber-800 dark:group-hover:text-primary transition-colors leading-snug truncate" title="${escapeHtml(designTitle)}">${escapeHtml(designTitle)}</h4>
-                        <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            <span class="font-bold text-slate-700 dark:text-slate-300">${task.service_type || task.serviceType || 'Digitizing'}</span>
-                            <span>·</span>
-                            <span class="font-semibold text-slate-800 dark:text-slate-200">${task.placement || 'Left Chest'}</span>
+                    <!-- HERO PRODUCTION DETAIL: PLACEMENT (Bold & Prominent) -->
+                    <div class="mt-2 mb-2">
+                        <div class="text-[10px] font-black uppercase tracking-wider text-amber-800 dark:text-primary">Placement</div>
+                        <div class="text-lg sm:text-xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-snug">
+                            ${escapeHtml(placementUpper)}
                         </div>
-                        <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-                            <span class="inline-block text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono">${task.dimensions || task.sizing || '3.5" W'}</span>
-                            ${reqFormatsBadges}
+                        ${designTitle && designTitle.toUpperCase() !== placementUpper ? `
+                            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 truncate mt-0.5" title="${escapeHtml(designTitle)}">
+                                ${escapeHtml(designTitle)}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- PRODUCTION LABELS BENTO: SIZE, FORMAT, TYPE & FABRIC -->
+                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200/80 dark:border-primary/20 space-y-2 mb-2.5">
+                        <!-- SIZE & SPECIAL OPTION BADGE -->
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-baseline gap-1.5 min-w-0">
+                                <span class="font-bold text-slate-500 dark:text-slate-400 text-[11px] tracking-wider shrink-0">SIZE:</span>
+                                <span class="font-black text-slate-900 dark:text-white text-xs sm:text-sm uppercase truncate">${escapeHtml(sizeVal)}</span>
+                            </div>
+                            ${specialBadgeHtml}
+                        </div>
+
+                        <!-- FORMAT: Requested Machine Formats -->
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="font-bold text-slate-500 dark:text-slate-400 text-[11px] tracking-wider shrink-0">FORMAT:</span>
+                            <span class="font-black text-amber-950 dark:text-primary text-xs sm:text-sm tracking-wide uppercase">${escapeHtml(formatDisplay)}</span>
+                        </div>
+
+                        <!-- TYPE & FABRIC -->
+                        <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-200/60 dark:border-primary/10 text-xs">
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <span class="font-bold text-slate-500 dark:text-slate-400 text-[11px] tracking-wider shrink-0">TYPE:</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-200 uppercase truncate text-[11.5px]">${typeText}</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[130px] sm:max-w-[150px]" title="${escapeHtml(fabricVal)}">
+                                <span class="font-semibold text-slate-400 dark:text-slate-500">FABRIC:</span> ${escapeHtml(fabricVal)}
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Compact Due & Substrate Alert Strip -->
-                    <div class="flex items-center justify-between py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-primary/15 text-[11px] text-slate-600 dark:text-slate-400 mb-1">
-                        <span class="flex items-center gap-1">
-                            <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">timer</span>
-                            <span>${isRush ? '⚡ 5–8 Hours' : '12–24 Hours'}</span>
-                        </span>
-                        <span class="text-slate-500 dark:text-slate-400 truncate max-w-[130px] font-medium">Fabric: ${task.target_fabric || task.fabric_type || 'Pique Polo'}</span>
+                    <!-- CUSTOMER ARTWORK THUMBNAIL (Tap to enlarge in lightbox, direct download) -->
+                    <div class="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-primary/20 flex items-center justify-between gap-2.5 mb-2.5 shadow-2xs">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div onclick="window.workerWorkspace.openDigitizerArtworkPreview('${orderNum}', 0)" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shrink-0 cursor-pointer group/art hover:ring-2 hover:ring-amber-500/50 transition-all" title="Click to view artwork full size">
+                                ${isImage ? `
+                                    <img src="${artUrl}" alt="Artwork thumbnail" class="w-full h-full object-contain p-1 group-hover/art:scale-110 transition-transform" loading="lazy" />
+                                    <div class="absolute inset-0 bg-black/0 group-hover/art:bg-black/30 transition-colors flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-white text-base opacity-0 group-hover/art:opacity-100 transition-opacity drop-shadow">zoom_in</span>
+                                    </div>
+                                ` : `
+                                    <div class="flex flex-col items-center justify-center text-center p-1">
+                                        <span class="material-symbols-outlined text-base text-amber-600 dark:text-primary">description</span>
+                                        <span class="font-mono text-[9px] font-black uppercase text-slate-600 dark:text-slate-300">${artExt}</span>
+                                    </div>
+                                `}
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="px-1.5 py-0.2 rounded font-mono text-[9px] font-black uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">${artExt}</span>
+                                    <span class="text-xs font-bold text-slate-900 dark:text-white truncate max-w-[120px] sm:max-w-[150px]" title="${escapeHtml(artName)}">${escapeHtml(artName)}</span>
+                                </div>
+                                <button type="button" onclick="window.workerWorkspace.openDigitizerArtworkPreview('${orderNum}', 0)" class="text-[11px] font-semibold text-amber-700 dark:text-primary hover:underline cursor-pointer flex items-center gap-0.5 mt-0.5">
+                                    <span class="material-symbols-outlined text-[12px]">visibility</span>
+                                    <span>Tap to enlarge</span>
+                                </button>
+                            </div>
+                        </div>
+                        <a href="${artUrl}" download="${escapeHtml(artName)}" target="_blank" onclick="event.stopPropagation()" class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-colors shrink-0" title="Download original artwork file">
+                            <span class="material-symbols-outlined text-xs">download</span>
+                            <span>Download</span>
+                        </a>
                     </div>
+
+                    <!-- CUSTOMER INSTRUCTIONS: 2-3 lines visible with line-clamp -->
+                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-primary/15 text-xs mb-2">
+                        <div class="flex items-center justify-between text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                            <span class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[13px] text-amber-600 dark:text-primary">chat</span>
+                                <span>Customer Notes:</span>
+                            </span>
+                            ${isLongNotes ? `
+                                <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="text-[10.5px] font-bold text-amber-700 dark:text-primary hover:underline cursor-pointer">
+                                    View Full Instructions →
+                                </button>
+                            ` : ''}
+                        </div>
+                        <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed ${isLongNotes ? 'line-clamp-3' : ''}" style="${isLongNotes ? 'display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;' : ''}">
+                            ${escapeHtml(hasNotes ? clientNotes : 'Standard commercial digitizing. Follow artwork contours.')}
+                        </p>
+                    </div>
+
+                    <!-- REVISION FEEDBACK ALERT (If applicable) -->
+                    ${isRevision && (task.revision_notes || task.revisionNotes) ? `
+                        <div class="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/40 text-xs mb-2">
+                            <div class="text-[10.5px] font-bold text-purple-900 dark:text-purple-300 flex items-center gap-1 mb-0.5">
+                                <span class="material-symbols-outlined text-xs text-purple-600 dark:text-purple-400">warning</span>
+                                <span>Revision Feedback:</span>
+                            </div>
+                            <p class="text-xs text-purple-950 dark:text-purple-200 line-clamp-2 leading-tight">
+                                ${escapeHtml(task.revision_notes || task.revisionNotes)}
+                            </p>
+                        </div>
+                    ` : ''}
                 </div>
 
-                <!-- Actions Toolbar (Always Visible on Compact Card) -->
+                <!-- ACTIONS TOOLBAR: View Order (left) + Attach Files (right) -->
                 <div class="pt-2.5 border-t border-slate-100 dark:border-primary/10 flex items-center justify-between gap-2 mt-2">
                     <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors" title="Open full dedicated work order">
                         <span>View Order</span>
@@ -787,7 +936,7 @@
                         ${!isCompleted ? `
                             <button type="button" onclick="window.workerWorkspace.openDeliverableUploadModal('${orderNum}')" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1.5 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer focus-visible:outline-2 focus-visible:outline-primary" title="Attach production deliverables (.DST, PDF, JPG)">
                                 <span class="material-symbols-outlined text-sm">cloud_upload</span>
-                                <span>Attach Deliverables</span>
+                                <span>Attach Files</span>
                             </button>
                         ` : `
                             <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 text-xs font-bold inline-flex items-center gap-1 cursor-pointer" title="View delivered files">
@@ -1030,6 +1179,58 @@
                 </div>
             `;
             document.body.insertAdjacentHTML('beforeend', zoomHtml);
+        }
+
+        if (!document.getElementById('digitizer-artwork-preview-modal')) {
+            const previewModalHtml = `
+                <div id="digitizer-artwork-preview-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-5" onclick="if(event.target === this) window.workerWorkspace.closeDigitizerArtworkPreview()">
+                    <div class="relative w-full max-w-5xl h-[88vh] bg-[#0f172a] rounded-2xl border border-slate-700/80 shadow-2xl flex flex-col overflow-hidden text-slate-100">
+                        <div class="px-5 py-3 bg-slate-900/90 border-b border-slate-700/80 flex items-center justify-between gap-3 shrink-0">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span id="digitizer-preview-format-badge" class="px-2 py-0.5 rounded-md font-mono text-[11px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">PNG</span>
+                                <div class="min-w-0">
+                                    <h4 id="digitizer-preview-filename" class="text-sm font-bold text-white truncate max-w-[220px] sm:max-w-md">Artwork_Primary.png</h4>
+                                    <p id="digitizer-preview-filesize" class="text-[11px] text-slate-400 font-mono">Production Asset</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <div id="digitizer-preview-nav-controls" class="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700 rounded-lg px-2 py-1">
+                                    <button type="button" id="digitizer-preview-prev-btn" onclick="window.workerWorkspace.navigateDigitizerArtworkPreview(-1)" class="p-1 rounded hover:bg-slate-700 text-slate-300 disabled:opacity-30 cursor-pointer">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                    </button>
+                                    <span id="digitizer-preview-counter" class="text-xs font-mono font-bold text-slate-300 px-1">1 / 1</span>
+                                    <button type="button" id="digitizer-preview-next-btn" onclick="window.workerWorkspace.navigateDigitizerArtworkPreview(1)" class="p-1 rounded hover:bg-slate-700 text-slate-300 disabled:opacity-30 cursor-pointer">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                    </button>
+                                </div>
+                                <a id="digitizer-preview-download-btn" href="#" download class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                    <span>Download</span>
+                                </a>
+                                <button type="button" onclick="window.workerWorkspace.closeDigitizerArtworkPreview()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white cursor-pointer">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex-1 relative overflow-hidden flex items-center justify-center p-4" style="background-color: #0b0f17; background-image: linear-gradient(45deg, #131b2a 25%, transparent 25%), linear-gradient(-45deg, #131b2a 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #131b2a 75%), linear-gradient(-45deg, transparent 75%, #131b2a 75%); background-size: 24px 24px;">
+                            <div id="digitizer-preview-image-container" class="w-full h-full flex items-center justify-center overflow-auto p-2">
+                                <img id="digitizer-preview-img" src="" alt="Artwork preview" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl" />
+                            </div>
+                            <div id="digitizer-preview-pdf-container" class="w-full h-full hidden flex flex-col p-1">
+                                <iframe id="digitizer-preview-pdf-iframe" src="" class="w-full h-full border-0 rounded-xl bg-white shadow-xl"></iframe>
+                            </div>
+                            <div id="digitizer-preview-fallback-container" class="max-w-md w-full p-6 rounded-2xl bg-slate-900/95 border border-slate-700 shadow-2xl text-center hidden">
+                                <h4 id="digitizer-fallback-filename" class="text-base font-bold text-white mb-1 truncate">Artwork_Source.ai</h4>
+                                <p class="text-xs text-slate-400 mb-5 leading-relaxed">Source vector / production file (<span id="digitizer-fallback-ext" class="font-bold text-amber-400">AI</span>).</p>
+                                <a id="digitizer-fallback-download-btn" href="#" download class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 cursor-pointer">
+                                    <span>Download File</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', previewModalHtml);
         }
     }
 

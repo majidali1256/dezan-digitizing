@@ -2014,4 +2014,52 @@ The Worker Studio provides an isolated, production-focused environment for embro
        - `admin_view_order_modal_verified.png`
        - `admin_modal_assign_digitizer_verified.png`
 
+### 35.12 Digitizer Portal Task Cards: Production-First Information Architecture (Live & Verified)
+- **User Mandate & Problem Statement**:
+  - *"Please make a few changes only in the Digitizer Portal task cards. The current layout is good, so I do not want a redesign. I just want the most important production information to be much more prominent."*
+  - *"The digitizer should normally be able to start work directly from the task card without opening View Order. He should only need to open View Order when the customer's description/instructions are long or when he needs additional details."*
+  - *"Right now 'Custom Embroidery Digitizing' is the largest text, but that information isn't very useful because almost every task is digitizing anyway. Make LEFT CHEST / CAP FRONT / JACKET BACK the largest production detail instead."*
+  - Scope: Strictly modify Digitizer Portal task cards (`worker-tasks.html`, `worker-portal.html`, `js/worker-workspace.js`). Do not alter Client or Admin cards.
+- **Architectural Implementation**:
+  1. **Visual Priority Hierarchy (The Production Scan Sequence)**:
+     - **PLACEMENT**: Made the absolute largest, boldest production headline on the card (`text-lg sm:text-xl font-black tracking-wide uppercase text-slate-900 dark:text-white`). Examples: `LEFT CHEST`, `CAP FRONT`, `JACKET BACK`, `CAP SIDE`, `HOODIE SLEEVE`. Accompanied by a tiny uppercase subtitle `PLACEMENT & WORK AREA`. Replaces the redundant "Custom Embroidery Digitizing" headline.
+     - **SIZE**: High-contrast badge displaying the exact dimensions submitted by the client in bold uppercase (e.g. `SIZE: 4.0” WIDE` or `SIZE: 3.5” W × 2.2” H`).
+     - **FILE FORMAT**: High-contrast machine format pill displaying requested stitch output formats (e.g. `FORMAT: DST + PES` or `FORMAT: DST (+EMB OPT)`).
+     - **EMBROIDERY TYPE / SPECIAL OPTION**:
+       - Standard flat stitch orders display `TYPE: FLAT EMBROIDERY`.
+       - Special option orders (e.g. 3D Puff, Appliqué, Trims) display a high-visibility amber/yellow callout pill: `⚡ 3D PUFF` (`bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/40 font-black`).
+       - Fabric substrate displayed in clean monospace tag (e.g. `FABRIC: Pique Polo`).
+     - **CUSTOMER ARTWORK THUMBNAIL**:
+       - Embedded a small interactive thumbnail (`w-11 h-11` or `w-12 h-12`) of the customer's uploaded logo directly inside the card.
+       - Tapping the thumbnail triggers `openDigitizerArtworkPreview(orderNum, 0)`, opening the in-dashboard Lightbox modal with zoom and high-res preview.
+       - Artwork row includes format chip (`PNG`, `JPG`, `AI`, `PDF`), filename, `Tap to enlarge` label, and direct `Download` button (`onclick="event.stopPropagation()"`).
+     - **CUSTOMER INSTRUCTIONS (Verbatim Notes)**:
+       - Client description displayed directly on the card in a clean callout box.
+       - Shows first 2–3 lines visible with CSS `line-clamp-3` ellipsis overflow.
+       - If instructions exceed 110 characters, renders an unobtrusive `View Full Instructions →` shortcut that opens the full work order modal.
+       - Sanitized to permanently filter out technical physics/density boilerplate.
+     - **ACTIONS TOOLBAR**:
+       - Preserves the single-button-per-purpose rule: Left: `[ View Order → ]` (opens full work order specifications); Right: `[ Attach Files ]` (opens deliverables upload modal with QA file checks) or `[ Files (N) ]` for completed tasks.
+  2. **Data & Fallback Harmonization**:
+     - Updated `applyWorkerMasking` in `js/worker-workspace.js` to preserve `task.placement` / `task.target_placement` instead of masking it with the generic design title.
+     - Enhanced `getFallbackTasks()` and `getDigitizerFallbackTasks()` with realistic production placement data (`Left Chest`, `Cap Front`, `Jacket Back`, `Cap Side`), dimensions (`4.0" WIDE`, `3.5" W × 2.2" H`, `10.5" W × 8.0" H`), format combos (`DST + PES`, `DST + EXP`, `DST + JEF`), and 3D Puff special options.
+     - Injected `#digitizer-artwork-preview-modal` dynamically via `ensureModalsExist()` in `js/worker-workspace.js` if not statically in DOM.
+- **Automated Playwright Multi-Viewport Verification (`scripts/verify_digitizer_task_cards.js`)**:
+  - Tested across Desktop (1440x900) and Mobile (390x844) on both `worker-tasks.html` and `worker-portal.html`:
+    - Verified 34 digitizer cards rendered with bold `PLACEMENT` headlines.
+    - Verified `SIZE:`, `FORMAT:`, and `TYPE:` labels are present and prominent.
+    - Verified `⚡ 3D PUFF` callout badges render on 3D foam orders.
+    - Verified customer notes callout rendered with `line-clamp-3` and `View Full Instructions →` link.
+    - Verified interactive artwork thumbnail with `openDigitizerArtworkPreview` trigger and working `Download` link.
+    - Verified Lightbox modal opens cleanly upon clicking thumbnail.
+    - Verified `[ View Order → ]` opens full technical specs modal with 0 duplicate "Details" buttons.
+    - Visual artifacts captured:
+      - `digitizer_prominent_cards_desktop.png`
+      - `digitizer_card_lightbox_verified.png`
+      - `digitizer_view_order_modal_verified.png`
+      - `digitizer_prominent_cards_mobile.png`
+      - `digitizer_portal_prominent_cards_desktop.png`
+
+
+
 
