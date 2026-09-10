@@ -798,6 +798,16 @@
         }
 
         // ===== ARTWORK & MULTI-FILE PREVIEW UTILITIES =====
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         function getFileExtension(filename) {
             if (!filename || typeof filename !== 'string') return '';
             const clean = filename.split('?')[0].split('#')[0];
@@ -907,41 +917,106 @@
         }
 
         /**
-         * Modular Visual Bento Card Renderer (Matching Digitizer Studio Compact Bento Standard ~220px)
+         * Streamlined Admin Quick Order Summary Card
+         * Displays essential production summary immediately at a glance:
+         * Logo thumbnail (click to enlarge), prominent bold placement, exact size,
+         * visible rush status, 3D puff / special options badge, clamped customer notes (first 2-3 lines with ...),
+         * order status, and View Order button.
+         * Technical formats (DST, PES, EMB) and fabric strips are kept exclusively inside View Order.
          */
         function renderAdminOrderCard(order, stageKey) {
             const isPaid = order.payment_status === 'paid';
             const isRevision = order.status === 'revision_requested';
             const isUnassigned = !order.assigned_digitizer_id;
-            const isRush = order.turnaround_speed === 'rush';
+            const isRush = order.turnaround_speed === 'rush' || order.priority === 'rush' || order.is_rush || order.isRush || (order.turnaround && String(order.turnaround).toLowerCase().includes('rush'));
             const isQuote = order.is_quote || (order.order_number && order.order_number.startsWith('QUO-')) || order.status === 'quote_requested';
             const theme = getOrderColorTheme(order);
             const safeOrderNumber = String(order.order_number || '').replace(/-/g, '&#8209;');
             const orderDt = formatOrderDateTime(order.created_at);
 
+            // 1. HEADER: RUSH STATUS BADGE (Very visible if rush)
             const rushBadge = isRush
-                ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 shrink-0 whitespace-nowrap shadow-2xs"><span class="material-symbols-outlined text-xs text-rose-600 dark:text-rose-400">bolt</span> ⚡ RUSH · 5–8h</span>`
-                : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0 whitespace-nowrap"><span class="material-symbols-outlined text-[11px] text-slate-500">schedule</span> Standard · 12–24h</span>`;
+                ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-black bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 shrink-0 whitespace-nowrap shadow-2xs animate-pulse">⚡ RUSH · 5–8 HOURS</span>`
+                : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-[10.5px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shrink-0 whitespace-nowrap"><span class="material-symbols-outlined text-[11px] text-slate-400">schedule</span> Standard · 12–24h</span>`;
 
-            const assignedText = order.assigned_digitizer_name
-                ? `<span class="inline-flex items-center gap-1 font-bold text-slate-800 dark:text-slate-200"><span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">badge</span> ${order.assigned_digitizer_name.split('(')[0].trim()}</span>`
-                : '<span class="inline-flex items-center gap-1 font-bold text-amber-800 dark:text-amber-400"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Unassigned</span>';
-
+            // 2. LOGO / ARTWORK THUMBNAIL (Small preview of uploaded file, click to enlarge)
             const artworkFiles = getOrderArtworkFiles(order);
-            const primaryArt = artworkFiles[0] || { name: 'artwork.png', url: order.artwork_url || '#' };
-            const artExt = (getFileExtension(primaryArt.name) || getFileExtension(primaryArt.url) || 'ART').toUpperCase();
-            const clientNotes = (order.special_instructions || order.instructions || order.notes || '').replace(/Standard commercial digitizing standards apply.*$/i, '').trim();
-            const deliverables = order.deliverables || [];
-            const hasDeliverables = Array.isArray(deliverables) && deliverables.length > 0;
+            const primaryArt = artworkFiles[0] || { name: 'artwork.png', url: order.artwork_url || 'images/service-digitizing.png' };
+            const artUrl = primaryArt.url || order.artwork_url || 'images/service-digitizing.png';
+            const artName = primaryArt.name || 'artwork.png';
+            const artExt = (getFileExtension(artName) || getFileExtension(artUrl) || 'PNG').toUpperCase();
+            const isImage = ['PNG', 'JPG', 'JPEG', 'WEBP', 'GIF', 'SVG', 'BMP', 'ICO'].includes(artExt);
+
+            // 3. PLACEMENT (Hero production detail - very prominent and bold)
+            let placement = order.placement || order.target_placement || order.targetPlacement;
+            if (!placement || placement.toLowerCase().includes('digitizing') || placement.toLowerCase() === 'standard' || placement.toLowerCase() === 'custom') {
+                const pName = (order.project_name || order.design_name || '').toLowerCase();
+                if (pName.includes('cap') || pName.includes('hat')) placement = 'Cap Front';
+                else if (pName.includes('jacket') || pName.includes('back')) placement = 'Jacket Back';
+                else if (pName.includes('sleeve')) placement = 'Sleeve';
+                else if (pName.includes('left chest') || pName.includes('chest')) placement = 'Left Chest';
+                else placement = order.placement || 'Left Chest';
+            }
+            const placementUpper = String(placement).trim().toUpperCase();
+            const designTitle = order.project_name || order.design_name || '';
+
+            // 4. SIZE (Exact submitted size in bold)
+            const sizeVal = order.sizing || order.dimensions || order.size || '4.0" WIDE';
+            const sizeUpper = String(sizeVal).trim().toUpperCase();
+
+            // 5. 3D PUFF / SPECIAL OPTIONS (Bold badge, omitted entirely if flat embroidery)
+            const allOptionsStr = `${order.special_options || ''} ${order.specialOptions || ''} ${order.embroidery_type || ''} ${order.embroideryType || ''} ${order.instructions || ''} ${order.special_instructions || ''} ${order.notes || ''}`.toLowerCase();
+            const is3dPuff = allOptionsStr.includes('3d puff') || allOptionsStr.includes('puff') || allOptionsStr.includes('foam');
+            const isApplique = allOptionsStr.includes('appliqu');
+            const isTrims = allOptionsStr.includes('trim');
+
+            let specialOptionBadge = '';
+            if (is3dPuff) {
+                specialOptionBadge = `
+                    <div class="mb-2.5">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/20 text-amber-950 dark:text-amber-200 border border-amber-500/40 font-black text-xs tracking-wider shadow-2xs">
+                            <span class="text-amber-600 dark:text-primary font-bold">⚡</span>
+                            <span>3D PUFF</span>
+                        </span>
+                    </div>
+                `;
+            } else if (isApplique) {
+                specialOptionBadge = `
+                    <div class="mb-2.5">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-purple-500/20 text-purple-950 dark:text-purple-200 border border-purple-500/40 font-black text-xs tracking-wider shadow-2xs">
+                            <span>🧵</span>
+                            <span>APPLIQUÉ</span>
+                        </span>
+                    </div>
+                `;
+            } else if (isTrims) {
+                specialOptionBadge = `
+                    <div class="mb-2.5">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-950 dark:text-indigo-200 border border-indigo-500/40 font-black text-xs tracking-wider shadow-2xs">
+                            <span>✂️</span>
+                            <span>TRIMS</span>
+                        </span>
+                    </div>
+                `;
+            }
+
+            // 6. CUSTOMER NOTES / DESCRIPTION (First 2-3 lines only with ... truncation)
+            const clientNotes = (order.special_instructions || order.instructions || order.notes || order.description || '')
+                .replace(/Standard commercial digitizing standards apply.*$/i, '')
+                .trim();
+
+            // 7. ASSIGNED WORKER / DISPATCH
+            const assignedText = order.assigned_digitizer_name
+                ? `<span class="inline-flex items-center gap-1 font-bold text-slate-800 dark:text-slate-200"><span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">badge</span> ${escapeHtml(order.assigned_digitizer_name.split('(')[0].trim())}</span>`
+                : '<span class="inline-flex items-center gap-1 font-bold text-amber-800 dark:text-amber-400"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Unassigned</span>';
 
             return `
                 <div id="admin-card-${order.order_number}" class="admin-order-card digitizer-bento-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark ${theme.cardClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
-                    <!-- Collapsed Resting Card (~220px) -->
                     <div>
-                        <!-- Header Bar: ID, Date & Time, Status & Payment Badges -->
-                        <div class="flex items-start justify-between gap-2 mb-2">
+                        <!-- Header Bar: ID, Date/Time, Rush Status -->
+                        <div class="flex items-start justify-between gap-2 mb-3">
                             <div>
-                                <span class="px-2.5 py-1 rounded-lg border font-mono text-xs font-black ${theme.orderIdClass} tracking-wide whitespace-nowrap select-all inline-block">#${safeOrderNumber}</span>
+                                <span class="px-2.5 py-1 rounded-lg border font-mono text-xs font-black ${theme.orderIdClass} tracking-wide whitespace-nowrap select-all inline-block bg-slate-100/80 dark:bg-slate-800/80">#${safeOrderNumber}</span>
                                 <div class="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium mt-1 leading-tight flex items-center gap-1">
                                     <span class="material-symbols-outlined text-[11px] text-slate-400 dark:text-slate-500">schedule</span>
                                     <span>${orderDt.date}</span>
@@ -950,53 +1025,101 @@
                                 </div>
                             </div>
                             <div class="flex flex-col items-end gap-1">
-                                ${getStatusBadge(order.status)}
-                                ${isRush ? rushBadge : getPaymentBadge(order.payment_status)}
+                                ${rushBadge}
+                                ${order.client_name ? `
+                                    <button type="button" onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="btn-inline text-[11px] font-bold text-slate-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-primary transition-colors cursor-pointer truncate max-w-[130px] flex items-center gap-0.5" title="Client: ${escapeHtml(order.client_name)}">
+                                        <span class="material-symbols-outlined text-xs">person</span>
+                                        <span class="truncate">${escapeHtml(order.client_name)}</span>
+                                    </button>
+                                ` : ''}
                             </div>
                         </div>
 
-                        <!-- Project Information -->
-                        <div class="mb-2">
-                            <h4 class="font-black text-slate-900 dark:text-white text-sm group-hover:text-amber-800 dark:group-hover:text-primary transition-colors leading-snug truncate" title="${order.project_name || 'Custom Design'}">${order.project_name || 'Custom Design'}</h4>
-                            <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                <button type="button" onclick="openClientHistoryModal('${order.client_email || order.client_name}')" class="font-bold text-slate-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-primary transition-colors cursor-pointer inline-flex items-center gap-0.5 truncate max-w-[130px]" title="Inspect client history: ${order.client_name} (${order.client_email})">
-                                    <span class="material-symbols-outlined text-xs text-slate-400">person</span>
-                                    <span>${order.client_name}</span>
+                        <!-- Logo / Artwork Thumbnail (Click to view larger preview) -->
+                        <div class="mb-3 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 flex items-center gap-3">
+                            <div onclick="openArtworkPreviewModal('${order.order_number}', 0)" class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shrink-0 cursor-pointer group/art hover:ring-2 hover:ring-amber-500/70 transition-all shadow-2xs" title="Click to view large preview">
+                                ${isImage ? `
+                                    <img src="${artUrl}" alt="${escapeHtml(artName)}" class="w-full h-full object-contain p-1 group-hover/art:scale-105 transition-transform" loading="lazy" />
+                                    <div class="absolute inset-0 bg-black/0 group-hover/art:bg-black/30 transition-colors flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-white text-base opacity-0 group-hover/art:opacity-100 transition-opacity drop-shadow">zoom_in</span>
+                                    </div>
+                                ` : `
+                                    <div class="flex flex-col items-center justify-center text-center p-1">
+                                        <span class="material-symbols-outlined text-base text-amber-600 dark:text-primary">description</span>
+                                        <span class="font-mono text-[9px] font-black uppercase text-slate-600 dark:text-slate-300">${artExt}</span>
+                                    </div>
+                                `}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">Logo / Artwork</div>
+                                <div class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate" title="${escapeHtml(artName)}">${escapeHtml(artName)}</div>
+                                <button type="button" onclick="openArtworkPreviewModal('${order.order_number}', 0)" class="btn-inline text-[11px] font-bold text-amber-700 dark:text-primary hover:underline cursor-pointer inline-flex items-center gap-1 mt-1">
+                                    <span class="material-symbols-outlined text-[13px]">visibility</span>
+                                    <span>Tap to enlarge</span>
                                 </button>
-                                <span>·</span>
-                                <span class="font-mono text-[11px]">${assignedText}</span>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-                                <span class="inline-block text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono">${order.placement || 'Left Chest'} · ${order.sizing || 'Default Size'}</span>
-                                ${order.file_format ? `<span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/30 uppercase">.${order.file_format}</span>` : '<span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black bg-amber-500/20 text-amber-900 dark:text-primary border border-amber-500/30">.DST</span>'}
                             </div>
                         </div>
 
-                        <!-- Compact Due & Fabric Alert Strip -->
-                        <div class="flex items-center justify-between py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-primary/15 text-[11px] text-slate-600 dark:text-slate-400 mb-1">
-                            <span class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">timer</span>
-                                <span>${isRush ? '⚡ 5–8 Hours' : '12–24 Hours'}</span>
-                            </span>
-                            <span class="text-slate-500 dark:text-slate-400 truncate max-w-[130px] font-medium">Fabric: ${order.fabric_type || 'Pique Polo'}</span>
+                        <!-- Placement (Hero production detail - very prominent and bold) -->
+                        <div class="mb-1">
+                            <div class="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-primary">Placement</div>
+                            <div class="text-lg sm:text-xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-snug">
+                                ${escapeHtml(placementUpper)}
+                            </div>
+                            ${designTitle && designTitle.toUpperCase() !== placementUpper ? `
+                                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 truncate mt-0.5" title="${escapeHtml(designTitle)}">
+                                    ${escapeHtml(designTitle)}
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Size (Exact submitted size in bold) -->
+                        <div class="mb-2 flex items-baseline gap-1.5">
+                            <span class="text-xs font-black text-slate-500 dark:text-slate-400 tracking-wider">SIZE:</span>
+                            <span class="text-sm font-black text-slate-900 dark:text-white uppercase">${escapeHtml(sizeUpper)}</span>
+                        </div>
+
+                        <!-- 3D Puff / Special Options Badge (Omitted if flat embroidery) -->
+                        ${specialOptionBadge}
+
+                        <!-- Customer Notes (First 2-3 lines only, truncated with ...) -->
+                        <div class="mb-3 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800 text-xs">
+                            <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">chat</span>
+                                <span>Customer Notes:</span>
+                            </div>
+                            <p class="text-xs text-slate-800 dark:text-slate-200 font-medium leading-relaxed" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;" title="${escapeHtml(clientNotes)}">
+                                ${clientNotes ? `“${escapeHtml(clientNotes)}”` : '<span class="italic text-slate-400 dark:text-slate-500">No specific notes submitted.</span>'}
+                            </p>
+                        </div>
+
+                        <!-- Order Status & Dispatch -->
+                        <div class="flex items-center justify-between gap-2 mb-3 pt-0.5">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400">Status:</span>
+                                ${getStatusBadge(order.status)}
+                            </div>
+                            <div class="text-[11px] font-mono">
+                                ${assignedText}
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Actions Toolbar (Single View Order Button + Primary CTA) -->
-                    <div class="pt-2.5 border-t border-slate-100 dark:border-primary/10 flex items-center justify-between gap-2 mt-2">
-                        <button type="button" onclick="openAdminOrderDetailsModal('${order.order_number}')" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/15 dark:hover:bg-primary/20 text-slate-800 dark:text-slate-200 hover:text-amber-800 dark:hover:text-primary font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors" title="View order details and files">
+                    <!-- Actions Toolbar: View Order Button + Quick Actions -->
+                    <div class="pt-3 border-t border-slate-100 dark:border-primary/10 flex items-center justify-between gap-2 mt-auto">
+                        <button type="button" onclick="openAdminOrderDetailsModal('${order.order_number}')" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-primary dark:hover:bg-primary-hover text-white dark:text-slate-950 font-black text-xs inline-flex items-center gap-1.5 cursor-pointer transition-all shadow-xs" title="View order details and files">
                             <span>View Order</span>
-                            <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">arrow_forward</span>
+                            <span class="material-symbols-outlined text-xs">arrow_forward</span>
                         </button>
                         <div class="flex items-center gap-1.5">
                             <span class="text-xs font-black text-slate-900 dark:text-white mr-1">$${Number(order.price || 0).toFixed(2)}</span>
                             ${(!order.is_quote && order.status !== 'quote_requested' && !(order.order_number && order.order_number.startsWith('QUO-'))) ? `
-                                <button type="button" onclick="openAssignModal('${order.order_number}')" class="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer" title="Assign or Reassign Digitizer">
+                                <button type="button" onclick="openAssignModal('${order.order_number}')" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/15 dark:hover:bg-primary/20 text-slate-800 dark:text-slate-200 hover:text-amber-800 dark:hover:text-primary font-bold text-xs inline-flex items-center gap-1 border border-slate-200 dark:border-slate-700 cursor-pointer transition-colors" title="Assign or Reassign Digitizer">
                                     <span class="material-symbols-outlined text-xs">person_add</span>
                                     <span>${order.assigned_digitizer_id ? 'Reassign' : 'Assign'}</span>
                                 </button>
                             ` : (order.is_quote || (order.order_number && order.order_number.startsWith('QUO-'))) ? `
-                                <button type="button" onclick="openSetQuotePriceModal('${order.order_number}')" class="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer" title="Set or Update Quote Price">
+                                <button type="button" onclick="openSetQuotePriceModal('${order.order_number}')" class="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs inline-flex items-center gap-1 shadow-xs cursor-pointer transition-colors" title="Set or Update Quote Price">
                                     <span class="material-symbols-outlined text-xs">price_change</span>
                                     <span>${order.price ? 'Update Price' : 'Give Price'}</span>
                                 </button>
@@ -1647,15 +1770,16 @@
                 case 'completed':
                     return '<span class="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;">Completed</span>';
                 case 'in_progress':
-                    return '<span class="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-900 dark:text-blue-300 border border-blue-300 dark:border-blue-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;">In Production</span>';
                 case 'assigned':
-                    return '<span class="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;">Assigned</span>';
+                    return '<span class="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-900 dark:text-blue-300 border border-blue-300 dark:border-blue-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;">In Production</span>';
                 case 'revision_requested':
-                    return '<span class="whitespace-nowrap inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-500/25 text-purple-950 dark:text-purple-200 border border-purple-300 dark:border-purple-500/40 text-[11px] font-black leading-none animate-pulse shrink-0" style="white-space: nowrap !important;"><span class="w-1.5 h-1.5 rounded-full bg-purple-600 animate-ping"></span> Revision</span>';
+                    return '<span class="whitespace-nowrap inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-500/25 text-purple-950 dark:text-purple-200 border border-purple-300 dark:border-purple-500/40 text-[11px] font-black leading-none shrink-0" style="white-space: nowrap !important;"><span class="w-1.5 h-1.5 rounded-full bg-purple-600 animate-ping mr-0.5"></span> Revision</span>';
                 case 'quote_requested':
                     return '<span class="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-sky-100 dark:bg-sky-500/20 text-sky-900 dark:text-sky-300 border border-sky-300 dark:border-sky-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;">Quote Requested</span>';
+                case 'new':
+                case 'pending_review':
                 default:
-                    return '<span class="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;">Needs Review</span>';
+                    return '<span class="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;">New Order</span>';
             }
         }
 

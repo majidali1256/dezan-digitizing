@@ -163,8 +163,17 @@ body > main h1 { font-size: 30px; font-weight: 700; letter-spacing: -.035em; }
 .stage-sub-section h4 + span { white-space: nowrap; }
 .stage-sub-section > div:first-child p { margin-top: 4px; font-size: 12px; line-height: 1.5; color: var(--admin-muted); }
 .stage-cards-container { background: var(--admin-canvas); padding: 20px 24px; }
-.admin-order-card { background: var(--admin-surface); border-color: var(--admin-border); box-shadow: 0 2px 4px rgb(15 23 42 / 3%); }
-.admin-order-card button { min-height: 44px; }
+.admin-order-card {
+    background: #ffffff;
+    border-width: 2px !important;
+    border-style: solid;
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+}
+.dark .admin-order-card {
+    background: #16140c;
+}
+.admin-order-card button:not(.btn-inline) { min-height: 44px; }
+.admin-order-card button.btn-inline { min-height: auto; }
 .admin-order-card h4 { line-height: 1.5; }
 body button:focus-visible, body [role="button"]:focus-visible, body a:focus-visible, body input:focus-visible { outline: 2px solid var(--admin-gold); outline-offset: 3px; }
 @media (hover: hover) { #overview-metrics-section [role="button"]:hover { background: var(--admin-selected); } }
@@ -247,3 +256,14 @@ nav.fixed a[aria-current="page"] { color: var(--admin-text); background: var(--a
 .admin-chart-note { margin-top:12px; }
 @media(max-width:1100px) { .admin-chart-grid { grid-template-columns:1fr 1fr; } .admin-trend-card { grid-column:1/-1; } }
 @media(max-width:639px) { .admin-chart-grid { grid-template-columns:1fr; } .admin-insights-heading { flex-wrap:wrap; gap:0; } .admin-chart-card { padding:16px; } }
+
+/* ===== ADMIN COMMAND CENTER HARDWARE LAYER ISOLATION (60/120 FPS) ===== */
+#admin-drawer,
+.admin-drawer,
+.admin-table-scroll,
+.admin-insights {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    isolation: isolate;
+}
