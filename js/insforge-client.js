@@ -17,7 +17,7 @@ const DEMO_USERS = {
     admin: {
         id: '00000000-0000-0000-0000-000000000001',
         email: 'admin@dezandigitizing.com',
-        displayName: 'Faisal Dezan (Admin)',
+        displayName: 'Felix Dezan (Admin)',
         role: 'admin',
         company: 'Dezan Digitizing HQ',
         status: 'active'

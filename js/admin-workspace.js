@@ -1864,7 +1864,7 @@ Order Details:
 If you have already submitted payment or have any questions regarding your stitch specs, please let us know.
 
 Warm regards,
-Faisal Dezan
+Felix Dezan
 Master Digitizer & Founder, Dezan Digitizing
 Email: fdezan91@gmail.com`;
 
@@ -2401,7 +2401,7 @@ Email: fdezan91@gmail.com`;
 
                     <div class="flex items-center justify-between text-[10px] text-slate-400 pt-3 border-t border-slate-100">
                         <span>Thank you for choosing Dezan Digitizing for your embroidery artwork!</span>
-                        <span class="font-mono font-semibold">Authorized By: Faisal Dezan (Head Digitizer)</span>
+                        <span class="font-mono font-semibold">Authorized By: Felix Dezan (Head Digitizer)</span>
                     </div>
                 </div>
             `;

@@ -89,6 +89,6 @@ For full technical specifications, consult [SECURITY.md](SECURITY.md) and [DATAB
 ---
 
 ## 📬 Contact & Support
-- **Owner & Master Digitizer:** Faisal Dezan
+- **Owner & Master Digitizer:** Felix Dezan
 - **Email:** `fdezan91@gmail.com`
 - **Portfolio & Feedbacks:** [View Feedbacks](https://dezan-digitizing.vercel.app/portfolio.html)

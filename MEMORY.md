@@ -2231,3 +2231,22 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - Client Portal 1400x900 (`client-portal.html`): Verified sticky navigation GPU layer isolation, drawer isolation, and table scrolling. Screenshot: `smooth_client_portal.png`.
   - Quality gates: `npm test` (10/10 passed), `deep_button_link_validator.js` (30/30 pages passed), `verify_review_pay_flow.js` (passed).
 
+### 35.17 Founder & Master Digitizer Identity: Felix Dezan (F. Dezan)
+- **User Mandate & Problem Statement**:
+  - *"F Dezan Doesnt mean Faisal Dezan, It means Felix Dezan. replace every where."*
+  - Corrected all occurrences of the founder / master digitizer's name across the entire codebase to **Felix Dezan**.
+- **Files Updated & Verified (Zero Occurrences Remaining)**:
+  - `admin-portal.html`: Header admin button and admin account modal updated to Felix Dezan.
+  - `admin-orders.html`: Header admin button and admin account modal updated to Felix Dezan.
+  - `admin-clients.html`: Header admin button and admin account modal updated to Felix Dezan.
+  - `admin-catalog.html`: Header admin button and admin account modal updated to Felix Dezan.
+  - `admin-team.html`: Header admin button and admin account modal updated to Felix Dezan.
+  - `js/insforge-client.js`: Admin demo account display name set to `Felix Dezan (Admin)`.
+  - `js/admin-workspace.js`: Payment reminder email sign-off and official receipt authorization updated to `Felix Dezan (Head Digitizer)`.
+  - `README.md`: Owner & Master Digitizer set to Felix Dezan.
+  - `.env.example`: `ADMIN_NAME=Felix Dezan`.
+  - `tests/notifications.test.js` & `scratch/diagnose.js`: Test sessions updated to Felix Dezan.
+- **Verification**:
+  - Full codebase regex scan `grep -rInwi "faisal" .` returned 0 matches.
+
+
