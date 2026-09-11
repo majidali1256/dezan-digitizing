@@ -4,8 +4,8 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Order Portal Sign In | Dezan Digitizing</title>
-    <meta name="description" content="Secure Role-Based Order Portal for Dezan Digitizing Clients, Admins, and Workers." />
+    <title>Sign In to Dashboard | Dezan Digitizing</title>
+    <meta name="description" content="Secure Role-Based Dashboard for Dezan Digitizing Clients, Admins, and Workers." />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -37,7 +37,7 @@
         <div class="flex items-center justify-between px-4 py-3 max-w-6xl mx-auto">
             <a href="index.html" class="flex items-center gap-2">
                 <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover shadow-sm">
-                <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN <span class="text-primary-dark dark:text-primary text-xs uppercase font-bold tracking-widest ml-1">Portal</span></span>
+                <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN <span class="text-primary-dark dark:text-primary text-xs uppercase font-bold tracking-widest ml-1">Dashboard</span></span>
             </a>
             <div class="flex items-center gap-3">
                 <a href="index.html" class="text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-primary-dark dark:hover:text-primary transition-colors flex items-center gap-1">
@@ -59,13 +59,13 @@
             <!-- Ambient Glow (Dark Mode) -->
             <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none hidden dark:block"></div>
 
-            <!-- Portal Badge -->
+            <!-- Dashboard Badge -->
             <div class="text-center mb-6">
                 <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 dark:bg-primary/15 border border-primary/25 dark:border-primary/30 text-primary mb-3 shadow-inner">
-                    <span class="material-symbols-outlined text-3xl">lock_person</span>
+                    <span class="material-symbols-outlined text-3xl">dashboard</span>
                 </div>
-                <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Order Portal Access</h1>
-                <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-1">Role-Based Access Control powered by InsForge</p>
+                <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Sign In to Dashboard</h1>
+                <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-1">Access your client, digitizer, or admin workspace</p>
             </div>
 
             <!-- Tab Switcher -->
@@ -496,7 +496,7 @@
                 if (intentBanner) {
                     intentBanner.classList.remove('hidden');
                     if (intentTitle) intentTitle.textContent = serviceParam ? `Request a ${serviceParam} Quote` : `Request a Custom Quote`;
-                    if (intentDesc) intentDesc.textContent = 'Sign in to manage quotes in your portal, or request a free quote without signing in.';
+                    if (intentDesc) intentDesc.textContent = 'Sign in to manage quotes in your dashboard, or request a free quote without signing in.';
                     if (guestLink) {
                         guestLink.href = 'contact.html#custom-quote-section';
                         guestLink.innerHTML = '<span>Request Quote as Guest</span><span class="material-symbols-outlined text-xs font-bold">arrow_forward</span>';

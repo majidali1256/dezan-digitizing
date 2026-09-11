@@ -60,19 +60,28 @@ document.addEventListener("DOMContentLoaded", () => {
             session = null;
         }
 
+        const isSubdir = window.location.pathname.includes('/embroidery-digitizing/') || 
+                         window.location.pathname.includes('/vector-art-conversion/') || 
+                         window.location.pathname.includes('/stitch-lab/');
+        const prefix = isSubdir ? '/' : '';
+
         if (session && session.role) {
             // Already logged in -> Immediately open their correct role dashboard
             const target = getDashboardUrlForRole(session.role);
             window.location.href = target;
         } else {
-            // Visitor is not logged in -> Open the login modal
-            window.openPortalLoginModal('dashboard');
+            // Visitor is not logged in -> Directly navigate to Dashboard Sign In page without popup
+            window.location.href = prefix + 'portal-login.html';
         }
     };
 
     window.handleLoginBtnClick = function(e) {
         if (e) e.preventDefault();
-        window.openPortalLoginModal('dashboard');
+        const isSubdir = window.location.pathname.includes('/embroidery-digitizing/') || 
+                         window.location.pathname.includes('/vector-art-conversion/') || 
+                         window.location.pathname.includes('/stitch-lab/');
+        const prefix = isSubdir ? '/' : '';
+        window.location.href = prefix + 'portal-login.html';
     };
 
     // ===== PORTAL LOGIN MODAL CONTROLLERS =====
@@ -159,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                     </svg>
-                    <span>Continue with Google / Portal</span>
+                    <span>Continue with Google</span>
                 </a>
 
                 <!-- Sign Up Link -->
@@ -183,40 +192,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     window.openPortalLoginModal = function(destination = 'dashboard') {
-        let modal = document.getElementById('portal-login-modal');
-        if (!modal) {
-            createPortalLoginModalDOM();
-            modal = document.getElementById('portal-login-modal');
-        }
-        if (!modal) return;
-
-        modal.dataset.destination = destination;
-        const errorBanner = document.getElementById('modal-login-error-banner');
-        if (errorBanner) errorBanner.classList.add('hidden');
-
-        const pwInput = document.getElementById('modal-login-password');
-        if (pwInput) pwInput.value = '';
-
-        const submitBtn = document.getElementById('modal-login-submit-btn');
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = `
-                <span>Enter Dashboard</span>
-                <span class="material-symbols-outlined text-base">arrow_forward</span>
-            `;
-        }
-
-        modal.classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
-
-        const emailInput = document.getElementById('modal-login-email');
-        setTimeout(() => {
-            if (emailInput && !emailInput.value) {
-                emailInput.focus();
-            } else if (pwInput) {
-                pwInput.focus();
-            }
-        }, 100);
+        const isSubdir = window.location.pathname.includes('/embroidery-digitizing/') || 
+                         window.location.pathname.includes('/vector-art-conversion/') || 
+                         window.location.pathname.includes('/stitch-lab/');
+        const prefix = isSubdir ? '/' : '';
+        const destQuery = destination && destination !== 'dashboard' ? `?redirect=${encodeURIComponent(destination)}` : '';
+        window.location.href = prefix + 'portal-login.html' + destQuery;
     };
 
     window.closePortalLoginModal = function() {
@@ -330,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
                          window.location.pathname.includes('/vector-art-conversion/') || 
                          window.location.pathname.includes('/stitch-lab/');
         const prefix = isSubdir ? '/' : '';
-        const dashboardUrl = session && session.role ? getDashboardUrlForRole(session.role) : (prefix + 'client-portal.html');
+        const dashboardUrl = session && session.role ? getDashboardUrlForRole(session.role) : (prefix + 'portal-login.html');
         const tooltip = session && session.role 
             ? `Return to ${session.role.charAt(0).toUpperCase() + session.role.slice(1)} Dashboard`
             : 'Sign In to Access Dashboard';
@@ -391,7 +372,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 // Logged out: replace Login button with Dashboard button!
                 slot.innerHTML = `
-                    <a href="${prefix}client-portal.html" onclick="window.handleDashboardNavClick(event)" class="nav-dashboard-link px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 cursor-pointer shadow-xs" title="Access Dashboard" aria-label="Access Dashboard">
+                    <a href="${prefix}portal-login.html" onclick="window.handleDashboardNavClick(event)" class="nav-dashboard-link px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 cursor-pointer shadow-xs" title="Access Dashboard" aria-label="Access Dashboard">
                         <span class="material-symbols-outlined text-[17px]">dashboard</span>
                         <span>Dashboard</span>
                     </a>
@@ -408,7 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
                          window.location.pathname.includes('/vector-art-conversion/') || 
                          window.location.pathname.includes('/stitch-lab/');
         const prefix = isSubdir ? '/' : '';
-        const dashboardUrl = session && session.role ? getDashboardUrlForRole(session.role) : (prefix + 'client-portal.html');
+        const dashboardUrl = session && session.role ? getDashboardUrlForRole(session.role) : (prefix + 'portal-login.html');
         const tooltip = session && session.role 
             ? `Return to ${session.role.charAt(0).toUpperCase() + session.role.slice(1)} Dashboard`
             : 'Sign In to Access Dashboard';
@@ -1241,7 +1222,7 @@ window.submitGuestAccountClaim = async function() {
     } catch (err) {
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span class="material-symbols-outlined text-base">lock</span> Save Password & Open My Client Portal';
+            submitBtn.innerHTML = '<span class="material-symbols-outlined text-base">lock</span> Save Password & Open My Client Dashboard';
         }
         if (errEl) {
             errEl.textContent = err.message || "Could not create account. Please try again.";

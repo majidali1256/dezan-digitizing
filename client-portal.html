@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Client Portal | Dezan Digitizing</title>
+    <title>Client Dashboard | Dezan Digitizing</title>
     <meta name="description" content="Client Dashboard - Submit quotes, track production, pay invoices, and download embroidery files." />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -75,7 +75,7 @@
         <div class="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
             <a href="index.html" class="flex items-center gap-2">
                 <img src="logo.png" alt="Dezan Digitizing" class="w-8 h-8 rounded-full object-cover shadow-sm">
-                <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN <span class="text-primary-dark dark:text-primary text-xs uppercase font-bold tracking-widest ml-1">Client Portal</span></span>
+                <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN <span class="text-primary-dark dark:text-primary text-xs uppercase font-bold tracking-widest ml-1">Client Dashboard</span></span>
             </a>
 
             <div class="flex items-center gap-2 sm:gap-2.5">
@@ -143,7 +143,7 @@
         <!-- Header Title & Subtitle -->
         <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div>
-                <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">Client Portal</h1>
+                <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">Client Dashboard</h1>
                 <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">Track orders, pay invoices, and request quotes easily.</p>
             </div>
             <div class="flex items-center gap-2">
@@ -2267,7 +2267,7 @@
                                 </button>
                                 ${order.deliverables && order.deliverables.length > 0 ? `
                                     <a href="${order.deliverables[0].url}" download target="_blank" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs inline-flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-xs">download</span> Files
+                                        <span class="material-symbols-outlined text-xs">download</span> Download Files
                                     </a>
                                 ` : ''}
                             ` : isQuote ? `
@@ -2382,6 +2382,9 @@
             const clientNotes = (order.special_instructions || order.instructions || order.notes || '').replace(/Standard commercial digitizing standards apply.*$/i, '').trim();
             const deliverables = order.deliverables || [];
             const hasDeliverables = Array.isArray(deliverables) && deliverables.length > 0;
+            const downloadUrl = (hasDeliverables && deliverables[0].url)
+                ? deliverables[0].url
+                : (order.deliverable_url || order.artwork_url || '#');
 
             return `
                 <div id="client-card-${order.order_number}" class="client-order-card digitizer-bento-card p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark ${cardThemeClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
@@ -2428,31 +2431,51 @@
                         </div>
                     </div>
 
-                    <!-- Actions Toolbar (Single View Order Button + Primary CTA) -->
-                    <div class="pt-2.5 border-t border-slate-100 dark:border-primary/10 flex items-center justify-between gap-2 mt-2">
-                        <button type="button" onclick="openClientInvoiceModal('${order.id}')" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/15 dark:hover:bg-primary/20 text-slate-800 dark:text-slate-200 hover:text-amber-800 dark:hover:text-primary font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors" title="View order details and files">
-                            <span>View Order</span>
-                            <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">arrow_forward</span>
-                        </button>
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-xs font-black text-slate-900 dark:text-white mr-1">${priceFormatted}</span>
-                            ${isQuote ? `
-                                <button type="button" onclick="openNewOrderModal('${order.project_name || order.design_name || ''}')" class="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer">
-                                    <span>Convert</span>
+                    <!-- Actions Toolbar -->
+                    ${isCompleted ? `
+                        <!-- Completed Order Actions: Secondary Row (View Order + Request Revision) & Prominent Download Files Button -->
+                        <div class="pt-2.5 border-t border-slate-100 dark:border-primary/10 mt-2 space-y-2">
+                            <!-- Secondary Action Row -->
+                            <div class="flex items-center justify-between gap-2">
+                                <button type="button" onclick="openClientInvoiceModal('${order.id || order.order_number}')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/15 dark:hover:bg-primary/20 text-slate-800 dark:text-slate-200 hover:text-amber-800 dark:hover:text-primary font-bold text-xs inline-flex items-center gap-1 cursor-pointer transition-colors whitespace-nowrap shrink-0" title="View order details and files">
+                                    <span>View Order</span>
+                                    <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">arrow_forward</span>
                                 </button>
-                            ` : !isPaid ? `
-                                <button type="button" onclick="openCheckoutModal('${order.id}')" class="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer" title="Complete order and settle balance">
-                                    <span class="material-symbols-outlined text-xs">credit_card</span>
-                                    <span>Pay</span>
+                                <button type="button" onclick="openRevisionModal('${order.order_number}')" class="px-2.5 py-1.5 rounded-xl border border-purple-300 dark:border-purple-600/50 hover:border-purple-400 dark:hover:border-purple-400 text-purple-700 dark:text-purple-300 hover:bg-purple-50/80 dark:hover:bg-purple-950/40 bg-purple-50/40 dark:bg-purple-950/20 font-bold text-xs inline-flex items-center gap-1 cursor-pointer transition-all whitespace-nowrap shrink-0" title="Request revision for this order">
+                                    <span class="material-symbols-outlined text-xs text-purple-600 dark:text-purple-400">refresh</span>
+                                    <span>Request Revision</span>
                                 </button>
-                            ` : isCompleted ? `
-                                <a href="${order.deliverable_url || order.artwork_url || '#'}" download class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer" title="Download completed embroidery files">
-                                    <span class="material-symbols-outlined text-xs">download</span>
-                                    <span>Files</span>
+                            </div>
+                            <!-- Prominent Primary Download Files Button (70-85% card width, centered) -->
+                            <div class="flex justify-center pt-0.5 w-full">
+                                <a href="${downloadUrl}" download target="_blank" onclick="downloadDeliverablesForOrder('${order.order_number}', event)" class="w-[82%] py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs inline-flex items-center justify-center gap-1.5 shadow-xs hover:shadow-md transition-all active:scale-[0.99] cursor-pointer" title="Download completed embroidery files">
+                                    <span class="material-symbols-outlined text-sm">download</span>
+                                    <span>Download Files</span>
                                 </a>
-                            ` : ''}
+                            </div>
                         </div>
-                    </div>
+                    ` : `
+                        <!-- Actions Toolbar (Active / Due / Quote Orders) -->
+                        <div class="pt-2.5 border-t border-slate-100 dark:border-primary/10 flex items-center justify-between gap-2 mt-2">
+                            <button type="button" onclick="openClientInvoiceModal('${order.id || order.order_number}')" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/15 dark:hover:bg-primary/20 text-slate-800 dark:text-slate-200 hover:text-amber-800 dark:hover:text-primary font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors" title="View order details and files">
+                                <span>View Order</span>
+                                <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">arrow_forward</span>
+                            </button>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-black text-slate-900 dark:text-white mr-1">${priceFormatted}</span>
+                                ${isQuote ? `
+                                    <button type="button" onclick="openNewOrderModal('${order.project_name || order.design_name || ''}')" class="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer">
+                                        <span>Convert</span>
+                                    </button>
+                                ` : !isPaid ? `
+                                    <button type="button" onclick="openCheckoutModal('${order.id || order.order_number}')" class="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer" title="Complete order and settle balance">
+                                        <span class="material-symbols-outlined text-xs">credit_card</span>
+                                        <span>Pay</span>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `}
                 </div>
             `;
         }
@@ -3254,6 +3277,30 @@
 
         window.openRevisionModal = openRevisionModal;
         window.closeRevisionModal = closeRevisionModal;
+
+        function downloadDeliverablesForOrder(orderNumber, e) {
+            const order = (typeof cachedOrders !== 'undefined' ? cachedOrders : []).find(o => o.order_number === orderNumber || o.id === orderNumber);
+            if (!order) return;
+            const delivs = (Array.isArray(order.deliverables) && order.deliverables.length > 0)
+                ? order.deliverables
+                : (order.deliverable_url ? [{ name: `${order.order_number || 'design'}.dst`, url: order.deliverable_url }] : []);
+
+            if (delivs.length > 1) {
+                if (e && e.preventDefault) e.preventDefault();
+                delivs.forEach((del, idx) => {
+                    setTimeout(() => {
+                        const a = document.createElement('a');
+                        a.href = del.url;
+                        a.download = del.name || `${order.order_number || 'deliverable'}_${idx + 1}`;
+                        a.target = '_blank';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    }, idx * 250);
+                });
+            }
+        }
+        window.downloadDeliverablesForOrder = downloadDeliverablesForOrder;
 
         function handleStitchOutPhotoFile(file) {
             if (!file) return;

@@ -199,26 +199,28 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - Visitors and registered users needed an unmistakable, permanent entry to their dashboard in the main website navigation without confusing multi-role links ("Client Portal", "Digitizer Portal", "Admin Portal").
   - The legacy "Login" button on the far right of the header (`#header-auth-slot`) was replaced directly with the universal **[ Dashboard ]** button (`[ Dashboard icon + Dashboard ]`).
   - Middle navigation (`Home`, `Services`, `Feedbacks`, `Pricing`, `About`, `Contact`) remains clean, spacious, and uncluttered without redundant dashboard links.
-  - Logged-out visitors clicking Dashboard open an in-place sign-in modal on the current page, and upon authentication automatically redirect to their account role's workspace (Client $\rightarrow$ `client-portal.html`, Digitizer $\rightarrow$ `worker-portal.html`, Admin $\rightarrow$ `admin-portal.html`), preserving their current page if cancelled or if login fails.
-  - Logged-in users clicking Dashboard immediately route to their correct role workspace without intermediate clicks or friction, with their user avatar dropdown menu displayed alongside the Dashboard button in the header action slot.
+  - **Direct Page Navigation (Zero Popup Modal)**: Logged-out visitors clicking Dashboard are directly routed to the dedicated Dashboard Sign In page (`portal-login.html`) without any intermediate popup modal dialog.
+  - **Rebranded to Dashboard**: All user-facing terminology transitioned from "Portal" to **"Dashboard"** across page titles, top navigation header lockups (`DEZAN Dashboard`, `DEZAN Client Dashboard`), page headings (`Sign In to Dashboard`), badge icons, and call-to-action buttons.
+  - **Role-Based Fast Path**: Logged-in users clicking Dashboard immediately route to their correct role workspace without intermediate clicks or friction (Client $\rightarrow$ `client-portal.html`, Digitizer $\rightarrow$ `worker-portal.html`, Admin $\rightarrow$ `admin-portal.html`), with their user avatar dropdown menu displayed alongside the Dashboard button in the header action slot.
   - Dashboard button is styled with subtle gold outline/background pill styling matching the Dezan theme (`[ Dashboard icon + Dashboard ]`), accessible on desktop, tablet, mobile header, and mobile bottom nav, remaining permanently available across all pages.
 - **Architecture & Implementation**:
   1. **Visual Design & Token System (`styles.css`)**:
      - `.nav-dashboard-link`: Styled as a subtle gold pill (`rgba(212, 175, 53, 0.10)` background, `1px solid rgba(212, 175, 53, 0.32)` border, `font-extrabold`, dark mode `rgba(212, 175, 53, 0.14)` / `0.38` border), featuring a Material Symbols `dashboard` icon and clean hover transform (`translateY(-1px)`, gold background `#d4af35`, dark text `#16140c`, soft glow shadow). Scaled responsively for mobile (`12px`, `padding: 5px 10px`), tablet (`12.5px`, `padding: 6px 11px`), and desktop (`13.5px`, `padding: 7px 15px`).
      - `.bottom-nav-dashboard`: Integrated into the mobile fixed bottom nav bar (`flex flex-col items-center min-w-[50px] text-primary`).
-  2. **Core Navigation Engine & Role Router (`app.js`)**:
+  2. **Core Navigation Engine & Direct Router (`app.js`)**:
      - `getDashboardUrlForRole(role)`: Intelligently resolves the target dashboard URL (`client-portal.html`, `worker-portal.html`, `admin-portal.html`) while factoring in root/subfolder URL paths (`/embroidery-digitizing/`, `/stitch-lab/`, etc.).
-     - `window.handleDashboardNavClick(event)`: Checks active session (`dezan_session` in `localStorage`/`sessionStorage`). If authenticated, routes immediately to `getDashboardUrlForRole(session.role)`. If logged out, triggers `openPortalLoginModal('dashboard')`.
-  3. **In-Place Portal Sign-In Modal (`#portal-login-modal`)**:
-     - Dynamically generated with WCAG accessibility attributes (`role="dialog"`, `aria-modal="true"`, `aria-labelledby="modal-login-title"`).
-     - Provides email/password inputs, show/hide password toggle, autofocus on open, submit progress state, Google/full portal sign-in link (`portal-login.html?redirect=dashboard`), and create account link.
-     - Closes on backdrop click or `Escape` key press, leaving the visitor on their current page.
-     - `handleModalLoginSubmit(e)`: Calls `window.insforgeClient.signIn(email, password)`. On error, shows inline banner (`#modal-login-error-banner`) without navigating away. On success, updates navigation auth state and redirects directly to role dashboard.
+     - `window.handleDashboardNavClick(event)`: Checks active session (`dezan_session` in `localStorage`/`sessionStorage`). If authenticated, routes immediately to `getDashboardUrlForRole(session.role)`. If logged out, directly navigates to `portal-login.html` (with subdirectory path resolution) with zero in-page popup modal display.
+     - `window.handleLoginBtnClick(event)` and `window.openPortalLoginModal(destination)`: Maintained with seamless direct routing fallback to `portal-login.html`.
+  3. **Universal Dashboard Authentication Screen (`portal-login.html`)**:
+     - Page title: `Sign In to Dashboard | Dezan Digitizing`.
+     - Header lockup: `DEZAN Dashboard` with direct link back to `index.html`.
+     - Centered auth card: Material Symbols `dashboard` badge, `Sign In to Dashboard` title, and subtitle `Access your client, digitizer, or admin workspace`.
+     - Sign-in button: `Enter Dashboard`.
   4. **Dynamic Header & Bottom Bar Synchronization**:
-     - `initHeaderAuthState()`: Dynamically renders the gold `.nav-dashboard-link` in `#header-auth-slot` when logged out, and renders both the `.nav-dashboard-link` and the user avatar dropdown menu (`#user-header-btn` + `#user-header-menu`) when logged in.
+     - `initHeaderAuthState()`: Dynamically renders the gold `.nav-dashboard-link` in `#header-auth-slot` pointing directly to `portal-login.html` when logged out, and renders both the `.nav-dashboard-link` and the user avatar dropdown menu (`#user-header-btn` + `#user-header-menu`) when logged in.
      - `initUniversalDashboardNav(session)`: Cleans up any duplicate `.nav-dashboard-link` from middle `<nav>` or `.nav-dashboard-mobile-btn`, and synchronizes `.bottom-nav-dashboard` on script load, DOM ready, and storage change events across all browser tabs.
   5. **Static HTML Pre-Rendering Across Public Pages**:
-     - All primary public pages (`index.html`, `services.html`, `portfolio.html`, `pricing.html`, `about.html`, `contact.html`, `embroidery-digitizing.html`, `vector-art-conversion.html`, `terms.html`, `privacy.html`, `track-order.html`, `order-success.html`, `404.html`, `stitch-lab/index.html`, etc.) updated with static elements in `#header-auth-slot` to ensure zero CLS (Cumulative Layout Shift) before JavaScript execution.
+     - All primary public pages (`index.html`, `services.html`, `portfolio.html`, `pricing.html`, `about.html`, `contact.html`, `embroidery-digitizing.html`, `vector-art-conversion.html`, `terms.html`, `privacy.html`, `track-order.html`, `order-success.html`, `404.html`, `stitch-lab/index.html`, etc.) updated with static `href="portal-login.html"` (or `/portal-login.html`) in `#header-auth-slot` and `.bottom-nav-dashboard` to ensure zero CLS and instant navigation even prior to script execution.
 
 ### 4.9 Client Stitchouts Mobile Slider WebKit Fix & Zero-Mock Production E2E Audit
 - **Problem Diagnosed (Mobile Blank Viewer Bug)**:
@@ -2444,5 +2446,41 @@ The Worker Studio provides an isolated, production-focused environment for embro
     - Quote request `#QUO-3344` ($0.00) $\rightarrow$ 1 `generate_lead` event and 0 `purchase` events.
     - Screenshot saved: `tests/order-success-tracking-verified.png`.
   - Full API regression test suite: `node --test tests/api.test.js` passed 10/10 tests.
+
+### 35.13 Client Portal: Completed Order Card Layout Redesign (Download Files Prominence & Request Revision Outlined Secondary Action)
+- **User Mandate & Problem Statement**:
+  - *"Please update the Completed Order cards in the Client Portal. I want the main action after completion to be Download Files, and it should be much more obvious than the current small 'Files' button."*
+  - *"Recommended layout: Keep the upper order information exactly as it is. At the bottom, first have a small secondary-action row: View Order → ↻ Request Revision. Then underneath, centered across the card, add one prominent green button: ↓ Download Files. The Download Files button should be the primary action. Make it wider than the other buttons — around 70–85% of the card width on mobile — but not unnecessarily tall. Please use 'Download Files' rather than simply 'Files' ... Put Request Revision approximately where the current Files button is now. It should be a secondary outlined button rather than another filled green button: ↻ Request Revision. Use a subtle purple or neutral outline so it is visible but doesn't compete."*
+- **Implemented Architecture & Changes**:
+  1. **Upper Order Information Preservation**:
+     - Preserved all existing card header content and structure intact across `client-portal.html` and `js/client-workspace.js`: Order # badge, Created Date & Time, Status checkmark badge (`Completed`), Payment badge (`Paid`), Design Name, Service Type & Placement, Dimensions & Format pills (`3.5" W`, `.DST, EMB`), and Turnaround/Fabric alert box (`12-24 Hours | Fabric: Pique Polo`).
+  2. **Two-Tier Action Section on Completed Order Cards**:
+     - **Secondary Action Row**:
+       - Left: Compact `[ View Order → ]` button (`bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs whitespace-nowrap`) wired to `openClientInvoiceModal` / `openOrderDetailsModal`.
+       - Right: Outlined `[ ↻ Request Revision ]` button (`border border-purple-300 dark:border-purple-600/50 hover:border-purple-400 text-purple-700 dark:text-purple-300 hover:bg-purple-50/80 dark:hover:bg-purple-950/40 bg-purple-50/40 dark:bg-purple-950/20 font-bold text-xs whitespace-nowrap`) wired to `openRevisionModal(order_number)`.
+     - **Prominent Primary Action Button**:
+       - Positioned underneath, centered horizontally across the card.
+       - Styled as a prominent emerald green button: `w-[82%] py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs inline-flex items-center justify-center gap-1.5 shadow-xs hover:shadow-md transition-all active:scale-[0.99]`.
+       - Measured mobile width proportion: 71.2% of card width (274px card, 195.2px button), satisfying the 70–85% specification.
+       - Clear label: `[ ↓ Download Files ]` with Google Material Symbols `download` icon.
+       - Direct download fallback with multi-file deliverable sequencing support via `downloadDeliverablesForOrder`.
+  3. **Synchronized Codebases**:
+     - Updated `renderOrderCard` in `client-portal.html`.
+     - Updated `renderClientOrderCard` and `renderClientOrderTableRow` in `js/client-workspace.js`.
+     - Global API export: `window.downloadDeliverablesForOrder` and `window.clientWorkspace.downloadDeliverablesForOrder`.
+- **Visual & Functional Verification**:
+  - `scripts/verify_completed_order_card_layout.js`: Executed headless Chrome verification across Mobile (390x844), Desktop (1512x982), and Tablet (834x1112).
+  - All automated checks passed:
+    - View Order button present.
+    - Request Revision button present with subtle purple outline (`border-purple-300`).
+    - Prominent green Download Files button present with 71.2% card width ratio.
+    - Click on `[ ↻ Request Revision ]` successfully opens the Client Revision Request modal.
+    - Zero layout overflows, zero text wrapping glitches (enforced via `whitespace-nowrap shrink-0`).
+  - Playwright visual artifacts generated:
+    - `playwright_artifacts/completed_cards/completed_order_card_mobile_detail.png`
+    - `playwright_artifacts/completed_cards/client_portal_completed_cards_mobile_390.png`
+    - `playwright_artifacts/completed_cards/client_portal_completed_cards_desktop.png`
+    - `playwright_artifacts/completed_cards/client_portal_completed_cards_tablet.png`
+
 
 
