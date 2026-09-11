@@ -20,6 +20,7 @@
 - **GitHub Pages Production (Frontend Mirror):** `https://majidali1256.github.io/dezan-digitizing/`
 - **GitHub Repository:** `https://github.com/majidali1256/dezan-digitizing.git` (Branch: `main`)
 - **Configuration:** `vercel.json` (clean URLs, `/api/(.*)` rewrites to `/api`)
+- **Git Push Policy (Universal Rule across all projects)**: **NEVER run `git push` autonomously**. Because GitHub is linked directly to live production deployments (Vercel, GitHub Pages), the agent must always test locally and explicitly ask the user for permission before running any `git push`.
 
 
 ---
