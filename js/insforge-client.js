@@ -1154,7 +1154,7 @@ class InsForgeClient {
         return orders.map(o => {
             const hasDeliverables = o.deliverables && o.deliverables.length > 0;
             const hasArtwork = o.raw_artwork_files && o.raw_artwork_files.length > 0;
-            const previewUrl = hasArtwork ? o.raw_artwork_files[0].url : 'logo.png';
+            const previewUrl = hasArtwork ? o.raw_artwork_files[0].url : 'logo.webp';
 
             return {
                 id: o.id,

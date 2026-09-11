@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 <!-- Brand Header -->
                 <div class="flex items-center gap-3 mb-5">
-                    <img src="${prefix}logo.png" alt="Dezan Digitizing" class="w-10 h-10 rounded-full object-cover shadow-sm border border-primary/20">
+                    <img src="${prefix}logo.webp" alt="Dezan Digitizing" class="w-10 h-10 rounded-full object-cover shadow-sm border border-primary/20">
                     <div>
                         <h3 id="modal-login-title" class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">Sign In to Dashboard</h3>
                         <p class="text-xs text-slate-500 dark:text-slate-400">Access your client, digitizer, or admin workspace</p>

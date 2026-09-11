@@ -2233,14 +2233,14 @@
                             console.warn('Storage upload fallback:', upErr);
                             rawArtworkFiles.push({
                                 name: file.name,
-                                url: 'logo.png',
+                                url: 'logo.webp',
                                 size: file.size
                             });
                         }
                     } else {
                         rawArtworkFiles.push({
                             name: file.name,
-                            url: 'logo.png',
+                            url: 'logo.webp',
                             size: file.size
                         });
                     }

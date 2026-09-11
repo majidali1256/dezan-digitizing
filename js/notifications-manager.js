@@ -207,7 +207,7 @@
                 try {
                     const browserNotif = new Notification(notif.title, {
                         body: notif.message,
-                        icon: 'logo.png'
+                        icon: 'logo.webp'
                     });
                     browserNotif.onclick = () => {
                         window.focus();

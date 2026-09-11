@@ -830,14 +830,14 @@ a {
    Header Logo & Hero Before/After Slider Glitch Stabilization
    Ensures zero layout shifts and instant pixel alignment on initial refresh.
    ========================================================================== */
-header a img[src*="logo.png"] {
+header a img[src*="logo.webp"], header a img[src*="logo.webp"] {
     width: 2rem;
     height: 2rem;
     aspect-ratio: 1 / 1;
 }
 
 @media (min-width: 640px) {
-    header a img[src*="logo.png"] {
+    header a img[src*="logo.webp"], header a img[src*="logo.webp"] {
         width: 2.25rem;
         height: 2.25rem;
     }

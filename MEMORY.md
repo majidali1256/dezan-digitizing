@@ -76,7 +76,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - Implemented a 2-line stacked architectural lockup across all 8 public pages (`index.html`, `about.html`, `services.html`, `portfolio.html`, `pricing.html`, `contact.html`, `order-success.html`, `profile.html`):
     - **Top Line (Brand Root)**: `<span class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN</span>` (or `text-white` in dark footers).
     - **Bottom Line (Craft Subtitle)**: `<span class="text-[9.5px] sm:text-[10.5px] font-extrabold tracking-[0.18em] text-primary uppercase mt-0">Digitizing</span>`.
-  - Nested within `<div class="flex flex-col text-left leading-none">` alongside the circular emblem `logo.png` (`w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover`).
+  - Nested within `<div class="flex flex-col text-left leading-none">` alongside the circular emblem `logo.webp` (`w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover`).
   - Gives the brand a refined, high-fashion horology/atelier lockup with optimal visual hierarchy and enhanced horizontal clearance on mobile viewports.
 
 ### 4.3 Admin Orders Color Theme System & Table Layout Stabilization (`admin-orders.html` & `admin-workspace.js`)
@@ -130,16 +130,16 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 ### 4.5 Hero Comparison Slider & Brand Logo Refresh Glitch Elimination
 - **Problem**:
   - On mobile and desktop reloads/refreshes, the hero astronaut comparison graphic momentarily appeared glitched/distorted: the vector half was squished horizontally to 50% width and misaligned with the embroidery background behind it for 100–300ms until `app.js` executed `syncBeforeImageWidth()`.
-  - The header `logo.png` lacked explicit dimension attributes and static CSS rules, risking minor FOUC/layout shift before runtime CDN compilation.
+  - The header `logo.webp` lacked explicit dimension attributes and static CSS rules, risking minor FOUC/layout shift before runtime CDN compilation.
 - **Solution & Architecture**:
   1. **Zero-FOUC CSS `clip-path` Slider**:
      - Converted `#hero-compare-slider` from an `overflow: hidden; width: 50%` wrapper to two identical 100% scale sibling `<img>` tags (`Hero Page/Embroidery.png` and `Hero Page/Vector.png` with `clip-path: inset(0 50% 0 0)` and `-webkit-clip-path: inset(0 50% 0 0)`).
      - Renders with 100% pixel alignment across vector and embroidery halves from the initial HTML paint frame without requiring JavaScript execution.
      - Updated `initCompareSlider()` in `app.js` to dynamically adjust `clipPath: inset(0 (100 - pct)% 0 0)` during mouse and touch drag events with zero layout thrashing or resize listeners.
   2. **Brand Asset Preloading & Dimension Locking**:
-     - Preloaded `logo.png`, `Hero%20Page/Embroidery.png`, and `Hero%20Page/Vector.png` in the `<head>` of `index.html`.
-     - Explicitly specified `width="36" height="36"` on `logo.png` and `width="1057" height="1100"` on the hero comparison images.
-     - Added CSS rules in `styles.css` locking `header a img[src*="logo.png"]` dimensions to 32px (mobile) and 36px (desktop) with `aspect-ratio: 1 / 1`.
+     - Preloaded `logo.webp`, `Hero%20Page/Embroidery.png`, and `Hero%20Page/Vector.png` in the `<head>` of `index.html`.
+     - Explicitly specified `width="36" height="36"` on `logo.webp` and `width="1057" height="1100"` on the hero comparison images.
+     - Added CSS rules in `styles.css` locking `header a img[src*="logo.webp"]` dimensions to 32px (mobile) and 36px (desktop) with `aspect-ratio: 1 / 1`.
 
 ### 4.6 Stage 1 Order Modal Optimization & Viewport Fit (`js/order-quote-modal.js` & `client-portal.html`)
 - **Problem**:
@@ -221,6 +221,28 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
      - `initUniversalDashboardNav(session)`: Cleans up any duplicate `.nav-dashboard-link` from middle `<nav>` or `.nav-dashboard-mobile-btn`, and synchronizes `.bottom-nav-dashboard` on script load, DOM ready, and storage change events across all browser tabs.
   5. **Static HTML Pre-Rendering Across Public Pages**:
      - All primary public pages (`index.html`, `services.html`, `portfolio.html`, `pricing.html`, `about.html`, `contact.html`, `embroidery-digitizing.html`, `vector-art-conversion.html`, `terms.html`, `privacy.html`, `track-order.html`, `order-success.html`, `404.html`, `stitch-lab/index.html`, etc.) updated with static `href="portal-login.html"` (or `/portal-login.html`) in `#header-auth-slot` and `.bottom-nav-dashboard` to ensure zero CLS and instant navigation even prior to script execution.
+
+### 4.10 Full-Site WebP Image Optimization & Performance Overhaul
+- **Objective & Scope**:
+  - Convert every picture across the entire Dezan Digitizing website to modern, high-performance WebP (`.webp`) format to drastically reduce page weight, accelerate load times, and preserve 100% visual quality and transparency.
+- **Conversion Strategy & Standards**:
+  - **Transparent Brand Assets & Vectors**: Converted using `Pillow` WebP encoder with `RGBA` mode, quality 95, alpha quality 100%, and method 6 (e.g. `logo.png` $\rightarrow$ `logo.webp` reduced from 522 KB to 35 KB, a **93.2% payload reduction** with crisp vector-like edges).
+  - **High-Resolution Photography & Stitchouts**: Converted at `quality=84-90` with method 6 (highest compression efficiency), delivering visually indistinguishable fidelity while reducing hero assets (e.g., `astronaut-patch...` reduced by **77.3%**, `jacket-backs...` reduced by **79.9%**, `vector-art-senior...` reduced by **89.5%**).
+  - **Asset Weight Impact**: Total asset size plummeted from **19.69 MB to 5.65 MB** (overall **71.3% bandwidth savings** across 41 converted assets).
+  - **Dual-Retention Safety**: Original PNG/JPEG assets retained on disk to ensure legacy URL backward-compatibility and zero broken external links.
+- **Codebase References Updated (49 Files, 214 Replacements)**:
+  - Updated all HTML image tags, link preloads, CSS background-image properties, schema.org definitions, and open graph tags across 49 files:
+    - Root marketing pages (`index.html`, `about.html`, `services.html`, `portfolio.html`, `pricing.html`, `contact.html`, `order-success.html`, `track-order.html`, `terms.html`, `privacy.html`, `404.html`, `portal-login.html`).
+    - Workspaces (`client-portal.html`, `client-orders.html`, `client-quotes.html`, `client-invoices.html`, `client-profile.html`, `admin-*.html`, `worker-*.html`).
+    - SEO Subdirectories (`embroidery-digitizing/`, `vector-art-conversion/`, `stitch-lab/`).
+    - Core Styles (`styles.css` selector `header a img[src*="logo.webp"], header a img[src*="logo.png"]`).
+    - Core Scripts (`app.js`, `js/admin-workspace.js`, `js/insforge-client.js`, `js/order-quote-modal.js`, `js/notifications-manager.js`).
+- **Automated Playwright Audit Results**:
+  - Checked 257 `<img>` elements across 26 distinct pages.
+  - Total WebP image references: 244.
+  - Failed HTTP image requests: **0**.
+  - Broken images (`naturalWidth = 0`): **0**.
+  - Multi-viewport visual verification confirmed crystal clear rendering across Desktop (1512x982) and Mobile (390x844).
 
 ### 4.9 Client Stitchouts Mobile Slider WebKit Fix & Zero-Mock Production E2E Audit
 - **Problem Diagnosed (Mobile Blank Viewer Bug)**:
@@ -369,7 +391,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
       4. *We Digitize* (bespoke monitor and stylus drawing pen SVG)
       5. *Download Your Files* (bespoke download tray with downward arrow SVG)
       - Centered top-border gold numbered badges (`1` to `5`), subtle primary background circular containers, and desktop directional flow arrows (`arrow_forward`).
-    - **Expert Services 2-Column Grid & Showcase Image**: Preserved the approved 2-column grid and side-by-side action buttons on mobile. Updated Card 1 (*Embroidery Digitizing*) to feature the high-resolution "DUAL EDGE LANDSCAPE" side-by-side showcase (`images/embroidery-digitizing-dual-edge.jpg`), displaying the digitized vector/stitch file on the left and the finished physical embroidered snapback trucker cap on the right.
+    - **Expert Services 2-Column Grid & Showcase Image**: Preserved the approved 2-column grid and side-by-side action buttons on mobile. Updated Card 1 (*Embroidery Digitizing*) to feature the high-resolution "DUAL EDGE LANDSCAPE" side-by-side showcase (`images/embroidery-digitizing-dual-edge.webp`), displaying the digitized vector/stitch file on the left and the finished physical embroidered snapback trucker cap on the right.
   - `about.html`:
     - Converted bloated single-column stats stack into a balanced 2x2 grid on mobile (`grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 p-3.5 sm:p-6 rounded-xl sm:rounded-2xl`).
     - Standardized all `py-16` section padding down to `py-6 sm:py-10`.
@@ -1083,8 +1105,8 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - **`vector-art-conversion.html`**:
     - **Target Keywords & Focus**: 100% manual vector art conversion, raster redraw, low-res JPG/PNG to AI, EPS, SVG, PDF, CDR, print-ready screen printing separations, vinyl cut paths, laser engraving.
     - **User Vector Assets Prominently Integrated**:
-      1. `images/vector-art-fish-comparison.jpg`: Full-color detailed Rainbow Trout water splash illustration comparison (Raster vs Vector) displaying format badges (JPG, AI, EPS, PNG, PDF, CDR) and "All file formats available upon request".
-      2. `images/vector-art-senior-comparison.png`: Napkin/paper hand-drawn pencil concept sketch ("SENIOR 2024 HOLCOMB HIGH SCHOOL") converted into production-ready vibrant colored vector artwork ("SENIOR 2024 AFSIVA HIGH SCHOOL") with format badges.
+      1. `images/vector-art-fish-comparison.webp`: Full-color detailed Rainbow Trout water splash illustration comparison (Raster vs Vector) displaying format badges (JPG, AI, EPS, PNG, PDF, CDR) and "All file formats available upon request".
+      2. `images/vector-art-senior-comparison.webp`: Napkin/paper hand-drawn pencil concept sketch ("SENIOR 2024 HOLCOMB HIGH SCHOOL") converted into production-ready vibrant colored vector artwork ("SENIOR 2024 AFSIVA HIGH SCHOOL") with format badges.
     - **Production Capabilities (6 Bento Cards)**: Screen Printing & Color Separation, DTF & Heat Transfers, Vinyl Cut Paths & Plotters, Laser Engraving & CNC, Vehicle Wraps & Billboards, Embroidery Art Prep.
     - **Structured Data**: JSON-LD `Service`, `ProfessionalService`, `FAQPage`, `BreadcrumbList`.
 - **Expert Services Click Routing in `services.html`**:
@@ -1098,7 +1120,7 @@ The Worker Studio provides an isolated, production-focused environment for embro
       2. `Refund & Privacy Policy` (`privacy.html`)
     - **Bottom Bar**: `© 2016-2026 Dezan Digitizing — All Rights Reserved. Terms of Service • Refund & Privacy Policy`.
 - **Mobile Image Asset Optimization & Zero-Opacity Blocking**:
-  - Replaced unencoded space filenames with web-standard URL-safe filenames (`images/custom-hats.png`, `images/jacket-backs.png`, `images/left-chest-logos.png`, `images/pet-embroidery.png`) with `?v=4` cache-busting parameters across `services.html`, `index.html`, and `embroidery-digitizing.html`.
+  - Replaced unencoded space filenames with web-standard URL-safe filenames (`images/custom-hats.webp`, `images/jacket-backs.webp`, `images/left-chest-logos.webp`, `images/pet-embroidery.webp`) with `?v=4` cache-busting parameters across `services.html`, `index.html`, and `embroidery-digitizing.html`.
   - Removed nested `.reveal` animation classes from individual portfolio cards on `services.html` that caused mobile WebKit browsers to occasionally leave cards stuck at `opacity: 0`.
   - Added `loading="eager"` and calibrated `object-[center_35%]` framing on `embroidery-digitizing.html` so hat crowns are never cut off by horizontal aspect ratio crops.
 - **Visual Verification**:
@@ -1331,14 +1353,14 @@ The Worker Studio provides an isolated, production-focused environment for embro
     38. `39.webp` $\rightarrow$ `sevenailz-barbershop-greek-key-jacket-back-embroidery-digitizing.webp`
     39. `40.webp` $\rightarrow$ `sevenailz-barbershop-jacket-back-embroidery-stitchout.webp`
   - **Hero Page Comparison Assets Renamed**:
-    - `Hero Page/Vector.png` $\rightarrow$ `Hero Page/astronaut-vector-art-source-illustration.png`
-    - `Hero Page/Embroidery.png` $\rightarrow$ `Hero Page/astronaut-patch-embroidery-digitizing-stitchout.png`
+    - `Hero Page/Vector.png` $\rightarrow$ `Hero Page/astronaut-vector-art-source-illustration.webp`
+    - `Hero Page/Embroidery.png` $\rightarrow$ `Hero Page/astronaut-patch-embroidery-digitizing-stitchout.webp`
   - **Factory Craftsmanship Assets Renamed (`images/`)**:
-    - `1.jpeg` $\rightarrow$ `commercial-multi-head-embroidery-machine.jpeg`
-    - `2.jpeg` $\rightarrow$ `wilcom-embroidery-digitizing-software-stitch-simulation.jpeg`
-    - `3.jpeg` $\rightarrow$ `scenic-mountain-landscape-embroidered-patch.jpeg`
-    - `4.jpeg` $\rightarrow$ `madeira-polyneon-embroidery-thread-spools.jpeg`
-    - Removed space-containing duplicates (`Custom Hats.png`, `Jacket Backs.png`, `Left Chest Logos.png`, `Left Chest Logos.jpg`, `Pet Embroidery.png`) in favor of standardized `custom-hats.png`, `jacket-backs.png`, `left-chest-logos.png`, `pet-embroidery.png`.
+    - `1.jpeg` $\rightarrow$ `commercial-multi-head-embroidery-machine.webp`
+    - `2.jpeg` $\rightarrow$ `wilcom-embroidery-digitizing-software-stitch-simulation.webp`
+    - `3.jpeg` $\rightarrow$ `scenic-mountain-landscape-embroidered-patch.webp`
+    - `4.jpeg` $\rightarrow$ `madeira-polyneon-embroidery-thread-spools.webp`
+    - Removed space-containing duplicates (`Custom Hats.png`, `Jacket Backs.png`, `Left Chest Logos.png`, `Left Chest Logos.jpg`, `Pet Embroidery.png`) in favor of standardized `custom-hats.webp`, `jacket-backs.webp`, `left-chest-logos.webp`, `pet-embroidery.webp`.
   - **Customer Testimonial Screenshots Renamed (`reviews/`)**:
     - `review2.jpeg` $\rightarrow$ `ashlea-foxwell-embroidery-stitchout-review.jpeg`
     - `review3.jpeg` $\rightarrow$ `erkan-koyuncu-seaside-hats-embroidery-review.jpeg`

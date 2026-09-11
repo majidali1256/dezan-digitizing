@@ -114,7 +114,7 @@ async function runVerification() {
         await page.fill('#order-client-email', 'sarah.jenkins@company.com');
 
         // Attach a simulated artwork file
-        const sampleArtPath = path.join(WORKSPACE_DIR, 'logo.png');
+        const sampleArtPath = path.join(WORKSPACE_DIR, 'logo.webp');
         if (fs.existsSync(sampleArtPath)) {
             await page.setInputFiles('#artwork-file', sampleArtPath);
             await page.waitForTimeout(300);
