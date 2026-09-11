@@ -1033,81 +1033,7 @@
         window.setDigitizerTabFilter = setDigitizerTabFilter;
 
         function getDigitizerFallbackTasks() {
-            return [
-                {
-                    id: 'tsk-001',
-                    orderNumber: 'ORD-8492',
-                    taskId: 'TSK-8492-DIG',
-                    designName: 'Apex Mountain Gear',
-                    serviceType: 'Digitizing',
-                    status: 'pending',
-                    placement: 'Left Chest',
-                    targetFabric: 'Pique Polo',
-                    sizing: '4.0" WIDE',
-                    fileFormat: 'DST + PES',
-                    turnaroundHours: 8,
-                    created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
-                    artwork_url: 'images/service-digitizing.png',
-                    instructions: 'Keep the small text clear and add trims between all letters. Avoid excessive density on small satin borders.'
-                },
-                {
-                    id: 'tsk-002',
-                    orderNumber: 'ORD-8240',
-                    taskId: 'TSK-8240-REV',
-                    designName: 'Pacific Coast Marina Cap',
-                    serviceType: 'Digitizing',
-                    status: 'revision_requested',
-                    placement: 'Cap Front',
-                    targetFabric: 'Structured Twill Cap',
-                    sizing: '3.5" W × 2.2" H',
-                    fileFormat: 'DST',
-                    specialOptions: ['3D Puff', 'Trims Between All Letters'],
-                    revision_notes: 'Please make the red text thicker and move the outline closer.',
-                    instructions: '3D Puff cap design. Center out sequence for structured cap frame. Add extra pull comp for cap center seam.',
-                    turnaroundHours: 4,
-                    isRush: true,
-                    created_at: new Date(Date.now() - 86400000 * 1).toISOString(),
-                    revision_requested_at: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
-                    artwork_url: 'images/service-digitizing.png',
-                    rawArtworkFiles: [{ name: 'Pacific_Marina_Logo.png', url: 'images/service-digitizing.png' }],
-                    previous_deliverable: { name: 'ORD-8240_v1.DST', url: 'images/service-digitizing.png', format: 'DST' },
-                    deliverables: [{ name: 'ORD-8240_v1.DST', url: 'images/service-digitizing.png', format: 'DST' }]
-                },
-                {
-                    id: 'tsk-003',
-                    orderNumber: 'ORD-8511',
-                    taskId: 'TSK-8511-PRD',
-                    designName: 'Iron Horse Biker Club Emblem',
-                    serviceType: 'Digitizing',
-                    status: 'in_progress',
-                    placement: 'Jacket Back',
-                    targetFabric: 'Heavy Twill',
-                    sizing: '4.5" W × 4.0" H',
-                    fileFormat: 'DST + PES',
-                    turnaroundHours: 12,
-                    created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
-                    artwork_url: 'images/service-digitizing.png',
-                    instructions: 'Clean tatami fills on the shield background with satin outlines. Group color stops logically.'
-                },
-                {
-                    id: 'tsk-004',
-                    orderNumber: 'ORD-8310',
-                    taskId: 'TSK-8310-CMP',
-                    designName: 'Golden Eagle Crest Vintage',
-                    serviceType: 'Digitizing',
-                    status: 'completed',
-                    placement: 'Jacket Back',
-                    targetFabric: 'Denim Jacket',
-                    sizing: '9.0" W × 7.5" H',
-                    fileFormat: 'DST + PES',
-                    stitchCount: 28450,
-                    turnaroundHours: 12,
-                    created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-                    artwork_url: 'images/service-digitizing.png',
-                    deliverable_url: 'images/service-digitizing.png',
-                    deliverables: [{ name: 'Golden_Eagle_Jacket.dst', url: 'images/service-digitizing.png' }]
-                }
-            ];
+            return [];
         }
 
         async function renderWorkerTasks() {
@@ -1124,7 +1050,7 @@
             }
 
             if (!rawTasks || rawTasks.length === 0) {
-                rawTasks = getDigitizerFallbackTasks();
+                rawTasks = [];
             }
 
             // STRICT MASKING: queries sanitized digitizer tasks only (zero quotes, zero client info, zero pricing)
@@ -1635,7 +1561,7 @@
         function renderDigitizerOrderCard(task, isCompleted) {
             const isRevision = task.status === 'revision_requested' || !!task.revision_notes || !!task.revisionNotes;
             const isRush = task.isRush || task.turnaround_speed === 'rush' || task.priority === 'rush';
-            const orderNum = task.orderNumber || task.order_number || 'ORD-8492';
+            const orderNum = task.orderNumber || task.order_number || (task.taskId ? task.taskId.replace('TSK-', 'ORD-') : 'ORD-PENDING');
             const safeOrderNumber = String(orderNum).replace(/-/g, '&#8209;');
 
             const isNewOrder = !isCompleted && !isRevision && task.status !== 'in_progress';

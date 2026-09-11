@@ -124,32 +124,11 @@
             return;
         }
 
-        let user = null;
-        try {
-            user = window.insforgeClient.getCurrentUser();
-        } catch (e) {
-            console.warn('Worker session check warning:', e);
-        }
+        // Check authentication
+        const user = window.insforgeClient.requireAuth(['digitizer']);
+        if (!user) return;
 
-        if (!user || user.role !== 'digitizer') {
-            user = {
-                id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
-                email: 'digitizer@dezandigitizing.com',
-                displayName: 'Digitizer',
-                role: 'digitizer',
-                company: 'Dezan Digitizing Studio',
-                phone: '+1 (555) 987-6543'
-            };
-            try {
-                if (typeof window.insforgeClient.setSession === 'function') {
-                    window.insforgeClient.setSession(user);
-                }
-            } catch (e) {
-                console.warn('Worker set session warning:', e);
-            }
-        }
-
-        state.session = user || { displayName: 'Digitizer', email: 'digitizer@dezandigitizing.com', role: 'digitizer' };
+        state.session = user;
         updateHeaderUserUI();
         highlightActiveNavTab();
 
@@ -181,22 +160,12 @@
                 tasks = await window.insforgeClient.fetchDigitizerTasks();
             } else if (typeof window.insforgeClient.getDigitizerTasks === 'function') {
                 tasks = window.insforgeClient.getDigitizerTasks();
-            } else if (typeof window.insforgeClient.getTasks === 'function') {
-                tasks = await window.insforgeClient.getTasks();
-            } else if (typeof window.insforgeClient.getOrders === 'function') {
-                tasks = await window.insforgeClient.getOrders();
             }
 
-            // Fall back to comprehensive demo tasks if array is empty
-            if (!Array.isArray(tasks) || tasks.length === 0) {
-                tasks = getFallbackTasks();
-            }
-
-            // Apply strict masking and deep field normalization
-            state.tasks = tasks.map(applyWorkerMasking);
+            state.tasks = Array.isArray(tasks) ? tasks.map(applyWorkerMasking) : [];
         } catch (e) {
-            console.warn('Tasks load notice, using rich fallback queue:', e);
-            state.tasks = getFallbackTasks().map(applyWorkerMasking);
+            console.warn('Tasks load error:', e);
+            state.tasks = [];
         }
 
         updateMetricsAcrossViews();
@@ -204,7 +173,7 @@
 
     // Strict PII & Price Masking Rule with Universal Field Normalization
     function applyWorkerMasking(task) {
-        const orderNumber = task.order_number || task.orderNumber || (task.taskId ? task.taskId.replace('TSK-', 'ORD-') : 'ORD-8492');
+        const orderNumber = task.order_number || task.orderNumber || (task.taskId ? task.taskId.replace('TSK-', 'ORD-') : 'ORD-PENDING');
         const idSuffix = String(orderNumber).replace(/[^0-9]/g, '').slice(-4) || '1234';
         const designName = task.design_name || task.designName || task.project_name || task.projectName || 'Custom Embroidery';
         
@@ -278,109 +247,7 @@
     }
 
     function getFallbackTasks() {
-        return [
-            {
-                id: 'task-201',
-                order_number: 'ORD-8492',
-                design_name: 'Apex Mountain Gear',
-                service_type: 'Digitizing',
-                plan: 'Hat / Left Chest Logos',
-                status: 'in_progress',
-                priority: 'normal',
-                placement: 'Left Chest',
-                created_at: new Date(Date.now() - 3600000 * 3).toISOString(),
-                artwork_url: 'images/service-digitizing.png',
-                target_fabric: 'Pique Polo',
-                dimensions: '4.0" WIDE',
-                target_format: 'DST + PES',
-                special_instructions: 'Keep the small text clear and add trims between all letters. Avoid excessive density on small satin borders.'
-            },
-            {
-                id: 'task-202',
-                order_number: 'ORD-8488',
-                design_name: 'Timberline Tactical Cap',
-                service_type: 'Digitizing',
-                plan: 'Hat / Left Chest Logos',
-                status: 'in_progress',
-                priority: 'rush',
-                placement: 'Cap Front',
-                created_at: new Date(Date.now() - 3600000 * 6).toISOString(),
-                artwork_url: 'images/service-digitizing.png',
-                target_fabric: 'Structured 6-Panel Cap',
-                dimensions: '3.5" W × 2.2" H',
-                target_format: 'DST',
-                special_options: ['3D Puff', 'Trims Between All Letters'],
-                special_instructions: '3D Puff cap design. Center out sequence for structured cap frame. Add extra pull comp for cap center seam.'
-            },
-            {
-                id: 'task-204',
-                order_number: 'ORD-8482',
-                design_name: 'Metro Fire Rescue Shield',
-                service_type: 'Digitizing',
-                plan: 'Jacket Backs',
-                status: 'in_progress',
-                priority: 'normal',
-                placement: 'Jacket Back',
-                created_at: new Date(Date.now() - 3600000 * 9).toISOString(),
-                artwork_url: 'images/service-digitizing.png',
-                target_fabric: 'Heavy Twill',
-                dimensions: '11.0" W × 9.5" H',
-                target_format: 'DST + EMB',
-                special_instructions: 'Clean tatami fills on the shield background with satin outlines. Group color stops logically.'
-            },
-            {
-                id: 'task-205',
-                order_number: 'ORD-8475',
-                design_name: 'Summit Ridge Athletic Club',
-                service_type: 'Digitizing',
-                plan: 'Jacket Backs',
-                status: 'revision_requested',
-                priority: 'rush',
-                isRush: true,
-                placement: 'Jacket Back',
-                created_at: new Date(Date.now() - 3600000 * 14).toISOString(),
-                revision_requested_at: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
-                artwork_url: 'images/service-digitizing.png',
-                target_fabric: 'Fleece Pullover',
-                dimensions: '6.5" W × 4.5" H',
-                target_format: 'DST + PES',
-                special_instructions: 'Increase tatami underlay density by +0.05mm to stop looping on thick fleece substrate.',
-                revision_notes: 'Please make the red text thicker and move the outline closer.',
-                raw_artwork_files: [{ name: 'SummitRidge_Logo.png', url: 'images/service-digitizing.png' }],
-                previous_deliverable: { name: 'ORD-8475_v1.DST', url: 'images/service-digitizing.png', format: 'DST' },
-                deliverables: [{ name: 'ORD-8475_v1.DST', url: 'images/service-digitizing.png', format: 'DST' }]
-            },
-            {
-                id: 'task-203',
-                order_number: 'ORD-8310',
-                design_name: 'Golden Eagle Crest Vintage',
-                service_type: 'Digitizing',
-                plan: 'Larger Designs',
-                status: 'completed',
-                created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-                artwork_url: 'images/wilcom-embroidery-digitizing-software-stitch-simulation.jpeg',
-                deliverable_url: 'images/jacket-backs.png',
-                target_fabric: 'Denim Jacket Back',
-                dimensions: '9.0" W x 7.5" H',
-                stitch_count: 28450,
-                target_format: 'EMB, DST, PES'
-            },
-            {
-                id: 'task-206',
-                order_number: 'ORD-8280',
-                design_name: 'Silver Creek Golf Classic',
-                service_type: 'Digitizing',
-                plan: 'Hat / Left Chest Logos',
-                status: 'completed',
-                created_at: new Date(Date.now() - 86400000 * 4).toISOString(),
-                artwork_url: 'images/scenic-mountain-landscape-embroidered-patch.jpeg',
-                deliverable_url: 'images/left-chest-logos.png',
-                target_fabric: 'Performance Poly Knit',
-                dimensions: '3.2" W x 2.0" H',
-                stitch_count: 14200,
-                target_format: 'DST, EXP'
-            }
-        ];
+        return [];
     }
 
     // ----- Metrics Calculation -----
@@ -785,7 +652,7 @@
         const isNewOrder = !isCompleted && !isRevision && (task.status === 'assigned' || (!task.started_at && task.status !== 'in_progress'));
         const isUnread = !!task.is_unread || (!task.digitizer_viewed_at && isNewOrder);
         const assignedTimeAgo = formatTimeAgo(task.assigned_at || task.created_at);
-        const orderNum = task.order_number || task.orderNumber || 'ORD-8492';
+        const orderNum = task.order_number || task.orderNumber || (task.taskId ? task.taskId.replace('TSK-', 'ORD-') : 'ORD-PENDING');
         const safeOrderNumber = String(orderNum).replace(/-/g, '&#8209;');
 
         // Stage color classes (distinct 2px border with respective color theme)
@@ -1160,7 +1027,7 @@
         const isNewOrder = !isCompleted && !isRevision && (task.status === 'assigned' || (!task.started_at && task.status !== 'in_progress'));
         const isUnread = !!task.is_unread || (!task.digitizer_viewed_at && isNewOrder);
         const assignedTimeAgo = formatTimeAgo(task.assigned_at || task.created_at);
-        const orderNum = task.order_number || task.orderNumber || 'ORD-8492';
+        const orderNum = task.order_number || task.orderNumber || (task.taskId ? task.taskId.replace('TSK-', 'ORD-') : 'ORD-PENDING');
         const safeOrderNumber = String(orderNum).replace(/-/g, '&#8209;');
         const revWaitTime = isRevision ? getRevisionWaitingTime(task) : '';
 

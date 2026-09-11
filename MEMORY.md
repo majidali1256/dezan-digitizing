@@ -220,6 +220,44 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   5. **Static HTML Pre-Rendering Across Public Pages**:
      - All primary public pages (`index.html`, `services.html`, `portfolio.html`, `pricing.html`, `about.html`, `contact.html`, `embroidery-digitizing.html`, `vector-art-conversion.html`, `terms.html`, `privacy.html`, `track-order.html`, `order-success.html`, `404.html`, `stitch-lab/index.html`, etc.) updated with static elements in `#header-auth-slot` to ensure zero CLS (Cumulative Layout Shift) before JavaScript execution.
 
+### 4.9 Client Stitchouts Mobile Slider WebKit Fix & Zero-Mock Production E2E Audit
+- **Problem Diagnosed (Mobile Blank Viewer Bug)**:
+  - In mobile Safari / WebKit viewports (e.g., iPhone), the main viewer box of the **Client Stitchouts** slider rendered completely dark and empty while thumbnails below were partially visible.
+  - **Root Cause A (Paint Containment Culling)**: In `styles.css`, `#feedback-slide-track` had `contain: paint layout;`. In iOS Safari WebKit, `contain: paint` forcibly culls hardware-accelerated offscreen/transformed child elements, causing the translated track contents to fail to paint entirely.
+  - **Root Cause B (Percentage Ambiguity in Flex Containers)**: In `app.js`, `track.style.transform = 'translateX(' + offset + '%)'` calculated percentages relative to the track's own layout width (`offsetWidth`). Because the track contains 39 non-shrinking flex slide items, its layout width exceeded 9,000px! Evaluating `translateX(-47.5%)` or `translateX(-762.5%)` translated the track by thousands of pixels out of bounds, shooting all slide images completely out of the viewport.
+  - **Root Cause C (Unencoded URI Spaces)**: File paths in `Client FeedBack/` contained unencoded spaces, which failed to parse reliably across certain mobile WebKit builds.
+- **Architectural Solution Implemented**:
+  1. **Removed `contain: paint layout;` & `content-visibility: auto;` (`styles.css`)**:
+     - Removed `#feedback-slide-track` from the GPU promotion paint containment rule.
+     - Removed `#feedbacks-section` from `content-visibility: auto;` to prevent WebKit scroll clipping.
+  2. **Deterministic Pixel-Based Positioning Engine (`app.js`)**:
+     - Converted slide sizing and translation from percentage-based offsets to exact pixels:
+       ```javascript
+       const containerWidth = wrapper.offsetWidth || track.parentElement.offsetWidth || window.innerWidth;
+       const slideWidth = getSlideWidth(); // 78% on mobile (<640px), 65% on tablet, 52% (max 640px) on desktop
+       const centerOffset = (containerWidth - slideWidth) / 2;
+       const targetX = centerOffset - (currentIndex * slideWidth);
+       track.style.transform = `translate3d(${Math.round(targetX)}px, 0, 0)`;
+       ```
+     - Enforced explicit pixel dimensions on every slide element (`flex: 0 0 ${slideWidth}px; max-width: ${slideWidth}px`).
+     - Added `encodeURI(src)` to all slide and thumbnail image paths.
+     - Implemented a responsive `window.addEventListener('resize')` handler to recompute dimensions on orientation changes.
+     - Streamlined `goTo()` so user clicks on thumbnails immediately navigate without being blocked by transition locks.
+- **Full Production Zero-Mock E2E Audit & Database Alignment**:
+  1. **Purged All Mock Data & Fallback Remnants**:
+     - Eradicated `DEMO_USERS`, `INITIAL_DEMO_ORDERS`, dev master OTP `123456`, `loginAsDemo()` from `js/insforge-client.js`.
+     - Replaced `getClientFallbackOrders()` and `getDigitizerFallbackTasks()` so portals return empty arrays `[]` instead of mock cards (`ORD-8492`, `QUO-7215`, `TSK-8492-DIG`).
+     - Eradicated hardcoded "John Foster" / "ORD-8492" invoice fallbacks in `client-invoices.html` and `js/client-workspace.js`.
+     - Enforced bcrypt verification in `server/controllers/authController.js` and removed demo password bypasses.
+  2. **Database Alignment**:
+     - Synced Majid Hussain's real orders (`ORD-2026-7418`, `ORD-2026-6378`, `ORD-2026-4747`) in `public.orders` to his profile UUID (`95d5c7c9-fed7-4187-8c13-37e37b718d6d`).
+  3. **Passed 5-Suite End-to-End Automated Verification (`verify_real_production_e2e.js`)**:
+     - Suite 1: Unauthenticated Gatekeeping blocks protected routes and redirects to `portal-login.html`.
+     - Suite 2: Authentic Google Client Sign-In (Majid Hussain) logs in and renders live Postgres orders.
+     - Suite 3: Order Modal enforces artwork attachment before Step 3 Review & Pay.
+     - Suite 4: Master Admin logs in and loads live Postgres orders table.
+     - Suite 5: Production Digitizer logs in, renders live task queue, with verified **ZERO PII leaks** (customer emails, billing).
+
 ---
 
 ## 5. Site Map & Route Architecture

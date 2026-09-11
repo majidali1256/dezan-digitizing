@@ -100,9 +100,9 @@
             const user = (typeof window.insforgeClient?.getCurrentUser === 'function')
                 ? window.insforgeClient.getCurrentUser()
                 : null;
-            this.userId = user?.id || user?.email || (role === 'admin' ? 'admin_master' : role === 'digitizer' ? 'worker_master' : 'client_demo');
+            this.userId = user?.id || user?.email || (role === 'admin' ? 'admin_master' : role === 'digitizer' ? 'worker_master' : 'client_guest');
 
-            // Load persisted notifications or generate initial contextual seed
+            // Load persisted notifications or start empty
             this.loadNotifications();
 
             // Render Bell & Panel UI into DOM
@@ -122,7 +122,7 @@
         }
 
         /**
-         * Load notifications from localStorage or generate realistic contextual seed
+         * Load notifications from localStorage or initialize empty list
          */
         loadNotifications() {
             const key = this.getStorageKey();
@@ -137,8 +137,8 @@
                 }
             }
 
-            // Generate initial realistic seed based on role
-            this.notifications = this.generateInitialSeed();
+            // Start empty for genuine production notifications
+            this.notifications = [];
             this.saveNotifications(false);
         }
 
@@ -170,237 +170,7 @@
          * Contextual Initial Seed Data based on role and actual orders in system
          */
         generateInitialSeed() {
-            const now = Date.now();
-            const m = (mins) => new Date(now - mins * 60 * 1000).toISOString();
-
-            if (this.role === 'admin') {
-                return [
-                    {
-                        id: 'notif-adm-1',
-                        orderId: 'ORD-8842',
-                        type: 'order_new',
-                        category: 'orders',
-                        title: 'New Embroidery Order Placed',
-                        message: 'Falcon Cap Badge (Cap / Hat) placed by John Falcon. Ready for digitizer dispatch.',
-                        meta: '$15.00 · Structured Cap · Turnaround 12-24h',
-                        clientName: 'John Falcon',
-                        actionLabel: 'Assign Digitizer',
-                        actionType: 'assign_order',
-                        read: false,
-                        timestamp: m(8),
-                        icon: 'add_shopping_cart',
-                        accent: 'amber'
-                    },
-                    {
-                        id: 'notif-adm-2',
-                        orderId: 'QUO-4769',
-                        type: 'quote_new',
-                        category: 'quotes',
-                        title: 'New Free Quote Request',
-                        message: 'Custom Vector Redraw requested by Marcus Vance. Requires complexity appraisal.',
-                        meta: 'Quote Appraisal Pending · Vector Redraw',
-                        clientName: 'Marcus Vance',
-                        actionLabel: 'Appraise Quote',
-                        actionType: 'view_quotes',
-                        read: false,
-                        timestamp: m(42),
-                        icon: 'request_quote',
-                        accent: 'sky'
-                    },
-                    {
-                        id: 'notif-adm-3',
-                        orderId: 'ORD-8837',
-                        type: 'revision_requested',
-                        category: 'revisions',
-                        title: 'Stitch-Out Revision Requested',
-                        message: 'Client reported minor thread pull on Left Chest crest. Physical defect photos attached.',
-                        meta: 'Priority Review · Left Chest Polo',
-                        clientName: 'Sarah Jenkins',
-                        actionLabel: 'Review Revision',
-                        actionType: 'view_revision',
-                        read: false,
-                        timestamp: m(110),
-                        icon: 'change_circle',
-                        accent: 'purple'
-                    },
-                    {
-                        id: 'notif-adm-4',
-                        orderId: 'ORD-8839',
-                        type: 'deliverables_uploaded',
-                        category: 'orders',
-                        title: 'Digitizer Submitted Machine Files',
-                        message: 'Digitizer submitted .DST and .EMB production files for Falcon Corporate Polo.',
-                        meta: 'QA Review Required · 14,280 Stitches',
-                        clientName: 'Falcon Apparel',
-                        actionLabel: 'QA & Release',
-                        actionType: 'view_order',
-                        read: true,
-                        timestamp: m(320),
-                        icon: 'verified',
-                        accent: 'emerald'
-                    },
-                    {
-                        id: 'notif-adm-5',
-                        orderId: 'ORD-8841',
-                        type: 'payment_confirmed',
-                        category: 'orders',
-                        title: 'Payment Received ($25.00)',
-                        message: 'PayPal payment confirmed for Jacket Back Redraw. Automated invoice generated.',
-                        meta: 'Paid · Transaction #TXN-9941',
-                        clientName: 'David Miller',
-                        actionLabel: 'View Invoice',
-                        actionType: 'view_invoice',
-                        read: true,
-                        timestamp: m(650),
-                        icon: 'payments',
-                        accent: 'emerald'
-                    }
-                ];
-            }
-
-            if (this.role === 'digitizer') {
-                return [
-                    {
-                        id: 'notif-wrk-1',
-                        orderId: 'ORD-8840',
-                        type: 'task_assigned',
-                        category: 'assigned',
-                        title: 'New Digitizing Task Assigned',
-                        message: 'Task #ORD-8840 (Left Chest Logo) assigned to your workbench. Needle 75/11, Tatami underlay.',
-                        meta: 'Cap / Hat · 3.5" W x 2.2" H · Format: DST, EMB',
-                        actionLabel: 'Open Workbench',
-                        actionType: 'open_task',
-                        read: false,
-                        timestamp: m(12),
-                        icon: 'precision_manufacturing',
-                        accent: 'blue'
-                    },
-                    {
-                        id: 'notif-wrk-2',
-                        orderId: 'ORD-8837',
-                        type: 'revision_task',
-                        category: 'revisions',
-                        title: 'Stitch-Out Revision Requested',
-                        message: 'Density adjustment required on lettering. Increase pull compensation to 0.40mm for pique knit.',
-                        meta: 'Urgent Revision · Left Chest · Pique Fabric',
-                        actionLabel: 'Inspect Specs',
-                        actionType: 'open_task',
-                        read: false,
-                        timestamp: m(55),
-                        icon: 'change_circle',
-                        accent: 'purple'
-                    },
-                    {
-                        id: 'notif-wrk-3',
-                        orderId: 'ORD-8838',
-                        type: 'deadline_urgent',
-                        category: 'urgent',
-                        title: 'Priority Turnaround Reminder',
-                        message: 'Task #ORD-8838 has a target delivery in 4 hours. Ensure jump stitches under 1mm are trimmed.',
-                        meta: 'Priority Queue · Jacket Back 3D Puff',
-                        actionLabel: 'Workbench',
-                        actionType: 'open_task',
-                        read: false,
-                        timestamp: m(140),
-                        icon: 'bolt',
-                        accent: 'amber'
-                    },
-                    {
-                        id: 'notif-wrk-4',
-                        orderId: 'ORD-8835',
-                        type: 'qa_approved',
-                        category: 'assigned',
-                        title: 'Deliverables Approved & Verified',
-                        message: 'Machine stitch simulation for Vance Tigers Crest verified. 100% QA score recorded.',
-                        meta: 'Completed · 18,920 Stitches · 5 Stars',
-                        actionLabel: 'View Archive',
-                        actionType: 'view_archive',
-                        read: true,
-                        timestamp: m(480),
-                        icon: 'task_alt',
-                        accent: 'emerald'
-                    }
-                ];
-            }
-
-            // Default: Client Role
-            return [
-                {
-                    id: 'notif-cli-1',
-                    orderId: 'ORD-8839',
-                    type: 'deliverables_ready',
-                    category: 'ready',
-                    title: 'Stitch Files Ready for Download!',
-                    message: 'Your production-ready embroidery files (.DST, .EMB) for Falcon Corporate Polo are complete.',
-                    meta: 'Deliverables Ready · Left Chest · 14,280 Stitches',
-                    actionLabel: 'Download Files',
-                    actionType: 'download_order',
-                    read: false,
-                    timestamp: m(15),
-                    icon: 'cloud_download',
-                    accent: 'emerald'
-                },
-                {
-                    id: 'notif-cli-2',
-                    orderId: 'ORD-8840',
-                    type: 'in_production',
-                    category: 'production',
-                    title: 'Order is in Active Digitization',
-                    message: 'Our senior digitizer has started stitching simulations on Falcon Cap Badge.',
-                    meta: 'In Production · Estimated Ready: Today 6:00 PM',
-                    actionLabel: 'Track Progress',
-                    actionType: 'track_order',
-                    read: false,
-                    timestamp: m(65),
-                    icon: 'pending_actions',
-                    accent: 'blue'
-                },
-                {
-                    id: 'notif-cli-3',
-                    orderId: 'QUO-4769',
-                    type: 'quote_ready',
-                    category: 'quotes',
-                    title: 'Custom Quote Appraisal Ready',
-                    message: 'Master digitizer reviewed your artwork and estimated stitch counts. Flat appraisal: $15.00.',
-                    meta: 'Quote Approved · 100% Free Appraisal',
-                    actionLabel: 'Review & Pay',
-                    actionType: 'view_quote',
-                    read: false,
-                    timestamp: m(180),
-                    icon: 'request_quote',
-                    accent: 'sky'
-                },
-                {
-                    id: 'notif-cli-4',
-                    orderId: 'ORD-8837',
-                    type: 'revision_progress',
-                    category: 'production',
-                    title: 'Stitch Revision in Progress',
-                    message: 'Digitizer is adjusting pull compensation and lettering density as requested.',
-                    meta: 'Free Revisions Guarantee · In Progress',
-                    actionLabel: 'View Order',
-                    actionType: 'view_order',
-                    read: true,
-                    timestamp: m(360),
-                    icon: 'change_circle',
-                    accent: 'purple'
-                },
-                {
-                    id: 'notif-cli-5',
-                    orderId: 'ORD-8841',
-                    type: 'payment_received',
-                    category: 'ready',
-                    title: 'Payment Confirmed & Receipt Ready',
-                    message: 'Payment of $15.00 received. Your order has entered standard queue.',
-                    meta: 'Invoice Settled · Confirmation #DZ-1048',
-                    actionLabel: 'View Invoice',
-                    actionType: 'view_invoice',
-                    read: true,
-                    timestamp: m(720),
-                    icon: 'receipt',
-                    accent: 'emerald'
-                }
-            ];
+            return [];
         }
 
         /**
@@ -1036,8 +806,6 @@
                         <span class="font-semibold">${unread} unread (${total} total)</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button type="button" id="notif-btn-simulate" class="text-amber-800 dark:text-primary font-bold hover:underline cursor-pointer" title="Generate test order notification">+ Test Alert</button>
-                        <span class="text-slate-300 dark:text-slate-700">|</span>
                         <button type="button" id="notif-btn-clear" class="text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 font-semibold cursor-pointer" title="Remove all read notifications">Clear Read</button>
                     </div>
                 `;
@@ -1047,60 +815,6 @@
                     this.renderPanelHeader();
                     this.renderPanelTabs();
                     this.renderPanelBody();
-                });
-                footerEl.querySelector('#notif-btn-simulate')?.addEventListener('click', () => {
-                    this.simulateSampleAlert();
-                    this.renderPanelHeader();
-                    this.renderPanelTabs();
-                    this.renderPanelBody();
-                });
-            }
-        }
-
-        /**
-         * Test alert simulator for instant demonstration
-         */
-        simulateSampleAlert() {
-            const rand = Math.floor(1000 + Math.random() * 9000);
-            if (this.role === 'admin') {
-                this.addNotification({
-                    orderId: `ORD-${rand}`,
-                    type: 'order_new',
-                    category: 'orders',
-                    title: 'New Customer Order Placed',
-                    message: `Customer placed instant order #ORD-${rand} for Left Chest / Hat ($15.00).`,
-                    meta: '$15.00 · Cap / Hat · Pending Assignment',
-                    clientName: 'Demo Client',
-                    actionLabel: 'Assign Digitizer',
-                    actionType: 'assign_order',
-                    accent: 'amber',
-                    icon: 'add_shopping_cart'
-                });
-            } else if (this.role === 'digitizer') {
-                this.addNotification({
-                    orderId: `ORD-${rand}`,
-                    type: 'task_assigned',
-                    category: 'assigned',
-                    title: 'New Digitizing Task Assigned',
-                    message: `New task #ORD-${rand} assigned to you. Turnaround requested within 24h.`,
-                    meta: 'Structured Cap · Needle 75/11 · Format: DST, EMB',
-                    actionLabel: 'Open Workbench',
-                    actionType: 'open_task',
-                    accent: 'blue',
-                    icon: 'precision_manufacturing'
-                });
-            } else {
-                this.addNotification({
-                    orderId: `ORD-${rand}`,
-                    type: 'deliverables_ready',
-                    category: 'ready',
-                    title: 'Stitch Files Ready for Download',
-                    message: `Production deliverables for order #ORD-${rand} are uploaded and verified.`,
-                    meta: 'Ready · .DST & .EMB files attached',
-                    actionLabel: 'Download Files',
-                    actionType: 'download_order',
-                    accent: 'emerald',
-                    icon: 'cloud_download'
                 });
             }
         }

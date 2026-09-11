@@ -1466,36 +1466,62 @@ function initFeedbackSlider() {
     let autoTimer = null;
     let isTransitioning = false;
 
-    // --- Slide width percentage (center panel takes ~65%, sides peek) ---
-    const SLIDE_WIDTH_PERCENT = 65; // center image width (sides peek smaller)
+    // --- Dynamic Slide Width in Pixels (Eliminates percentage ambiguity across Safari/WebKit & Android) ---
+    function getSlideWidth() {
+        const containerWidth = wrapper.offsetWidth || track.parentElement.offsetWidth || window.innerWidth;
+        if (containerWidth < 640) {
+            return Math.round(containerWidth * 0.78); // 78% on mobile for clear center view with subtle side peeks
+        } else if (containerWidth < 1024) {
+            return Math.round(containerWidth * 0.65);
+        } else {
+            return Math.min(Math.round(containerWidth * 0.52), 640);
+        }
+    }
 
     // --- Build slide images in track ---
     images.forEach((src, i) => {
         const slide = document.createElement('div');
-        slide.className = 'flex-shrink-0 h-full flex items-center justify-center';
-        slide.style.width = SLIDE_WIDTH_PERCENT + '%';
-        slide.style.transition = 'transform 600ms ease-in-out, opacity 600ms ease-in-out';
+        slide.className = 'flex-shrink-0 h-full flex items-center justify-center p-2';
+        slide.style.transition = 'transform 600ms cubic-bezier(0.25, 1, 0.5, 1), opacity 600ms cubic-bezier(0.25, 1, 0.5, 1)';
 
         const img = document.createElement('img');
         const item = feedbackItems[i] || { alt: 'Client Stitchout ' + (i + 1), title: 'Client Stitchout' };
-        img.src = src;
+        img.src = encodeURI(src);
         img.alt = item.alt;
         img.title = item.title;
-        img.className = 'w-full h-full object-contain';
+        img.loading = i < 3 ? 'eager' : 'lazy';
+        img.decoding = 'async';
+        img.className = 'w-full h-full object-contain pointer-events-none drop-shadow-md select-none';
         img.draggable = false;
+        img.onerror = () => {
+            console.warn('Feedback image failed to load:', src);
+        };
         slide.appendChild(img);
         track.appendChild(slide);
     });
 
     const slides = track.querySelectorAll(':scope > div');
 
+    // --- Apply explicit pixel dimensions to every slide ---
+    function updateSlideSizes() {
+        const slideWidth = getSlideWidth();
+        slides.forEach(slide => {
+            slide.style.width = slideWidth + 'px';
+            slide.style.minWidth = slideWidth + 'px';
+            slide.style.maxWidth = slideWidth + 'px';
+            slide.style.flex = `0 0 ${slideWidth}px`;
+        });
+    }
+
     // --- Build Thumbnail Strip ---
     images.forEach((src, i) => {
         const thumb = document.createElement('img');
         const item = feedbackItems[i] || { alt: 'Thumbnail ' + (i + 1), title: 'Client Stitchout' };
-        thumb.src = src;
+        thumb.src = encodeURI(src);
         thumb.alt = item.alt + ' - Thumbnail';
         thumb.title = item.title;
+        thumb.loading = 'lazy';
+        thumb.decoding = 'async';
         thumb.className = 'h-14 w-20 md:h-16 md:w-24 object-cover rounded cursor-pointer flex-shrink-0 border-2 transition-all duration-300 hover:border-primary';
         thumb.style.borderColor = i === 0 ? 'var(--color-primary, #c9a84c)' : 'transparent';
         thumb.addEventListener('click', () => goTo(i));
@@ -1508,54 +1534,56 @@ function initFeedbackSlider() {
     function updateSlideStyles() {
         slides.forEach((slide, i) => {
             if (i === currentIndex) {
-                slide.style.transform = 'scale(1) translateX(0)';
+                slide.style.transform = 'scale(1)';
                 slide.style.opacity = '1';
                 slide.style.zIndex = '2';
-            } else if (i < currentIndex) {
-                slide.style.transform = 'scale(0.85) translateX(20%)';
-                slide.style.opacity = '0.6';
-                slide.style.zIndex = '1';
             } else {
-                slide.style.transform = 'scale(0.85) translateX(-20%)';
-                slide.style.opacity = '0.6';
+                slide.style.transform = 'scale(0.88)';
+                slide.style.opacity = '0.5';
                 slide.style.zIndex = '1';
             }
         });
     }
 
-    // --- Position track so current slide is centered ---
+    // --- Position track in exact pixels so current slide is centered ---
     function updatePosition(animate) {
+        const containerWidth = wrapper.offsetWidth || track.parentElement.offsetWidth || window.innerWidth;
+        const slideWidth = getSlideWidth();
+        const centerOffset = (containerWidth - slideWidth) / 2;
+        const targetX = centerOffset - (currentIndex * slideWidth);
+
         if (!animate) {
             track.style.transition = 'none';
             slides.forEach(s => s.style.transition = 'none');
         } else {
-            track.style.transition = 'transform 600ms ease-in-out';
-            slides.forEach(s => s.style.transition = 'transform 600ms ease-in-out, opacity 600ms ease-in-out');
+            track.style.transition = 'transform 600ms cubic-bezier(0.25, 1, 0.5, 1)';
+            slides.forEach(s => s.style.transition = 'transform 600ms cubic-bezier(0.25, 1, 0.5, 1), opacity 600ms cubic-bezier(0.25, 1, 0.5, 1)');
         }
-        // Offset: center the current slide
-        const offset = (50 - SLIDE_WIDTH_PERCENT / 2) - (currentIndex * SLIDE_WIDTH_PERCENT);
-        track.style.transform = 'translateX(' + offset + '%)';
+
+        track.style.transform = `translate3d(${Math.round(targetX)}px, 0, 0)`;
+        track.style.webkitTransform = `translate3d(${Math.round(targetX)}px, 0, 0)`;
         updateSlideStyles();
 
         if (!animate) {
             // Force reflow then re-enable transitions
             track.offsetHeight;
-            track.style.transition = 'transform 600ms ease-in-out';
+            track.style.transition = 'transform 600ms cubic-bezier(0.25, 1, 0.5, 1)';
         }
     }
 
     // --- Go to a specific slide ---
     function goTo(index, animate = true) {
-        if (isTransitioning && animate) return;
         if (index === currentIndex && animate) return;
+
+        // Reset transition lock for snappy user interactions
+        isTransitioning = false;
 
         // Update thumbnail borders
         thumbs[currentIndex].style.borderColor = 'transparent';
         currentIndex = ((index % totalSlides) + totalSlides) % totalSlides;
         thumbs[currentIndex].style.borderColor = 'var(--color-primary, #c9a84c)';
 
-        // Scroll active thumb into view, but only if the user is actually looking at the slider section.
-        // This prevents the page from auto-scrolling down to the slider on load when the auto-play timer ticks.
+        // Scroll active thumb into view only if slider is currently visible
         const sliderRect = wrapper.getBoundingClientRect();
         const isSliderVisible = (
             sliderRect.top < (window.innerHeight || document.documentElement.clientHeight) &&
@@ -1577,14 +1605,22 @@ function initFeedbackSlider() {
         resetAutoPlay();
     }
 
-    // --- Initial position ---
+    // --- Initial setup ---
+    updateSlideSizes();
     updatePosition(false);
+
+    // --- Responsive orientation / window resize listener ---
+    window.addEventListener('resize', () => {
+        updateSlideSizes();
+        updatePosition(false);
+    });
 
     // --- Auto-play (3 seconds) ---
     function startAutoPlay() {
+        clearInterval(autoTimer);
         autoTimer = setInterval(() => {
             goTo(currentIndex + 1);
-        }, 3000);
+        }, 3500);
     }
 
     function resetAutoPlay() {
@@ -1606,10 +1642,10 @@ function initFeedbackSlider() {
     const thumbNext = document.getElementById('fb-thumb-next');
 
     if (thumbPrev) thumbPrev.addEventListener('click', () => {
-        strip.scrollBy({ left: -300, behavior: 'smooth' });
+        strip.scrollBy({ left: -260, behavior: 'smooth' });
     });
     if (thumbNext) thumbNext.addEventListener('click', () => {
-        strip.scrollBy({ left: 300, behavior: 'smooth' });
+        strip.scrollBy({ left: 260, behavior: 'smooth' });
     });
 
     // Pause auto-play on hover over entire slider area
@@ -1631,7 +1667,7 @@ function initFeedbackSlider() {
     sliderContainer.addEventListener('touchend', (e) => {
         touchEndX = e.changedTouches[0].screenX;
         const diff = touchStartX - touchEndX;
-        if (Math.abs(diff) > 50) {
+        if (Math.abs(diff) > 40) {
             if (diff > 0) goTo(currentIndex + 1);
             else goTo(currentIndex - 1);
         }

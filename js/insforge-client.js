@@ -17,411 +17,15 @@ if (typeof window !== 'undefined') {
 }
 
 // ===================================================================
-//  DEMO MOCK ACCOUNTS (For Instant 1-Click Role Testing & Verifications)
+//  PRIMARY PRODUCTION ACTORS
 // ===================================================================
-const DEMO_USERS = {
-    admin: {
-        id: '00000000-0000-0000-0000-000000000001',
-        email: 'admin@dezandigitizing.com',
-        displayName: 'Felix Dezan (Admin)',
-        role: 'admin',
-        company: 'Dezan Digitizing HQ',
-        status: 'active'
-    },
-    client: {
-        id: '00000000-0000-0000-0000-000000000002',
-        email: 'client@falconapparel.com',
-        displayName: 'John Falcon',
-        role: 'client',
-        company: 'Falcon Apparel Co.',
-        status: 'active'
-    },
-    digitizer: {
-        id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
-        email: 'digitizer@dezandigitizing.com',
-        displayName: 'Digitizer',
-        role: 'digitizer',
-        status: 'active'
-    }
+const PRIMARY_DIGITIZER = {
+    id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
+    email: 'digitizer@dezandigitizing.com',
+    displayName: 'Digitizer',
+    role: 'digitizer',
+    status: 'active'
 };
-
-// Initial Sample Orders for Offline Demonstration & Fallback
-const INITIAL_DEMO_ORDERS = [
-    {
-        id: '00000000-0000-0000-0000-000000000101',
-        order_number: 'ORD-8841',
-        client_id: '00000000-0000-0000-0000-000000000002',
-        client_name: 'John Falcon',
-        client_email: 'client@falconapparel.com',
-        client_company: 'Falcon Apparel Co.',
-        service_type: 'Digitizing',
-        plan_name: 'Jacket Back',
-        project_name: 'Falcon Wings Crest',
-        placement: 'Jacket Back',
-        sizing: '11.5" W x 8.0" H',
-        fabric_type: 'Heavy Denim Jacket',
-        file_format: 'DST, EMB',
-        instructions: 'High density stitch, 3D puff on the letter F, fabric is heavy denim. Keep color changes to max 5 stops.',
-        raw_artwork_files: [
-            { name: 'falcon_wings_crest.png', url: 'images/dezan-logo.png', size: 245000 }
-        ],
-        price: 55.00,
-        currency: 'USD',
-        payment_status: 'paid',
-        payment_method: 'PayPal',
-        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
-        assigned_digitizer_name: 'Digitizer',
-        assigned_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-        status: 'completed',
-        deliverables: [
-            { format: 'DST', name: 'Falcon_Wings_Back.dst', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.dst', size: 54000 },
-            { format: 'EMB', name: 'Falcon_Wings_Back.emb', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.emb', size: 220000 }
-        ],
-        created_at: new Date(Date.now() - 3600000 * 12).toISOString()
-    },
-    {
-        id: '00000000-0000-0000-0000-000000000102',
-        order_number: 'ORD-8842',
-        client_id: '00000000-0000-0000-0000-000000000002',
-        client_name: 'John Falcon',
-        client_email: 'client@falconapparel.com',
-        client_company: 'Falcon Apparel Co.',
-        service_type: 'Digitizing',
-        plan_name: 'Left Chest / Hat',
-        project_name: 'Falcon Mini Cap Logo',
-        placement: 'Cap Front / Hat',
-        sizing: '2.5" W x 2.2" H',
-        fabric_type: '6-Panel Structured Cap',
-        file_format: 'DST, EMB',
-        instructions: 'Center-out sequencing for structured 6-panel baseball cap. Needle 75/11.',
-        raw_artwork_files: [
-            { name: 'falcon_cap_badge.png', url: 'logo.png', size: 142000 }
-        ],
-        price: 15.00,
-        currency: 'USD',
-        payment_status: 'unpaid',
-        payment_method: 'Pending Invoice',
-        assigned_digitizer_id: null,
-        assigned_digitizer_name: null,
-        assigned_at: null,
-        status: 'pending_review',
-        deliverables: [],
-        created_at: new Date(Date.now() - 3600000 * 2).toISOString()
-    },
-    {
-        id: '00000000-0000-0000-0000-000000000103',
-        order_number: 'ORD-8839',
-        client_id: '00000000-0000-0000-0000-000000000002',
-        client_name: 'John Falcon',
-        client_email: 'client@falconapparel.com',
-        client_company: 'Falcon Apparel Co.',
-        service_type: 'Digitizing',
-        plan_name: 'Left Chest',
-        project_name: 'Falcon Corporate Polo',
-        placement: 'Left Chest',
-        sizing: '3.5" W x 1.8" H',
-        fabric_type: 'Pique Knit Cotton',
-        file_format: 'DST, EMB',
-        instructions: 'Pique knit fabric, underlay tatami with satin border.',
-        raw_artwork_files: [
-            { name: 'falcon_polo_vector.svg', url: 'logo.png', size: 98000 }
-        ],
-        price: 20.00,
-        currency: 'USD',
-        payment_status: 'paid',
-        payment_method: 'PayPal',
-        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
-        assigned_digitizer_name: 'Digitizer',
-        assigned_at: new Date(Date.now() - 3600000 * 48).toISOString(),
-        status: 'completed',
-        deliverables: [
-            { format: 'DST', name: 'Falcon_Polo_LeftChest.dst', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.dst', size: 28400 },
-            { format: 'EMB', name: 'Falcon_Polo_LeftChest.emb', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.emb', size: 148200 }
-        ],
-        created_at: new Date(Date.now() - 3600000 * 54).toISOString()
-    },
-    {
-        id: '00000000-0000-0000-0000-000000000104',
-        order_number: 'ORD-8835',
-        client_id: '00000000-0000-0000-0000-000000000006',
-        client_name: 'Marcus Vance',
-        client_email: 'vance@vanceathletics.com',
-        client_company: 'Vance Athletics',
-        service_type: 'Digitizing',
-        plan_name: 'Left Chest',
-        project_name: 'Vance Tigers Varsity Crest',
-        placement: 'Left Chest',
-        sizing: '3.8" W x 3.2" H',
-        fabric_type: 'Fleece / Sweatshirt',
-        file_format: 'DST, EMB',
-        instructions: 'Underlay grid for heavy fleece, gold and navy thread colors.',
-        raw_artwork_files: [
-            { name: 'vance_tigers.png', url: 'logo.png', size: 120000 }
-        ],
-        price: 25.00,
-        currency: 'USD',
-        payment_status: 'paid',
-        payment_method: 'PayPal',
-        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
-        assigned_digitizer_name: 'Digitizer',
-        assigned_at: new Date(Date.now() - 3600000 * 68).toISOString(),
-        status: 'completed',
-        deliverables: [
-            { format: 'DST', name: 'Vance_Tigers_Varsity.dst', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.dst', size: 34200 },
-            { format: 'EMB', name: 'Vance_Tigers_Varsity.emb', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.emb', size: 165000 }
-        ],
-        created_at: new Date(Date.now() - 3600000 * 72).toISOString()
-    },
-    {
-        id: '00000000-0000-0000-0000-000000000105',
-        order_number: 'ORD-8838',
-        client_id: '00000000-0000-0000-0000-000000000006',
-        client_name: 'Marcus Vance',
-        client_email: 'vance@vanceathletics.com',
-        client_company: 'Vance Athletics',
-        service_type: 'Digitizing',
-        plan_name: 'Cap / Hat',
-        project_name: 'Vance Track & Field 3D Cap',
-        placement: 'Cap Front / Hat',
-        sizing: '2.4" W x 2.0" H',
-        fabric_type: '6-Panel Structured Cap',
-        file_format: 'DST, EMB',
-        instructions: '3D foam puff on letter V. Center-out sewing sequence for high-profile cap.',
-        raw_artwork_files: [
-            { name: 'vance_track_badge.png', url: 'logo.png', size: 140000 }
-        ],
-        price: 30.00,
-        currency: 'USD',
-        payment_status: 'paid',
-        payment_method: 'Credit Card',
-        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
-        assigned_digitizer_name: 'Digitizer',
-        assigned_at: new Date(Date.now() - 3600000 * 30).toISOString(),
-        status: 'completed',
-        deliverables: [
-            { format: 'DST', name: 'Vance_Track_3D_Cap.dst', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_cap.dst', size: 41000 },
-            { format: 'EMB', name: 'Vance_Track_3D_Cap.emb', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_cap.emb', size: 182000 }
-        ],
-        created_at: new Date(Date.now() - 3600000 * 36).toISOString()
-    },
-    {
-        id: '00000000-0000-0000-0000-000000000106',
-        order_number: 'ORD-8832',
-        client_id: '00000000-0000-0000-0000-000000000007',
-        client_name: 'Sarah Jenkins',
-        client_email: 'sarah@apexuniforms.com',
-        client_company: 'Apex Workwear & Uniforms',
-        service_type: 'Digitizing',
-        plan_name: 'Left Chest',
-        project_name: 'Apex Shield Uniform Badge',
-        placement: 'Left Chest',
-        sizing: '3.2" W x 3.5" H',
-        fabric_type: 'Cotton / Oxford Pique',
-        file_format: 'DST, PES, EMB',
-        instructions: 'Gold metallic accent thread border. High stitch density tatami fill.',
-        raw_artwork_files: [
-            { name: 'apex_shield_vector.png', url: 'logo.png', size: 115000 }
-        ],
-        price: 20.00,
-        currency: 'USD',
-        payment_status: 'paid',
-        payment_method: 'PayPal',
-        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
-        assigned_digitizer_name: 'Digitizer',
-        assigned_at: new Date(Date.now() - 3600000 * 110).toISOString(),
-        status: 'completed',
-        deliverables: [
-            { format: 'DST', name: 'Apex_Shield_Badge.dst', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.dst', size: 29000 },
-            { format: 'PES', name: 'Apex_Shield_Badge.pes', url: 'https://cdn.insforge.dev/storage/e8rw998g/deliverables/sample_crest.pes', size: 31000 }
-        ],
-        created_at: new Date(Date.now() - 3600000 * 120).toISOString()
-    },
-    {
-        id: '00000000-0000-0000-0000-000000000107',
-        order_number: 'ORD-8836',
-        client_id: '00000000-0000-0000-0000-000000000007',
-        client_name: 'Sarah Jenkins',
-        client_email: 'sarah@apexuniforms.com',
-        client_company: 'Apex Workwear & Uniforms',
-        service_type: 'Digitizing',
-        plan_name: 'Jacket Back',
-        project_name: 'Apex Industrial Back Emblem',
-        placement: 'Jacket Back',
-        sizing: '11.0" W x 9.5" H',
-        fabric_type: 'Heavy Canvas / Twill',
-        file_format: 'DST, EMB',
-        instructions: 'Large format embroidery for work jackets. Underlay compensation for canvas.',
-        raw_artwork_files: [
-            { name: 'apex_back_emblem.svg', url: 'logo.png', size: 210000 }
-        ],
-        price: 50.00,
-        currency: 'USD',
-        payment_status: 'unpaid',
-        payment_method: 'Pending Invoice',
-        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
-        assigned_digitizer_name: 'Digitizer',
-        assigned_at: new Date(Date.now() - 3600000 * 14).toISOString(),
-        status: 'in_progress',
-        deliverables: [],
-        created_at: new Date(Date.now() - 3600000 * 18).toISOString()
-    },
-    {
-        id: '00000000-0000-0000-0000-000000000108',
-        order_number: 'ORD-8828',
-        client_id: '00000000-0000-0000-0000-000000000008',
-        client_name: 'Elena Rostova',
-        client_email: 'elena@summitheadwear.com',
-        client_company: 'Summit Headwear & Outerwear',
-        service_type: 'Vector Art',
-        plan_name: 'Vector Conversion',
-        project_name: 'Summit Alpine Peak Emblem',
-        placement: 'Vector Graphic / Print',
-        sizing: 'Scalable Vector',
-        fabric_type: 'Vector Graphic',
-        file_format: 'AI, EPS, SVG, PDF',
-        instructions: 'Clean pantone color separation for screen printing and vinyl cutting.',
-        raw_artwork_files: [
-            { name: 'summit_sketch.jpg', url: 'logo.png', size: 180000 }
-        ],
-        price: 25.00,
-        currency: 'USD',
-        payment_status: 'paid',
-        payment_method: 'PayPal',
-        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
-        assigned_digitizer_name: 'Digitizer',
-        assigned_at: new Date(Date.now() - 3600000 * 140).toISOString(),
-        status: 'completed',
-        deliverables: [
-            { format: 'AI', name: 'Summit_Alpine_Vector.ai', url: 'logo.png', size: 450000 },
-            { format: 'SVG', name: 'Summit_Alpine_Vector.svg', url: 'logo.png', size: 85000 }
-        ],
-        created_at: new Date(Date.now() - 3600000 * 150).toISOString()
-    },
-    {
-        id: '00000000-0000-0000-0000-000000000109',
-        order_number: 'QUO-4769',
-        client_id: '00000000-0000-0000-0000-000000000006',
-        client_name: 'Marcus Vance',
-        client_email: 'vance@vanceathletics.com',
-        client_company: 'Vance Athletics',
-        service_type: 'Vector Art',
-        plan_name: 'Custom Vector Redraw',
-        project_name: 'Custom Vector Redraw',
-        placement: 'Vector Graphic / Print',
-        sizing: 'Scalable Vector',
-        fabric_type: 'Vector Graphic',
-        file_format: 'AI, EPS, SVG, PDF',
-        instructions: 'Custom Vector Redraw requested by Marcus Vance. Requires complexity appraisal.',
-        raw_artwork_files: [
-            { name: 'vance_vector_sketch.png', url: 'logo.png', size: 165000 }
-        ],
-        price: 0,
-        currency: 'USD',
-        payment_status: 'unpaid',
-        payment_method: 'Pending Quote',
-        assigned_digitizer_id: null,
-        assigned_digitizer_name: null,
-        assigned_at: null,
-        status: 'quote_requested',
-        is_quote: true,
-        deliverables: [],
-        created_at: new Date(Date.now() - 3600000 * 1).toISOString()
-    },
-    {
-        id: '00000000-0000-0000-0000-000000000110',
-        order_number: 'ORD-8837',
-        client_id: '00000000-0000-0000-0000-000000000007',
-        client_name: 'Sarah Jenkins',
-        client_email: 'sarah@apexuniforms.com',
-        client_company: 'Apex Workwear & Uniforms',
-        service_type: 'Digitizing',
-        plan_name: 'Left Chest',
-        project_name: 'Apex Shield Uniform Badge',
-        placement: 'Left Chest',
-        sizing: '3.2" W x 3.5" H',
-        fabric_type: 'Cotton / Oxford Pique',
-        file_format: 'DST, PES, EMB',
-        instructions: 'Please make the red text thicker and move the outline closer. Increase pull compensation to 0.40mm for pique knit.',
-        revision_notes: 'Please make the red text thicker and move the outline closer. Increase pull compensation to 0.40mm for pique knit.',
-        revision_requested_at: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
-        raw_artwork_files: [
-            { name: 'apex_shield_vector.png', url: 'logo.png', size: 115000 }
-        ],
-        previous_deliverable: { name: 'ORD-8837_v1.DST', url: 'images/service-digitizing.png', format: 'DST' },
-        stitch_out_photos: [
-            { name: 'defect_thread_pull.jpg', url: 'logo.png', size: 95000 }
-        ],
-        price: 20.00,
-        currency: 'USD',
-        payment_status: 'paid',
-        payment_method: 'PayPal',
-        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
-        assigned_digitizer_name: 'Digitizer',
-        assigned_at: new Date(Date.now() - 3600000 * 2).toISOString(),
-        status: 'revision_requested',
-        deliverables: [{ name: 'ORD-8837_v1.DST', url: 'images/service-digitizing.png', format: 'DST' }],
-        created_at: new Date(Date.now() - 3600000 * 5).toISOString()
-    },
-    {
-        id: '00000000-0000-0000-0000-000000000111',
-        order_number: 'ORD-8840',
-        client_id: '00000000-0000-0000-0000-000000000002',
-        client_name: 'John Falcon',
-        client_email: 'client@falconapparel.com',
-        client_company: 'Falcon Apparel Co.',
-        service_type: 'Digitizing',
-        plan_name: 'Left Chest / Hat',
-        project_name: 'Falcon Cap Badge',
-        placement: 'Cap Front / Hat',
-        sizing: '3.5" W x 2.2" H',
-        fabric_type: 'Structured Cap',
-        file_format: 'DST, EMB',
-        instructions: 'Needle 75/11, Tatami underlay with satin edge. Center-out sewing sequence.',
-        raw_artwork_files: [
-            { name: 'falcon_cap_badge.png', url: 'logo.png', size: 142000 }
-        ],
-        price: 15.00,
-        currency: 'USD',
-        payment_status: 'paid',
-        payment_method: 'PayPal',
-        assigned_digitizer_id: '3210bcc5-defd-40fe-b843-d0a57b0e12e1',
-        assigned_digitizer_name: 'Digitizer',
-        assigned_at: new Date(Date.now() - 3600000 * 1).toISOString(),
-        status: 'in_progress',
-        deliverables: [],
-        created_at: new Date(Date.now() - 3600000 * 3).toISOString()
-    },
-    {
-        id: '00000000-0000-0000-0000-000000000112',
-        order_number: 'QUO-8845',
-        client_id: '00000000-0000-0000-0000-000000000002',
-        client_name: 'John Falcon',
-        client_email: 'client@falconapparel.com',
-        client_company: 'Falcon Apparel Co.',
-        service_type: 'Custom Quote',
-        plan_name: 'Jacket Back / High Stitch Count',
-        project_name: 'Falcon Golden Eagle Jacket Back',
-        placement: 'Jacket Back',
-        sizing: '11.0" W x 9.5" H',
-        fabric_type: 'Heavy Leather Bomber',
-        file_format: 'DST, EMB',
-        instructions: 'Heavy density embroidery quote request with projected 65,000 stitch count. Check backing requirements.',
-        raw_artwork_files: [
-            { name: 'golden_eagle_back.png', url: 'logo.png', size: 310000 }
-        ],
-        price: 0,
-        currency: 'USD',
-        payment_status: 'unpaid',
-        payment_method: 'Pending Quote',
-        assigned_digitizer_id: null,
-        assigned_digitizer_name: null,
-        assigned_at: null,
-        status: 'quote_requested',
-        is_quote: true,
-        deliverables: [],
-        created_at: new Date(Date.now() - 3600000 * 6).toISOString()
-    }
-];
 
 class InsForgeClient {
     constructor() {
@@ -454,36 +58,12 @@ class InsForgeClient {
 
     initData() {
         if (!localStorage.getItem('dezan_orders')) {
-            localStorage.setItem('dezan_orders', JSON.stringify(INITIAL_DEMO_ORDERS));
-        } else {
-            // Normalize any previously cached demo orders to use the single Digitizer & backfill missing demo orders
-            try {
-                const cachedOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
-                let modified = false;
-                cachedOrders.forEach(o => {
-                    if (o.assigned_digitizer_name && o.assigned_digitizer_name !== 'Digitizer') {
-                        o.assigned_digitizer_name = 'Digitizer';
-                        o.assigned_digitizer_id = DEMO_USERS.digitizer.id;
-                        modified = true;
-                    }
-                });
-                const existingNums = new Set(cachedOrders.map(o => o.order_number));
-                INITIAL_DEMO_ORDERS.forEach(demo => {
-                    if (!existingNums.has(demo.order_number)) {
-                        cachedOrders.push(demo);
-                        modified = true;
-                    }
-                });
-                if (modified) {
-                    localStorage.setItem('dezan_orders', JSON.stringify(cachedOrders));
-                }
-            } catch(e) {}
+            localStorage.setItem('dezan_orders', '[]');
         }
-
-        // Strictly enforce that only 1 single Digitizer exists in the platform
+        // Strictly enforce that primary Digitizer exists in local state
         const storedDigitizers = JSON.parse(localStorage.getItem('dezan_digitizers') || '[]');
-        if (!localStorage.getItem('dezan_digitizers') || storedDigitizers.length !== 1 || storedDigitizers[0].email !== DEMO_USERS.digitizer.email || storedDigitizers[0].displayName !== 'Digitizer') {
-            localStorage.setItem('dezan_digitizers', JSON.stringify([DEMO_USERS.digitizer]));
+        if (!localStorage.getItem('dezan_digitizers') || storedDigitizers.length !== 1 || storedDigitizers[0].email !== PRIMARY_DIGITIZER.email || storedDigitizers[0].displayName !== 'Digitizer') {
+            localStorage.setItem('dezan_digitizers', JSON.stringify([PRIMARY_DIGITIZER]));
         }
     }
 
@@ -679,18 +259,21 @@ class InsForgeClient {
      */
     async checkHeartbeatProbe() {
         try {
-            const res = await fetch(`${this.baseUrl}/api/database/records/orders?select=id,order_number,status,updated_at&order=updated_at.desc&limit=1`, {
-                headers: this.getApiHeaders()
-            });
+            const apiBase = this.getApiBase();
+            const token = typeof localStorage !== 'undefined' ? localStorage.getItem('dezan_jwt_token') : null;
+            if (!token) return; // Only probe when user has active session
+            const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+            const res = await fetch(`${apiBase}/orders?limit=1`, { headers });
             if (!res.ok) return;
-            const rows = await res.json();
+            const json = await res.json().catch(() => null);
+            const rows = json?.data;
             if (!Array.isArray(rows) || rows.length === 0) return;
 
             const latest = rows[0];
             const fingerprint = `${latest.order_number}:${latest.status}:${latest.updated_at}`;
 
             if (this.lastKnownFingerprint && this.lastKnownFingerprint !== fingerprint) {
-                console.log('⚡ InsForge DB change detected by probe:', fingerprint);
+                console.log('⚡ DB change detected by probe:', fingerprint);
                 this.lastKnownFingerprint = fingerprint;
                 this.notifySubscribers('remote_db_change', {
                     orderNumber: latest.order_number,
@@ -899,16 +482,6 @@ class InsForgeClient {
         window.location.href = 'portal-login.html';
     }
 
-    // 1-Click Demo Login Switcher
-    async loginAsDemo(role) {
-        const user = DEMO_USERS[role];
-        if (!user) return false;
-        const passwords = { admin: 'admin123', digitizer: 'worker123', client: 'client123' };
-        await this.signIn(user.email, passwords[role] || 'client123', true);
-        this.redirectToDashboard(user.role);
-        return true;
-    }
-
     // Predefined & Standard Sign In
     async signIn(email, password, remember = true) {
         const rawEmail = (email || '').trim().toLowerCase();
@@ -943,7 +516,7 @@ class InsForgeClient {
             return { user: null, error: apiRes.error };
         }
 
-        // 2. Offline / Predefined fallback verification (Strict Password Checks)
+        // 2. Offline staff verification fallback (Strict Password Checks)
         const OFFLINE_PASSWORDS = {
             'admin@dezandigitizing.com': 'Wasif8899@@@',
             'digitizer@dezandigitizing.com': 'Pakistan6677@@@'
@@ -953,7 +526,14 @@ class InsForgeClient {
             if (password && password !== OFFLINE_PASSWORDS[rawEmail]) {
                 return { user: null, error: 'Invalid email or password' };
             }
-            const adminUser = DEMO_USERS.admin;
+            const adminUser = {
+                id: '00000000-0000-0000-0000-000000000001',
+                email: 'admin@dezandigitizing.com',
+                displayName: 'Felix Dezan (Admin)',
+                role: 'admin',
+                company: 'Dezan Digitizing HQ',
+                status: 'active'
+            };
             this.setSession(adminUser);
             return { user: adminUser, error: null };
         }
@@ -962,16 +542,8 @@ class InsForgeClient {
             if (password && password !== OFFLINE_PASSWORDS[rawEmail]) {
                 return { user: null, error: 'Invalid email or password' };
             }
-            const workerUser = DEMO_USERS.digitizer;
-            this.setSession(workerUser);
-            return { user: workerUser, error: null };
-        }
-
-        if (rawEmail === 'client@falconapparel.com') {
-            const clientUser = DEMO_USERS.client;
-            this.setSession(clientUser);
-            this.claimGuestOrders(clientUser.email, clientUser.id).catch(() => {});
-            return { user: clientUser, error: null };
+            this.setSession(PRIMARY_DIGITIZER);
+            return { user: PRIMARY_DIGITIZER, error: null };
         }
 
         // 7. Check local registered users (all registered users are clients)
@@ -1053,8 +625,11 @@ class InsForgeClient {
         }
 
         // 2. Direct Google Auth API call (Node.js backend)
-        const targetEmail = (email || 'client@falconapparel.com').trim().toLowerCase();
-        const targetName = (displayName || 'John Falcon').trim();
+        if (!email) {
+            return { user: null, error: 'Google account email is required' };
+        }
+        const targetEmail = email.trim().toLowerCase();
+        const targetName = (displayName || targetEmail.split('@')[0] || 'Client').trim();
 
         const apiRes = await this.callBackendApi('/auth/google', 'POST', {
             email: targetEmail,
@@ -1271,8 +846,7 @@ class InsForgeClient {
         // 2. Client-side fallback check
         const otps = JSON.parse(localStorage.getItem('dezan_reset_otps') || '{}');
         const record = otps[rawEmail];
-        const isMasterDevCode = cleanOtp === '123456';
-        const isValid = isMasterDevCode || (record && record.otp === cleanOtp && record.expiresAt > Date.now());
+        const isValid = record && record.otp === cleanOtp && record.expiresAt > Date.now();
 
         if (!isValid) {
             return { success: false, error: 'Invalid or expired OTP code. Please request a new code.' };
@@ -1364,6 +938,16 @@ class InsForgeClient {
 
         let orders = [];
         try {
+            // 1. Primary: Query authenticated backend API (direct PostgreSQL via server pool)
+            const backendRes = await this.callBackendApi('/orders', 'GET');
+            if (backendRes && backendRes.success && Array.isArray(backendRes.data)) {
+                orders = backendRes.data;
+                localStorage.setItem('dezan_orders', JSON.stringify(orders));
+                localStorage.setItem('dezan_db_last_synced', new Date().toISOString());
+                return orders;
+            }
+
+            // 2. Secondary: InsForge BaaS REST endpoint
             const res = await fetch(`${this.baseUrl}/api/database/records/orders?order=created_at.desc`, {
                 headers: this.getApiHeaders()
             });
@@ -1371,36 +955,14 @@ class InsForgeClient {
             if (res.ok) {
                 const cloudOrders = await res.json();
                 if (Array.isArray(cloudOrders)) {
-                    const localOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
-                    const localOnly = localOrders.filter(l => !cloudOrders.some(c => c.order_number === l.order_number || c.id === l.id));
-                    const mergedCloud = cloudOrders.map(cloud => {
-                        const local = localOrders.find(l => l.order_number === cloud.order_number || l.id === cloud.id);
-                        if (local) {
-                            if (local.assigned_digitizer_id && !cloud.assigned_digitizer_id) {
-                                cloud.assigned_digitizer_id = local.assigned_digitizer_id;
-                                cloud.assigned_digitizer_name = local.assigned_digitizer_name;
-                                cloud.assigned_at = local.assigned_at;
-                                cloud.status = local.status;
-                            }
-                            if (local.deliverables && local.deliverables.length > (cloud.deliverables ? cloud.deliverables.length : 0)) {
-                                cloud.deliverables = local.deliverables;
-                            }
-                            if (local.payment_status === 'paid' && cloud.payment_status !== 'paid') {
-                                cloud.payment_status = 'paid';
-                            }
-                        }
-                        return cloud;
-                    });
-                    orders = [...localOnly, ...mergedCloud];
+                    orders = cloudOrders;
                     localStorage.setItem('dezan_orders', JSON.stringify(orders));
                     localStorage.setItem('dezan_db_last_synced', new Date().toISOString());
                 }
             } else {
-                console.warn('InsForge orders fetch non-200 status:', res.status);
                 orders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
             }
         } catch (err) {
-            console.warn('InsForge orders network notice, using local cache:', err.message);
             orders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
         }
 
@@ -1631,6 +1193,15 @@ class InsForgeClient {
 
         let tasks = [];
         try {
+            // 1. Primary: Query authenticated backend API (/api/tasks with Zero-PII masking)
+            const backendRes = await this.callBackendApi('/tasks', 'GET');
+            if (backendRes && backendRes.success && Array.isArray(backendRes.data)) {
+                tasks = backendRes.data;
+                localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(tasks));
+                return tasks;
+            }
+
+            // 2. Secondary: InsForge BaaS REST endpoint
             const res = await fetch(`${this.baseUrl}/api/database/records/digitizer_tasks?order=assigned_at.desc`, {
                 headers: this.getApiHeaders()
             });
@@ -1638,17 +1209,13 @@ class InsForgeClient {
             if (res.ok) {
                 const cloudTasks = await res.json();
                 if (Array.isArray(cloudTasks)) {
-                    const localTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
-                    const localOnly = localTasks.filter(l => !cloudTasks.some(c => (c.order_number && c.order_number === l.order_number) || (c.task_number && c.task_number === l.task_number) || (c.id && c.id === l.id)));
-                    tasks = [...localOnly, ...cloudTasks].filter(t => !t.order_number || !t.order_number.startsWith('QUO-'));
+                    tasks = cloudTasks.filter(t => !t.order_number || !t.order_number.startsWith('QUO-'));
                     localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(tasks));
                 }
             } else {
-                console.warn('InsForge tasks fetch non-200 status:', res.status);
                 tasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]').filter(t => !t.order_number || !t.order_number.startsWith('QUO-'));
             }
         } catch (err) {
-            console.warn('InsForge tasks network notice, using cache:', err.message);
             tasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]').filter(t => !t.order_number || !t.order_number.startsWith('QUO-'));
         }
 
@@ -2106,7 +1673,7 @@ class InsForgeClient {
      * Get primary digitizer worker for auto-assignment (single digitizer account)
      */
     getPrimaryWorker() {
-        return DEMO_USERS.digitizer;
+        return PRIMARY_DIGITIZER;
     }
 
     /**
@@ -2754,7 +2321,7 @@ class InsForgeClient {
         const allTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
         let task = allTasks.find(t => t.order_number === order.order_number || t.orderNumber === order.order_number);
 
-        const digitizerId = order.assigned_digitizer_id || DEMO_USERS.digitizer.id;
+        const digitizerId = order.assigned_digitizer_id || PRIMARY_DIGITIZER.id;
         const taskNumber = 'TSK-' + order.order_number.replace('ORD-', '');
 
         if (!task) {

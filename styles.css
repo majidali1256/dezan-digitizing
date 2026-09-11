@@ -994,7 +994,6 @@ nav.fixed.bottom-0,
 /* GPU promotion & paint containment for infinite animations & carousels */
 .marquee-wrapper,
 .marquee-track,
-#feedback-slide-track,
 .carousel-track {
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
@@ -1006,7 +1005,6 @@ nav.fixed.bottom-0,
 
 /* Offscreen containment for high-element sections on long pages */
 #faq-accordion,
-#feedbacks-section,
 .content-auto {
     content-visibility: auto;
     contain-intrinsic-size: 1px 500px;

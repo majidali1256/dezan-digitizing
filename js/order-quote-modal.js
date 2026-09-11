@@ -1296,6 +1296,21 @@
         const service = modal.querySelector('#selected-service-type')?.value || 'Digitizing';
 
         // 1. Validation of Step 2 Fields
+        const fileInputEl = modal.querySelector('#artwork-file');
+        if (fileInputEl && fileInputEl.files && fileInputEl.files.length > 0) {
+            Array.from(fileInputEl.files).forEach(f => {
+                if (!state.uploadedFiles.some(existing => existing.name === f.name && existing.size === f.size)) {
+                    state.uploadedFiles.push(f);
+                }
+            });
+            if (typeof renderArtworkFileChips === 'function') renderArtworkFileChips();
+        }
+
+        if (!state.isQuote && (!state.uploadedFiles || state.uploadedFiles.length === 0)) {
+            alert('Please attach your artwork or logo file before proceeding to checkout.');
+            return false;
+        }
+
         let projectName = '';
         if (service === 'Digitizing' || service === 'PetPortrait') {
             projectName = (modal.querySelector('#dig-job-name')?.value || '').trim();
@@ -1353,7 +1368,7 @@
             return false;
         }
 
-        let clientName = session?.full_name || session?.name || '';
+        let clientName = session?.displayName || session?.full_name || session?.name || '';
         let clientEmail = session?.email || '';
 
         if (!clientEmail) {
@@ -2230,12 +2245,6 @@
                         });
                     }
                 }
-            } else {
-                rawArtworkFiles.push({
-                    name: 'sample_artwork_upload.png',
-                    url: 'logo.png',
-                    size: 104000
-                });
             }
         } catch (fileErr) {
             console.warn('File preparation error:', fileErr);

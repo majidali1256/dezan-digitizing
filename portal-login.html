@@ -296,14 +296,7 @@
                     Enter the 6-digit code sent to <strong id="forgot-target-email" class="text-slate-900 dark:text-white"></strong>
                 </p>
 
-                <!-- Dev helper OTP pill for instant testing -->
-                <div id="dev-otp-pill" class="mb-4 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs flex items-center justify-between">
-                    <span class="flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-sm text-amber-500">key</span>
-                        <span>Generated OTP: <strong id="dev-otp-code" class="font-mono tracking-wider font-bold">123456</strong></span>
-                    </span>
-                    <button type="button" onclick="autoFillOtp()" class="text-[11px] font-bold text-primary hover:underline cursor-pointer">Auto-Fill</button>
-                </div>
+
 
                 <div id="reset-error-banner" class="hidden mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-400 text-xs flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">error</span>
@@ -393,19 +386,7 @@
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">Active</span>
                 </button>
 
-                <!-- John Falcon Account Tile -->
-                <button type="button" onclick="selectGoogleAccount('client@falconapparel.com', 'John Falcon')" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-primary/50 dark:hover:border-primary/50 bg-slate-50/70 hover:bg-amber-500/5 dark:bg-slate-800/60 dark:hover:bg-primary/10 transition-all flex items-center justify-between group cursor-pointer text-left">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 font-black text-sm flex items-center justify-center shadow-xs">
-                            JF
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">John Falcon</p>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">client@falconapparel.com</p>
-                        </div>
-                    </div>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">Default</span>
-                </button>
+
 
                 <!-- Use Another Google Account Toggle Button -->
                 <button type="button" onclick="toggleCustomGoogleInput()" id="google-toggle-custom-btn" class="w-full p-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-primary dark:hover:border-primary bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all flex items-center gap-3 cursor-pointer text-left">
@@ -737,14 +718,6 @@
             document.getElementById('forgot-step-1').classList.remove('hidden');
         }
 
-        function autoFillOtp() {
-            if (activeResetOtp) {
-                document.getElementById('reset-otp').value = activeResetOtp;
-            } else {
-                document.getElementById('reset-otp').value = '123456';
-            }
-        }
-
         async function handleRequestResetOtp(e) {
             e.preventDefault();
             const email = document.getElementById('forgot-email').value.trim();
@@ -769,13 +742,11 @@
             }
 
             activeResetEmail = email;
-            activeResetOtp = res.data?.otp || '123456';
 
             // Switch to Step 2
             document.getElementById('forgot-step-1').classList.add('hidden');
             document.getElementById('forgot-step-2').classList.remove('hidden');
             document.getElementById('forgot-target-email').textContent = email;
-            document.getElementById('dev-otp-code').textContent = activeResetOtp;
             document.getElementById('reset-otp').value = '';
             document.getElementById('reset-new-password').value = '';
             document.getElementById('reset-confirm-password').value = '';

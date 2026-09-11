@@ -58,41 +58,10 @@
         }
 
         // Check authentication
-        let user = null;
-        try {
-            user = window.insforgeClient.getCurrentUser();
-        } catch (e) {
-            console.warn('Session check warning:', e);
-        }
+        const user = window.insforgeClient.requireAuth(['client']);
+        if (!user) return;
 
-        if (user && (user.role === 'admin' || user.role === 'digitizer')) {
-            if (user.role === 'digitizer') {
-                window.location.href = 'worker-portal.html';
-            } else {
-                window.location.href = 'admin-portal.html';
-            }
-            return;
-        }
-
-        if (!user || user.role !== 'client') {
-            user = {
-                id: 'demo-client-1',
-                email: 'client@falconapparel.com',
-                displayName: 'John Falcon',
-                role: 'client',
-                company: 'Falcon Apparel Group',
-                phone: '+1 (555) 234-8900'
-            };
-            try {
-                if (typeof window.insforgeClient.setSession === 'function') {
-                    window.insforgeClient.setSession(user);
-                }
-            } catch (e) {
-                console.warn('Set session warning:', e);
-            }
-        }
-
-        state.session = user || { displayName: 'John Foster', email: 'john@creativemerch.com', role: 'client' };
+        state.session = user;
         updateHeaderUserUI();
         highlightActiveNavTab();
 
@@ -120,11 +89,12 @@
     // ----- Data Fetching -----
     async function loadClientData() {
         try {
-            const orders = await window.insforgeClient.getOrders();
-            state.orders = (Array.isArray(orders) && orders.length > 0) ? orders : getFallbackOrders();
+            const orders = await window.insforgeClient.fetchOrders();
+            state.orders = Array.isArray(orders) ? orders : [];
         } catch (e) {
-            console.warn('Failed to load orders, using fallback:', e);
-            state.orders = getFallbackOrders();
+            console.warn('Failed to load orders from network, using cache:', e);
+            const cached = window.insforgeClient.getOrders();
+            state.orders = Array.isArray(cached) ? cached : [];
         }
 
         try {
@@ -159,100 +129,7 @@
     }
 
     function getFallbackOrders() {
-        return [
-            {
-                id: 'ord-101',
-                order_number: 'ORD-8492',
-                design_name: 'Apex Mountain Gear Left Chest',
-                service_type: 'Digitizing',
-                plan: 'Hat / Left Chest Logos',
-                status: 'in_progress',
-                amount: 15.00,
-                payment_status: 'paid',
-                created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-                artwork_url: 'images/service-digitizing.png',
-                target_fabric: 'Pique Polo Knit',
-                dimensions: '3.5" W x 2.2" H',
-                format: 'DST (Tajima)'
-            },
-            {
-                id: 'quo-104',
-                order_number: 'QUO-7215',
-                design_name: 'Falcon Motorsport Jacket Back Quote',
-                service_type: 'Custom Quote',
-                plan: 'Jacket Backs',
-                status: 'quote_requested',
-                is_quote: true,
-                amount: 45.00,
-                payment_status: 'unpaid',
-                created_at: new Date(Date.now() - 3600000 * 8).toISOString(),
-                artwork_url: 'images/service-digitizing.png',
-                target_fabric: 'Leather & Heavy Denim',
-                dimensions: '11.5" W x 9.0" H',
-                format: 'EMB, DST, PES'
-            },
-            {
-                id: 'ord-105',
-                order_number: 'ORD-8240',
-                design_name: 'Pacific Coast Marina Cap Revision',
-                service_type: 'Digitizing',
-                plan: 'Hat / Left Chest Logos',
-                status: 'revision_requested',
-                amount: 15.00,
-                payment_status: 'paid',
-                created_at: new Date(Date.now() - 86400000 * 1).toISOString(),
-                artwork_url: 'images/service-vector.png',
-                target_fabric: 'Structured Twill Cap',
-                dimensions: '2.8" W x 2.0" H',
-                format: 'DST (Tajima)'
-            },
-            {
-                id: 'ord-106',
-                order_number: 'ORD-8511',
-                design_name: 'Iron Horse Biker Club Emblem',
-                service_type: 'Digitizing',
-                plan: 'Standard Embroidered Patch',
-                status: 'in_progress',
-                amount: 25.00,
-                payment_status: 'unpaid',
-                created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
-                artwork_url: 'images/service-digitizing.png',
-                target_fabric: 'Heavy Twill',
-                dimensions: '4.5" W x 4.0" H',
-                format: 'DST'
-            },
-            {
-                id: 'ord-102',
-                order_number: 'ORD-8310',
-                design_name: 'Golden Eagle Crest Vintage',
-                service_type: 'Digitizing',
-                plan: 'Larger Designs',
-                status: 'completed',
-                amount: 30.00,
-                payment_status: 'paid',
-                created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-                artwork_url: 'images/service-vector.png',
-                deliverable_url: 'images/service-digitizing.png',
-                target_fabric: 'Denim Jacket Back',
-                dimensions: '9.0" W x 7.5" H',
-                format: 'EMB & DST',
-                stitch_count: 28450
-            },
-            {
-                id: 'ord-103',
-                order_number: 'ORD-8199',
-                design_name: 'Urban Streetwear Vector Redraw',
-                service_type: 'Vectorizing',
-                plan: 'Simple Vector',
-                status: 'completed',
-                amount: 10.00,
-                payment_status: 'paid',
-                created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
-                artwork_url: 'images/service-vector.png',
-                deliverable_url: 'images/service-vector.png',
-                format: 'AI, EPS, SVG'
-            }
-        ];
+        return [];
     }
 
     // ----- Metrics Calculation -----
@@ -378,12 +255,7 @@
         const container = document.getElementById('orders-list-container');
         if (!container) return;
 
-        if (!state.orders || state.orders.length === 0) {
-            state.orders = getFallbackOrders();
-            updateMetricsAcrossViews();
-        }
-
-        let orders = [...state.orders];
+        let orders = [...(state.orders || [])];
 
         // Search query filter
         if (state.searchQuery) {
@@ -905,12 +777,7 @@
         const container = document.getElementById('quotes-list-container');
         if (!container) return;
 
-        if (!state.orders || state.orders.length === 0) {
-            state.orders = getFallbackOrders();
-            updateMetricsAcrossViews();
-        }
-
-        let quotes = state.orders.filter(o => isQuoteRecord(o));
+        let quotes = (state.orders || []).filter(o => isQuoteRecord(o));
 
         // Update pill counts
         const totalCount = quotes.length;
@@ -1135,12 +1002,7 @@
         const container = document.getElementById('invoices-list-container');
         if (!container) return;
 
-        if (!state.orders || state.orders.length === 0) {
-            state.orders = getFallbackOrders();
-            updateMetricsAcrossViews();
-        }
-
-        let invoices = state.orders.filter(o => !isQuoteRecord(o));
+        let invoices = (state.orders || []).filter(o => !isQuoteRecord(o));
 
         // Update pill counts
         const totalCount = invoices.length;
@@ -1613,9 +1475,11 @@
         const amount = parseFloat(rawPrice || 15).toFixed(2);
         const isPaid = (order.payment_status === 'paid');
 
-        setElText('invoice-number-disp', `INV-${order.order_number || '8492'}`);
+        setElText('invoice-number-disp', `INV-${order.order_number || ''}`);
         setElText('invoice-date-disp', new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }));
-        setElText('invoice-order-ref', order.order_number || 'ORD-8492');
+        setElText('invoice-order-ref', order.order_number || '—');
+        setElText('invoice-client-name', order.client_name || state.client?.name || 'Customer');
+        setElText('invoice-client-company', order.company || state.client?.company || '');
         setElText('invoice-item-desc', `${order.service_type || 'Digitizing'} — ${order.design_name || order.project_name || 'Embroidery Design'}`);
         setElText('invoice-item-rate', `$${amount}`);
         setElText('invoice-item-amount', `$${amount}`);

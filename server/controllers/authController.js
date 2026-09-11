@@ -9,12 +9,7 @@ const { query } = require('../config/db');
 const { success, error, badRequest, unauthorized } = require('../utils/apiResponse');
 const emailService = require('../services/emailService');
 
-// Production credentials whitelist / offline verification fallback
-const DEMO_PASSWORDS = {
-    'admin@dezandigitizing.com': ['Wasif8899@@@'],
-    'digitizer@dezandigitizing.com': ['Pakistan6677@@@'],
-    'client@falconapparel.com': ['client123', 'Falcon2026!']
-};
+
 
 /**
  * Generate JWT token
@@ -134,16 +129,9 @@ const login = async (req, res) => {
             return unauthorized(res, 'Your account has been suspended. Please contact support.');
         }
 
-        // Verify password
+        // Verify password with secure bcrypt hash
         let passwordMatches = false;
-
-        // Check if demo password matches
-        if (DEMO_PASSWORDS[normalizedEmail] && DEMO_PASSWORDS[normalizedEmail].includes(password)) {
-            passwordMatches = true;
-        }
-
-        // Check bcrypt password hash
-        if (!passwordMatches && user.password_hash) {
+        if (user.password_hash) {
             passwordMatches = await bcrypt.compare(password, user.password_hash);
         }
 
@@ -295,12 +283,7 @@ const changePassword = async (req, res) => {
 
         const user = userRes.rows[0];
         let passwordValid = false;
-
-        if (DEMO_PASSWORDS[user.email] && DEMO_PASSWORDS[user.email].includes(currentPassword)) {
-            passwordValid = true;
-        }
-
-        if (!passwordValid && user.password_hash) {
+        if (user.password_hash) {
             passwordValid = await bcrypt.compare(currentPassword, user.password_hash);
         }
 
@@ -373,7 +356,6 @@ const forgotPassword = async (req, res) => {
 
         return success(res, {
             email: normalizedEmail,
-            otp: otp, // Returned for instant dev testing & UI confirmation
             expiresInMinutes: 15
         }, 'Password reset code generated and sent to your email.');
     } catch (err) {
@@ -402,10 +384,9 @@ const resetPassword = async (req, res) => {
         const stored = PASSWORD_RESET_TOKENS.get(normalizedEmail);
 
         // Verify OTP/token
-        const isMasterDevCode = otp === '123456';
         const isValidStoredOtp = stored && (stored.otp === otp || stored.token === token) && stored.expiresAt > Date.now();
 
-        if (!isMasterDevCode && !isValidStoredOtp) {
+        if (!isValidStoredOtp) {
             return badRequest(res, 'Invalid or expired reset code. Please request a new code.');
         }
 

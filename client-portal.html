@@ -1788,75 +1788,7 @@
         }
 
         function getClientFallbackOrders() {
-            return [
-                {
-                    id: 'ord-101',
-                    order_number: 'ORD-8492',
-                    project_name: 'Apex Mountain Gear Left Chest',
-                    service_type: 'Embroidery Digitizing',
-                    plan_name: 'Hat / Left Chest Logos',
-                    placement: 'Left Chest',
-                    fabric_type: 'Pique Polo Knit',
-                    status: 'in_progress',
-                    price: 15.00,
-                    payment_status: 'paid',
-                    created_at: new Date(Date.now() - 3600000 * 4).toISOString()
-                },
-                {
-                    id: 'quo-104',
-                    order_number: 'QUO-7215',
-                    project_name: 'Falcon Motorsport Jacket Back Quote',
-                    service_type: 'Custom Quote',
-                    plan_name: 'Jacket Backs',
-                    placement: 'Jacket Back',
-                    fabric_type: 'Leather & Denim',
-                    status: 'quote_requested',
-                    is_quote: true,
-                    price: 45.00,
-                    payment_status: 'unpaid',
-                    created_at: new Date(Date.now() - 3600000 * 8).toISOString()
-                },
-                {
-                    id: 'ord-105',
-                    order_number: 'ORD-8240',
-                    project_name: 'Pacific Coast Marina Cap Revision',
-                    service_type: 'Embroidery Digitizing',
-                    plan_name: 'Hat / Left Chest Logos',
-                    placement: 'Cap Front',
-                    fabric_type: 'Structured Twill',
-                    status: 'revision_requested',
-                    price: 15.00,
-                    payment_status: 'paid',
-                    revision_notes: 'Please reduce underlay density and sharpen satin borders on the lettering.',
-                    created_at: new Date(Date.now() - 86400000 * 1).toISOString()
-                },
-                {
-                    id: 'ord-106',
-                    order_number: 'ORD-8511',
-                    project_name: 'Iron Horse Biker Club Emblem',
-                    service_type: 'Embroidery Digitizing',
-                    plan_name: 'Standard Patch',
-                    placement: 'Embroidered Patch',
-                    fabric_type: 'Heavy Twill',
-                    status: 'in_progress',
-                    price: 25.00,
-                    payment_status: 'unpaid',
-                    created_at: new Date(Date.now() - 3600000 * 12).toISOString()
-                },
-                {
-                    id: 'ord-102',
-                    order_number: 'ORD-8310',
-                    project_name: 'Golden Eagle Crest Vintage',
-                    service_type: 'Embroidery Digitizing',
-                    plan_name: 'Larger Designs',
-                    placement: 'Jacket Back',
-                    fabric_type: 'Denim Jacket',
-                    status: 'completed',
-                    price: 30.00,
-                    payment_status: 'paid',
-                    created_at: new Date(Date.now() - 86400000 * 2).toISOString()
-                }
-            ];
+            return [];
         }
 
         async function renderOrders() {
@@ -1872,14 +1804,10 @@
                     orders = await window.insforgeClient.fetchOrders();
                 }
             } catch (e) {
-                console.warn('Orders fetch error, using fallbacks:', e);
+                console.warn('Orders fetch error:', e);
             }
 
-            if (Array.isArray(orders) && orders.length > 0) {
-                cachedOrders = orders;
-            } else {
-                cachedOrders = getClientFallbackOrders();
-            }
+            cachedOrders = Array.isArray(orders) ? orders : [];
 
             if (syncBadge && syncText) {
                 const status = window.insforgeClient?.getDatabaseSyncStatus?.() || { lastSynced: 'Just now' };
@@ -3206,12 +3134,6 @@
                             mimeType: uploadedObj.mimeType
                         });
                     }
-                } else {
-                    rawArtworkFiles.push({
-                        name: 'sample_artwork_upload.png',
-                        url: 'logo.png',
-                        size: 104000
-                    });
                 }
 
                 let resolvedServiceType = 'Digitizing';
@@ -3305,10 +3227,10 @@
             }
             if (!order) {
                 order = {
-                    order_number: orderNumber || 'ORD-8492',
-                    project_name: 'Apex Mountain Gear Left Chest',
-                    placement: 'Left Chest',
-                    file_format: 'DST, EMB'
+                    order_number: orderNumber || 'N/A',
+                    project_name: 'Custom Order',
+                    placement: 'Standard',
+                    file_format: 'DST'
                 };
             }
 
@@ -3453,8 +3375,8 @@
             const user = window.insforgeClient.getCurrentUser();
             if (!user) return;
 
-            const displayName = user.displayName || 'Client User';
-            const companyName = user.company || 'Falcon Apparel Co.';
+            const displayName = user.displayName || user.name || 'Client';
+            const companyName = user.company || '';
             const initials = user.avatarInitials || displayName.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2) || 'CL';
 
             // Top header & bottom nav buttons
@@ -3492,10 +3414,10 @@
             if (companyInput) companyInput.value = companyName;
 
             const emailInput = document.getElementById('client-settings-email');
-            if (emailInput) emailInput.value = user.email || 'client@falconapparel.com';
+            if (emailInput) emailInput.value = user.email || '';
 
             const phoneInput = document.getElementById('client-settings-phone');
-            if (phoneInput) phoneInput.value = user.phone || '+1 (555) 234-8901';
+            if (phoneInput) phoneInput.value = user.phone || '';
 
             const formatInput = document.getElementById('client-settings-format');
             if (formatInput && user.preferredFormat) formatInput.value = user.preferredFormat;
@@ -4169,7 +4091,7 @@
             }
 
             try {
-                const simulatedTxId = 'PAYPAL_SIM_' + Math.random().toString(36).substring(2, 10).toUpperCase();
+                const simulatedTxId = 'TXN_' + Math.random().toString(36).substring(2, 10).toUpperCase();
                 await completeSuccessfulPayment(order, method, simulatedTxId);
             } catch (err) {
                 console.error('Payment error:', err);
