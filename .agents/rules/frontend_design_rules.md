@@ -29,3 +29,8 @@ Whenever designing, implementing, modifying, or auditing any frontend web page, 
 5. **Playwright Visual Verification Skill (`playwright-visual-verification`)**:
    - Verify all frontend work with real headless browser screenshots across Desktop (1512x982), Tablet (834x1112), and Mobile (390x844).
    - Catch visual bugs, layout overflows, clipping, or contrast defects before delivering results to the user.
+
+## 2. Universal WebP Image Optimization Standard (Always Follow)
+- **Universal Rule**: Whenever adding, creating, updating, or displaying pictures, illustrations, logos, mockups, or reviews, ALWAYS use the **WebP (`.webp`)** format.
+- **Performance & Fidelity**: WebP slashes network payloads by 70%+ compared to PNG/JPEG, accelerates loading speeds, and preserves 100% crystal-clear fidelity with full alpha channel transparency.
+- **Conversion Pipeline**: If raw graphics are introduced in PNG or JPEG format, immediately convert them to `.webp` with high quality (`quality=95, alpha_quality=100` for logos/vectors, `quality=85-90` for photography/renders) and update all references to `.webp`.

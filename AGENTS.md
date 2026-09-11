@@ -20,3 +20,9 @@ Key patterns:
 - Reference users with `auth.users(id)`; use `auth.uid()` in RLS policies.
 - For storage uploads, persist both the returned `url` and `key`.
 <!-- INSFORGE:END -->
+
+## Universal Image Format Directive: Always Use WebP
+
+- **Mandatory WebP Format**: For every picture added to this site/project (heroes, mockups, logos, thumbnails, reviews, portfolio showcases, service banners, and icons), ALWAYS use the modern **WebP (`.webp`)** format.
+- **Benefits**: Maximizes loading speed, minimizes payload size (typically 70%+ bandwidth savings), eliminates layout shifts (CLS), and maintains pristine high-resolution visual quality (lossless or 90-95% quality with alpha transparency preserved).
+- **Tooling & Conversion**: When new image assets are introduced in PNG or JPEG format, convert them immediately to `.webp` (using Python `Pillow` with `quality=95, alpha_quality=100` for graphics/logos or `quality=85-90` for photography/renders), and ensure HTML/CSS references point directly to `.webp`.

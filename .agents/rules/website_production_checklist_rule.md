@@ -27,6 +27,6 @@ Whenever building, modifying, reviewing, or finalizing ANY website or web applic
 17. **WCAG 2.1 AA Accessibility**: High-contrast text ($\ge 4.5:1$ light and dark), ARIA attributes, semantic HTML, and keyboard navigation.
 18. **End-to-End Tested Forms**: Validated inputs, accessible labels, clear submission feedback, and error handling.
 19. **Broken Link & Asset Verification**: Zero broken internal links, zero missing anchors, and zero broken image paths (`naturalWidth > 0`).
-20. **Performance Optimization**: Zero CLS (layout shifts), explicit image dimensions, asset preloading, native lazy-loading, and fast lightweight execution.
+20. **Performance Optimization & Universal WebP Images**: Every picture must be in `.webp` format for rapid page loads without quality loss. Zero CLS (layout shifts), explicit image dimensions, asset preloading, native lazy-loading, and fast lightweight execution.
 
 Always audit existing projects against this checklist and supply any missing files immediately.

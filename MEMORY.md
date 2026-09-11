@@ -31,6 +31,7 @@
 - **Theme Default:** **White/Light theme** is the universal default for all visitors, portal users, clients, admins, and workers. Dark mode is user-toggleable and persisted in `localStorage`.
 - **Text Contrast Standard:** Strict WCAG 2.1 AA compliant text contrast ratios ($\ge 4.5:1$) across both light and dark modes.
 - **Logic:** Vanilla JavaScript (ES6+) — *Strictly zero client-side frameworks (no React, Vue, Angular)*
+- **Image Asset Standard (Permanent Universal Rule)**: **Every picture must be in WebP (`.webp`) format**. All newly added images across all projects and pages must be converted to `.webp` with high fidelity (`quality=95, alpha_quality=100` for logos/vectors, `quality=85-90` for photos/stitchouts) to maximize page speed, minimize payload weight, and preserve 100% visual quality and transparency. Never reference raw PNG/JPEG files in production HTML/CSS.
 - **Backend Architecture (Node.js & Express.js REST API)**:
   - **Server Directory (`server/`)**: Production-ready Express API service (`server.js`) on port 5001 with Helmet, CORS, Morgan, and JSON parsers.
   - **Controllers & Routes**: Modular controllers for `/api/health`, `/api/auth` (bcrypt + JWT), `/api/orders`, `/api/quotes`, `/api/tasks` (worker queue with strict zero-PII data masking), `/api/revisions` (physical defect photo proofing), and `/api/upload` (Multer multipart handling).
