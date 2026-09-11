@@ -98,6 +98,32 @@
         </div>
     </section>
 
+    <!-- REALTIME NEW ORDER ALERT BANNER -->
+    <div id="digitizer-live-alert-banner" class="hidden max-w-5xl mx-auto px-4 sm:px-6 pt-4 no-print">
+        <div class="p-4 rounded-2xl bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 border-2 border-amber-400 flex items-center justify-between gap-4 animate-bounce">
+            <div class="flex items-center gap-3">
+                <span class="p-2 rounded-xl bg-slate-950 text-amber-400 font-bold flex items-center justify-center">
+                    <span class="material-symbols-outlined text-xl animate-spin">notifications_active</span>
+                </span>
+                <div>
+                    <h4 class="font-black text-sm tracking-wide flex items-center gap-2">
+                        <span>🔔 New Order Assigned!</span>
+                        <span id="digitizer-live-alert-ordnum" class="px-2 py-0.5 rounded-lg bg-slate-950 text-amber-300 font-mono text-xs">ORD-NEW</span>
+                    </h4>
+                    <p class="text-xs font-semibold text-slate-900 mt-0.5">A new digitizing job was assigned to you. Click to review instructions and start production.</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <button type="button" id="digitizer-live-alert-btn" class="px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-900 text-amber-300 font-black text-xs shadow-xs transition-transform hover:scale-105 cursor-pointer">
+                    View Order →
+                </button>
+                <button type="button" onclick="document.getElementById('digitizer-live-alert-banner').classList.add('hidden')" class="p-2 rounded-xl hover:bg-black/10 text-slate-900 cursor-pointer" title="Dismiss">
+                    <span class="material-symbols-outlined text-base">close</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== MAIN CONTENT ===== -->
     <main class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full pb-28">
 
@@ -310,10 +336,16 @@
 
             <!-- Action Buttons Footer -->
             <div class="flex items-center justify-between pt-4 mt-3 border-t border-slate-200 dark:border-primary/20">
-                <button type="button" id="detail-attach-btn" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-transform hover:scale-[1.02]">
-                    <span class="material-symbols-outlined text-sm">cloud_upload</span>
-                    <span>Attach Deliverables</span>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" id="detail-start-btn" class="hidden px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs inline-flex items-center gap-1.5 shadow-md shadow-blue-500/25 cursor-pointer transition-transform hover:scale-[1.02]">
+                        <span class="material-symbols-outlined text-sm">play_arrow</span>
+                        <span>▶️ Start Order</span>
+                    </button>
+                    <button type="button" id="detail-attach-btn" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-transform hover:scale-[1.02]">
+                        <span class="material-symbols-outlined text-sm">cloud_upload</span>
+                        <span>Attach Deliverables</span>
+                    </button>
+                </div>
                 <button type="button" onclick="window.workerWorkspace.closeTaskDetailsModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-xs cursor-pointer ml-auto">Close</button>
             </div>
         </div>

@@ -10,6 +10,8 @@ router.use(authenticate, requireDigitizer);
 router.get('/', taskController.getTasks);
 router.get('/:id', taskController.getTaskById);
 router.put('/:id/status', taskController.updateTaskStatus);
+router.post('/:id/view', taskController.markTaskViewed);
+router.post('/:id/start', taskController.startTask);
 router.post('/:id/deliverables', taskController.uploadDeliverables);
 
 module.exports = router;

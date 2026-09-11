@@ -443,6 +443,17 @@
                         payload.enabled ? 'smart_toy' : 'tune',
                         'info'
                     );
+                } else if (type === 'task_viewed') {
+                    // Digitizer viewed an assigned order
+                    await renderAllAdminData();
+                } else if (type === 'task_started' || type === 'order_started') {
+                    window.insforgeClient.showToast(
+                        'Production Started',
+                        `Digitizer started work on order ${payload.orderNumber || payload.taskId || ''}.`,
+                        'play_circle',
+                        'info'
+                    );
+                    await renderAllAdminData();
                 } else if (type === 'order_assigned' || type === 'payment_reminder_sent' || type === 'remote_db_change') {
                     await renderAllAdminData();
                 }
@@ -565,16 +576,17 @@
                 return isQuote(o) || isPaymentDue(o);
             });
 
-            // 1. Stage 1: New Incoming Orders (paid, confirmed bookings awaiting digitizer dispatch; strictly NO quotes and NO unpaid)
+            // 1. Stage 1: New Incoming Orders (paid, confirmed bookings awaiting digitizer dispatch OR assigned awaiting digitizer start; strictly NO quotes and NO unpaid)
             const stageNewOrders = allOrders.filter(o => {
                 if (stageCompletedOrders.includes(o) || stageRevisionOrders.includes(o) || stageQuotesOrders.includes(o) || o.status === 'cancelled') return false;
-                return (!o.assigned_digitizer_id || o.status === 'pending_review' || o.status === 'new' || o.status === 'pending');
+                if (o.status === 'in_progress' || o.status === 'in_production') return false;
+                return true;
             });
 
             // 4. Stage 4: In Production (paid, assigned, actively being digitized)
             const stageProductionOrders = allOrders.filter(o => {
                 if (stageCompletedOrders.includes(o) || stageRevisionOrders.includes(o) || stageQuotesOrders.includes(o) || stageNewOrders.includes(o) || o.status === 'cancelled') return false;
-                return true;
+                return o.status === 'in_progress' || o.status === 'in_production';
             });
 
             // Compatibility union for legacy unassigned stage references
@@ -653,7 +665,7 @@
             }
 
             // Render each stage independently with custom empty states
-            renderStageSection('new', filterBySearch(stageNewOrders), searchInput, 'All incoming orders have assigned digitizers.');
+            renderStageSection('new', filterBySearch(stageNewOrders), searchInput, 'No new incoming or unstarted orders awaiting production.');
             renderStageSection('revisions', filterBySearch(stageRevisionOrders), searchInput, 'No active client revision requests pending.');
             renderStageSection('incomplete', filterBySearch(stageQuotesOrders), searchInput, 'All client balances and invoices are settled. No incomplete bookings or unpaid quotes.');
             renderStageSection('in-progress', filterBySearch(stageProductionOrders), searchInput, 'No orders actively in production undergoing digitization at this moment.');
@@ -735,7 +747,8 @@
             const isRevision = order.status === 'revision_requested';
             const isQuote = order.is_quote === true || order.status === 'quote_requested' || (order.order_number && order.order_number.startsWith('QUO-'));
             const isUnpaid = (order.payment_status === 'unpaid' || order.payment_status === 'pending') && !isQuote && !isCompleted;
-            const isInProgress = order.status === 'in_progress' || order.status === 'assigned' || (order.assigned_digitizer_id && !isRevision && !isCompleted);
+            const isInProgress = order.status === 'in_progress' || order.status === 'in_production';
+            const isAssigned = order.status === 'assigned' || (order.assigned_digitizer_id && !isInProgress && !isRevision && !isCompleted);
 
             if (isCompleted) {
                 return {
@@ -789,6 +802,17 @@
                     cardClass: 'border-2 border-blue-500/85 dark:border-blue-400/80 shadow-xs ring-1 ring-blue-500/20 hover:border-blue-600',
                     orderIdClass: 'text-blue-800 dark:text-blue-300',
                     accentBadge: 'bg-blue-100 text-blue-900 dark:bg-blue-500/20 dark:text-blue-300 border-blue-300 dark:border-blue-500/35'
+                };
+            }
+
+            if (isAssigned) {
+                return {
+                    type: 'assigned',
+                    label: 'Assigned (New)',
+                    rowClass: 'bg-amber-50/80 hover:bg-amber-100/85 dark:bg-amber-950/30 dark:hover:bg-amber-900/40 border-l-4 border-l-amber-500 dark:border-l-amber-400',
+                    cardClass: 'border-2 border-amber-500/85 dark:border-amber-400/80 shadow-xs ring-1 ring-amber-500/20 hover:border-amber-600',
+                    orderIdClass: 'text-amber-800 dark:text-amber-300',
+                    accentBadge: 'bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-300 border-amber-300 dark:border-amber-500/35'
                 };
             }
 
@@ -1011,9 +1035,21 @@
                 .replace(/Standard commercial digitizing standards apply.*$/i, '')
                 .trim();
 
-            // 7. ASSIGNED WORKER / DISPATCH
+            // 7. ASSIGNED WORKER / DISPATCH & DIGITIZER ACTIVITY
+            let assignedStatusDetail = '';
+            if (order.assigned_digitizer_name) {
+                if (order.status === 'in_progress' || order.status === 'in_production' || order.started_at) {
+                    const startTime = order.started_at ? formatOrderDateTime(order.started_at).time : orderDt.time;
+                    assignedStatusDetail = `<div class="text-[10px] font-bold text-blue-700 dark:text-blue-300 flex items-center justify-end gap-1 mt-0.5"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Production · Started ${startTime}</div>`;
+                } else if (order.digitizer_viewed_at) {
+                    assignedStatusDetail = `<div class="text-[10px] font-bold text-slate-600 dark:text-slate-400 flex items-center justify-end gap-1 mt-0.5"><span class="material-symbols-outlined text-[12px] text-emerald-600">visibility</span> Seen ${formatTimeAgo(order.digitizer_viewed_at)}</div>`;
+                } else {
+                    assignedStatusDetail = `<div class="text-[10px] font-bold text-amber-700 dark:text-amber-400 flex items-center justify-end gap-1 mt-0.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Not Viewed Yet</div>`;
+                }
+            }
+
             const assignedText = order.assigned_digitizer_name
-                ? `<span class="inline-flex items-center gap-1 font-bold text-slate-800 dark:text-slate-200"><span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">badge</span> ${escapeHtml(order.assigned_digitizer_name.split('(')[0].trim())}</span>`
+                ? `<div class="text-right"><span class="inline-flex items-center gap-1 font-bold text-slate-800 dark:text-slate-200"><span class="material-symbols-outlined text-xs text-amber-700 dark:text-primary">badge</span> ${escapeHtml(order.assigned_digitizer_name.split('(')[0].trim())}</span>${assignedStatusDetail}</div>`
                 : '<span class="inline-flex items-center gap-1 font-bold text-amber-800 dark:text-amber-400"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Unassigned</span>';
 
             return `
@@ -1147,20 +1183,31 @@
             const theme = getOrderColorTheme(order);
             const orderDt = formatOrderDateTime(order.created_at);
             
-            // Format worker display (Primary name + secondary specialty subtitle or neat unassigned pill)
+            // Format worker display (Primary name + secondary specialty subtitle or neat unassigned pill + activity status)
             let assignedMarkup = '';
             if (order.assigned_digitizer_name) {
                 const match = order.assigned_digitizer_name.match(/^(.*?)\s*\((.*?)\)$/);
-                if (match) {
-                    assignedMarkup = `
-                        <div class="leading-tight">
-                            <span class="text-slate-800 dark:text-slate-200 font-bold block text-xs whitespace-nowrap">${match[1]}</span>
-                            <span class="text-slate-500 dark:text-slate-400 text-[10px] font-medium block whitespace-nowrap">${match[2]}</span>
-                        </div>
-                    `;
+                const workerName = match ? match[1] : order.assigned_digitizer_name;
+                const workerSub = match ? match[2] : '';
+
+                // Activity / Started status indicator
+                let progressStatus = '';
+                if (order.status === 'in_progress' || order.status === 'in_production' || order.started_at) {
+                    const startTime = order.started_at ? formatOrderDateTime(order.started_at).time : orderDt.time;
+                    progressStatus = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 dark:text-blue-300 mt-0.5 whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Production · Started ${startTime}</span>`;
+                } else if (order.digitizer_viewed_at) {
+                    progressStatus = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 dark:text-slate-400 mt-0.5 whitespace-nowrap"><span class="material-symbols-outlined text-[11px] text-emerald-600">visibility</span> Seen ${formatTimeAgo(order.digitizer_viewed_at)}</span>`;
                 } else {
-                    assignedMarkup = `<span class="text-slate-800 dark:text-slate-200 font-bold block text-xs whitespace-nowrap">${order.assigned_digitizer_name}</span>`;
+                    progressStatus = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 dark:text-amber-400 mt-0.5 whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Not Viewed Yet</span>`;
                 }
+
+                assignedMarkup = `
+                    <div class="leading-tight">
+                        <span class="text-slate-800 dark:text-slate-200 font-bold block text-xs whitespace-nowrap">${escapeHtml(workerName)}</span>
+                        ${workerSub ? `<span class="text-slate-500 dark:text-slate-400 text-[10px] font-medium block whitespace-nowrap">${escapeHtml(workerSub)}</span>` : ''}
+                        ${progressStatus}
+                    </div>
+                `;
             } else {
                 assignedMarkup = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap leading-none">Unassigned</span>`;
             }
@@ -1747,7 +1794,7 @@
             const diffSec = Math.floor(diffMs / 1000);
             if (diffSec < 60) return 'just now';
             const diffMin = Math.floor(diffSec / 60);
-            if (diffMin < 60) return `${diffMin}m ago`;
+            if (diffMin < 60) return `${diffMin} min ago`;
             const diffHr = Math.floor(diffMin / 60);
             if (diffHr < 24) return `${diffHr}h ago`;
             return new Date(isoString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -1776,8 +1823,10 @@
                 case 'completed':
                     return '<span class="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;">Completed</span>';
                 case 'in_progress':
+                case 'in_production':
+                    return '<span class="whitespace-nowrap inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-900 dark:text-blue-300 border border-blue-300 dark:border-blue-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Production</span>';
                 case 'assigned':
-                    return '<span class="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-900 dark:text-blue-300 border border-blue-300 dark:border-blue-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;">In Production</span>';
+                    return '<span class="whitespace-nowrap inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/35 text-[11px] font-black leading-none shrink-0" style="white-space: nowrap !important;"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Assigned (New)</span>';
                 case 'revision_requested':
                     return '<span class="whitespace-nowrap inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-500/25 text-purple-950 dark:text-purple-200 border border-purple-300 dark:border-purple-500/40 text-[11px] font-black leading-none shrink-0" style="white-space: nowrap !important;"><span class="w-1.5 h-1.5 rounded-full bg-purple-600 animate-ping mr-0.5"></span> Revision</span>';
                 case 'quote_requested':
@@ -2893,7 +2942,20 @@ Email: fdezan91@gmail.com`;
             // Section 5: Digitizer Assignment & Deliverables
             const digitizerNameEl = document.getElementById('order-details-digitizer-name');
             if (digitizerNameEl) {
-                digitizerNameEl.textContent = order.assigned_digitizer_name || 'Unassigned (Awaiting Assignment)';
+                if (order.assigned_digitizer_name) {
+                    let statusPill = '';
+                    if (order.status === 'in_progress' || order.status === 'in_production' || order.started_at) {
+                        const startTime = order.started_at ? formatOrderDateTime(order.started_at).time : 'In Progress';
+                        statusPill = `<span class="inline-flex items-center gap-1 ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Production · Started ${startTime}</span>`;
+                    } else if (order.digitizer_viewed_at) {
+                        statusPill = `<span class="inline-flex items-center gap-1 ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700"><span class="material-symbols-outlined text-[11px] text-emerald-600">visibility</span> Seen ${formatTimeAgo(order.digitizer_viewed_at)}</span>`;
+                    } else {
+                        statusPill = `<span class="inline-flex items-center gap-1 ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Not Viewed Yet</span>`;
+                    }
+                    digitizerNameEl.innerHTML = `<span class="font-bold text-slate-900 dark:text-white">${escapeHtml(order.assigned_digitizer_name)}</span> ${statusPill}`;
+                } else {
+                    digitizerNameEl.textContent = 'Unassigned (Awaiting Assignment)';
+                }
             }
 
             const assignmentActionsEl = document.getElementById('order-details-assignment-actions');

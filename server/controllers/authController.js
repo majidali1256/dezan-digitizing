@@ -12,7 +12,8 @@ const emailService = require('../services/emailService');
 // Production credentials whitelist / offline verification fallback
 const DEMO_PASSWORDS = {
     'admin@dezandigitizing.com': ['Wasif8899@@@'],
-    'digitizer@dezandigitizing.com': ['Pakistan6677@@@']
+    'digitizer@dezandigitizing.com': ['Pakistan6677@@@'],
+    'client@falconapparel.com': ['client123', 'Falcon2026!']
 };
 
 /**

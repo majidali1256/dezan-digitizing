@@ -2,15 +2,17 @@ User-agent: *
 Allow: /
 Allow: /index.html
 Allow: /about.html
+Allow: /services
 Allow: /services.html
+Allow: /embroidery-digitizing/
+Allow: /vector-art-conversion/
+Allow: /stitch-lab/
 Allow: /portfolio.html
 Allow: /pricing.html
 Allow: /contact.html
 Allow: /terms.html
 Allow: /privacy.html
 Allow: /refund-policy.html
-Allow: /embroidery-digitizing.html
-Allow: /vector-art-conversion.html
 Allow: /track-order.html
 Allow: /order-success.html
 
@@ -29,4 +31,4 @@ Disallow: /scripts/
 Disallow: /tests/
 
 # Sitemap Location
-Sitemap: https://dezan-digitizing.vercel.app/sitemap.xml
+Sitemap: https://dezandigitizing.com/sitemap.xml

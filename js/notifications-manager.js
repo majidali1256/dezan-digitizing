@@ -432,12 +432,42 @@
                 this.playChime();
             }
 
+            // Trigger native browser notification if granted
+            if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+                try {
+                    const browserNotif = new Notification(notif.title, {
+                        body: notif.message,
+                        icon: 'logo.png'
+                    });
+                    browserNotif.onclick = () => {
+                        window.focus();
+                        if (notif.orderId) {
+                            if (typeof window.openTaskDetailsModal === 'function') {
+                                window.openTaskDetailsModal(notif.orderId);
+                            } else if (window.workerWorkspace && typeof window.workerWorkspace.openTaskDetailsModal === 'function') {
+                                window.workerWorkspace.openTaskDetailsModal(notif.orderId);
+                            } else if (typeof window.openAdminOrderDetailsModal === 'function') {
+                                window.openAdminOrderDetailsModal(notif.orderId);
+                            }
+                        }
+                    };
+                } catch (e) {}
+            }
+
             // Trigger visual toast
             if (typeof window.insforgeClient?.showToast === 'function') {
                 window.insforgeClient.showToast(notif.title, notif.message, notif.icon, 'info');
             }
 
             return notif;
+        }
+
+        requestNativePermission() {
+            if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+                try {
+                    Notification.requestPermission();
+                } catch (e) {}
+            }
         }
 
         /**

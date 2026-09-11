@@ -1678,7 +1678,11 @@ class InsForgeClient {
                     is_rush: o.turnaround_speed === 'rush' || o.priority === 'rush',
                     instructions: o.instructions || '',
                     raw_artwork_files: o.raw_artwork_files || [],
-                    status: o.status || 'in_progress',
+                    status: o.status || 'assigned',
+                    is_unread: o.is_unread !== undefined ? o.is_unread : (!o.digitizer_viewed_at && !o.viewed_at),
+                    viewed_at: o.digitizer_viewed_at || o.viewed_at || null,
+                    digitizer_viewed_at: o.digitizer_viewed_at || o.viewed_at || null,
+                    started_at: o.started_at || null,
                     deliverables: o.deliverables || [],
                     assigned_at: o.assigned_at || o.created_at
                 });
@@ -1701,6 +1705,7 @@ class InsForgeClient {
         // Normalize property names (support both snake_case and camelCase)
         return assignedTasks.map(t => {
             const isRush = t.turnaround_speed === 'rush' || t.turnaroundSpeed === 'rush' || t.priority === 'rush' || t.is_rush === true || t.isRush === true;
+            const isUnread = t.is_unread !== undefined ? t.is_unread : (!t.digitizer_viewed_at && !t.viewed_at && (t.status === 'assigned' || t.status === 'pending' || t.status === 'new'));
             return {
                 id: t.id,
                 taskId: t.task_number || ('TSK-' + (t.order_number ? t.order_number.replace('ORD-', '') : '')),
@@ -1726,7 +1731,15 @@ class InsForgeClient {
                 instructions: t.instructions || '',
                 rawArtworkFiles: Array.isArray(t.raw_artwork_files) ? t.raw_artwork_files : (Array.isArray(t.rawArtworkFiles) ? t.rawArtworkFiles : []),
                 raw_artwork_files: Array.isArray(t.raw_artwork_files) ? t.raw_artwork_files : (Array.isArray(t.rawArtworkFiles) ? t.rawArtworkFiles : []),
-                status: t.status || 'in_progress',
+                status: t.status || 'assigned',
+                is_unread: isUnread,
+                isUnread: isUnread,
+                viewed_at: t.viewed_at || t.digitizer_viewed_at || null,
+                viewedAt: t.viewed_at || t.digitizer_viewed_at || null,
+                digitizer_viewed_at: t.digitizer_viewed_at || t.viewed_at || null,
+                digitizerViewedAt: t.digitizer_viewed_at || t.viewed_at || null,
+                started_at: t.started_at || null,
+                startedAt: t.started_at || null,
                 deliverables: Array.isArray(t.deliverables) ? t.deliverables : [],
                 assignedAt: t.assigned_at,
                 completedAt: t.completed_at,
@@ -1759,6 +1772,7 @@ class InsForgeClient {
                 : cachedTasks.filter(t => t.assigned_digitizer_id === user.id);
             return filtered.map(t => {
                 const isRush = t.turnaround_speed === 'rush' || t.turnaroundSpeed === 'rush' || t.priority === 'rush' || t.is_rush === true || t.isRush === true;
+                const isUnread = t.is_unread !== undefined ? t.is_unread : (!t.digitizer_viewed_at && !t.viewed_at && (t.status === 'assigned' || t.status === 'pending' || t.status === 'new'));
                 return {
                     id: t.id,
                     taskId: t.task_number || ('TSK-' + (t.order_number ? t.order_number.replace('ORD-', '') : '')),
@@ -1784,7 +1798,15 @@ class InsForgeClient {
                     instructions: t.instructions || '',
                     rawArtworkFiles: Array.isArray(t.raw_artwork_files) ? t.raw_artwork_files : [],
                     raw_artwork_files: Array.isArray(t.raw_artwork_files) ? t.raw_artwork_files : [],
-                    status: t.status,
+                    status: t.status || 'assigned',
+                    is_unread: isUnread,
+                    isUnread: isUnread,
+                    viewed_at: t.viewed_at || t.digitizer_viewed_at || null,
+                    viewedAt: t.viewed_at || t.digitizer_viewed_at || null,
+                    digitizer_viewed_at: t.digitizer_viewed_at || t.viewed_at || null,
+                    digitizerViewedAt: t.digitizer_viewed_at || t.viewed_at || null,
+                    started_at: t.started_at || null,
+                    startedAt: t.started_at || null,
                     deliverables: Array.isArray(t.deliverables) ? t.deliverables : [],
                     assignedAt: t.assigned_at,
                     revision_notes: t.revision_notes || t.revisionNotes || '',
@@ -1805,6 +1827,7 @@ class InsForgeClient {
         return assignedOrders.map(order => {
             const isRush = order.turnaround_speed === 'rush' || order.turnaroundSpeed === 'rush' || order.priority === 'rush';
             const fallbackTaskNumber = 'TSK-' + order.order_number.replace('ORD-', '').replace('DZ-', '');
+            const isUnread = order.is_unread !== undefined ? order.is_unread : (!order.digitizer_viewed_at && !order.viewed_at && (order.status === 'assigned' || order.status === 'pending' || order.status === 'new'));
             return {
                 id: order.id,
                 taskId: fallbackTaskNumber,
@@ -1830,7 +1853,15 @@ class InsForgeClient {
                 instructions: order.instructions,
                 rawArtworkFiles: order.raw_artwork_files || [],
                 raw_artwork_files: order.raw_artwork_files || [],
-                status: order.status,
+                status: order.status || 'assigned',
+                is_unread: isUnread,
+                isUnread: isUnread,
+                viewed_at: order.digitizer_viewed_at || order.viewed_at || null,
+                viewedAt: order.digitizer_viewed_at || order.viewed_at || null,
+                digitizer_viewed_at: order.digitizer_viewed_at || order.viewed_at || null,
+                digitizerViewedAt: order.digitizer_viewed_at || order.viewed_at || null,
+                started_at: order.started_at || null,
+                startedAt: order.started_at || null,
                 deliverables: order.deliverables || [],
                 assignedAt: order.assigned_at,
                 revision_notes: order.revision_notes || '',
@@ -2350,7 +2381,10 @@ class InsForgeClient {
             order.assigned_digitizer_id = digitizerId;
             order.assigned_digitizer_name = digitizerName;
             order.assigned_at = assignedAt;
-            order.status = 'in_progress';
+            order.status = 'assigned';
+            order.digitizer_viewed_at = null;
+            order.viewed_at = null;
+            order.started_at = null;
             localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
         }
 
@@ -2382,7 +2416,10 @@ class InsForgeClient {
             instructions: (order && order.instructions) || '',
             raw_artwork_files: (order && order.raw_artwork_files) || [],
             rawArtworkFiles: (order && order.raw_artwork_files) || [],
-            status: 'in_progress',
+            status: 'assigned',
+            is_unread: true,
+            viewed_at: null,
+            started_at: null,
             deliverables: [],
             assigned_at: assignedAt
         };
@@ -2392,7 +2429,10 @@ class InsForgeClient {
         const taskIdx = allTasks.findIndex(t => t.order_number === orderNumber || t.orderNumber === orderNumber);
         if (taskIdx >= 0) {
             allTasks[taskIdx].assigned_digitizer_id = digitizerId;
-            allTasks[taskIdx].status = 'in_progress';
+            allTasks[taskIdx].status = 'assigned';
+            allTasks[taskIdx].is_unread = true;
+            allTasks[taskIdx].viewed_at = null;
+            allTasks[taskIdx].started_at = null;
             allTasks[taskIdx].assigned_at = assignedAt;
             if (!allTasks[taskIdx].task_number) allTasks[taskIdx].task_number = taskNumber;
         } else {
@@ -2405,8 +2445,25 @@ class InsForgeClient {
             orderNumber: orderNumber,
             taskNumber: taskNumber,
             digitizerId: digitizerId,
-            digitizerName: digitizerName
+            digitizerName: digitizerName,
+            task: sanitizedTask
         });
+
+        // Broadcast to digitizer role notification center
+        if (window.dezanNotificationEngine) {
+            window.dezanNotificationEngine.broadcastToRole('digitizer', {
+                orderId: orderNumber,
+                type: 'order_assigned',
+                category: 'tasks',
+                title: `🔔 New Order Assigned — ${orderNumber}`,
+                message: `New digitizing project "${sanitizedTask.project_name || 'Custom Embroidery'}" has been assigned to your studio queue.`,
+                meta: 'Assigned just now · New Order',
+                actionLabel: 'View Order',
+                actionType: 'view_order',
+                accent: 'amber',
+                icon: 'fiber_new'
+            });
+        }
 
         // Attempt Node.js backend assignment if available
         try {
@@ -2428,7 +2485,10 @@ class InsForgeClient {
                     assigned_digitizer_id: digitizerId,
                     assigned_digitizer_name: digitizerName,
                     assigned_at: assignedAt,
-                    status: 'in_progress',
+                    status: 'assigned',
+                    is_unread: true,
+                    digitizer_viewed_at: null,
+                    started_at: null,
                     updated_at: assignedAt
                 })
             });
@@ -2445,7 +2505,10 @@ class InsForgeClient {
                     headers: this.getApiHeaders(),
                     body: JSON.stringify({
                         assigned_digitizer_id: digitizerId,
-                        status: 'in_progress',
+                        status: 'assigned',
+                        is_unread: true,
+                        digitizer_viewed_at: null,
+                        started_at: null,
                         assigned_at: assignedAt
                     })
                 });
@@ -2456,10 +2519,208 @@ class InsForgeClient {
                     body: JSON.stringify([sanitizedTask])
                 });
             }
-            console.log(`✅ Order ${orderNumber} assigned to ${digitizerName} in InsForge PostgreSQL`);
+            console.log(`✅ Order ${orderNumber} assigned to ${digitizerName} in InsForge PostgreSQL (Status: assigned)`);
         } catch (err) {
             console.warn('InsForge assign sync notice:', err.message);
         }
+
+        return true;
+    }
+
+    /**
+     * Mark Digitizer Task as Viewed / Seen
+     * Removes the unread status while keeping the task in 'assigned' (New / Not Started)
+     * @param {string} taskOrOrderNumber
+     * @returns {Promise<boolean>}
+     */
+    async markDigitizerTaskViewed(taskOrOrderNumber) {
+        if (!taskOrOrderNumber) return false;
+        const viewedAt = new Date().toISOString();
+
+        // 1. Update task in local storage
+        const allTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+        const task = allTasks.find(t => 
+            (t.order_number || t.orderNumber) === taskOrOrderNumber || 
+            (t.task_number || t.taskId) === taskOrOrderNumber || 
+            t.id === taskOrOrderNumber
+        );
+
+        let orderNumber = taskOrOrderNumber;
+        let taskNumber = taskOrOrderNumber;
+
+        if (task) {
+            orderNumber = task.order_number || task.orderNumber || orderNumber;
+            taskNumber = task.task_number || task.taskId || taskNumber;
+            if (task.is_unread !== false || !task.viewed_at) {
+                task.is_unread = false;
+                task.viewed_at = viewedAt;
+                task.digitizer_viewed_at = viewedAt;
+                localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(allTasks));
+            }
+        }
+
+        // 2. Update order in local storage
+        const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+        const order = allOrders.find(o => o.order_number === orderNumber || o.id === orderNumber);
+        if (order) {
+            if (!order.digitizer_viewed_at) {
+                order.digitizer_viewed_at = viewedAt;
+                order.viewed_at = viewedAt;
+                order.is_unread = false;
+                localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
+            }
+        }
+
+        // 3. Broadcast real-time view event
+        this.broadcastEvent('task_viewed', {
+            orderNumber: orderNumber,
+            taskNumber: taskNumber,
+            viewedAt: viewedAt
+        });
+
+        // 4. Asynchronously sync to database
+        try {
+            const taskParam = taskNumber || orderNumber;
+            await this.callBackendApi(`/tasks/${encodeURIComponent(taskParam)}/view`, 'POST', {}).catch(() => {});
+
+            await fetch(`${this.baseUrl}/api/database/records/orders?order_number=eq.${encodeURIComponent(orderNumber)}`, {
+                method: 'PATCH',
+                headers: this.getApiHeaders(),
+                body: JSON.stringify({
+                    is_unread: false,
+                    digitizer_viewed_at: viewedAt,
+                    updated_at: viewedAt
+                })
+            }).catch(() => {});
+
+            await fetch(`${this.baseUrl}/api/database/records/digitizer_tasks?order_number=eq.${encodeURIComponent(orderNumber)}`, {
+                method: 'PATCH',
+                headers: this.getApiHeaders(),
+                body: JSON.stringify({
+                    is_unread: false,
+                    digitizer_viewed_at: viewedAt
+                })
+            }).catch(() => {});
+        } catch (_) {}
+
+        return true;
+    }
+
+    /**
+     * Digitizer Clicks "Start Order"
+     * Transitions task & master order from 'assigned' (New) to 'in_progress' (In Production)
+     * @param {string} taskOrOrderNumber
+     * @returns {Promise<boolean>}
+     */
+    async startDigitizerTask(taskOrOrderNumber) {
+        if (!taskOrOrderNumber) return false;
+        const startedAt = new Date().toISOString();
+
+        // 1. Update task in local storage
+        const allTasks = JSON.parse(localStorage.getItem('dezan_digitizer_tasks') || '[]');
+        const task = allTasks.find(t => 
+            (t.order_number || t.orderNumber) === taskOrOrderNumber || 
+            (t.task_number || t.taskId) === taskOrOrderNumber || 
+            t.id === taskOrOrderNumber
+        );
+
+        let orderNumber = taskOrOrderNumber;
+        let taskNumber = taskOrOrderNumber;
+
+        if (task) {
+            orderNumber = task.order_number || task.orderNumber || orderNumber;
+            taskNumber = task.task_number || task.taskId || taskNumber;
+            task.status = 'in_progress';
+            task.started_at = startedAt;
+            task.is_unread = false;
+            if (!task.viewed_at) task.viewed_at = startedAt;
+            if (!task.digitizer_viewed_at) task.digitizer_viewed_at = startedAt;
+            localStorage.setItem('dezan_digitizer_tasks', JSON.stringify(allTasks));
+        }
+
+        // 2. Update master order in local storage
+        const allOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+        const order = allOrders.find(o => o.order_number === orderNumber || o.id === orderNumber);
+        if (order) {
+            order.status = 'in_progress';
+            order.started_at = startedAt;
+            order.production_started_at = startedAt;
+            order.is_unread = false;
+            if (!order.digitizer_viewed_at) order.digitizer_viewed_at = startedAt;
+            order.updated_at = startedAt;
+            localStorage.setItem('dezan_orders', JSON.stringify(allOrders));
+        }
+
+        // 3. Broadcast real-time started events
+        this.broadcastEvent('task_started', {
+            orderNumber: orderNumber,
+            taskNumber: taskNumber,
+            startedAt: startedAt
+        });
+        this.broadcastEvent('order_started', {
+            orderNumber: orderNumber,
+            taskNumber: taskNumber,
+            startedAt: startedAt
+        });
+
+        // 4. Role notifications
+        if (window.dezanNotificationEngine) {
+            window.dezanNotificationEngine.broadcastToRole('admin', {
+                orderId: orderNumber,
+                type: 'production_started',
+                category: 'production',
+                title: 'Digitizer Started Production',
+                message: `Digitizer has started sew-out & stitch mapping for #${orderNumber}.`,
+                meta: `Started ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                actionLabel: 'View Order',
+                actionType: 'open_order',
+                accent: 'blue',
+                icon: 'precision_manufacturing'
+            });
+            window.dezanNotificationEngine.broadcastToRole('client', {
+                orderId: orderNumber,
+                type: 'in_production',
+                category: 'production',
+                title: 'Your Order is Now in Production',
+                message: `Master digitizer has initiated active stitch mapping on #${orderNumber}.`,
+                meta: 'In Production · Turnaround 12-24h',
+                actionLabel: 'Track Progress',
+                actionType: 'track_order',
+                accent: 'blue',
+                icon: 'pending_actions'
+            });
+        }
+
+        // 5. Backend API sync
+        try {
+            const taskParam = taskNumber || orderNumber;
+            await this.callBackendApi(`/tasks/${encodeURIComponent(taskParam)}/start`, 'POST', {}).catch(() => {});
+        } catch (_) {}
+
+        // 6. PostgreSQL direct sync
+        try {
+            await fetch(`${this.baseUrl}/api/database/records/orders?order_number=eq.${encodeURIComponent(orderNumber)}`, {
+                method: 'PATCH',
+                headers: this.getApiHeaders(),
+                body: JSON.stringify({
+                    status: 'in_progress',
+                    is_unread: false,
+                    started_at: startedAt,
+                    updated_at: startedAt
+                })
+            }).catch(() => {});
+
+            await fetch(`${this.baseUrl}/api/database/records/digitizer_tasks?order_number=eq.${encodeURIComponent(orderNumber)}`, {
+                method: 'PATCH',
+                headers: this.getApiHeaders(),
+                body: JSON.stringify({
+                    status: 'in_progress',
+                    is_unread: false,
+                    started_at: startedAt,
+                    updated_at: startedAt
+                })
+            }).catch(() => {});
+        } catch (_) {}
 
         return true;
     }

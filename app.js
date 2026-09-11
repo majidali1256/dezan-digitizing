@@ -37,10 +37,287 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // ===== DYNAMIC HEADER AUTH STATE (LOGIN BUTTON vs PREVIOUS ACCOUNT ICON) =====
+    // ===== UNIVERSAL DASHBOARD NAVIGATION & ROLE-BASED REDIRECT ENGINE =====
+    function getDashboardUrlForRole(role) {
+        const isSubdir = window.location.pathname.includes('/embroidery-digitizing/') || 
+                         window.location.pathname.includes('/vector-art-conversion/') || 
+                         window.location.pathname.includes('/stitch-lab/');
+        const prefix = isSubdir ? '/' : '';
+        if (role === 'admin') return prefix + 'admin-portal.html';
+        if (role === 'digitizer') return prefix + 'worker-portal.html';
+        return prefix + 'client-portal.html';
+    }
+    window.getDashboardUrlForRole = getDashboardUrlForRole;
+
+    window.handleDashboardNavClick = function(e) {
+        if (e) e.preventDefault();
+        let session = null;
+        try {
+            const raw = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('dezan_session') : null) || 
+                        (typeof localStorage !== 'undefined' ? localStorage.getItem('dezan_session') : null);
+            if (raw) session = JSON.parse(raw);
+        } catch (err) {
+            session = null;
+        }
+
+        if (session && session.role) {
+            // Already logged in -> Immediately open their correct role dashboard
+            const target = getDashboardUrlForRole(session.role);
+            window.location.href = target;
+        } else {
+            // Visitor is not logged in -> Open the login modal
+            window.openPortalLoginModal('dashboard');
+        }
+    };
+
+    window.handleLoginBtnClick = function(e) {
+        if (e) e.preventDefault();
+        window.openPortalLoginModal('dashboard');
+    };
+
+    // ===== PORTAL LOGIN MODAL CONTROLLERS =====
+    function createPortalLoginModalDOM() {
+        if (document.getElementById('portal-login-modal')) return;
+
+        const isSubdir = window.location.pathname.includes('/embroidery-digitizing/') || 
+                         window.location.pathname.includes('/vector-art-conversion/') || 
+                         window.location.pathname.includes('/stitch-lab/');
+        const prefix = isSubdir ? '/' : '';
+
+        const modal = document.createElement('div');
+        modal.id = 'portal-login-modal';
+        modal.className = 'hidden fixed inset-0 z-[120] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'modal-login-title');
+
+        modal.innerHTML = `
+            <div class="w-full max-w-md bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/30 rounded-3xl p-6 sm:p-8 shadow-2xl relative my-auto transition-all">
+                <!-- Close Button -->
+                <button type="button" onclick="window.closePortalLoginModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Close login dialog">
+                    <span class="material-symbols-outlined text-xl">close</span>
+                </button>
+
+                <!-- Brand Header -->
+                <div class="flex items-center gap-3 mb-5">
+                    <img src="${prefix}logo.png" alt="Dezan Digitizing" class="w-10 h-10 rounded-full object-cover shadow-sm border border-primary/20">
+                    <div>
+                        <h3 id="modal-login-title" class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">Sign In to Dashboard</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Access your client, digitizer, or admin workspace</p>
+                    </div>
+                </div>
+
+                <!-- Error Banner (Hidden by default) -->
+                <div id="modal-login-error-banner" class="hidden mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-700 dark:text-rose-300 flex items-start gap-2" role="alert">
+                    <span class="material-symbols-outlined text-base shrink-0 text-rose-600 mt-0.5">error</span>
+                    <span id="modal-login-error-msg" class="leading-relaxed">Invalid email or password.</span>
+                </div>
+
+                <!-- Sign In Form -->
+                <form id="modal-login-form" onsubmit="window.handleModalLoginSubmit(event)" class="space-y-4">
+                    <div>
+                        <label for="modal-login-email" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">mail</span>
+                            <input type="email" id="modal-login-email" required autocomplete="email" placeholder="name@company.com" class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all">
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label for="modal-login-password" class="block text-xs font-bold text-slate-700 dark:text-slate-300">Password</label>
+                            <a href="${prefix}portal-login.html?tab=forgot" class="text-[11px] font-semibold text-primary hover:underline">Forgot password?</a>
+                        </div>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">lock</span>
+                            <input type="password" id="modal-login-password" required autocomplete="current-password" placeholder="••••••••" class="w-full pl-9 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all">
+                            <button type="button" onclick="window.toggleModalLoginPasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer" aria-label="Toggle password visibility">
+                                <span id="modal-login-pw-icon" class="material-symbols-outlined text-lg">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="modal-login-submit-btn" class="w-full py-3 rounded-xl bg-primary hover:brightness-105 active:scale-[0.99] text-slate-950 font-black text-xs sm:text-sm transition-all shadow-md shadow-amber-500/20 flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span>Enter Dashboard</span>
+                        <span class="material-symbols-outlined text-base">arrow_forward</span>
+                    </button>
+                </form>
+
+                <!-- Divider -->
+                <div class="my-4 flex items-center gap-3">
+                    <div class="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                    <span class="text-[11px] text-slate-400 font-medium uppercase tracking-wider">or</span>
+                    <div class="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                </div>
+
+                <!-- Google / Full Portal Sign In -->
+                <a href="${prefix}portal-login.html?redirect=dashboard" class="w-full py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Continue with Google / Portal</span>
+                </a>
+
+                <!-- Sign Up Link -->
+                <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-center">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        Don't have an account? 
+                        <a href="${prefix}portal-login.html?tab=register&redirect=dashboard" class="font-bold text-primary hover:underline">Create an account</a>
+                    </p>
+                </div>
+            </div>
+        `;
+
+        // Close when clicking overlay backdrop
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                window.closePortalLoginModal();
+            }
+        });
+
+        document.body.appendChild(modal);
+    }
+
+    window.openPortalLoginModal = function(destination = 'dashboard') {
+        let modal = document.getElementById('portal-login-modal');
+        if (!modal) {
+            createPortalLoginModalDOM();
+            modal = document.getElementById('portal-login-modal');
+        }
+        if (!modal) return;
+
+        modal.dataset.destination = destination;
+        const errorBanner = document.getElementById('modal-login-error-banner');
+        if (errorBanner) errorBanner.classList.add('hidden');
+
+        const pwInput = document.getElementById('modal-login-password');
+        if (pwInput) pwInput.value = '';
+
+        const submitBtn = document.getElementById('modal-login-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `
+                <span>Enter Dashboard</span>
+                <span class="material-symbols-outlined text-base">arrow_forward</span>
+            `;
+        }
+
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+
+        const emailInput = document.getElementById('modal-login-email');
+        setTimeout(() => {
+            if (emailInput && !emailInput.value) {
+                emailInput.focus();
+            } else if (pwInput) {
+                pwInput.focus();
+            }
+        }, 100);
+    };
+
+    window.closePortalLoginModal = function() {
+        const modal = document.getElementById('portal-login-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+    };
+
+    window.toggleModalLoginPasswordVisibility = function() {
+        const input = document.getElementById('modal-login-password');
+        const icon = document.getElementById('modal-login-pw-icon');
+        if (input && icon) {
+            const isPw = input.type === 'password';
+            input.type = isPw ? 'text' : 'password';
+            icon.textContent = isPw ? 'visibility_off' : 'visibility';
+        }
+    };
+
+    window.handleModalLoginSubmit = async function(e) {
+        e.preventDefault();
+        const emailInput = document.getElementById('modal-login-email');
+        const pwInput = document.getElementById('modal-login-password');
+        const errorBanner = document.getElementById('modal-login-error-banner');
+        const errorMsg = document.getElementById('modal-login-error-msg');
+        const submitBtn = document.getElementById('modal-login-submit-btn');
+
+        const email = emailInput ? emailInput.value.trim() : '';
+        const password = pwInput ? pwInput.value : '';
+
+        if (!email || !password) {
+            if (errorBanner && errorMsg) {
+                errorBanner.classList.remove('hidden');
+                errorMsg.textContent = 'Please enter both your email address and password.';
+            }
+            return;
+        }
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <span class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                <span>Signing In...</span>
+            `;
+        }
+
+        try {
+            if (!window.insforgeClient || typeof window.insforgeClient.signIn !== 'function') {
+                throw new Error('Authentication client unavailable. Please refresh the page.');
+            }
+
+            const { user, error } = await window.insforgeClient.signIn(email, password);
+            if (error || !user) {
+                if (errorBanner && errorMsg) {
+                    errorBanner.classList.remove('hidden');
+                    errorMsg.textContent = error || 'Invalid email or password. Please try again.';
+                }
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `
+                        <span>Enter Dashboard</span>
+                        <span class="material-symbols-outlined text-base">arrow_forward</span>
+                    `;
+                }
+                return;
+            }
+
+            // Successful authentication -> update header & redirect to role dashboard
+            initHeaderAuthState();
+            const dashboardUrl = getDashboardUrlForRole(user.role);
+            window.location.href = dashboardUrl;
+        } catch (err) {
+            if (errorBanner && errorMsg) {
+                errorBanner.classList.remove('hidden');
+                errorMsg.textContent = err.message || 'An error occurred during sign in. Please try again.';
+            }
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `
+                    <span>Enter Dashboard</span>
+                    <span class="material-symbols-outlined text-base">arrow_forward</span>
+                `;
+            }
+        }
+    };
+
+    // Close modal on Escape key press
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('portal-login-modal');
+            if (modal && !modal.classList.contains('hidden')) {
+                window.closePortalLoginModal();
+            }
+        }
+    });
+
+    // ===== DYNAMIC HEADER AUTH STATE & UNIVERSAL DASHBOARD NAV INJECTION =====
     function initHeaderAuthState() {
         const slots = document.querySelectorAll('#header-auth-slot, .header-auth-slot');
-        if (!slots.length) return;        let session = null;
+        let session = null;
         try {
             const raw = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('dezan_session') : null) || 
                         (typeof localStorage !== 'undefined' ? localStorage.getItem('dezan_session') : null);
@@ -49,32 +326,43 @@ document.addEventListener("DOMContentLoaded", () => {
             session = null;
         }
 
+        const isSubdir = window.location.pathname.includes('/embroidery-digitizing/') || 
+                         window.location.pathname.includes('/vector-art-conversion/') || 
+                         window.location.pathname.includes('/stitch-lab/');
+        const prefix = isSubdir ? '/' : '';
+        const dashboardUrl = session && session.role ? getDashboardUrlForRole(session.role) : (prefix + 'client-portal.html');
+        const tooltip = session && session.role 
+            ? `Return to ${session.role.charAt(0).toUpperCase() + session.role.slice(1)} Dashboard`
+            : 'Sign In to Access Dashboard';
+
         slots.forEach(slot => {
             if (session && session.role) {
-                // Logged in: show previous account_circle icon!
-                let dashboardUrl = 'client-portal.html';
-                if (session.role === 'admin') dashboardUrl = 'admin-portal.html';
-                else if (session.role === 'digitizer') dashboardUrl = 'worker-portal.html';
-
+                // Logged in: show direct Dashboard link + account avatar & dropdown menu
                 slot.innerHTML = `
-                    <div class="relative">
-                        <button id="user-header-btn" class="w-9 h-9 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-slate-800 dark:text-primary hover:bg-primary/30 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer" title="${session.displayName || 'My Account'}">
-                            <span class="material-symbols-outlined text-xl">account_circle</span>
-                        </button>
-                        <div id="user-header-menu" class="hidden absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/20 shadow-xl py-2 z-50 transition-all text-xs">
-                            <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
-                                <p class="font-bold text-slate-900 dark:text-white truncate">${session.displayName || 'User'}</p>
-                                <p class="text-[11px] text-slate-500 truncate">${session.email || ''}</p>
-                                <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-primary/15 text-slate-900 dark:text-primary">${session.role}</span>
-                            </div>
-                            <a href="${dashboardUrl}" class="flex items-center gap-2 px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-primary/10 transition-colors font-semibold">
-                                <span class="material-symbols-outlined text-base">dashboard</span>
-                                <span>Go to Dashboard</span>
-                            </a>
-                            <button id="header-signout-btn" class="w-full flex items-center gap-2 px-4 py-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors font-semibold text-left">
-                                <span class="material-symbols-outlined text-base">logout</span>
-                                <span>Sign Out</span>
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                        <a href="${dashboardUrl}" class="nav-dashboard-link px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 cursor-pointer shadow-xs" title="${tooltip}" aria-label="${tooltip}">
+                            <span class="material-symbols-outlined text-[17px]">dashboard</span>
+                            <span>Dashboard</span>
+                        </a>
+                        <div class="relative">
+                            <button id="user-header-btn" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-slate-800 dark:text-primary hover:bg-primary/30 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer" title="${session.displayName || 'My Account'}" aria-label="User profile and options">
+                                <span class="material-symbols-outlined text-lg sm:text-xl">account_circle</span>
                             </button>
+                            <div id="user-header-menu" class="hidden absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/20 shadow-xl py-2 z-50 transition-all text-xs">
+                                <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
+                                    <p class="font-bold text-slate-900 dark:text-white truncate">${session.displayName || 'User'}</p>
+                                    <p class="text-[11px] text-slate-500 truncate">${session.email || ''}</p>
+                                    <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-primary/15 text-slate-900 dark:text-primary">${session.role}</span>
+                                </div>
+                                <a href="${dashboardUrl}" class="flex items-center gap-2 px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-primary/10 transition-colors font-semibold">
+                                    <span class="material-symbols-outlined text-base">dashboard</span>
+                                    <span>Go to Dashboard</span>
+                                </a>
+                                <button id="header-signout-btn" class="w-full flex items-center gap-2 px-4 py-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors font-semibold text-left cursor-pointer">
+                                    <span class="material-symbols-outlined text-base">logout</span>
+                                    <span>Sign Out</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -96,21 +384,69 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (typeof localStorage !== 'undefined') localStorage.removeItem('dezan_session');
                         initHeaderAuthState();
                         if (window.location.pathname.includes('-portal.html')) {
-                            window.location.href = 'portal-login.html';
+                            window.location.href = prefix + 'portal-login.html';
                         }
                     });
                 } 
             } else {
-                // Logged out: show Login button!
+                // Logged out: replace Login button with Dashboard button!
                 slot.innerHTML = `
-                    <a href="portal-login.html" class="header-login-btn px-3 py-1.5 rounded-lg bg-primary/10 dark:bg-primary/15 hover:bg-primary hover:text-background-dark dark:hover:bg-primary dark:hover:text-background-dark text-primary border border-primary/25 dark:border-primary/30 text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
-                        <span class="material-symbols-outlined text-sm">login</span>
-                        <span>Login</span>
+                    <a href="${prefix}client-portal.html" onclick="window.handleDashboardNavClick(event)" class="nav-dashboard-link px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 cursor-pointer shadow-xs" title="Access Dashboard" aria-label="Access Dashboard">
+                        <span class="material-symbols-outlined text-[17px]">dashboard</span>
+                        <span>Dashboard</span>
                     </a>
                 `;
             }
         });
+
+        // Synchronize and ensure Dashboard navigation option across public navs
+        initUniversalDashboardNav(session);
     }
+
+    function initUniversalDashboardNav(session) {
+        const isSubdir = window.location.pathname.includes('/embroidery-digitizing/') || 
+                         window.location.pathname.includes('/vector-art-conversion/') || 
+                         window.location.pathname.includes('/stitch-lab/');
+        const prefix = isSubdir ? '/' : '';
+        const dashboardUrl = session && session.role ? getDashboardUrlForRole(session.role) : (prefix + 'client-portal.html');
+        const tooltip = session && session.role 
+            ? `Return to ${session.role.charAt(0).toUpperCase() + session.role.slice(1)} Dashboard`
+            : 'Sign In to Access Dashboard';
+
+        // 1. Desktop Navs: Clean up any duplicate .nav-dashboard-link inside middle <nav>
+        // because Dashboard now lives in the primary header action slot (#header-auth-slot) replacing Login
+        document.querySelectorAll('header nav.hidden.md\\:flex .nav-dashboard-link, header nav.md\\:flex .nav-dashboard-link').forEach(link => {
+            link.remove();
+        });
+
+        // 2. Mobile Header: Clean up any duplicate .nav-dashboard-mobile-btn
+        // because #header-auth-slot is already rendered and visible on all viewports (mobile, tablet, desktop)
+        document.querySelectorAll('.nav-dashboard-mobile-btn').forEach(btn => {
+            btn.remove();
+        });
+
+        // 3. Mobile Bottom Nav: Ensure Dashboard button is present for mobile ergonomics
+        document.querySelectorAll('nav.md\\:hidden.fixed.bottom-0').forEach(bottomNav => {
+            const container = bottomNav.querySelector('.flex.justify-around, .flex.justify-between');
+            if (container) {
+                let dashItem = container.querySelector('.bottom-nav-dashboard');
+                if (!dashItem) {
+                    dashItem = document.createElement('a');
+                    dashItem.className = 'bottom-nav-dashboard flex flex-col items-center gap-0.5 text-primary min-w-[50px] cursor-pointer transition-colors';
+                    dashItem.innerHTML = `
+                        <span class="material-symbols-outlined text-xl">dashboard</span>
+                        <span class="text-[10px] font-bold">Dashboard</span>
+                    `;
+                    container.appendChild(dashItem);
+                }
+                dashItem.href = dashboardUrl;
+                dashItem.onclick = (e) => window.handleDashboardNavClick(e);
+                dashItem.title = tooltip;
+            }
+        });
+    }
+    window.initUniversalDashboardNav = initUniversalDashboardNav;
+    window.initHeaderAuthState = initHeaderAuthState;
 
     // Close user dropdown when clicking outside
     document.addEventListener('click', (e) => {
@@ -798,6 +1134,39 @@ function initSuccessPage() {
         if (loggedInCard) loggedInCard.classList.add("hidden");
         if (claimEmailInput) claimEmailInput.value = email;
     }
+
+    // ===================================================================
+    //  GOOGLE TAG MANAGER & GOOGLE ADS CONVERSION TRACKING
+    // ===================================================================
+    function fireOrderConfirmationTracking() {
+        if (!window.dezanTracker) return;
+        if (isQuote) {
+            window.dezanTracker.trackQuoteLead({
+                quoteId: orderId,
+                email: email,
+                service: service,
+                project: project
+            });
+        } else {
+            window.dezanTracker.trackOrderPurchase({
+                orderId: orderId,
+                txnId: txnId,
+                amount: amount,
+                service: service,
+                plan: plan,
+                project: project,
+                email: email
+            });
+        }
+    }
+
+    if (window.dezanTracker) {
+        fireOrderConfirmationTracking();
+    } else {
+        // Fallback if tracker script is still loading
+        window.addEventListener('DOMContentLoaded', fireOrderConfirmationTracking);
+        setTimeout(fireOrderConfirmationTracking, 300);
+    }
 }
 
 window.submitGuestAccountClaim = async function() {
@@ -1439,12 +1808,14 @@ function initInteractiveElements() {
     }
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
-            injectScript('js/cookie-consent.js');
-            injectScript('js/analytics.js');
+            injectScript('/js/tracking-config.js');
+            injectScript('/js/cookie-consent.js');
+            injectScript('/js/analytics.js');
         });
     } else {
-        injectScript('js/cookie-consent.js');
-        injectScript('js/analytics.js');
+        injectScript('/js/tracking-config.js');
+        injectScript('/js/cookie-consent.js');
+        injectScript('/js/analytics.js');
     }
 })();
 

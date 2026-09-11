@@ -290,6 +290,25 @@
             </div>
         </div>
 
+        <!-- Real-Time Notification Alert Banner (Dynamic) -->
+        <div id="digitizer-live-alert-banner" class="hidden mb-6 p-4 rounded-2xl bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 border-2 border-amber-400 flex items-center justify-between gap-3 animate-pulse">
+            <div class="flex items-center gap-3 min-w-0">
+                <span class="w-10 h-10 rounded-xl bg-slate-950 text-amber-400 flex items-center justify-center shrink-0 font-black">
+                    <span class="material-symbols-outlined text-xl">notifications_active</span>
+                </span>
+                <div class="min-w-0">
+                    <strong id="live-alert-title" class="text-sm font-black block tracking-tight">🔔 New Order Assigned — ORD-0000</strong>
+                    <span id="live-alert-msg" class="text-xs font-bold text-slate-900/90 block truncate">New technical work order has arrived in your studio queue.</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <button type="button" id="live-alert-action-btn" class="px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-900 text-white font-black text-xs cursor-pointer transition-transform hover:scale-105 shadow-xs">View Order</button>
+                <button type="button" onclick="dismissLiveAlertBanner()" class="p-1 rounded-lg hover:bg-amber-600/30 text-slate-950 cursor-pointer">
+                    <span class="material-symbols-outlined text-base">close</span>
+                </button>
+            </div>
+        </div>
+
         <!-- ===== STAGE SECTIONS FLOW (Dedicated Cards with 28px Breathing Room) ===== -->
         <div class="stage-sections-flow" id="worker-stage-sections-flow">
 
@@ -571,6 +590,10 @@
                     <span>Print Technical Sheet</span>
                 </button>
                 <div class="flex items-center gap-2">
+                    <button type="button" id="modal-details-start-btn" class="hidden px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs shadow-md shadow-blue-500/25 flex items-center gap-2 transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-sm">play_arrow</span>
+                        <span>▶️ Start Order</span>
+                    </button>
                     <button type="button" id="modal-details-attach-btn" onclick="openDeliverableUploadFromModal()" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs shadow-md shadow-primary/20 flex items-center gap-1.5 transition-all cursor-pointer">
                         <span class="material-symbols-outlined text-sm">upload_file</span>
                         <span>Attach Deliverables</span>
@@ -922,13 +945,38 @@
 
                 if (type === 'order_assigned') {
                     if (currentUser && (!payload.digitizerId || payload.digitizerId === currentUser.id)) {
-                        window.insforgeClient.showToast(
-                            'New Task Assigned!',
-                            `Order ${payload.orderNumber} was added to your production queue.`,
-                            'assignment_ind',
-                            'success'
+                        const orderNum = payload.orderNumber || (payload.task && payload.task.order_number) || 'ORD-NEW';
+                        const projName = (payload.task && (payload.task.project_name || payload.task.projectName)) || 'Custom Embroidery';
+
+                        // Show dynamic live alert banner at top of portal
+                        showLiveAlertBanner(
+                            orderNum,
+                            `🔔 New Order Assigned — #${orderNum}`,
+                            `Project "${projName}" has arrived in your New Orders queue.`
                         );
+
+                        // Play single subtle Web Audio chime sound
+                        if (typeof window.insforgeClient?.playNotificationChime === 'function') {
+                            window.insforgeClient.playNotificationChime();
+                        }
+
+                        // Trigger native browser notification if granted
+                        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+                            try {
+                                const browserNotif = new Notification(`New Order Assigned — #${orderNum}`, {
+                                    body: `Project: ${projName}. Tap to review technical specs.`,
+                                    icon: 'logo.png'
+                                });
+                                browserNotif.onclick = () => {
+                                    window.focus();
+                                    dismissLiveAlertBanner();
+                                    openTaskDetailsModal(orderNum);
+                                };
+                            } catch (e) {}
+                        }
                     }
+                    await renderWorkerTasks();
+                } else if (type === 'task_viewed' || type === 'task_started' || type === 'order_started') {
                     await renderWorkerTasks();
                 } else if (type === 'order_revision_requested') {
                     window.insforgeClient.showToast(
@@ -943,6 +991,29 @@
                 }
             });
         });
+
+        // Live Real-Time Banner Helpers
+        function showLiveAlertBanner(orderNumber, title, message) {
+            const banner = document.getElementById('digitizer-live-alert-banner');
+            const titleEl = document.getElementById('live-alert-title');
+            const msgEl = document.getElementById('live-alert-msg');
+            const btn = document.getElementById('live-alert-action-btn');
+            if (banner && titleEl && msgEl && btn) {
+                titleEl.textContent = title;
+                msgEl.textContent = message;
+                btn.onclick = () => {
+                    dismissLiveAlertBanner();
+                    openTaskDetailsModal(orderNumber);
+                };
+                banner.classList.remove('hidden');
+            }
+        }
+        function dismissLiveAlertBanner() {
+            const banner = document.getElementById('digitizer-live-alert-banner');
+            if (banner) banner.classList.add('hidden');
+        }
+        window.showLiveAlertBanner = showLiveAlertBanner;
+        window.dismissLiveAlertBanner = dismissLiveAlertBanner;
 
         // Navigation scroll helpers
         function scrollToTop() {
@@ -1065,9 +1136,9 @@
             }
 
             // Categorize into the 4 stages
-            const newTasks = allWorkerTasks.filter(t => t.status === 'pending' || t.status === 'assigned' || t.status === 'pending_review');
+            const newTasks = allWorkerTasks.filter(t => t.status === 'assigned' || t.status === 'pending' || t.status === 'pending_review' || t.status === 'new');
             const revisionTasks = allWorkerTasks.filter(t => t.status === 'revision_requested');
-            const productionTasks = allWorkerTasks.filter(t => t.status === 'in_progress' || (t.status !== 'completed' && t.status !== 'revision_requested' && t.status !== 'pending' && t.status !== 'assigned' && t.status !== 'pending_review'));
+            const productionTasks = allWorkerTasks.filter(t => t.status === 'in_progress');
             const completedTasks = allWorkerTasks.filter(t => t.status === 'completed');
 
             // Update Metrics Cards
@@ -1171,16 +1242,16 @@
         window.setDigitizerLayout = setDigitizerLayout;
 
         function formatTimeAgo(isoString) {
-            if (!isoString) return 'Recent';
+            if (!isoString) return 'just now';
             const date = new Date(isoString);
             const diffMs = Date.now() - date.getTime();
             const diffMins = Math.floor(diffMs / 60000);
-            if (diffMins < 1) return 'Just now';
-            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffMins < 1) return 'just now';
+            if (diffMins < 60) return `${diffMins} min ago`;
             const diffHours = Math.floor(diffMins / 60);
-            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffHours < 24) return `${diffHours} hr${diffHours > 1 ? 's' : ''} ago`;
             const diffDays = Math.floor(diffHours / 24);
-            return `${diffDays}d ago`;
+            return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
         }
 
         /**
@@ -1218,9 +1289,9 @@
             const tComp = document.getElementById('worker-completed-tbody');
 
             // Categorize into 4 mutually exclusive digitizer stages (STRICTLY NO quotes)
-            const newTasks = tasks.filter(t => t.status === 'pending' || t.status === 'assigned' || t.status === 'pending_review');
+            const newTasks = tasks.filter(t => t.status === 'assigned' || t.status === 'pending' || t.status === 'pending_review' || t.status === 'new');
             const revisionTasks = tasks.filter(t => t.status === 'revision_requested');
-            const productionTasks = tasks.filter(t => t.status === 'in_progress' || (t.status !== 'completed' && t.status !== 'revision_requested' && t.status !== 'pending' && t.status !== 'assigned' && t.status !== 'pending_review'));
+            const productionTasks = tasks.filter(t => t.status === 'in_progress');
             const completedTasks = tasks.filter(t => t.status === 'completed');
 
             // Update badge counts with filtered counts
@@ -1567,6 +1638,10 @@
             const orderNum = task.orderNumber || task.order_number || 'ORD-8492';
             const safeOrderNumber = String(orderNum).replace(/-/g, '&#8209;');
 
+            const isNewOrder = !isCompleted && !isRevision && task.status !== 'in_progress';
+            const isUnread = isNewOrder && (task.is_unread === true || task.isUnread === true || (!task.digitizer_viewed_at && !task.viewed_at));
+            const assignedTimeAgo = formatTimeAgo(task.assigned_at || task.assignedAt || task.created_at);
+
             // Stage color classes (distinct 2px border with respective color theme)
             let cardThemeClass = 'border-2 border-amber-500/85 dark:border-primary/85 shadow-xs ring-1 ring-amber-500/20 hover:border-amber-600 dark:hover:border-primary';
             let orderIdClass = 'bg-amber-100 dark:bg-primary/15 text-amber-900 dark:text-primary border-amber-300 dark:border-primary/30';
@@ -1582,6 +1657,16 @@
             } else if (task.status === 'in_progress') {
                 cardThemeClass = 'border-2 border-blue-500/85 dark:border-blue-400/80 shadow-xs ring-1 ring-blue-500/20 hover:border-blue-600';
                 orderIdClass = 'bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border-blue-200 dark:border-blue-700/40';
+            } else if (isNewOrder) {
+                if (isUnread) {
+                    cardThemeClass = 'border-2 border-amber-500 shadow-md shadow-amber-500/15 ring-2 ring-amber-400/40 hover:border-amber-600';
+                    orderIdClass = 'bg-amber-100 dark:bg-primary/25 text-amber-950 dark:text-primary border-amber-300 dark:border-primary/40 font-black';
+                    cardBgClass = 'bg-amber-50/50 dark:bg-amber-950/25';
+                } else {
+                    cardThemeClass = 'border-2 border-amber-500/75 dark:border-primary/70 shadow-xs ring-1 ring-amber-500/20 hover:border-amber-600 dark:hover:border-primary';
+                    orderIdClass = 'bg-amber-100 dark:bg-primary/15 text-amber-900 dark:text-primary border-amber-300 dark:border-primary/30';
+                    cardBgClass = 'bg-white dark:bg-card-dark';
+                }
             }
 
             // Badges
@@ -1597,7 +1682,7 @@
             } else if (task.status === 'in_progress') {
                 statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700/40 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Production</span>';
             } else {
-                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> New Order</span>';
+                statusBadge = '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500 text-slate-950 border border-amber-400 text-xs font-black tracking-wide whitespace-nowrap shadow-2xs">🟡 NEW ORDER</span>';
             }
 
             // Date and Time
@@ -1686,24 +1771,33 @@
             const deliverables = task.deliverables || [];
 
             return `
-                <div id="digitizer-card-${orderNum}" class="digitizer-bento-card p-4 sm:p-5 rounded-2xl ${cardBgClass} ${cardThemeClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
+                <div id="digitizer-card-${orderNum}" data-order-card="${orderNum}" class="digitizer-bento-card p-4 sm:p-5 rounded-2xl ${cardBgClass} ${cardThemeClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
                     <div>
                         <!-- Header Bar: ID, Date & Time, Badges -->
                         <div class="flex items-start justify-between gap-2 mb-2">
                             <div>
-                                <span class="px-2.5 py-1 rounded-lg border font-mono text-xs font-black ${orderIdClass} tracking-wide whitespace-nowrap select-all inline-block">#${safeOrderNumber}</span>
-                                <div class="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium mt-1 leading-tight flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[11px] text-slate-400 dark:text-slate-500">schedule</span>
-                                    <span>${orderDt.date}</span>
-                                    <span class="text-slate-300 dark:text-slate-600">·</span>
-                                    <span class="font-bold text-slate-700 dark:text-slate-300">${orderDt.time}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2.5 py-1 rounded-lg border font-mono text-xs font-black ${orderIdClass} tracking-wide whitespace-nowrap select-all inline-block">#${safeOrderNumber}</span>
+                                    ${isUnread ? '<span class="unread-dot w-2.5 h-2.5 rounded-full bg-amber-500 ring-4 ring-amber-400/40 animate-pulse shrink-0 inline-block" title="Unread new order"></span>' : ''}
                                 </div>
                                 ${isRevision ? `
                                     <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-100 dark:bg-purple-950/60 border border-purple-300/80 dark:border-purple-700/60 text-purple-950 dark:text-purple-200 text-xs font-bold mt-1.5 shadow-2xs">
                                         <span class="material-symbols-outlined text-xs text-purple-600 dark:text-purple-400">schedule</span>
                                         <span>Revision requested: <strong class="font-black text-purple-900 dark:text-purple-100">${escapeHtml(revWaitTime)}</strong></span>
                                     </div>
-                                ` : ''}
+                                ` : isNewOrder ? `
+                                    <div class="text-[10.5px] font-bold text-amber-800 dark:text-amber-300 mt-1 leading-tight flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[12px] text-amber-600 dark:text-primary">schedule</span>
+                                        <span>Assigned ${assignedTimeAgo}</span>
+                                    </div>
+                                ` : `
+                                    <div class="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium mt-1 leading-tight flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[11px] text-slate-400 dark:text-slate-500">schedule</span>
+                                        <span>${orderDt.date}</span>
+                                        <span class="text-slate-300 dark:text-slate-600">·</span>
+                                        <span class="font-bold text-slate-700 dark:text-slate-300">${orderDt.time}</span>
+                                    </div>
+                                `}
                             </div>
                             <div class="flex flex-col items-end gap-1">
                                 ${statusBadge}
@@ -1882,10 +1976,18 @@
                                 <span class="material-symbols-outlined text-xs">arrow_forward</span>
                             </button>
                         ` : `
-                            <button type="button" onclick="openTaskDetailsModal('${orderNum}')" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors" title="Open full dedicated work order">
-                                <span>View Order</span>
-                                <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">arrow_forward</span>
-                            </button>
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" onclick="openTaskDetailsModal('${orderNum}')" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors" title="Open full dedicated work order">
+                                    <span>View Order</span>
+                                    <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">arrow_forward</span>
+                                </button>
+                                ${isNewOrder ? `
+                                    <button type="button" onclick="startDigitizerOrder('${orderNum}')" class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs inline-flex items-center gap-1 shadow-xs transition-all hover:scale-[1.02] cursor-pointer" title="Start production on this order">
+                                        <span class="material-symbols-outlined text-xs">play_arrow</span>
+                                        <span>Start</span>
+                                    </button>
+                                ` : ''}
+                            </div>
                         `}
                         <div>
                             ${!isCompleted ? `
@@ -1911,6 +2013,9 @@
         function renderDigitizerOrderTableRow(task, isCompleted) {
             const isRevision = task.status === 'revision_requested' || !!task.revision_notes || !!task.revisionNotes;
             const isRush = task.isRush || task.turnaround_speed === 'rush' || task.priority === 'rush';
+            const isNewOrder = !isCompleted && !isRevision && (task.status === 'assigned' || (!task.started_at && task.status !== 'in_progress'));
+            const isUnread = !!task.is_unread || (!task.digitizer_viewed_at && isNewOrder);
+            const assignedTimeAgo = formatTimeAgo(task.assigned_at || task.created_at);
             const safeOrderNumber = String(task.orderNumber || '').replace(/-/g, '&#8209;');
             const revWaitTime = isRevision ? getRevisionWaitingTime(task) : '';
 
@@ -1939,9 +2044,9 @@
             } else if (isRevision) {
                 statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-600 text-white text-[10.5px] font-black whitespace-nowrap shadow-2xs"><span>↻</span> REVISION · PRIORITY</span>';
             } else if (task.status === 'in_progress') {
-                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700/40 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Prod</span>';
+                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700/40 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Production</span>';
             } else {
-                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> New</span>';
+                statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 border border-amber-400 text-[11px] font-black whitespace-nowrap shadow-2xs">🟡 NEW ORDER</span>';
             }
 
             // Requested Formats
@@ -1956,15 +2061,23 @@
             const designTitle = task.designName || task.design_name || task.placement || 'Custom Embroidery';
 
             return `
-                <tr class="transition-colors ${rowBorderClass}">
+                <tr data-order-row="${task.orderNumber}" class="transition-colors ${rowBorderClass}">
                     <!-- 1. Order #, Date & Time -->
                     <td class="px-4 py-3.5 whitespace-nowrap font-mono font-bold w-[145px] min-w-[145px]">
-                        <span class="inline-block whitespace-nowrap select-all font-mono font-black ${orderIdClass}">#${safeOrderNumber}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="inline-block whitespace-nowrap select-all font-mono font-black ${orderIdClass}">#${safeOrderNumber}</span>
+                            ${isUnread ? '<span class="unread-dot w-2 h-2 rounded-full bg-amber-500 ring-2 ring-amber-400/50 animate-pulse shrink-0 inline-block" title="Unread new order"></span>' : ''}
+                        </div>
                         ${isRevision ? `
                             <div class="text-[9.5px] font-black uppercase text-purple-700 dark:text-purple-400 mt-0.5 flex items-center gap-1">
                                 <span>↻</span> <span>REVISION · PRIORITY</span>
                             </div>
                             <div class="text-[9.5px] text-purple-600 dark:text-purple-400 font-medium">Req: ${escapeHtml(revWaitTime)}</div>
+                        ` : isNewOrder ? `
+                            <div class="text-[10px] text-amber-700 dark:text-amber-300 font-sans font-bold mt-0.5 leading-tight flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[11px] text-amber-600 dark:text-primary">schedule</span>
+                                <span>Assigned ${assignedTimeAgo}</span>
+                            </div>
                         ` : `
                             <div class="text-[10px] text-slate-500 dark:text-slate-400 font-sans font-medium mt-0.5 leading-tight flex items-center gap-1">
                                 <span>${orderDt.date}</span>
@@ -2028,6 +2141,12 @@
                                     <span class="hidden xl:inline">Details</span>
                                 </button>
                             `}
+                            ${isNewOrder ? `
+                                <button type="button" onclick="startDigitizerOrder('${task.orderNumber}')" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-black inline-flex items-center gap-1 cursor-pointer shadow-xs transition-transform hover:scale-[1.02]" title="Start production on this order">
+                                    <span class="material-symbols-outlined text-xs">play_arrow</span>
+                                    <span>Start</span>
+                                </button>
+                            ` : ''}
                             ${!isCompleted ? `
                                 <button type="button" onclick="openDeliverableUploadModal('${task.orderNumber}')" class="px-2.5 py-1 rounded-lg bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 cursor-pointer shadow-xs transition-transform hover:scale-[1.02]" title="Upload production deliverables">
                                     <span class="material-symbols-outlined text-xs">cloud_upload</span>
@@ -2341,6 +2460,30 @@
             const task = allWorkerTasks.find(t => t.orderNumber === orderNumber);
             if (!task) return;
 
+            // When the digitizer opens "View Order", remove the unread dot and record viewed timestamp
+            // However, the order should still remain New / Not Started. Opening an order should NOT automatically start production.
+            if (task.is_unread || !task.digitizer_viewed_at) {
+                task.is_unread = false;
+                task.digitizer_viewed_at = new Date().toISOString();
+
+                if (window.insforgeClient && typeof window.insforgeClient.markDigitizerTaskViewed === 'function') {
+                    window.insforgeClient.markDigitizerTaskViewed(orderNumber).catch(err => console.warn('Could not mark task viewed:', err));
+                }
+
+                // Immediately clear unread UI indicators from card/row without needing full reload
+                const cardEl = document.querySelector(`[data-order-card="${orderNumber}"]`);
+                if (cardEl) {
+                    cardEl.classList.remove('ring-2', 'ring-amber-400/40', 'border-amber-500');
+                    const dot = cardEl.querySelector('.unread-dot');
+                    if (dot) dot.remove();
+                }
+                const rowEl = document.querySelector(`[data-order-row="${orderNumber}"]`);
+                if (rowEl) {
+                    const dot = rowEl.querySelector('.unread-dot');
+                    if (dot) dot.remove();
+                }
+            }
+
             document.getElementById('modal-order-number').textContent = `#${task.orderNumber}`;
             document.getElementById('modal-task-id').textContent = task.taskId || 'TSK-ACTIVE';
             document.getElementById('modal-placement').textContent = task.placement || 'Left Chest';
@@ -2373,12 +2516,32 @@
             }
 
             const statusEl = document.getElementById('modal-status-badge');
+            const isNewOrder = !task.started_at && task.status !== 'completed' && task.status !== 'in_progress';
             if (task.status === 'completed') {
                 statusEl.innerHTML = '<span class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-400 font-bold text-xs border border-emerald-200 dark:border-emerald-500/30">Completed</span>';
-            } else if (task.status === 'revision_requested') {
-                statusEl.innerHTML = '<span class="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 font-bold text-xs border border-amber-300 dark:border-amber-500/40 animate-pulse">Revision Requested</span>';
+            } else if (task.status === 'revision_requested' || task.revision_notes) {
+                statusEl.innerHTML = '<span class="px-2.5 py-1 rounded-full bg-purple-600 text-white font-black text-xs border border-purple-500 shadow-xs">↻ REVISION · PRIORITY</span>';
+            } else if (task.status === 'in_progress') {
+                statusEl.innerHTML = '<span class="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 font-bold text-xs border border-blue-200 dark:border-blue-700/40 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Production</span>';
             } else {
-                statusEl.innerHTML = '<span class="px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-500/20 text-amber-900 dark:text-amber-400 font-bold text-xs border border-amber-200 dark:border-amber-500/30">In Progress</span>';
+                statusEl.innerHTML = '<span class="px-3 py-1 rounded-full bg-amber-500 text-slate-950 font-black text-xs border border-amber-400 shadow-xs">🟡 NEW ORDER · Not Started</span>';
+            }
+
+            // Configure modal start order button:
+            // Inside the order, add one obvious button: ▶️ Start Order
+            const startBtn = document.getElementById('modal-details-start-btn');
+            if (startBtn) {
+                if (isNewOrder || task.status === 'assigned') {
+                    startBtn.classList.remove('hidden');
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = `
+                        <span class="material-symbols-outlined text-sm">play_arrow</span>
+                        <span>▶️ Start Order</span>
+                    `;
+                    startBtn.onclick = () => startDigitizerOrder(orderNumber);
+                } else {
+                    startBtn.classList.add('hidden');
+                }
             }
 
             // Populate Artwork List in modal
@@ -2480,6 +2643,48 @@
 
             document.getElementById('task-details-modal').classList.remove('hidden');
         }
+
+        async function startDigitizerOrder(orderNumber) {
+            const task = allWorkerTasks.find(t => t.orderNumber === orderNumber);
+            const startBtn = document.getElementById('modal-details-start-btn');
+            if (startBtn) {
+                startBtn.disabled = true;
+                startBtn.innerHTML = `
+                    <span class="material-symbols-outlined animate-spin text-sm">sync</span>
+                    <span>Starting Production...</span>
+                `;
+            }
+            try {
+                if (window.insforgeClient && typeof window.insforgeClient.startDigitizerTask === 'function') {
+                    await window.insforgeClient.startDigitizerTask(orderNumber);
+                }
+                if (task) {
+                    task.status = 'in_progress';
+                    task.started_at = new Date().toISOString();
+                }
+                closeTaskDetailsModal();
+                await renderWorkerTasks();
+                if (window.insforgeClient && typeof window.insforgeClient.showToast === 'function') {
+                    window.insforgeClient.showToast(
+                        'Order In Production',
+                        `Order #${orderNumber} is now in production! Active timer started.`,
+                        'play_circle',
+                        'info'
+                    );
+                }
+            } catch (err) {
+                console.error('Failed to start digitizer order:', err);
+                alert('Could not start order: ' + err.message);
+                if (startBtn) {
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = `
+                        <span class="material-symbols-outlined text-sm">play_arrow</span>
+                        <span>▶️ Start Order</span>
+                    `;
+                }
+            }
+        }
+        window.startDigitizerOrder = startDigitizerOrder;
 
         function closeTaskDetailsModal() {
             const modal = document.getElementById('task-details-modal');

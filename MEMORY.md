@@ -155,8 +155,70 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
      - Scaled subtitle copy to `text-[11px] sm:text-xs` and file type badges to `text-[10.5px] px-2.5 py-0.5`.
      - Compacted outer container spacing from `p-4 sm:p-6 space-y-3.5` to `p-3 sm:p-4 space-y-2 sm:space-y-2.5`.
   3. **Zero-Scroll Viewport Parity**:
-     - All 3 service options (*Embroidery Digitizing*, *Realistic / Pet Portrait Digitizing*, and *Vector Art Conversion*) sit comfortably inside the viewport simultaneously on desktop, tablet, and mobile (390px) with zero vertical scrolling needed.
-     - Changes synchronized across both public modal (`js/order-quote-modal.js`) and embedded client portal order flow (`client-portal.html`). Verified via automated Playwright visual screenshots.
+      - All 3 service options (*Embroidery Digitizing*, *Realistic / Pet Portrait Digitizing*, and *Vector Art Conversion*) sit comfortably inside the viewport simultaneously on desktop, tablet, and mobile (390px) with zero vertical scrolling needed.
+      - Changes synchronized across both public modal (`js/order-quote-modal.js`) and embedded client portal order flow (`client-portal.html`). Verified via automated Playwright visual screenshots.
+
+### 4.7 Digitizer Portal Order Workflow & Admin Real-Time Tracking Lifecycle
+- **Problem**:
+  - Previously, assigning an order to a digitizer immediately moved it to "In Production" status, artificially inflating active production metrics and obscuring whether the digitizer had actually seen the order or begun work.
+  - Digitizers lacked a distinction between newly assigned work (which could be unread) and work actively on their embroidery machine/software.
+  - Digitizers lacked a dedicated "Start Order" control to trigger real-time timers and notify administrators of production kickoff.
+  - Administrators could not tell if an assigned digitizer had seen the order or when they actually started production.
+- **Workflow State Machine & Architecture**:
+  1. **Admin Assigns Order (`🟡 NEW ORDER`)**:
+     - Order status is set to `assigned` (`status = 'assigned'`).
+     - Digitizer task created with `is_unread = true`, `digitizer_viewed_at = null`, `started_at = null`.
+     - In Digitizer Portal (`worker-portal.html` & `worker-tasks.html`): Order routes to the **New Orders** section/filter with pulsating amber unread dot (`w-2 h-2 rounded-full bg-amber-500 animate-pulse`), gold `🟡 NEW ORDER` badge, highlighted card ring/background (`border-amber-500/80 bg-amber-500/5`), relative arrival timestamp (`Assigned 4 min ago`), and increments the New Orders counter (`New Orders (3)`).
+     - Does **NOT** automatically move to "In Production".
+  2. **Digitizer Opens Order ("View Order")**:
+     - Opening the order details modal triggers `markDigitizerTaskViewed(orderNumber)` (via `POST /api/tasks/:id/view`).
+     - Removes unread dot from DOM immediately; sets `is_unread = false` and records `digitizer_viewed_at = NOW()`.
+     - Order status **strictly remains `assigned` (`New / Not Started`)** — opening an order does NOT start production.
+     - Modal displays a prominent `▶️ Start Order` button alongside specs, notes, and artwork.
+  3. **Digitizer Starts Production ("▶️ Start Order")**:
+     - Digitizer clicks `▶️ Start Order` inside modal (or quick-start button on card).
+     - Triggers `startDigitizerTask(orderNumber)` (via `POST /api/tasks/:id/start`).
+     - Status transitions to `🔵 IN PRODUCTION` (`in_progress`), records `started_at = NOW()`.
+     - Order moves from New Orders tab to **In Production** tab, starting the active production stopwatch/timer.
+  4. **Admin Real-Time Visibility (`admin-orders.html` & `admin-workspace.js`)**:
+     - Stage 1 ("New Orders") keeps orders in Stage 1 when `status === 'assigned'` (awaiting digitizer start).
+     - Stage 4 ("In Production") strictly requires `status === 'in_progress'` or `status === 'in_production'`.
+     - Real-time worker status display:
+       - **Unviewed**: `<span class="text-amber-700 font-bold">● Not Viewed Yet</span>`
+       - **Viewed**: `<span class="text-slate-600 font-bold">👁 Seen 3 min ago</span>`
+       - **In Production**: `<span class="text-blue-700 font-bold">● In Production · Started 2:46 PM</span>`
+     - Displayed across Bento Cards, Table Rows, and the Admin Order Details Modal.
+  5. **Real-Time Audio, Native Push & Event Synchronization**:
+     - `playOrderChime()` plays an executive, multi-frequency chime on assignment and status changes.
+     - `showNativeNotification()` sends an OS desktop notification with click-to-focus window functionality.
+     - `#digitizer-live-alert-banner` slides down at the top of the Digitizer Portal for instant visual feedback.
+     - Realtime event channels broadcast `order_assigned`, `task_viewed`, `task_started`, and `order_started` for zero-reload live updates across both Admin and Digitizer portals.
+
+### 4.8 Universal Navigation Dashboard & Header Login Replacement
+- **Problem & Requirement**:
+  - Visitors and registered users needed an unmistakable, permanent entry to their dashboard in the main website navigation without confusing multi-role links ("Client Portal", "Digitizer Portal", "Admin Portal").
+  - The legacy "Login" button on the far right of the header (`#header-auth-slot`) was replaced directly with the universal **[ Dashboard ]** button (`[ Dashboard icon + Dashboard ]`).
+  - Middle navigation (`Home`, `Services`, `Feedbacks`, `Pricing`, `About`, `Contact`) remains clean, spacious, and uncluttered without redundant dashboard links.
+  - Logged-out visitors clicking Dashboard open an in-place sign-in modal on the current page, and upon authentication automatically redirect to their account role's workspace (Client $\rightarrow$ `client-portal.html`, Digitizer $\rightarrow$ `worker-portal.html`, Admin $\rightarrow$ `admin-portal.html`), preserving their current page if cancelled or if login fails.
+  - Logged-in users clicking Dashboard immediately route to their correct role workspace without intermediate clicks or friction, with their user avatar dropdown menu displayed alongside the Dashboard button in the header action slot.
+  - Dashboard button is styled with subtle gold outline/background pill styling matching the Dezan theme (`[ Dashboard icon + Dashboard ]`), accessible on desktop, tablet, mobile header, and mobile bottom nav, remaining permanently available across all pages.
+- **Architecture & Implementation**:
+  1. **Visual Design & Token System (`styles.css`)**:
+     - `.nav-dashboard-link`: Styled as a subtle gold pill (`rgba(212, 175, 53, 0.10)` background, `1px solid rgba(212, 175, 53, 0.32)` border, `font-extrabold`, dark mode `rgba(212, 175, 53, 0.14)` / `0.38` border), featuring a Material Symbols `dashboard` icon and clean hover transform (`translateY(-1px)`, gold background `#d4af35`, dark text `#16140c`, soft glow shadow). Scaled responsively for mobile (`12px`, `padding: 5px 10px`), tablet (`12.5px`, `padding: 6px 11px`), and desktop (`13.5px`, `padding: 7px 15px`).
+     - `.bottom-nav-dashboard`: Integrated into the mobile fixed bottom nav bar (`flex flex-col items-center min-w-[50px] text-primary`).
+  2. **Core Navigation Engine & Role Router (`app.js`)**:
+     - `getDashboardUrlForRole(role)`: Intelligently resolves the target dashboard URL (`client-portal.html`, `worker-portal.html`, `admin-portal.html`) while factoring in root/subfolder URL paths (`/embroidery-digitizing/`, `/stitch-lab/`, etc.).
+     - `window.handleDashboardNavClick(event)`: Checks active session (`dezan_session` in `localStorage`/`sessionStorage`). If authenticated, routes immediately to `getDashboardUrlForRole(session.role)`. If logged out, triggers `openPortalLoginModal('dashboard')`.
+  3. **In-Place Portal Sign-In Modal (`#portal-login-modal`)**:
+     - Dynamically generated with WCAG accessibility attributes (`role="dialog"`, `aria-modal="true"`, `aria-labelledby="modal-login-title"`).
+     - Provides email/password inputs, show/hide password toggle, autofocus on open, submit progress state, Google/full portal sign-in link (`portal-login.html?redirect=dashboard`), and create account link.
+     - Closes on backdrop click or `Escape` key press, leaving the visitor on their current page.
+     - `handleModalLoginSubmit(e)`: Calls `window.insforgeClient.signIn(email, password)`. On error, shows inline banner (`#modal-login-error-banner`) without navigating away. On success, updates navigation auth state and redirects directly to role dashboard.
+  4. **Dynamic Header & Bottom Bar Synchronization**:
+     - `initHeaderAuthState()`: Dynamically renders the gold `.nav-dashboard-link` in `#header-auth-slot` when logged out, and renders both the `.nav-dashboard-link` and the user avatar dropdown menu (`#user-header-btn` + `#user-header-menu`) when logged in.
+     - `initUniversalDashboardNav(session)`: Cleans up any duplicate `.nav-dashboard-link` from middle `<nav>` or `.nav-dashboard-mobile-btn`, and synchronizes `.bottom-nav-dashboard` on script load, DOM ready, and storage change events across all browser tabs.
+  5. **Static HTML Pre-Rendering Across Public Pages**:
+     - All primary public pages (`index.html`, `services.html`, `portfolio.html`, `pricing.html`, `about.html`, `contact.html`, `embroidery-digitizing.html`, `vector-art-conversion.html`, `terms.html`, `privacy.html`, `track-order.html`, `order-success.html`, `404.html`, `stitch-lab/index.html`, etc.) updated with static elements in `#header-auth-slot` to ensure zero CLS (Cumulative Layout Shift) before JavaScript execution.
 
 ---
 
@@ -165,10 +227,55 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 ### Public Marketing Pages
 - `/index.html`: Home page (Title: `Embroidery Digitizing Services | Dezan Digitizing®️`; Hero with Before/After Comparison Slider: zero bounding box or card border around the astronaut patch, allowing the slider divider line to sweep end-to-end across the full artwork; on mobile view, astronaut slider is calibrated to `max-w-[285px]` (~14% reduction) leaving optimal space for the text block; DEZAN brand eyebrow shifted upward; 2-line headline `Professional Embroidery Digitizing` & `and Vector Art Services` enlarged by 12-15% (`text-[19.5px]` on mobile) strictly on two non-wrapping lines; value proposition `Production-ready embroidery files at just $15.` increased by 8-10% (`text-[13.5px]`) with clean unadorned typography (no underlines) and prominent ultra-bold gold emphasis on `just $15.` (`font-black`); supporting copy `Fast turnaround | Premium quality` maintained as compact secondary text; bespoke 3-button horizontal row matching reference design: 1. Solid Gold Primary `Order Now` + `Flat Rates` with shopping bag icon badge, 2. Soft-tinted `View Pricing` with tag icon badge, 3. Soft-tinted `Get Quote` with document icon badge; Live Feedback Carousel; Trust reviews; Portfolio section (`#portfolio`) sequence: 1. Custom Hats (`images/Custom Hats.png`), 2. Jacket Backs (`images/Jacket Backs.png`), 3. Left Chest (`images/Left Chest Logos.png` - updated St. Patrick's parade jackets photo), 4. Pet Portraits (`images/Pet Embroidery.png`); the dedicated **"Why Choose Dezan Digitizing?"** section highlighting manual craftsmanship, production-ready stitch files, fast turnaround, and free revisions with 4 How-It-Works styled circular icon feature cards; and the modern, interactive **"Frequently Asked Questions" (FAQ) Accordion** at the bottom of the page featuring 5 rows with CSS grid transitions, rotating gold-accented chevrons, accessible `aria-expanded` attributes, and responsive typography).
 - `/about.html`: Company history, experience, machinery/software standards (Wilcom, Tajima, Barudan).
-- `/services.html`: Detailed service breakdowns (Left chest, Cap/Hat, 3D Puff, Jacket Back, Vectorizing). Clean hero without dark background image, side-by-side action buttons in a 2-col grid on mobile, and 2-column grid for Expert Services fitting above the fold on mobile without scrolling.
-  - **Portfolio Section Order (`#portfolio`)**: 1. Custom Hats, 2. Jacket Backs, 3. Left Chest (updated image), 4. Pet Portraits, 5. Vector Logo Trace.
-  - **Brand Color & Price Harmonization**: Eliminated all mismatched dark brown / amber shades (`text-amber-800` on hero eyebrow and "Order Now" links), replacing with brand gold token `text-primary`. Harmonized Card 2 in the Transparent Pricing section (aligned Card 2 to match Card 1 and Card 3 uniformly with neutral border and text colors, removing misleading `cursor-pointer` since cards are non-clickable preview boxes with the dedicated "View Full Price List & Order" button below), updated pricing preview figures ($15 Left Chest/Hat, $25 Jacket Back / Large), and synchronized Vector Art pricing text to `$15 Simple | $25 Complex`.
-  - **Responsive Verification Across All Viewports**: Playwright automated audit confirmed 0px horizontal overflow and zero layout collisions across Desktop (1512x982), Tablet (834x1112), Mobile (390x844), and Small Mobile (360x740).
+- `/services.html` (`/services`): **Main Services Navigation Hub**. Displays the two core pillars with 100% clickable cards (image, heading, CTA):
+  - **Embroidery Digitizing Card**: Direct link to `/embroidery-digitizing/` with CTA `Explore Embroidery Digitizing →`.
+  - **Vector Art Conversion Card**: Direct link to `/vector-art-conversion/` with CTA `Explore Vector Art Conversion →`.
+  - **Specialized Work Categories**: Balanced 6-card crawlable grid linking to all 5 embroidery sub-services and vector conversion.
+  - **Clean & Fast**: Free of excessive SEO paragraphs, functioning as a high-converting, visual service navigation hub.
+
+### Dedicated SEO Service Pillar & Specialist Architecture
+1. **Embroidery Digitizing Main Pillar (`/embroidery-digitizing/`)**:
+   - Primary SEO landing page for commercial embroidery digitizing.
+   - 12 Modular Sections: Breadcrumbs (`Home → Services → Embroidery Digitizing`), Hero/H1, Short Intro, Price Preview ($15 / $25), Real digitized $\rightarrow$ stitched result (American Flag Hiker Cap), 5-Specialist Service Category Grid (crawlable links), Real Work Gallery, 4-Step Process ("How it Works"), Technical Information (needle calibration, pull compensation), Supported Formats (.DST, .EMB, .PES, .EXP, .JEF, .VP3, etc.), Client Testimonials & Stitch-outs, Comprehensive FAQ Accordion, Related Services Strip, and Final Order / Quote CTA.
+   - Backward-compatibility redirect: `embroidery-digitizing.html` cleanly redirects to canonical `/embroidery-digitizing/`.
+
+2. **Dedicated Embroidery Specialist Pages (5 Dedicated URLs & Reusable 11-Section Template)**:
+   - Built with independent `<title>`, `<meta name="description">`, `<h1>`, canonical tag, OG tags, image alt text, and placement-specific FAQs.
+   - **Template Sequence**: 1. Hero (H1, intro, price, CTAs) &bull; 2. Real Result (Digitized map $\rightarrow$ real physical stitch-out) &bull; 3. About This Service &bull; 4. Production Considerations (pull comp, backing, underlay, machine frames) &bull; 5. Real Work Gallery &bull; 6. Why This Service Is Different &bull; 7. Client Results & Testimonials &bull; 8. Custom FAQ Accordion &bull; 9. Related Services Internal Link Strip &bull; 10. Final Conversion CTA.
+   - **Page 1: Cap & Hat Digitizing (`/embroidery-digitizing/cap-hat-digitizing/`)**:
+     - Specialized in 270° cap frames, center-out bottom-up sequencing, seam bridge underlay, and zero-pucker curve compensation.
+     - Real proof: Barbacoa Bandits Steer Skull on Richardson 112 Trucker Hat. Flat rate $15.
+   - **Page 2: Left Chest Digitizing (`/embroidery-digitizing/left-chest-digitizing/`)**:
+     - Specialized in 4mm micro-lettering clarity, pique knit mesh underlays, and uniform chest placements up to 4.5".
+     - Real proof: Mill Creek Kennels Hunting Dog on Heather Grey Polo. Flat rate $15.
+   - **Page 3: 3D Puff Digitizing (`/embroidery-digitizing/3d-puff-digitizing/`)**:
+     - Specialized in EVA foam embroidery, clean terminal capping, double-density satin capping, and zero foam bleed.
+     - Real proof: Retro Astros Rainbow Cap on Orange Brim Snapback. Flat rate $15 (no extra charge for puff).
+   - **Page 4: Jacket Back Digitizing (`/embroidery-digitizing/jacket-back-digitizing/`)**:
+     - Specialized in large format 10"-14" layouts, split tatami fills, density balancing to prevent bulletproof stiffness, and thread economy.
+     - Real proof: Doña's Tacos Mexican Folkloric Dancer on Black Satin/Fleece Bomber. Flat rate $25.
+   - **Page 5: Pet Portrait Digitizing (`/embroidery-digitizing/pet-portrait-digitizing/`)**:
+     - Specialized in realistic fur flow, multi-shade thread blending, facial anatomy contours, and hand-digitized realism.
+     - Real proof: Boxer Dog Pet Portrait on Heavy Canvas Tote Bag. Flat rate $25 (≤5.5") / $40 (>5.5").
+
+3. **Vector Art Conversion Main Pillar (`/vector-art-conversion/`)**:
+   - Independent service pillar outside embroidery digitizing.
+   - Breadcrumbs: `Home → Services → Vector Art Conversion`.
+   - Dedicated Sections: Hero/H1, Rainbow Trout & Senior Portrait Before/After interactive slider and redraw case studies, Supported Input Formats (JPG, PNG, PDF, sketches, mobile photos), Delivered Formats (AI, EPS, SVG, PDF, CDR), Production Uses (Screen Printing color separations, DTF film transfers, Vinyl cutting paths, Signage & CNC), 4-Step Vector Process, Technical FAQ, and Order CTA.
+   - Backward-compatibility redirect: `vector-art-conversion.html` cleanly redirects to canonical `/vector-art-conversion/`.
+
+4. **Future Stitch Lab Architecture (`/stitch-lab/`)**:
+   - **Hub Page (`/stitch-lab/index.html`)**: Technical digitizing laboratory showcase, machine run sheets, and production notes across apparel blanks.
+   - **Prototype Case Study (`/stitch-lab/richardson-112-cap-digitizing/`)**:
+     - Contains: Original artwork vs digitized file run-sheet &bull; Digitizing process video player &bull; Machine specifications table (Richardson 112, Tajima TMBR-SC1501, 75/11 Ballpoint, Madeira Polyneon 40wt, 270° Cap Driver) &bull; Real stitch-out proof examination &bull; Technical explanation (center-out pathing, +0.42mm seam pull comp, density gradient) &bull; Direct cross-link card back to `/embroidery-digitizing/cap-hat-digitizing/`.
+
+5. **Internal Linking & Crawlability Matrix**:
+   - Main `/services` connects directly to `/embroidery-digitizing/`, `/vector-art-conversion/`, and all 6 specialist categories.
+   - `/embroidery-digitizing/` links to all 5 specialist sub-pages.
+   - Specialist sub-pages cross-link naturally to related services (e.g. Cap $\leftrightarrow$ 3D Puff, Left Chest $\rightarrow$ Cap, Jacket Back $\rightarrow$ 3D Puff).
+   - All portfolio teaser cards across `index.html`, `services.html`, and category pills in `portfolio.html` link directly to dedicated service pages using standard crawlable `<a href="...">` anchors.
+   - All public URLs registered with canonical domain `https://dezandigitizing.com/` in `sitemap.xml` and permitted in `robots.txt`.
+   - Vercel preview/staging headers configured with `X-Robots-Tag: noindex, nofollow` to prevent staging duplicate indexation.
 - `/portfolio.html`: High-resolution gallery and customer feedback showcase.
 - `/pricing.html`: Dedicated flat-rate Pricing showcase in responsive 2-column grid layout, strictly adhering to Dezan's brand color scheme (Dezan Gold `#d4af35` / `#9a7810`, Dark Luxury `#201d12`, Card Dark `#16140c`, Warm Canvas `#f8f7f6`):
   - **Brand Color Harmonization**: Eliminated all mismatched amber/brown shades (`text-amber-800`, `text-amber-950`, `bg-amber-500/10`, `border-amber-400`, `to-amber-600`) in favor of brand tokens `text-primary`, `bg-primary/10`, `border-primary/25`, ensuring 100% aesthetic consistency with `index.html` and `services.html`.
@@ -222,7 +329,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
       4. *We Digitize* (bespoke monitor and stylus drawing pen SVG)
       5. *Download Your Files* (bespoke download tray with downward arrow SVG)
       - Centered top-border gold numbered badges (`1` to `5`), subtle primary background circular containers, and desktop directional flow arrows (`arrow_forward`).
-    - Expert Services 2-column grid and Side-by-side action buttons on mobile.
+    - **Expert Services 2-Column Grid & Showcase Image**: Preserved the approved 2-column grid and side-by-side action buttons on mobile. Updated Card 1 (*Embroidery Digitizing*) to feature the high-resolution "DUAL EDGE LANDSCAPE" side-by-side showcase (`images/embroidery-digitizing-dual-edge.jpg`), displaying the digitized vector/stitch file on the left and the finished physical embroidered snapback trucker cap on the right.
   - `about.html`:
     - Converted bloated single-column stats stack into a balanced 2x2 grid on mobile (`grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 p-3.5 sm:p-6 rounded-xl sm:rounded-2xl`).
     - Standardized all `py-16` section padding down to `py-6 sm:py-10`.
@@ -2248,5 +2355,56 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - `tests/notifications.test.js` & `scratch/diagnose.js`: Test sessions updated to Felix Dezan.
 - **Verification**:
   - Full codebase regex scan `grep -rInwi "faisal" .` returned 0 matches.
+
+---
+
+## 36. Google Tag Manager (GTM) & Google Ads Conversion Tracking Architecture (Live & Verified)
+- **User Mandate & Problem Statement**:
+  - *"Google Tag Manager & Conversion Tracking: Ensure your developer installs Google Conversion Tracking on the 'Thank You / Order Confirmed' page when the client pays and submits the order. If you do not track exactly which ad click led to a paid order, you will be flying completely blind."*
+  - Complete, robust conversion tracking is essential for Google Ads Smart Bidding (Target CPA, Target ROAS, Maximize Conversions) and accurate ad click attribution (`gclid`, `wbraid`, `gbraid`).
+- **Implemented Architecture & Key Modules**:
+  1. **Centralized Tracking Configuration (`js/tracking-config.js`)**:
+     - Global configuration object `window.DEZAN_TRACKING_CONFIG` with default production-ready placeholders:
+       - `gtmId`: Google Tag Manager Container ID (`GTM-5K8L9W2`)
+       - `googleAdsId`: Google Ads Tag/Account ID (`AW-16892345678`)
+       - `googleAdsPurchaseLabel`: Purchase Conversion Action Label (`AbCdEfGhIjKlMnOpQr`)
+       - `googleAdsLeadLabel`: Custom Quote Lead Conversion Label (`ZyXwVuTsRqPoNmLkJi`)
+       - `gaMeasurementId`: Google Analytics 4 Measurement ID (`G-XXXXXXXXXX`)
+       - `currency`: Default transaction currency (`USD`)
+       - `affiliation`: `'Dezan Digitizing Online Store'`
+       - `debug`: Verbose console diagnostics toggle for QA verification.
+  2. **Comprehensive Tracking Engine (`js/analytics.js`)**:
+     - **Google Consent Mode v2**: Automatically defaults `ad_storage`, `ad_user_data`, `ad_personalization`, `analytics_storage` to `'granted'` or `'denied'` based on `localStorage.getItem('dezan_cookie_consent')`. Listens to real-time storage events from `cookie-consent.js` to update consent seamlessly.
+     - **Ad Click Attribution Engine (`captureAdAttribution`)**:
+       - Extracts `gclid`, `gbraid`, `wbraid`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content` upon first visit on any page.
+       - Persists attribution data into `sessionStorage` (`dezan_ad_attribution`) and `localStorage` (`dezan_ad_attribution_persistent`).
+       - Guaranteed preservation through multi-step forms, modal popups, and redirects.
+     - **GTM Container & gtag Auto-Injection**:
+       - Initializes `window.dataLayer = window.dataLayer || []`.
+       - Dynamically injects GTM container script and Google Tag script when configured.
+     - **Conversion Tracking Engine (`window.dezanTracker`)**:
+       - `trackOrderPurchase(orderData)`: Dispatches Google Ads purchase conversion (`gtag('event', 'conversion', { send_to, value, currency, transaction_id })`) and pushes standard GA4/GTM E-commerce `purchase` event to `window.dataLayer` with transaction metadata, purchased items, and `user_data.email` (Enhanced Conversions).
+       - `trackQuoteLead(quoteData)`: Dispatches `generate_lead` / custom quote event without purchase value, protecting Google Ads bidding algorithms from being polluted by $0 free quote requests.
+     - **Conversion Deduplication Safeguard**:
+       - Tracks converted order IDs in `localStorage.getItem('dezan_converted_orders')`.
+       - Automatically detects and skips repeated conversion fires when users refresh the Thank You page or re-open their receipt, eliminating double-counted ad conversions.
+  3. **Thank You / Order Confirmed Page Integration (`order-success.html` & `app.js`)**:
+     - Official GTM `<script>` container tag installed in `<head>` and `<noscript>` iframe immediately after `<body>`.
+     - Explicit loading of `js/tracking-config.js` and `js/analytics.js` before `app.js`.
+     - In `app.js` (`initSuccessPage()`), automatically invokes `dezanTracker.trackOrderPurchase(...)` with verified order ID, price amount, service type, plan name, and client email, or `dezanTracker.trackQuoteLead(...)` for free quote requests.
+  4. **Site-Wide GTM Snippet Installation**:
+     - GTM `<script>` in `<head>` and `<noscript>` in `<body>` across: `order-success.html`, `index.html`, `pricing.html`, `services.html`, `contact.html`, `portfolio.html`, `about.html`, `vector-art-conversion.html`, `embroidery-digitizing/index.html`.
+     - Captures ad click IDs the instant a visitor lands on any page of the site.
+  5. **Environment Configuration Template (`.env.example`)**:
+     - Documented `GOOGLE_TAG_MANAGER_ID`, `GOOGLE_ADS_ID`, `GOOGLE_ADS_PURCHASE_CONVERSION_LABEL`, `GOOGLE_ADS_LEAD_CONVERSION_LABEL`, and `GOOGLE_ANALYTICS_MEASUREMENT_ID`.
+- **Automated & Visual Verification**:
+  - `node --test tests/tracking.test.js`: 5/5 automated unit tests passed (config structure, purchase conversion payload, lead event separation, deduplication rejection, GTM container tag presence).
+  - `node tests/browser-tracking-verification.js`: End-to-end Playwright headless browser test in real Chrome:
+    - Landing with `gclid=TEST_AD_CLICK_998877` and UTM parameters $\rightarrow$ attribution captured in session storage.
+    - Paid order `#DZ-9812` ($15.00) $\rightarrow$ exactly 1 `purchase` event pushed to `dataLayer` with accurate Google Ads attribution and items.
+    - Page reload $\rightarrow$ 0 duplicate purchase events (deduplication confirmed).
+    - Quote request `#QUO-3344` ($0.00) $\rightarrow$ 1 `generate_lead` event and 0 `purchase` events.
+    - Screenshot saved: `tests/order-success-tracking-verified.png`.
+  - Full API regression test suite: `node --test tests/api.test.js` passed 10/10 tests.
 
 

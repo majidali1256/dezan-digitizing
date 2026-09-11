@@ -294,6 +294,9 @@ const assignDigitizer = async (req, res) => {
                  assigned_digitizer_name = $2, 
                  assigned_at = NOW(), 
                  status = 'assigned', 
+                 digitizer_viewed_at = NULL,
+                 started_at = NULL,
+                 is_unread = TRUE,
                  updated_at = NOW() 
              WHERE id = $3 
              RETURNING *`,
@@ -310,6 +313,9 @@ const assignDigitizer = async (req, res) => {
                  SET assigned_digitizer_id = $1, 
                      status = 'assigned', 
                      assigned_at = NOW(), 
+                     digitizer_viewed_at = NULL,
+                     started_at = NULL,
+                     is_unread = TRUE,
                      updated_at = NOW() 
                  WHERE id = $2`,
                 [digitizerId, existingTask.rows[0].id]
@@ -319,9 +325,10 @@ const assignDigitizer = async (req, res) => {
                 `INSERT INTO public.digitizer_tasks 
                     (id, task_number, order_number, order_id, assigned_digitizer_id,
                      service_type, placement, sizing, file_format, instructions,
-                     raw_artwork_files, fabric_type, status, deliverables, assigned_at, updated_at)
+                     raw_artwork_files, fabric_type, status, deliverables, assigned_at, 
+                     digitizer_viewed_at, started_at, is_unread, updated_at)
                  VALUES 
-                    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'assigned', '[]'::jsonb, NOW(), NOW())`,
+                    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'assigned', '[]'::jsonb, NOW(), NULL, NULL, TRUE, NOW())`,
                 [
                     crypto.randomUUID(),
                     taskNumber,

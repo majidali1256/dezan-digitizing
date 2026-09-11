@@ -674,6 +674,90 @@ nav.fixed.bottom-0 a:hover {
     background-color: rgba(212, 175, 53, 0.14);
 }
 
+/* Universal Navigation Dashboard Button (Replaces Header Login) */
+.nav-dashboard-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 13px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: #9a7810;
+    background-color: rgba(212, 175, 53, 0.10);
+    border: 1px solid rgba(212, 175, 53, 0.32);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+@media (max-width: 639px) {
+    .nav-dashboard-link {
+        font-size: 12px;
+        padding: 5px 10px;
+        gap: 4px;
+        border-radius: 10px;
+    }
+    .nav-dashboard-link .material-symbols-outlined {
+        font-size: 15px !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    header nav.hidden.md\:flex,
+    header nav.md\:flex {
+        font-size: 13.5px !important;
+        gap: 4px !important;
+    }
+    .nav-link-gold {
+        padding: 5px 8px !important;
+        font-size: 13px !important;
+    }
+    .nav-dashboard-link {
+        font-size: 12.5px !important;
+        padding: 6px 11px !important;
+        gap: 5px !important;
+        border-radius: 10px !important;
+    }
+    .nav-dashboard-link .material-symbols-outlined {
+        font-size: 16px !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    .nav-dashboard-link {
+        font-size: 13.5px;
+        padding: 7px 15px;
+        gap: 6px;
+    }
+    .nav-dashboard-link .material-symbols-outlined {
+        font-size: 17px;
+    }
+}
+
+.dark .nav-dashboard-link {
+    color: #d4af35;
+    background-color: rgba(212, 175, 53, 0.14);
+    border-color: rgba(212, 175, 53, 0.38);
+}
+
+.nav-dashboard-link:hover {
+    color: #16140c !important;
+    background-color: #d4af35 !important;
+    border-color: #d4af35 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px -2px rgba(212, 175, 53, 0.35);
+}
+
+.dark .nav-dashboard-link:hover {
+    color: #16140c !important;
+    background-color: #d4af35 !important;
+    border-color: #d4af35 !important;
+}
+
 /* Service Card Zoom */
 .service-card-zoom {
     transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);

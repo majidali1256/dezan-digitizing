@@ -9,6 +9,14 @@
         content="Learn about Dezan Digitizing — operating since 2016, providing master embroidery digitizing and vector art services." />
     <link rel="canonical" href="https://dezan-digitizing.vercel.app/about.html" />
 
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-5K8L9W2');</script>
+    <!-- End Google Tag Manager -->
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Dezan Digitizing" />
@@ -60,6 +68,10 @@
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5K8L9W2"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
 
     <!-- ===== UNIFIED HEADER ===== -->
     <header
@@ -77,7 +89,7 @@
                 <a href="services.html" class="nav-link-gold transition-colors" data-nav="services.html">Services</a>
                 <a href="portfolio.html" class="nav-link-gold transition-colors" data-nav="portfolio.html">Feedbacks</a>
                 <a href="pricing.html" class="nav-link-gold transition-colors" data-nav="pricing.html">Pricing</a>
-                <a href="about.html" class="nav-link-gold transition-colors" data-nav="about.html">About</a>
+                <a href="about.html" class="nav-link-gold transition-colors text-primary" data-nav="about.html">About</a>
                 <a href="contact.html" class="nav-link-gold transition-colors" data-nav="contact.html">Contact</a>
             </nav>
             <div class="flex items-center gap-2 sm:gap-2.5">
@@ -86,9 +98,9 @@
                     <span class="material-symbols-outlined theme-toggle-icon text-xl">light_mode</span>
                 </button>
                 <div id="header-auth-slot" class="flex items-center">
-                    <a href="portal-login.html" class="header-login-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-primary/10 dark:bg-primary/15 hover:bg-primary hover:text-background-dark dark:hover:bg-primary dark:hover:text-background-dark text-primary border border-primary/25 dark:border-primary/30 text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 shadow-xs">
-                        <span class="material-symbols-outlined text-sm">login</span>
-                        <span>Login</span>
+                    <a href="client-portal.html" onclick="window.handleDashboardNavClick(event)" class="nav-dashboard-link px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 shadow-xs cursor-pointer" title="Access Dashboard" aria-label="Access Dashboard">
+                        <span class="material-symbols-outlined text-[17px]">dashboard</span>
+                        <span>Dashboard</span>
                     </a>
                 </div>
             </div>
@@ -354,30 +366,34 @@
     <nav
         class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-t border-primary/20 px-2 pb-5 pt-2">
         <div class="flex justify-around">
-            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="index.html"
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[50px]" href="index.html"
                 data-page="index.html">
                 <span class="material-symbols-outlined text-xl">home</span>
                 <span class="text-[10px] font-semibold">Home</span>
             </a>
-            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="services.html"
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[50px]" href="services.html"
                 data-page="services.html">
                 <span class="material-symbols-outlined text-xl">design_services</span>
                 <span class="text-[10px] font-semibold">Services</span>
             </a>
-            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="portfolio.html"
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[50px]" href="portfolio.html"
                 data-page="portfolio.html">
                 <span class="material-symbols-outlined text-xl">photo_library</span>
                 <span class="text-[10px] font-semibold">Feedbacks</span>
             </a>
-            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="pricing.html"
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[50px]" href="pricing.html"
                 data-page="pricing.html">
                 <span class="material-symbols-outlined text-xl">payments</span>
                 <span class="text-[10px] font-semibold">Pricing</span>
             </a>
-            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="contact.html"
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[50px]" href="contact.html"
                 data-page="contact.html">
                 <span class="material-symbols-outlined text-xl">mail</span>
                 <span class="text-[10px] font-semibold">Contact</span>
+            </a>
+            <a class="bottom-nav-dashboard flex flex-col items-center gap-0.5 text-primary min-w-[50px] cursor-pointer" href="client-portal.html" onclick="window.handleDashboardNavClick(event)" title="Access Dashboard">
+                <span class="material-symbols-outlined text-xl">dashboard</span>
+                <span class="text-[10px] font-bold">Dashboard</span>
             </a>
         </div>
     </nav>

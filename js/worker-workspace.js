@@ -257,7 +257,11 @@
             raw_artwork_files: rawArtworkFiles,
             rawArtworkFiles: rawArtworkFiles,
             deliverable_url: deliverableUrl,
-            status: task.status || 'in_progress',
+            status: task.status || 'assigned',
+            is_unread: (task.is_unread !== undefined && task.is_unread !== null) ? Boolean(task.is_unread) : (task.status === 'assigned' || !task.digitizer_viewed_at),
+            digitizer_viewed_at: task.digitizer_viewed_at || null,
+            started_at: task.started_at || null,
+            assigned_at: task.assigned_at || task.created_at || new Date().toISOString(),
             priority: isRush ? 'rush' : 'normal',
             turnaround_speed: isRush ? 'rush' : 'standard',
             is_rush: isRush,
@@ -382,13 +386,17 @@
     // ----- Metrics Calculation -----
     function updateMetricsAcrossViews() {
         const tasks = state.tasks || [];
-        const active = tasks.filter(t => t.status === 'in_progress' || t.status === 'pending' || t.status === 'assigned' || t.status === 'pending_review' || t.status === 'revision_requested');
         const completed = tasks.filter(t => t.status === 'completed');
+        const revisions = tasks.filter(t => (t.status === 'revision_requested' || !!t.revision_notes || !!t.revisionNotes) && t.status !== 'completed');
+        const inProgress = tasks.filter(t => !completed.includes(t) && !revisions.includes(t) && t.status === 'in_progress');
+        const newOrders = tasks.filter(t => !completed.includes(t) && !revisions.includes(t) && !inProgress.includes(t));
+
+        const active = [...revisions, ...inProgress, ...newOrders];
         const rush = tasks.filter(t => (t.priority === 'rush' || t.status === 'revision_requested') && t.status !== 'completed');
 
-        const newCount = tasks.filter(t => t.status === 'pending' || t.status === 'assigned' || t.status === 'pending_review').length;
-        const revisionCount = tasks.filter(t => t.status === 'revision_requested').length;
-        const inProgressCount = tasks.filter(t => t.status === 'in_progress' || (t.status !== 'completed' && t.status !== 'revision_requested' && t.status !== 'pending' && t.status !== 'assigned' && t.status !== 'pending_review')).length;
+        const newCount = newOrders.length;
+        const revisionCount = revisions.length;
+        const inProgressCount = inProgress.length;
         const completedCount = completed.length;
         const allCount = tasks.length;
 
@@ -499,10 +507,10 @@
             );
         }
 
-        const newTasks = allTasks.filter(t => t.status === 'pending' || t.status === 'assigned' || t.status === 'pending_review');
-        const revisionTasks = allTasks.filter(t => t.status === 'revision_requested');
-        const productionTasks = allTasks.filter(t => t.status === 'in_progress' || (t.status !== 'completed' && t.status !== 'revision_requested' && t.status !== 'pending' && t.status !== 'assigned' && t.status !== 'pending_review'));
         const completedTasks = allTasks.filter(t => t.status === 'completed');
+        const revisionTasks = allTasks.filter(t => (t.status === 'revision_requested' || !!t.revision_notes || !!t.revisionNotes) && t.status !== 'completed');
+        const productionTasks = allTasks.filter(t => !completedTasks.includes(t) && !revisionTasks.includes(t) && t.status === 'in_progress');
+        const newTasks = allTasks.filter(t => !completedTasks.includes(t) && !revisionTasks.includes(t) && !productionTasks.includes(t));
 
         // Helper to render a subsection card
         const renderSubSection = (id, icon, title, badgeColor, count, items, emptyTitle, emptyDesc, isCompletedSection = false) => `
@@ -714,6 +722,22 @@
         `;
     }
 
+    // Helper: Compute relative elapsed time (e.g. "4 min ago", "2h ago")
+    function formatTimeAgo(dateVal) {
+        if (!dateVal) return 'just now';
+        try {
+            const diffMs = Date.now() - new Date(dateVal).getTime();
+            const diffMins = Math.max(1, Math.floor(diffMs / (60 * 1000)));
+            if (diffMins < 60) return `${diffMins} min ago`;
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) return `${diffHours}h ago`;
+            const diffDays = Math.floor(diffHours / 24);
+            return `${diffDays}d ago`;
+        } catch (e) {
+            return 'just now';
+        }
+    }
+
     // Helper: Compute relative waiting time for revisions
     function getRevisionWaitingTime(task) {
         const revTime = task.revision_requested_at || task.revisionRequestedAt || task.updated_at || task.updatedAt;
@@ -758,6 +782,9 @@
     function renderWorkerTaskCard(task, isCompleted) {
         const isRevision = task.status === 'revision_requested' || !!task.revision_notes || !!task.revisionNotes;
         const isRush = task.isRush || task.turnaround_speed === 'rush' || task.priority === 'rush';
+        const isNewOrder = !isCompleted && !isRevision && (task.status === 'assigned' || (!task.started_at && task.status !== 'in_progress'));
+        const isUnread = !!task.is_unread || (!task.digitizer_viewed_at && isNewOrder);
+        const assignedTimeAgo = formatTimeAgo(task.assigned_at || task.created_at);
         const orderNum = task.order_number || task.orderNumber || 'ORD-8492';
         const safeOrderNumber = String(orderNum).replace(/-/g, '&#8209;');
 
@@ -776,6 +803,16 @@
         } else if (task.status === 'in_progress') {
             cardThemeClass = 'border-2 border-blue-500/85 dark:border-blue-400/80 shadow-xs ring-1 ring-blue-500/20 hover:border-blue-600';
             orderIdClass = 'bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border-blue-200 dark:border-blue-700/40';
+        } else if (isNewOrder) {
+            if (isUnread) {
+                cardThemeClass = 'border-2 border-amber-500 shadow-md shadow-amber-500/15 ring-2 ring-amber-400/40 hover:border-amber-600';
+                orderIdClass = 'bg-amber-100 dark:bg-primary/25 text-amber-950 dark:text-primary border-amber-300 dark:border-primary/40 font-black';
+                cardBgClass = 'bg-amber-50/50 dark:bg-amber-950/25';
+            } else {
+                cardThemeClass = 'border-2 border-amber-500/75 dark:border-primary/70 shadow-xs ring-1 ring-amber-500/20 hover:border-amber-600 dark:hover:border-primary';
+                orderIdClass = 'bg-amber-100 dark:bg-primary/15 text-amber-900 dark:text-primary border-amber-300 dark:border-primary/30';
+                cardBgClass = 'bg-white dark:bg-card-dark';
+            }
         }
 
         // Badges
@@ -791,7 +828,7 @@
         } else if (task.status === 'in_progress') {
             statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700/40 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Production</span>';
         } else {
-            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> New Order</span>';
+            statusBadge = '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500 text-slate-950 border border-amber-400 text-xs font-black tracking-wide whitespace-nowrap shadow-2xs">🟡 NEW ORDER</span>';
         }
 
         // Date and Time
@@ -880,24 +917,33 @@
         const deliverables = task.deliverables || [];
 
         return `
-            <div id="digitizer-card-${orderNum}" class="digitizer-bento-card p-4 sm:p-5 rounded-2xl ${cardBgClass} ${cardThemeClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
+            <div id="digitizer-card-${orderNum}" data-order-card="${orderNum}" class="digitizer-bento-card p-4 sm:p-5 rounded-2xl ${cardBgClass} ${cardThemeClass} shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
                 <div>
                     <!-- Header Bar: ID, Date & Time, Badges -->
                     <div class="flex items-start justify-between gap-2 mb-2">
                         <div>
-                            <span class="px-2.5 py-1 rounded-lg border font-mono text-xs font-black ${orderIdClass} tracking-wide whitespace-nowrap select-all inline-block">#${safeOrderNumber}</span>
-                            <div class="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium mt-1 leading-tight flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[11px] text-slate-400 dark:text-slate-500">schedule</span>
-                                <span>${orderDt.date}</span>
-                                <span class="text-slate-300 dark:text-slate-600">·</span>
-                                <span class="font-bold text-slate-700 dark:text-slate-300">${orderDt.time}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-1 rounded-lg border font-mono text-xs font-black ${orderIdClass} tracking-wide whitespace-nowrap select-all inline-block">#${safeOrderNumber}</span>
+                                ${isUnread ? '<span class="unread-dot w-2.5 h-2.5 rounded-full bg-amber-500 ring-4 ring-amber-400/40 animate-pulse shrink-0 inline-block" title="Unread new order"></span>' : ''}
                             </div>
                             ${isRevision ? `
                                 <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-100 dark:bg-purple-950/60 border border-purple-300/80 dark:border-purple-700/60 text-purple-950 dark:text-purple-200 text-xs font-bold mt-1.5 shadow-2xs">
                                     <span class="material-symbols-outlined text-xs text-purple-600 dark:text-purple-400">schedule</span>
                                     <span>Revision requested: <strong class="font-black text-purple-900 dark:text-purple-100">${escapeHtml(revWaitTime)}</strong></span>
                                 </div>
-                            ` : ''}
+                            ` : isNewOrder ? `
+                                <div class="text-[10.5px] font-bold text-amber-800 dark:text-amber-300 mt-1 leading-tight flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[12px] text-amber-600 dark:text-primary">schedule</span>
+                                    <span>Assigned ${assignedTimeAgo}</span>
+                                </div>
+                            ` : `
+                                <div class="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium mt-1 leading-tight flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[11px] text-slate-400 dark:text-slate-500">schedule</span>
+                                    <span>${orderDt.date}</span>
+                                    <span class="text-slate-300 dark:text-slate-600">·</span>
+                                    <span class="font-bold text-slate-700 dark:text-slate-300">${orderDt.time}</span>
+                                </div>
+                            `}
                         </div>
                         <div class="flex flex-col items-end gap-1">
                             ${statusBadge}
@@ -1076,10 +1122,18 @@
                             <span class="material-symbols-outlined text-xs">arrow_forward</span>
                         </button>
                     ` : `
-                        <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors" title="Open full dedicated work order">
-                            <span>View Order</span>
-                            <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">arrow_forward</span>
-                        </button>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="window.workerWorkspace.openTaskDetailsModal('${orderNum}')" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors" title="Open full dedicated work order">
+                                <span>View Order</span>
+                                <span class="material-symbols-outlined text-xs text-amber-600 dark:text-primary">arrow_forward</span>
+                            </button>
+                            ${isNewOrder ? `
+                                <button type="button" onclick="window.workerWorkspace.startDigitizerOrder('${orderNum}')" class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs inline-flex items-center gap-1 shadow-xs transition-all hover:scale-[1.02] cursor-pointer" title="Start production on this order">
+                                    <span class="material-symbols-outlined text-xs">play_arrow</span>
+                                    <span>Start</span>
+                                </button>
+                            ` : ''}
+                        </div>
                     `}
                     <div>
                         ${!isCompleted ? `
@@ -1103,6 +1157,9 @@
     function renderWorkerTaskTableRow(task, isCompleted) {
         const isRevision = task.status === 'revision_requested' || !!task.revision_notes || !!task.revisionNotes;
         const isRush = task.isRush || task.turnaround_speed === 'rush' || task.priority === 'rush';
+        const isNewOrder = !isCompleted && !isRevision && (task.status === 'assigned' || (!task.started_at && task.status !== 'in_progress'));
+        const isUnread = !!task.is_unread || (!task.digitizer_viewed_at && isNewOrder);
+        const assignedTimeAgo = formatTimeAgo(task.assigned_at || task.created_at);
         const orderNum = task.order_number || task.orderNumber || 'ORD-8492';
         const safeOrderNumber = String(orderNum).replace(/-/g, '&#8209;');
         const revWaitTime = isRevision ? getRevisionWaitingTime(task) : '';
@@ -1132,9 +1189,9 @@
         } else if (isRevision) {
             statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-600 text-white text-[10.5px] font-black whitespace-nowrap shadow-2xs"><span>↻</span> REVISION · PRIORITY</span>';
         } else if (task.status === 'in_progress') {
-            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700/40 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Prod</span>';
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700/40 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Production</span>';
         } else {
-            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-primary/15 text-amber-900 dark:text-primary border border-amber-200 dark:border-primary/30 text-[11px] font-bold whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> New</span>';
+            statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 border border-amber-400 text-[11px] font-black whitespace-nowrap shadow-2xs">🟡 NEW ORDER</span>';
         }
 
         // Requested Formats
@@ -1149,15 +1206,23 @@
         const designTitle = task.design_name || task.designName || task.placement || 'Custom Embroidery';
 
         return `
-            <tr class="transition-colors ${rowBorderClass}">
+            <tr data-order-row="${orderNum}" class="transition-colors ${rowBorderClass}">
                 <!-- 1. Order #, Date & Time -->
                 <td class="px-4 py-3.5 whitespace-nowrap font-mono font-bold w-[145px] min-w-[145px]">
-                    <span class="inline-block whitespace-nowrap select-all font-mono font-black ${orderIdClass}">#${safeOrderNumber}</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="inline-block whitespace-nowrap select-all font-mono font-black ${orderIdClass}">#${safeOrderNumber}</span>
+                        ${isUnread ? '<span class="unread-dot w-2 h-2 rounded-full bg-amber-500 ring-2 ring-amber-400/50 animate-pulse shrink-0 inline-block" title="Unread new order"></span>' : ''}
+                    </div>
                     ${isRevision ? `
                         <div class="text-[9.5px] font-black uppercase text-purple-700 dark:text-purple-400 mt-0.5 flex items-center gap-1">
                             <span>↻</span> <span>REVISION · PRIORITY</span>
                         </div>
                         <div class="text-[9.5px] text-purple-600 dark:text-purple-400 font-medium">Req: ${escapeHtml(revWaitTime)}</div>
+                    ` : isNewOrder ? `
+                        <div class="text-[10px] text-amber-700 dark:text-amber-300 font-sans font-bold mt-0.5 leading-tight flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[11px] text-amber-600 dark:text-primary">schedule</span>
+                            <span>Assigned ${assignedTimeAgo}</span>
+                        </div>
                     ` : `
                         <div class="text-[10px] text-slate-500 dark:text-slate-400 font-sans font-medium mt-0.5 leading-tight flex items-center gap-1">
                             <span>${orderDt.date}</span>
@@ -1221,6 +1286,12 @@
                                 <span class="hidden xl:inline">Details</span>
                             </button>
                         `}
+                        ${isNewOrder ? `
+                            <button type="button" onclick="window.workerWorkspace.startDigitizerOrder('${orderNum}')" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-black inline-flex items-center gap-1 cursor-pointer shadow-xs transition-transform hover:scale-[1.02]" title="Start production on this order">
+                                <span class="material-symbols-outlined text-xs">play_arrow</span>
+                                <span>Start</span>
+                            </button>
+                        ` : ''}
                         ${!isCompleted ? `
                             <button type="button" onclick="window.workerWorkspace.openDeliverableUploadModal('${orderNum}')" class="px-2.5 py-1 rounded-lg bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 cursor-pointer shadow-xs transition-transform hover:scale-[1.02]" title="Upload production deliverables">
                                 <span class="material-symbols-outlined text-xs">cloud_upload</span>
@@ -1741,6 +1812,31 @@
         }
 
         const orderNum = task.order_number || task.orderNumber || task.task_number || 'TSK-ACTIVE';
+
+        // When the digitizer opens "View Order", remove the unread dot and record viewed timestamp
+        // However, the order should still remain New / Not Started. Opening an order should NOT automatically start production.
+        if (task.is_unread || !task.digitizer_viewed_at) {
+            task.is_unread = false;
+            task.digitizer_viewed_at = new Date().toISOString();
+
+            if (window.insforgeClient && typeof window.insforgeClient.markDigitizerTaskViewed === 'function') {
+                window.insforgeClient.markDigitizerTaskViewed(orderNum).catch(err => console.warn('Could not mark task viewed:', err));
+            }
+
+            // Immediately clear unread UI indicators from card/row without needing full reload
+            const cardEl = document.querySelector(`[data-order-card="${orderNum}"]`);
+            if (cardEl) {
+                cardEl.classList.remove('ring-2', 'ring-amber-400/40', 'border-amber-500');
+                const dot = cardEl.querySelector('.unread-dot');
+                if (dot) dot.remove();
+            }
+            const rowEl = document.querySelector(`[data-order-row="${orderNum}"]`);
+            if (rowEl) {
+                const dot = rowEl.querySelector('.unread-dot');
+                if (dot) dot.remove();
+            }
+        }
+
         setElText('detail-task-id', orderNum);
         setElText('detail-client-id', task.client_name || 'Client Order');
         setElText('detail-design-name', task.design_name || task.placement || task.project_name || 'Custom Digitizing');
@@ -1822,6 +1918,24 @@
             }
         }
 
+        // Start Order Button Action
+        // Inside the order, add one obvious button: ▶️ Start Order
+        const isNewOrder = !task.started_at && task.status !== 'completed' && task.status !== 'in_progress';
+        const startBtn = document.getElementById('detail-start-btn');
+        if (startBtn) {
+            if (isNewOrder || task.status === 'assigned') {
+                startBtn.classList.remove('hidden');
+                startBtn.disabled = false;
+                startBtn.innerHTML = `
+                    <span class="material-symbols-outlined text-sm">play_arrow</span>
+                    <span>▶️ Start Order</span>
+                `;
+                startBtn.onclick = () => startDigitizerOrder(orderNum);
+            } else {
+                startBtn.classList.add('hidden');
+            }
+        }
+
         // Attach Deliverables Button Action
         const attachBtn = document.getElementById('detail-attach-btn');
         if (attachBtn) {
@@ -1838,6 +1952,48 @@
 
         const modal = document.getElementById('task-details-modal');
         if (modal) modal.classList.remove('hidden');
+    }
+
+    async function startDigitizerOrder(orderNumber) {
+        const task = state.tasks?.find(t => (t.order_number || t.orderNumber) === orderNumber || t.id === orderNumber);
+        const startBtn = document.getElementById('detail-start-btn');
+        if (startBtn) {
+            startBtn.disabled = true;
+            startBtn.innerHTML = `
+                <span class="material-symbols-outlined animate-spin text-sm">sync</span>
+                <span>Starting Production...</span>
+            `;
+        }
+        try {
+            if (window.insforgeClient && typeof window.insforgeClient.startDigitizerTask === 'function') {
+                await window.insforgeClient.startDigitizerTask(orderNumber);
+            }
+            if (task) {
+                task.status = 'in_progress';
+                task.started_at = new Date().toISOString();
+            }
+            closeTaskDetailsModal();
+            updateMetricsAcrossViews();
+            renderActivePage();
+            if (window.insforgeClient && typeof window.insforgeClient.showToast === 'function') {
+                window.insforgeClient.showToast(
+                    'Order In Production',
+                    `Order #${orderNumber} is now in production! Active timer started.`,
+                    'play_circle',
+                    'info'
+                );
+            }
+        } catch (err) {
+            console.error('Failed to start digitizer order:', err);
+            alert('Could not start order: ' + err.message);
+            if (startBtn) {
+                startBtn.disabled = false;
+                startBtn.innerHTML = `
+                    <span class="material-symbols-outlined text-sm">play_arrow</span>
+                    <span>▶️ Start Order</span>
+                `;
+            }
+        }
     }
 
     function closeTaskDetailsModal() {
@@ -1937,6 +2093,70 @@
                 localStorage.setItem('theme', isDark ? 'dark' : 'light');
             });
         });
+
+        // Realtime order assignment and status updates for Digitizer Workstation
+        if (window.insforgeClient && typeof window.insforgeClient.on === 'function') {
+            window.insforgeClient.on('order_assigned', async (data) => {
+                console.log('[Worker Workspace] Realtime assignment received:', data);
+                // 1. Play chime audio
+                if (window.notificationsManager && typeof window.notificationsManager.playOrderChime === 'function') {
+                    window.notificationsManager.playOrderChime();
+                }
+                // 2. Dispatch native OS notification if granted
+                if (window.notificationsManager && typeof window.notificationsManager.showNativeNotification === 'function') {
+                    window.notificationsManager.showNativeNotification(
+                        'New Order Assigned — ' + (data?.order_number || 'ORD-NEW'),
+                        {
+                            body: 'New digitizing order assigned. Click to review instructions and start production.',
+                            tag: 'order-' + (data?.order_number || 'new'),
+                            data: { url: window.location.pathname + '?task=' + (data?.order_number || '') }
+                        }
+                    );
+                }
+                // 3. Show live alert banner
+                const banner = document.getElementById('digitizer-live-alert-banner');
+                if (banner) {
+                    banner.classList.remove('hidden');
+                    const numEl = document.getElementById('digitizer-live-alert-ordnum');
+                    if (numEl) numEl.textContent = data?.order_number || 'ORD-NEW';
+                    const btn = document.getElementById('digitizer-live-alert-btn');
+                    if (btn) btn.onclick = () => {
+                        banner.classList.add('hidden');
+                        openTaskDetailsModal(data?.order_number);
+                    };
+                }
+                // 4. Auto-refresh without manual reload
+                await loadWorkerTasks();
+                renderActivePage();
+            });
+
+            window.insforgeClient.on('task_viewed', (data) => {
+                const ord = data?.order_number || data?.orderNumber;
+                const task = state.tasks?.find(t => (t.order_number || t.orderNumber) === ord || t.id === ord);
+                if (task) {
+                    task.is_unread = false;
+                    task.digitizer_viewed_at = data?.digitizer_viewed_at || new Date().toISOString();
+                    const cardEl = document.querySelector(`[data-order-card="${ord}"]`);
+                    if (cardEl) {
+                        cardEl.classList.remove('ring-2', 'ring-amber-400/40', 'border-amber-500');
+                        const dot = cardEl.querySelector('.unread-dot');
+                        if (dot) dot.remove();
+                    }
+                    const rowEl = document.querySelector(`[data-order-row="${ord}"]`);
+                    if (rowEl) {
+                        const dot = rowEl.querySelector('.unread-dot');
+                        if (dot) dot.remove();
+                    }
+                }
+            });
+
+            const onStarted = async () => {
+                await loadWorkerTasks();
+                renderActivePage();
+            };
+            window.insforgeClient.on('task_started', onStarted);
+            window.insforgeClient.on('order_started', onStarted);
+        }
     }
 
     function setElText(id, text) {
@@ -2110,11 +2330,13 @@
         closeWorkerAccountModal,
         openDigitizerArtworkPreview,
         closeDigitizerArtworkPreview,
-        navigateDigitizerArtworkPreview
+        navigateDigitizerArtworkPreview,
+        startDigitizerOrder
     };
 
     window.openTaskDetailsModal = openTaskDetailsModal;
     window.closeTaskDetailsModal = closeTaskDetailsModal;
+    window.startDigitizerOrder = startDigitizerOrder;
     window.setDigitizerLayout = setDigitizerLayout;
     window.setLayout = setDigitizerLayout;
 

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>Stitch Lab – Embroidery Digitizing Case Studies & Machine Notes | Dezan Digitizing</title>
+    <meta name="title" content="Stitch Lab – Embroidery Digitizing Case Studies & Machine Notes | Dezan Digitizing" />
+    <meta name="description" content="Technical embroidery digitizing case studies, machine run sheets, and production breakdowns. See real stitch-outs, pull-compensation formulas, and garment-specific file engineering." />
+    <meta name="keywords" content="embroidery case studies, digitizing lab notes, richardson 112 cap digitizing, embroidery technical analysis, stitch file engineering, Dezan Digitizing" />
+    <meta name="author" content="Dezan Digitizing" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://dezandigitizing.com/stitch-lab/" />
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-5K8L9W2');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://dezandigitizing.com/stitch-lab/" />
+    <meta property="og:title" content="Stitch Lab – Technical Digitizing Case Studies | Dezan Digitizing" />
+    <meta property="og:description" content="Explore real stitch-outs, machine run sheets, and file engineering breakdowns across popular caps, outerwear, and athletic apparel." />
+    <meta property="og:image" content="https://dezandigitizing.com/Client%20FeedBack/barbacoa-bandits-trucker-hat-embroidery-stitchout.webp" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://dezandigitizing.com/stitch-lab/" />
+    <meta property="twitter:title" content="Stitch Lab – Technical Digitizing Case Studies | Dezan Digitizing" />
+    <meta property="twitter:description" content="Explore real stitch-outs, machine run sheets, and file engineering breakdowns across popular caps, outerwear, and athletic apparel." />
+    <meta property="twitter:image" content="https://dezandigitizing.com/Client%20FeedBack/barbacoa-bandits-trucker-hat-embroidery-stitchout.webp" />
+
+    <link rel="icon" type="image/png" href="/logo.png" />
+
+    <!-- Tailwind & Google Fonts -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#d4af35",
+                        "primary-hover": "#b89628",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#201d12",
+                        "card-dark": "#16140c",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                },
+            },
+        };
+    </script>
+    <link rel="stylesheet" href="/styles.css" />
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5K8L9W2"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-50 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-primary/20">
+        <div class="flex items-center justify-between px-4 py-3 max-w-6xl mx-auto">
+            <a href="/" class="flex items-center gap-2.5">
+                <img src="/logo.png" alt="Dezan Digitizing" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover">
+                <div class="flex flex-col text-left leading-none">
+                    <span class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">DEZAN</span>
+                    <span class="text-[9.5px] sm:text-[10.5px] font-extrabold tracking-[0.18em] text-primary uppercase mt-0">Digitizing</span>
+                </div>
+            </a>
+            <nav class="hidden md:flex items-center gap-1 lg:gap-2 text-[15px] lg:text-[16.5px] font-bold">
+                <a href="/" class="nav-link-gold transition-colors">Home</a>
+                <a href="/services" class="nav-link-gold transition-colors">Services</a>
+                <a href="/stitch-lab/" class="nav-link-gold text-primary font-black transition-colors">Stitch Lab</a>
+                <a href="/portfolio.html" class="nav-link-gold transition-colors">Feedbacks</a>
+                <a href="/pricing.html" class="nav-link-gold transition-colors">Pricing</a>
+                <a href="/about.html" class="nav-link-gold transition-colors">About</a>
+                <a href="/contact.html" class="nav-link-gold transition-colors">Contact</a>
+            </nav>
+            <div class="flex items-center gap-2 sm:gap-2.5">
+                <button class="theme-toggle-btn p-2 sm:p-2.5 rounded-xl hover:bg-primary/10 transition-colors" aria-label="Toggle theme">
+                    <span class="material-symbols-outlined theme-toggle-icon text-xl">light_mode</span>
+                </button>
+                <div id="header-auth-slot" class="flex items-center">
+                    <a href="/client-portal.html" onclick="window.handleDashboardNavClick(event)" class="nav-dashboard-link px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 shadow-xs cursor-pointer" title="Access Dashboard" aria-label="Access Dashboard">
+                        <span class="material-symbols-outlined text-[17px]">dashboard</span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 pb-20">
+        <!-- Breadcrumb Navigation -->
+        <nav aria-label="Breadcrumb" class="max-w-6xl mx-auto px-4 pt-4 pb-2 text-xs text-slate-500 dark:text-slate-400">
+            <ol class="flex items-center gap-1.5 flex-wrap">
+                <li><a href="/" class="hover:text-primary transition-colors flex items-center gap-1"><span class="material-symbols-outlined text-xs">home</span> Home</a></li>
+                <li><span class="text-slate-400">/</span></li>
+                <li class="text-slate-800 dark:text-slate-200 font-semibold" aria-current="page">Stitch Lab</li>
+            </ol>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="max-w-6xl mx-auto px-4 py-8 sm:py-12 text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-4 border border-primary/20">
+                <span class="material-symbols-outlined text-xs">biotech</span>
+                <span>Production Engineering &amp; Case Studies</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
+                The Dezan <span class="text-gradient-gold">Stitch Lab</span>
+            </h1>
+            <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                Behind every clean stitch-out is meticulous digital craftsmanship. Explore our open production case studies, machine run sheets, pull-compensation formulas, and real fabric testing notes.
+            </p>
+        </section>
+
+        <!-- Case Studies Grid -->
+        <section class="max-w-6xl mx-auto px-4 py-6">
+            <h2 class="text-xl font-bold border-l-4 border-primary pl-3 text-slate-900 dark:text-white mb-6">Production Case Studies</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 1. Featured Active Case Study: Richardson 112 -->
+                <article class="bg-white dark:bg-card-dark rounded-2xl overflow-hidden border border-primary/30 dark:border-primary/25 shadow-md flex flex-col hover:border-primary transition-all group">
+                    <div class="relative aspect-video overflow-hidden bg-slate-900">
+                        <img src="/Client%20FeedBack/barbacoa-bandits-trucker-hat-embroidery-stitchout.webp" alt="Richardson 112 Trucker Cap Digitizing and Finished Stitchout" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-black/80 text-primary text-[11px] font-bold uppercase tracking-wider backdrop-blur-xs border border-primary/30">Case Study #01</span>
+                    </div>
+                    <div class="p-5 flex flex-col flex-1">
+                        <div class="flex items-center gap-2 text-xs text-primary font-bold mb-2 uppercase tracking-wider">
+                            <span class="material-symbols-outlined text-sm">sports_baseball</span>
+                            <span>Cap &amp; Hat Engineering</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors mb-2">
+                            <a href="/stitch-lab/richardson-112-cap-digitizing/" class="after:inset-0">Richardson 112 Trucker Cap: Center Seam Compensation &amp; Sequence Breakdown</a>
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-4 flex-1 line-clamp-3">
+                            A deep dive into zero-pucker center seam crossing, bottom-up 270° cap hooping compensation, and underlay architecture for structured 6-panel trucker hats.
+                        </p>
+                        <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+                            <span class="text-slate-500 font-medium">Garment: Richardson 112</span>
+                            <span class="text-primary font-bold inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                                Read Breakdown <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                            </span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- 2. Upcoming Case Study: Left Chest Polo -->
+                <article class="bg-white/60 dark:bg-card-dark/60 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col opacity-85">
+                    <div class="relative aspect-video overflow-hidden bg-slate-900">
+                        <img src="/Client%20FeedBack/mill-creek-kennels-left-chest-embroidery-stitchout.webp" alt="Mill Creek Kennels Left Chest Polo Stitchout" class="w-full h-full object-cover grayscale-25">
+                        <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-slate-800/90 text-slate-300 text-[11px] font-bold uppercase tracking-wider border border-slate-700">Coming Soon</span>
+                    </div>
+                    <div class="p-5 flex flex-col flex-1">
+                        <div class="flex items-center gap-2 text-xs text-slate-500 font-bold mb-2 uppercase tracking-wider">
+                            <span class="material-symbols-outlined text-sm">styler</span>
+                            <span>Pique Knit Polo</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                            4mm Micro-Lettering on Waffle Pique Fabric
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-4 flex-1">
+                            Analyzing net-mesh underlay matrices and short-stitch pull reduction to prevent small lettering from sinking into textured knit fabrics.
+                        </p>
+                        <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
+                            <span>Garment: Pique Polo</span>
+                            <span class="font-medium italic">In Lab Testing</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- 3. Upcoming Case Study: High-Density 3D Puff -->
+                <article class="bg-white/60 dark:bg-card-dark/60 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col opacity-85">
+                    <div class="relative aspect-video overflow-hidden bg-slate-900">
+                        <img src="/Client%20FeedBack/3d-puff-cap-embroidery-stitchout.webp" alt="3D Puff Snapback Stitchout" class="w-full h-full object-cover grayscale-25">
+                        <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-slate-800/90 text-slate-300 text-[11px] font-bold uppercase tracking-wider border border-slate-700">Coming Soon</span>
+                    </div>
+                    <div class="p-5 flex flex-col flex-1">
+                        <div class="flex items-center gap-2 text-xs text-slate-500 font-bold mb-2 uppercase tracking-wider">
+                            <span class="material-symbols-outlined text-sm">layers</span>
+                            <span>3D Puff Foam</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                            3mm EVA Foam Terminal Capping &amp; Clean Perforation
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-4 flex-1">
+                            Double-density satin column calculations and terminal edge capping to cut clean foam edges with zero raw foam exposure.
+                        </p>
+                        <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
+                            <span>Garment: Flat-Brim Snapback</span>
+                            <span class="font-medium italic">In Lab Testing</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Services Navigation Link Strip -->
+        <section class="max-w-6xl mx-auto px-4 py-12">
+            <div class="p-6 sm:p-8 rounded-2xl bg-white dark:bg-card-dark border border-primary/20 text-center">
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2">Looking for Production-Ready Digitizing?</h2>
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl mx-auto mb-6">Explore our dedicated service specifications calibrated specifically for your garment type.</p>
+                <div class="flex items-center justify-center gap-3 flex-wrap">
+                    <a href="/embroidery-digitizing/" class="px-5 py-2.5 rounded-xl bg-primary text-background-dark font-bold text-xs sm:text-sm hover:bg-primary-hover transition-all">Embroidery Digitizing Services</a>
+                    <a href="/vector-art-conversion/" class="px-5 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-xs sm:text-sm border border-slate-300 dark:border-slate-700 hover:border-primary transition-all">Vector Art Conversion</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-background-light dark:bg-[#12110a] border-t border-primary/20 py-8 px-4 text-center text-xs text-slate-500 dark:text-slate-400">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p>&copy; 2026 Dezan Digitizing. All rights reserved.</p>
+            <div class="flex items-center gap-4">
+                <a href="/services" class="hover:text-primary transition-colors">Services</a>
+                <a href="/stitch-lab/" class="text-primary font-bold transition-colors">Stitch Lab</a>
+                <a href="/pricing.html" class="hover:text-primary transition-colors">Pricing</a>
+                <a href="/privacy.html" class="hover:text-primary transition-colors">Privacy Policy</a>
+                <a href="/terms.html" class="hover:text-primary transition-colors">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/app.js"></script>
+</body>
+</html>

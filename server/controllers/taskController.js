@@ -11,7 +11,8 @@ const SANITIZED_TASK_COLUMNS = `
     id, task_number, order_number, order_id, assigned_digitizer_id,
     service_type, placement, sizing, file_format, instructions,
     raw_artwork_files, fabric_type, revision_notes, stitch_out_photos,
-    status, deliverables, assigned_at, completed_at, updated_at
+    status, deliverables, assigned_at, digitizer_viewed_at, started_at, is_unread,
+    completed_at, updated_at
 `;
 
 /**
@@ -220,9 +221,113 @@ const uploadDeliverables = async (req, res) => {
     }
 };
 
+/**
+ * Mark Task as Viewed by Digitizer
+ * POST /api/tasks/:id/view
+ */
+const markTaskViewed = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = req.user;
+
+        const taskRes = await query('SELECT * FROM public.digitizer_tasks WHERE (id::text = $1 OR task_number = $1 OR order_number = $1)', [id]);
+        if (taskRes.rows.length === 0) {
+            return notFound(res, 'Task not found');
+        }
+        const task = taskRes.rows[0];
+
+        if (user.role === 'digitizer' && task.assigned_digitizer_id !== user.id) {
+            return forbidden(res, 'You can only view tasks assigned to you');
+        }
+
+        const viewedAt = new Date().toISOString();
+
+        // Update digitizer_tasks: remove unread, set viewed timestamp (only if not already viewed)
+        const updateTaskRes = await query(
+            `UPDATE public.digitizer_tasks 
+             SET is_unread = FALSE, 
+                 digitizer_viewed_at = COALESCE(digitizer_viewed_at, $1), 
+                 updated_at = NOW() 
+             WHERE id = $2 
+             RETURNING ${SANITIZED_TASK_COLUMNS}`,
+            [viewedAt, task.id]
+        );
+
+        // Synchronize to public.orders
+        await query(
+            `UPDATE public.orders 
+             SET is_unread = FALSE, 
+                 digitizer_viewed_at = COALESCE(digitizer_viewed_at, $1), 
+                 updated_at = NOW() 
+             WHERE id = $2`,
+            [viewedAt, task.order_id]
+        );
+
+        return success(res, updateTaskRes.rows[0], 'Task marked as viewed/seen by digitizer');
+    } catch (err) {
+        console.error('[Mark Task Viewed Error]:', err);
+        return error(res, `Failed to mark task viewed: ${err.message}`);
+    }
+};
+
+/**
+ * Start Task Production (Transitions to 'in_progress')
+ * POST /api/tasks/:id/start
+ */
+const startTask = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = req.user;
+
+        const taskRes = await query('SELECT * FROM public.digitizer_tasks WHERE (id::text = $1 OR task_number = $1 OR order_number = $1)', [id]);
+        if (taskRes.rows.length === 0) {
+            return notFound(res, 'Task not found');
+        }
+        const task = taskRes.rows[0];
+
+        if (user.role === 'digitizer' && task.assigned_digitizer_id !== user.id) {
+            return forbidden(res, 'You can only start tasks assigned to you');
+        }
+
+        const startedAt = new Date().toISOString();
+
+        // Update digitizer_tasks: status = in_progress, started_at = NOW(), is_unread = false
+        const updateTaskRes = await query(
+            `UPDATE public.digitizer_tasks 
+             SET status = 'in_progress', 
+                 started_at = COALESCE(started_at, $1), 
+                 digitizer_viewed_at = COALESCE(digitizer_viewed_at, $1),
+                 is_unread = FALSE, 
+                 updated_at = NOW() 
+             WHERE id = $2 
+             RETURNING ${SANITIZED_TASK_COLUMNS}`,
+            [startedAt, task.id]
+        );
+
+        // Synchronize to public.orders
+        await query(
+            `UPDATE public.orders 
+             SET status = 'in_progress', 
+                 started_at = COALESCE(started_at, $1), 
+                 digitizer_viewed_at = COALESCE(digitizer_viewed_at, $1),
+                 is_unread = FALSE, 
+                 updated_at = NOW() 
+             WHERE id = $2`,
+            [startedAt, task.order_id]
+        );
+
+        return success(res, updateTaskRes.rows[0], 'Task production started (status changed to in_progress)');
+    } catch (err) {
+        console.error('[Start Task Error]:', err);
+        return error(res, `Failed to start task: ${err.message}`);
+    }
+};
+
 module.exports = {
     getTasks,
     getTaskById,
     updateTaskStatus,
-    uploadDeliverables
+    uploadDeliverables,
+    markTaskViewed,
+    startTask
 };

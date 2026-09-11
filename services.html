@@ -7,33 +7,41 @@
     <title>Services | Dezan Digitizing</title>
     <meta name="description"
         content="Explore our embroidery digitizing and vector art conversion services with transparent pricing." />
-    <link rel="canonical" href="https://dezan-digitizing.vercel.app/services.html" />
+    <link rel="canonical" href="https://dezandigitizing.com/services" />
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-5K8L9W2');</script>
+    <!-- End Google Tag Manager -->
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Dezan Digitizing" />
-    <meta property="og:url" content="https://dezan-digitizing.vercel.app/services.html" />
+    <meta property="og:url" content="https://dezandigitizing.com/services" />
     <meta property="og:title" content="Services & Flat-Rate Pricing | Dezan Digitizing" />
     <meta property="og:description" content="Explore our embroidery digitizing and vector art conversion services with transparent pricing and fast turnaround." />
-    <meta property="og:image" content="https://dezan-digitizing.vercel.app/logo.png" />
+    <meta property="og:image" content="https://dezandigitizing.com/logo.png" />
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Services & Flat-Rate Pricing | Dezan Digitizing" />
     <meta name="twitter:description" content="Explore our embroidery digitizing and vector art conversion services with transparent pricing and fast turnaround." />
-    <meta name="twitter:image" content="https://dezan-digitizing.vercel.app/logo.png" />
+    <meta name="twitter:image" content="https://dezandigitizing.com/logo.png" />
 
     <!-- Schema.org JSON-LD Structured Data -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Service",
-      "serviceType": "Embroidery Digitizing & Vector Art",
+      "serviceType": "Embroidery Digitizing & Vector Art Hub",
       "provider": {
         "@type": "LocalBusiness",
         "name": "Dezan Digitizing",
-        "url": "https://dezan-digitizing.vercel.app/",
-        "image": "https://dezan-digitizing.vercel.app/logo.png"
+        "url": "https://dezandigitizing.com/",
+        "image": "https://dezandigitizing.com/logo.png"
       },
       "areaServed": "Worldwide",
       "hasOfferCatalog": {
@@ -44,28 +52,17 @@
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Hat / Left Chest Embroidery Digitizing"
-            },
-            "price": "15.00",
-            "priceCurrency": "USD"
+              "name": "Commercial Embroidery Digitizing",
+              "url": "https://dezandigitizing.com/embroidery-digitizing/"
+            }
           },
           {
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Jacket Back & Large Embroidery Digitizing"
-            },
-            "price": "25.00",
-            "priceCurrency": "USD"
-          },
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "Vector Art Redraw & Conversion"
-            },
-            "price": "15.00",
-            "priceCurrency": "USD"
+              "name": "Vector Art Conversion & Redraw",
+              "url": "https://dezandigitizing.com/vector-art-conversion/"
+            }
           }
         ]
       }
@@ -91,6 +88,10 @@
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5K8L9W2"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
 
     <!-- ===== UNIFIED HEADER ===== -->
     <header
@@ -105,7 +106,7 @@
             </a>
             <nav class="hidden md:flex items-center gap-1 lg:gap-2 text-[15px] lg:text-[16.5px] font-bold">
                 <a href="index.html" class="nav-link-gold transition-colors" data-nav="index.html">Home</a>
-                <a href="services.html" class="nav-link-gold transition-colors" data-nav="services.html">Services</a>
+                <a href="services.html" class="nav-link-gold transition-colors text-primary" data-nav="services.html">Services</a>
                 <a href="portfolio.html" class="nav-link-gold transition-colors" data-nav="portfolio.html">Feedbacks</a>
                 <a href="pricing.html" class="nav-link-gold transition-colors" data-nav="pricing.html">Pricing</a>
                 <a href="about.html" class="nav-link-gold transition-colors" data-nav="about.html">About</a>
@@ -117,9 +118,9 @@
                     <span class="material-symbols-outlined theme-toggle-icon text-xl">light_mode</span>
                 </button>
                 <div id="header-auth-slot" class="flex items-center">
-                    <a href="portal-login.html" class="header-login-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-primary/10 dark:bg-primary/15 hover:bg-primary hover:text-background-dark dark:hover:bg-primary dark:hover:text-background-dark text-primary border border-primary/25 dark:border-primary/30 text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 shadow-xs">
-                        <span class="material-symbols-outlined text-sm">login</span>
-                        <span>Login</span>
+                    <a href="client-portal.html" onclick="window.handleDashboardNavClick(event)" class="nav-dashboard-link px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 shadow-xs cursor-pointer" title="Access Dashboard" aria-label="Access Dashboard">
+                        <span class="material-symbols-outlined text-[17px]">dashboard</span>
+                        <span>Dashboard</span>
                     </a>
                 </div>
             </div>
@@ -167,7 +168,7 @@
                 <a href="embroidery-digitizing.html"
                     class="group flex flex-col bg-white dark:bg-card-dark rounded-xl overflow-hidden border border-primary/15 dark:border-primary/25 shadow-xs hover-scale hover:border-primary transition-all cursor-pointer">
                     <div class="aspect-[16/10] sm:aspect-video bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
-                        style='background-image: url("images/pet-embroidery.png");'>
+                        style='background-image: url("images/embroidery-digitizing-dual-edge.jpg");'>
                     </div>
                     <div class="p-2.5 sm:p-5 flex flex-col flex-1 justify-between">
                         <div>
@@ -225,74 +226,103 @@
             </div>
         </section>
 
-        <!-- Portfolio Section -->
+        <!-- Portfolio Section (Linked to Specialist Pages) -->
         <section id="portfolio" class="scroll-mt-20 px-4 py-8 sm:py-12 reveal max-w-6xl mx-auto">
             <div class="flex items-center justify-between mb-4 sm:mb-6">
-                <h3 class="text-base sm:text-xl font-bold border-l-4 border-primary pl-2.5 sm:pl-3 text-slate-900 dark:text-white">Portfolio</h3>
+                <div>
+                    <h3 class="text-base sm:text-xl font-bold border-l-4 border-primary pl-2.5 sm:pl-3 text-slate-900 dark:text-white">Specialized Work Categories</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 pl-3">Explore individual service specifications for each garment placement</p>
+                </div>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-6 gap-2.5 sm:gap-4">
-                <!-- 1. Custom Hats -->
-                <div
-                    class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 portfolio-card col-span-1 md:col-span-2 shadow-xs">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4">
+                <!-- 1. Custom Hats -> Cap & Hat Digitizing -->
+                <a href="/embroidery-digitizing/cap-hat-digitizing/"
+                    class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 portfolio-card shadow-xs cursor-pointer block">
                     <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        alt="Custom 3D Puff Cap Front Embroidery Digitizing Stitchout" title="Custom 3D Puff Hats"
+                        alt="Custom 3D Puff Cap Front Embroidery Digitizing Stitchout" title="Cap & Hat Embroidery Digitizing"
                         loading="eager"
                         src="images/custom-hats.png?v=4" />
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4 pointer-events-none">
-                        <p class="text-white text-xs sm:text-sm font-bold">Custom Hats</p>
-                        <p class="text-primary text-[9px] sm:text-[10px] uppercase tracking-widest">3D Puff</p>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-2.5 sm:p-3">
+                        <p class="text-white text-xs sm:text-sm font-bold group-hover:text-primary transition-colors flex items-center gap-1">
+                            <span>Cap &amp; Hat</span>
+                            <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </p>
+                        <p class="text-primary text-[9px] uppercase tracking-widest">Center-Out Curve</p>
                     </div>
-                </div>
-                <!-- 2. Jacket Backs -->
-                <div
-                    class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 portfolio-card col-span-1 md:col-span-2 shadow-xs">
+                </a>
+                <!-- 2. Jacket Backs -> Jacket Back Digitizing -->
+                <a href="/embroidery-digitizing/jacket-back-digitizing/"
+                    class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 portfolio-card shadow-xs cursor-pointer block">
                     <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        alt="Large Jacket Back Custom Embroidery Digitizing Stitchout on Satin Jacket" title="Jacket Back Embroidery"
+                        alt="Large Jacket Back Custom Embroidery Digitizing Stitchout on Satin Jacket" title="Jacket Back Embroidery Digitizing"
                         loading="eager"
                         src="images/jacket-backs.png?v=4" />
-                    <div
-                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4 pointer-events-none">
-                        <p class="text-white text-xs sm:text-sm font-bold">Jacket Backs</p>
-                        <p class="text-primary text-[9px] sm:text-[10px] uppercase tracking-widest">Custom Design</p>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-2.5 sm:p-3">
+                        <p class="text-white text-xs sm:text-sm font-bold group-hover:text-primary transition-colors flex items-center gap-1">
+                            <span>Jacket Back</span>
+                            <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </p>
+                        <p class="text-primary text-[9px] uppercase tracking-widest">10"-14" Formats</p>
                     </div>
-                </div>
-                <!-- 3. Left Chest -->
-                <div
-                    class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 portfolio-card col-span-1 md:col-span-2 shadow-xs">
+                </a>
+                <!-- 3. Left Chest -> Left Chest Digitizing -->
+                <a href="/embroidery-digitizing/left-chest-digitizing/"
+                    class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 portfolio-card shadow-xs cursor-pointer block">
                     <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        alt="Left Chest Corporate Uniform Logo Embroidery Digitizing on Softshell Team Jackets" title="Left Chest Logos"
+                        alt="Left Chest Corporate Uniform Logo Embroidery Digitizing on Softshell Team Jackets" title="Left Chest Embroidery Digitizing"
                         loading="eager"
                         src="images/left-chest-logos.png?v=4" />
-                    <div
-                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4 pointer-events-none">
-                        <p class="text-white text-xs sm:text-sm font-bold">Left Chest</p>
-                        <p class="text-primary text-[9px] sm:text-[10px] uppercase tracking-widest">Corporate</p>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-2.5 sm:p-3">
+                        <p class="text-white text-xs sm:text-sm font-bold group-hover:text-primary transition-colors flex items-center gap-1">
+                            <span>Left Chest</span>
+                            <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </p>
+                        <p class="text-primary text-[9px] uppercase tracking-widest">Polos &amp; Uniforms</p>
                     </div>
-                </div>
-                <!-- 4. Pet Portraits -->
-                <div
-                    class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 portfolio-card col-span-1 md:col-span-2 md:col-start-2 shadow-xs">
-                    <img alt="Realistic Custom Pet Dog Portrait Embroidery Digitizing on Fabric" title="Pet Portrait Embroidery"
+                </a>
+                <!-- 4. 3D Puff -> 3D Puff Digitizing -->
+                <a href="/embroidery-digitizing/3d-puff-digitizing/"
+                    class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 portfolio-card shadow-xs cursor-pointer block">
+                    <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        alt="High-Density 3D Puff Raised Foam Cap Embroidery Stitchout" title="3D Puff Embroidery Digitizing"
+                        loading="eager"
+                        src="Client FeedBack/3d-puff-cap-embroidery-stitchout.webp" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-2.5 sm:p-3">
+                        <p class="text-white text-xs sm:text-sm font-bold group-hover:text-primary transition-colors flex items-center gap-1">
+                            <span>3D Puff</span>
+                            <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </p>
+                        <p class="text-primary text-[9px] uppercase tracking-widest">Raised Foam</p>
+                    </div>
+                </a>
+                <!-- 5. Pet Portraits -> Pet Portrait Digitizing -->
+                <a href="/embroidery-digitizing/pet-portrait-digitizing/"
+                    class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 portfolio-card shadow-xs cursor-pointer block">
+                    <img alt="Realistic Custom Pet Dog Portrait Embroidery Digitizing on Fabric" title="Pet Portrait Embroidery Digitizing"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                         loading="eager"
                         src="images/pet-embroidery.png?v=4" />
-                    <div
-                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4 pointer-events-none">
-                        <p class="text-white text-xs sm:text-sm font-bold">Pet Portraits</p>
-                        <p class="text-primary text-[9px] sm:text-[10px] uppercase tracking-widest">Embroidery</p>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-2.5 sm:p-3">
+                        <p class="text-white text-xs sm:text-sm font-bold group-hover:text-primary transition-colors flex items-center gap-1">
+                            <span>Pet Portraits</span>
+                            <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </p>
+                        <p class="text-primary text-[9px] uppercase tracking-widest">Realistic Shading</p>
                     </div>
-                </div>
-                <!-- 5. Hand-Drawn Sketch to Vector (New Artwork) -->
-                <a href="vector-art-conversion.html"
-                    class="group relative aspect-[16/10] md:aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 portfolio-card cursor-pointer col-span-2 md:col-span-2 shadow-xs">
+                </a>
+                <!-- 6. Vector Art -> Vector Art Conversion -->
+                <a href="/vector-art-conversion/"
+                    class="group relative aspect-square overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 portfolio-card cursor-pointer shadow-xs block">
                     <img alt="Hand-Drawn Pencil Sketch Converted to Clean Production Vector Art with Color Layers" title="Hand-Drawn Sketch to Vector Art"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                         loading="eager"
                         src="images/vector-art-senior-comparison.png?v=4" />
-                    <div
-                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4 pointer-events-none">
-                        <p class="text-white text-xs sm:text-sm font-bold">Sketch to Vector</p>
-                        <p class="text-primary text-[9px] sm:text-[10px] uppercase tracking-widest">Screen Print Ready</p>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-2.5 sm:p-3">
+                        <p class="text-white text-xs sm:text-sm font-bold group-hover:text-primary transition-colors flex items-center gap-1">
+                            <span>Vector Art</span>
+                            <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </p>
+                        <p class="text-primary text-[9px] uppercase tracking-widest">Screen &amp; DTF</p>
                     </div>
                 </a>
             </div>
@@ -521,8 +551,8 @@
                 <div class="col-span-1 md:col-span-1 lg:col-span-1">
                     <h4 class="text-primary font-bold text-xs uppercase tracking-widest mb-4">Dedicated Services</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a class="hover:text-primary transition-colors" href="embroidery-digitizing.html">Embroidery Digitizing</a></li>
-                        <li><a class="hover:text-primary transition-colors" href="vector-art-conversion.html">Vector Art Conversion</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="/embroidery-digitizing/">Embroidery Digitizing</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="/vector-art-conversion/">Vector Art Conversion</a></li>
                         <li><a class="hover:text-primary transition-colors" href="pricing.html">Flat-Rate Pricing</a></li>
                         <li><a class="hover:text-primary transition-colors" href="services.html">Services Overview</a></li>
                         <li><a class="hover:text-primary transition-colors" href="portfolio.html">Feedbacks / Reviews</a></li>
@@ -563,21 +593,25 @@
     <nav
         class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-t border-primary/20 px-2 pb-5 pt-2">
         <div class="flex justify-around">
-            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="index.html"
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[50px]" href="index.html"
                 data-page="index.html"><span class="material-symbols-outlined text-xl">home</span><span
                     class="text-[10px] font-semibold">Home</span></a>
-            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="services.html"
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[50px]" href="services.html"
                 data-page="services.html"><span class="material-symbols-outlined text-xl">design_services</span><span
                     class="text-[10px] font-semibold">Services</span></a>
-            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="portfolio.html"
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[50px]" href="portfolio.html"
                 data-page="portfolio.html"><span class="material-symbols-outlined text-xl">photo_library</span><span
                     class="text-[10px] font-semibold">Feedbacks</span></a>
-            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="pricing.html"
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[50px]" href="pricing.html"
                 data-page="pricing.html"><span class="material-symbols-outlined text-xl">payments</span><span
                     class="text-[10px] font-semibold">Pricing</span></a>
-            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[56px]" href="contact.html"
+            <a class="flex flex-col items-center gap-0.5 text-slate-400 min-w-[50px]" href="contact.html"
                 data-page="contact.html"><span class="material-symbols-outlined text-xl">mail</span><span
                     class="text-[10px] font-semibold">Contact</span></a>
+            <a class="bottom-nav-dashboard flex flex-col items-center gap-0.5 text-primary min-w-[50px] cursor-pointer" href="client-portal.html" onclick="window.handleDashboardNavClick(event)" title="Access Dashboard">
+                <span class="material-symbols-outlined text-xl">dashboard</span>
+                <span class="text-[10px] font-bold">Dashboard</span>
+            </a>
         </div>
     </nav>
 
