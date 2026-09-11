@@ -26,8 +26,8 @@ const config = {
     uploads: {
         maxFileSize: 50 * 1024 * 1024, // 50 MB
         allowedExtensions: [
-            '.png', '.jpg', '.jpeg', '.pdf', '.ai', '.eps', '.svg', 
-            '.dst', '.emb', '.pxf', '.pes', '.exp', '.cnd', '.jef', 
+            '.png', '.jpg', '.jpeg', '.webp', '.pdf', '.ai', '.eps', '.svg', 
+            '.dst', '.emb', '.pxf', '.pes', '.exp', '.cnd', '.jef', '.vp3', '.ofm', '.xxx', '.hus',
             '.zip', '.rar'
         ],
         artworksDir: (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME)

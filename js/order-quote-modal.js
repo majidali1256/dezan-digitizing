@@ -546,11 +546,11 @@
                             <div>
                                 <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Artwork Upload (Drag &amp; Drop or Browse) *</label>
                                 <div id="dropzone" onclick="document.getElementById('artwork-file').click()" class="border-2 border-dashed border-slate-300 dark:border-primary/30 hover:border-primary rounded-xl p-3.5 sm:p-5 text-center cursor-pointer bg-slate-50 dark:bg-slate-950/40 transition-all hover:bg-amber-50/20">
-                                    <span class="material-symbols-outlined text-amber-700 dark:text-primary text-2xl sm:text-3xl mb-0.5">cloud_upload</span>
-                                    <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Tap to upload or drag artwork file here</p>
-                                    <p class="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Supports PNG, JPG, PDF, AI, EPS, SVG, or ZIP (Multiple files supported)</p>
-                                    <input type="file" id="artwork-file" onchange="window.handleFileSelected(event)" class="hidden" accept=".ai,.eps,.pdf,.png,.jpg,.jpeg,.svg,.zip,.dst,.emb" multiple />
+                                    <span class="material-symbols-outlined text-amber-700 dark:text-primary text-2xl sm:text-3xl mb-0.5 pointer-events-none">cloud_upload</span>
+                                    <p class="text-xs font-bold text-slate-800 dark:text-slate-200 pointer-events-none">Tap to upload or drag artwork file here</p>
+                                    <p class="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5 pointer-events-none">Supports PNG, JPG, WEBP, PDF, AI, EPS, SVG, or ZIP (Multiple files supported)</p>
                                 </div>
+                                <input type="file" id="artwork-file" onchange="window.handleFileSelected(event)" class="hidden" accept=".ai,.eps,.pdf,.png,.jpg,.jpeg,.svg,.zip,.dst,.emb,.webp" multiple onclick="event.stopPropagation()" />
                                 <div id="file-preview-container" class="hidden mt-2 space-y-1.5">
                                     <!-- Populated by JS -->
                                 </div>

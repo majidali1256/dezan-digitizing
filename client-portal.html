@@ -884,11 +884,11 @@
                         <div>
                             <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Artwork Upload (Drag &amp; Drop or Browse) *</label>
                             <div id="dropzone" onclick="document.getElementById('artwork-file').click()" class="border-2 border-dashed border-slate-300 dark:border-primary/30 hover:border-primary rounded-xl p-3.5 sm:p-5 text-center cursor-pointer bg-slate-50 dark:bg-slate-950/40 transition-all hover:bg-amber-50/20">
-                                <span class="material-symbols-outlined text-amber-700 dark:text-primary text-2xl sm:text-3xl mb-0.5">cloud_upload</span>
-                                <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Tap to upload or drag artwork file here</p>
-                                <p class="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Supports PNG, JPG, PDF, AI, EPS, SVG, or ZIP</p>
-                                <input type="file" id="artwork-file" onchange="handleFileSelected(event)" class="hidden" accept=".ai,.eps,.pdf,.png,.jpg,.jpeg,.svg,.zip" multiple />
+                                <span class="material-symbols-outlined text-amber-700 dark:text-primary text-2xl sm:text-3xl mb-0.5 pointer-events-none">cloud_upload</span>
+                                <p class="text-xs font-bold text-slate-800 dark:text-slate-200 pointer-events-none">Tap to upload or drag artwork file here</p>
+                                <p class="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5 pointer-events-none">Supports PNG, JPG, WEBP, PDF, AI, EPS, SVG, or ZIP</p>
                             </div>
+                            <input type="file" id="artwork-file" onchange="handleFileSelected(event)" class="hidden" accept=".ai,.eps,.pdf,.png,.jpg,.jpeg,.webp,.svg,.zip" multiple onclick="event.stopPropagation()" />
                             <div id="file-preview-container" class="hidden mt-2 space-y-1.5">
                                 <!-- Populated by JS -->
                             </div>
@@ -1173,11 +1173,11 @@
                         <span class="text-[10px] font-normal lowercase text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">(optional)</span>
                     </label>
                     <div id="stitch-out-dropzone" onclick="document.getElementById('stitch-out-file').click()" ondragover="event.preventDefault(); this.classList.add('border-primary', 'bg-amber-50/20');" ondragleave="this.classList.remove('border-primary', 'bg-amber-50/20');" ondrop="handleStitchOutDrop(event)" class="border-2 border-dashed border-slate-300 dark:border-primary/30 hover:border-primary rounded-xl p-3.5 sm:p-4 text-center cursor-pointer bg-slate-50/50 dark:bg-slate-950/40 transition-all hover:bg-slate-100/60 dark:hover:bg-slate-900/60">
-                        <span class="material-symbols-outlined text-amber-600 dark:text-primary text-2xl sm:text-3xl mb-1">add_a_photo</span>
-                        <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Upload Photo or Screenshot</p>
-                        <p class="text-[10px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">Attach a photo of the stitch-out, garment, or marked-up artwork to show what needs fixing. (Optional)</p>
-                        <input type="file" id="stitch-out-file" onchange="handleStitchOutPhotoSelected(event)" class="hidden" accept="image/*" />
+                        <span class="material-symbols-outlined text-amber-600 dark:text-primary text-2xl sm:text-3xl mb-1 pointer-events-none">add_a_photo</span>
+                        <p class="text-xs font-bold text-slate-800 dark:text-slate-200 pointer-events-none">Upload Photo or Screenshot</p>
+                        <p class="text-[10px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5 pointer-events-none">Attach a photo of the stitch-out, garment, or marked-up artwork to show what needs fixing. (Optional)</p>
                     </div>
+                    <input type="file" id="stitch-out-file" onchange="handleStitchOutPhotoSelected(event)" class="hidden" accept="image/*,.webp" onclick="event.stopPropagation()" />
                     
                     <!-- Live Thumbnail Preview -->
                     <div id="stitch-out-preview-card" class="hidden mt-2.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/20 flex items-center justify-between">

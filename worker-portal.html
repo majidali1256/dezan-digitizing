@@ -851,15 +851,15 @@
 
             <!-- Large Gmail-Style Attachment Area: 📎 Add Files (Select multiple files at once) -->
             <div id="digitizer-upload-dropzone" onclick="document.getElementById('modal-deliverable-file-input').click()" class="gmail-upload-area p-6 rounded-2xl text-center cursor-pointer transition-all hover:border-amber-500/80 mb-4 flex flex-col items-center justify-center gap-1.5 group">
-                <div class="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-800 dark:text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-800 dark:text-primary flex items-center justify-center group-hover:scale-110 transition-transform pointer-events-none">
                     <span class="material-symbols-outlined text-2xl">attach_file</span>
                 </div>
-                <div class="font-black text-sm text-slate-900 dark:text-white flex items-center gap-1.5 mt-1">
+                <div class="font-black text-sm text-slate-900 dark:text-white flex items-center gap-1.5 mt-1 pointer-events-none">
                     <span>📎 Add Files</span>
                 </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Select several files at once or drop them here</p>
-                <input type="file" id="modal-deliverable-file-input" multiple accept=".dst,.emb,.pes,.exp,.jef,.vp3,.ofm,.cnd,.xxx,.hus,.ai,.eps,.svg,.pdf,.jpg,.jpeg,.png,.webp,.zip" class="hidden" onchange="handleModalDeliverableFileInput(event)" />
+                <p class="text-xs text-slate-500 dark:text-slate-400 pointer-events-none">Select several files at once or drop them here</p>
             </div>
+            <input type="file" id="modal-deliverable-file-input" multiple accept=".dst,.emb,.pes,.exp,.jef,.vp3,.ofm,.cnd,.xxx,.hus,.ai,.eps,.svg,.pdf,.jpg,.jpeg,.png,.webp,.zip" class="hidden" onchange="handleModalDeliverableFileInput(event)" onclick="event.stopPropagation()" />
 
             <!-- Auto-recognized Extensions Live Checklist -->
             <div class="mb-4">
@@ -1054,7 +1054,26 @@
             }
 
             // STRICT MASKING: queries sanitized digitizer tasks only (zero quotes, zero client info, zero pricing)
-            allWorkerTasks = (rawTasks || []).filter(t => !t.is_quote && !t.isQuote && !(t.orderNumber && t.orderNumber.startsWith('QUO-')));
+            allWorkerTasks = (rawTasks || []).map(t => {
+                const orderNum = t.orderNumber || t.order_number || (t.task_number ? t.task_number.replace('TSK-', 'ORD-') : (t.taskId ? t.taskId.replace('TSK-', 'ORD-') : 'ORD-NEW'));
+                const taskNum = t.taskNumber || t.task_number || (orderNum ? orderNum.replace('ORD-', 'TSK-') : 'TSK-NEW');
+                return {
+                    ...t,
+                    orderNumber: orderNum,
+                    order_number: orderNum,
+                    taskNumber: taskNum,
+                    task_number: taskNum,
+                    designName: t.designName || t.design_name || t.project_name || t.placement || 'Custom Embroidery',
+                    placement: t.placement || t.target_placement || 'Left Chest',
+                    sizing: t.sizing || t.dimensions || 'Standard',
+                    fabricType: t.fabricType || t.fabric_type || 'Pique Polo',
+                    fabric_type: t.fabric_type || t.fabricType || 'Pique Polo',
+                    fileFormat: t.fileFormat || t.file_format || t.target_format || 'DST, EMB',
+                    file_format: t.file_format || t.fileFormat || t.target_format || 'DST, EMB',
+                    isRush: t.isRush || t.turnaround_speed === 'rush' || t.priority === 'rush',
+                    deliverables: t.deliverables || []
+                };
+            }).filter(t => !t.is_quote && !t.isQuote && !(t.orderNumber && t.orderNumber.startsWith('QUO-')));
 
             if (syncText) {
                 const status = window.insforgeClient?.getDatabaseSyncStatus?.() || { lastSynced: 'Just now' };
@@ -2094,8 +2113,29 @@
         let currentUploadModalTask = null;
 
         function openDeliverableUploadModal(orderNumber) {
-            const task = allWorkerTasks.find(t => t.orderNumber === orderNumber);
-            if (!task) return;
+            const cleanNum = String(orderNumber || '').replace('#', '').trim();
+            let task = allWorkerTasks.find(t => 
+                (t.orderNumber && t.orderNumber === cleanNum) || 
+                (t.order_number && t.order_number === cleanNum) ||
+                (t.taskNumber && t.taskNumber === cleanNum) ||
+                (t.task_number && t.task_number === cleanNum) ||
+                (t.id && String(t.id) === cleanNum)
+            );
+            if (!task) {
+                task = {
+                    orderNumber: cleanNum || 'ORD-NEW',
+                    order_number: cleanNum || 'ORD-NEW',
+                    designName: 'Production Work Order',
+                    placement: 'Left Chest',
+                    sizing: 'Standard Size',
+                    fabricType: 'Fabric',
+                    fileFormat: 'DST, EMB',
+                    isRush: false,
+                    status: 'in_progress',
+                    deliverables: []
+                };
+                allWorkerTasks.push(task);
+            }
             currentUploadModalTask = task;
 
             const orderNumEl = document.getElementById('upload-modal-order-number');
@@ -2383,7 +2423,12 @@
 
         // Modal Handlers
         function openTaskDetailsModal(orderNumber) {
-            const task = allWorkerTasks.find(t => t.orderNumber === orderNumber);
+            const task = allWorkerTasks.find(t => 
+                (t.orderNumber && t.orderNumber === orderNumber) || 
+                (t.order_number && t.order_number === orderNumber) || 
+                (t.task_number && t.task_number === orderNumber) || 
+                (t.id && t.id === orderNumber)
+            );
             if (!task) return;
 
             // When the digitizer opens "View Order", remove the unread dot and record viewed timestamp
@@ -2562,7 +2607,7 @@
                     attachBtn.classList.remove('hidden');
                     attachBtn.onclick = () => {
                         closeTaskDetailsModal();
-                        openDeliverableUploadModal(task.orderNumber);
+                        openDeliverableUploadModal(task.orderNumber || task.order_number || task.task_number || task.id);
                     };
                 }
             }
@@ -2571,7 +2616,12 @@
         }
 
         async function startDigitizerOrder(orderNumber) {
-            const task = allWorkerTasks.find(t => t.orderNumber === orderNumber);
+            const task = allWorkerTasks.find(t => 
+                (t.orderNumber && t.orderNumber === orderNumber) || 
+                (t.order_number && t.order_number === orderNumber) || 
+                (t.task_number && t.task_number === orderNumber) || 
+                (t.id && t.id === orderNumber)
+            );
             const startBtn = document.getElementById('modal-details-start-btn');
             if (startBtn) {
                 startBtn.disabled = true;
@@ -2623,7 +2673,12 @@
         let currentDigitizerPreviewOrder = null;
 
         function openDigitizerArtworkPreview(orderNumber, fileIndex = 0, sourceType = 'artwork') {
-            const task = allWorkerTasks.find(t => t.orderNumber === orderNumber);
+            const task = allWorkerTasks.find(t => 
+                (t.orderNumber && t.orderNumber === orderNumber) || 
+                (t.order_number && t.order_number === orderNumber) || 
+                (t.task_number && t.task_number === orderNumber) || 
+                (t.id && t.id === orderNumber)
+            );
             if (!task) return;
 
             let files = [];

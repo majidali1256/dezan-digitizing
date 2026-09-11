@@ -175,7 +175,7 @@ const uploadDeliverables = async (req, res) => {
             return badRequest(res, 'At least one deliverable file specification is required');
         }
 
-        const taskRes = await query('SELECT * FROM public.digitizer_tasks WHERE (id::text = $1 OR task_number = $1)', [id]);
+        const taskRes = await query('SELECT * FROM public.digitizer_tasks WHERE (id::text = $1 OR task_number = $1 OR order_number = $1)', [id]);
         if (taskRes.rows.length === 0) {
             return notFound(res, 'Task not found');
         }

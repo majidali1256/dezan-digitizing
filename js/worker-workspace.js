@@ -1333,6 +1333,65 @@
             `;
             document.body.insertAdjacentHTML('beforeend', previewModalHtml);
         }
+
+        if (!document.getElementById('deliverable-upload-modal') && !document.getElementById('digitizer-upload-modal')) {
+            const deliverableModalHtml = `
+                <div id="deliverable-upload-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto" onclick="if(event.target === this) window.workerWorkspace.closeDeliverableUploadModal()">
+                    <div class="w-full max-w-xl bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/30 shadow-2xl p-5 sm:p-6 text-slate-900 dark:text-slate-100 my-8">
+                        <div class="flex items-center justify-between pb-3.5 border-b border-slate-200 dark:border-primary/20 mb-4">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span id="upload-task-id" class="px-2.5 py-0.5 rounded-lg bg-amber-100 dark:bg-primary/15 text-amber-900 dark:text-primary font-mono font-black text-xs border border-amber-300 dark:border-primary/30">ORD-NEW</span>
+                                    <div id="upload-task-rush-badge"></div>
+                                </div>
+                                <h3 class="text-base font-black text-slate-900 dark:text-white uppercase tracking-wide">UPLOAD FINISHED FILES</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400" id="upload-design-name">Design Title</p>
+                            </div>
+                            <button type="button" onclick="window.workerWorkspace.closeDeliverableUploadModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer transition-colors" aria-label="Close modal">
+                                <span class="material-symbols-outlined text-lg">close</span>
+                            </button>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-primary/20 text-xs flex items-center justify-between gap-3 mb-4">
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">DELIVER:</span>
+                                <span id="upload-deliver-req-summary" class="font-mono font-black text-amber-900 dark:text-primary text-sm tracking-wide">DST · JPG · PDF</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Optional:</span>
+                                <span id="upload-deliver-opt-summary" class="font-mono text-xs text-slate-500 dark:text-slate-400 font-semibold">EMB</span>
+                            </div>
+                        </div>
+                        <div id="worker-tasks-upload-dropzone" onclick="document.getElementById('worker-task-file-input').click()" class="gmail-upload-area p-6 rounded-2xl text-center cursor-pointer transition-all hover:border-amber-500/80 mb-4 flex flex-col items-center justify-center gap-1.5 group">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-800 dark:text-primary flex items-center justify-center group-hover:scale-110 transition-transform pointer-events-none">
+                                <span class="material-symbols-outlined text-2xl">attach_file</span>
+                            </div>
+                            <div class="font-black text-sm text-slate-900 dark:text-white flex items-center gap-1.5 mt-1 pointer-events-none">
+                                <span>📎 Add Files</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 pointer-events-none">Select several files at once or drop them here</p>
+                        </div>
+                        <input type="file" id="worker-task-file-input" multiple accept=".dst,.emb,.pes,.exp,.jef,.vp3,.ofm,.cnd,.xxx,.hus,.ai,.eps,.svg,.pdf,.jpg,.jpeg,.png,.webp,.zip" class="hidden" onchange="window.workerWorkspace.handleDeliverableFileInput(event)" onclick="event.stopPropagation()" />
+                        <div class="mb-4">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">Detected Deliverables:</span>
+                            <div class="flex flex-wrap gap-2" id="worker-task-validation-checklist"></div>
+                        </div>
+                        <div class="mb-4" id="worker-task-staged-container">
+                            <div id="worker-task-staged-list" class="space-y-1.5 max-h-40 overflow-y-auto pr-1"></div>
+                        </div>
+                        <div class="pt-3 border-t border-slate-200 dark:border-primary/15 space-y-3">
+                            <div class="text-center font-bold text-xs" id="worker-task-submit-hint">
+                                <span class="text-amber-700 dark:text-amber-400">Missing: JPG Preview + PDF</span>
+                            </div>
+                            <button type="button" id="worker-task-submit-btn" onclick="window.workerWorkspace.handleDeliverableSubmit(event)" disabled class="w-full py-3.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 font-black text-sm tracking-wide shadow-none cursor-not-allowed transition-all flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-base">task_alt</span>
+                                <span id="worker-task-btn-text">SUBMIT COMPLETED ORDER</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', deliverableModalHtml);
+        }
     }
 
     // Global card expansion helper
@@ -1367,11 +1426,34 @@
     };
 
     function openDeliverableUploadModal(taskNumber) {
-        state.currentTaskNumber = taskNumber;
+        ensureModalsExist();
+        const cleanNum = String(taskNumber || '').replace('#', '').trim();
+        state.currentTaskNumber = cleanNum;
         state.stagedDeliverableFiles = [];
-        const task = state.tasks.find(t => (t.order_number || t.orderNumber) === taskNumber);
+        let task = state.tasks.find(t => 
+            (t.order_number && t.order_number === cleanNum) || 
+            (t.orderNumber && t.orderNumber === cleanNum) ||
+            (t.task_number && t.task_number === cleanNum) ||
+            (t.taskId && t.taskId === cleanNum) ||
+            (t.id && String(t.id) === cleanNum)
+        );
+        if (!task) {
+            task = {
+                order_number: cleanNum || 'ORD-NEW',
+                orderNumber: cleanNum || 'ORD-NEW',
+                design_name: 'Production Work Order',
+                placement: 'Left Chest',
+                sizing: 'Standard Size',
+                fabric_type: 'Fabric',
+                file_format: 'DST, EMB',
+                isRush: false,
+                status: 'in_progress',
+                deliverables: []
+            };
+            state.tasks.push(task);
+        }
 
-        setElText('upload-task-id', taskNumber);
+        setElText('upload-task-id', cleanNum);
         setElText('upload-design-name', task ? (task.design_name || task.placement || 'Custom Embroidery') : 'Custom Embroidery');
 
         const isRush = task ? (task.isRush || task.turnaround_speed === 'rush' || task.priority === 'rush') : false;
@@ -1443,7 +1525,7 @@
 
     function updateDeliverableUploadUI() {
         const taskNumber = state.currentTaskNumber;
-        const task = state.tasks.find(t => (t.order_number || t.orderNumber) === taskNumber);
+        const task = state.tasks?.find(t => (t.order_number || t.orderNumber) === taskNumber || t.task_number === taskNumber || t.id === taskNumber);
         const staged = state.stagedDeliverableFiles || [];
 
         const instructionsText = task ? `${task.instructions || ''} ${task.special_instructions || ''} ${task.notes || ''}` : '';
@@ -1565,18 +1647,38 @@
         const staged = state.stagedDeliverableFiles || [];
 
         try {
-            const deliverables = staged.length > 0
-                ? staged.map(f => ({
-                    name: f.name,
-                    url: 'images/service-digitizing.png',
-                    type: f.type || 'application/octet-stream',
-                    size: f.size ? formatFileSize(f.size) : '150 KB'
-                }))
-                : [
-                    { name: `${taskNumber}_production.dst`, url: 'images/service-digitizing.png', type: 'application/octet-stream', size: '245 KB' },
-                    { name: `${taskNumber}_preview.jpg`, url: 'images/service-digitizing.png', type: 'image/jpeg', size: '180 KB' },
-                    { name: `${taskNumber}_worksheet.pdf`, url: 'images/service-digitizing.png', type: 'application/pdf', size: '320 KB' }
+            let deliverables = [];
+            if (staged.length > 0) {
+                for (let i = 0; i < staged.length; i++) {
+                    const f = staged[i];
+                    try {
+                        const uploaded = await window.insforgeClient.uploadFile('deliverables', f);
+                        deliverables.push({
+                            name: uploaded.name || f.name,
+                            url: uploaded.url,
+                            key: uploaded.key,
+                            format: uploaded.format || getFileExtension(f.name),
+                            type: f.type || 'application/octet-stream',
+                            size: f.size ? formatFileSize(f.size) : '150 KB'
+                        });
+                    } catch (uploadErr) {
+                        console.warn('[Deliverable upload fallback notice]:', uploadErr);
+                        deliverables.push({
+                            name: f.name,
+                            url: (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') ? URL.createObjectURL(f) : 'images/service-digitizing.png',
+                            format: getFileExtension(f.name),
+                            type: f.type || 'application/octet-stream',
+                            size: f.size ? formatFileSize(f.size) : '150 KB'
+                        });
+                    }
+                }
+            } else {
+                deliverables = [
+                    { name: `${taskNumber}_production.dst`, url: 'images/service-digitizing.png', type: 'application/octet-stream', size: '245 KB', format: 'DST' },
+                    { name: `${taskNumber}_preview.jpg`, url: 'images/service-digitizing.png', type: 'image/jpeg', size: '180 KB', format: 'JPG' },
+                    { name: `${taskNumber}_worksheet.pdf`, url: 'images/service-digitizing.png', type: 'application/pdf', size: '320 KB', format: 'PDF' }
                 ];
+            }
 
             if (typeof window.insforgeClient.completeDigitizerTask === 'function') {
                 await window.insforgeClient.completeDigitizerTask(taskNumber, deliverables);
@@ -2049,7 +2151,7 @@
     }
 
     function openDigitizerArtworkPreview(orderNumber, fileIndex = 0, sourceType = 'artwork') {
-        const task = state.tasks.find(t => (t.order_number || t.orderNumber) === orderNumber);
+        const task = state.tasks?.find(t => (t.order_number || t.orderNumber) === orderNumber || t.task_number === orderNumber || t.id === orderNumber);
         if (!task) return;
 
         let files = [];

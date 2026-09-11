@@ -202,11 +202,11 @@
                         <span class="text-[10px] font-normal lowercase text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">(optional)</span>
                     </label>
                     <div id="revision-photo-dropzone" onclick="document.getElementById('revision-photo-file').click()" ondragover="event.preventDefault(); this.classList.add('border-primary', 'bg-amber-50/20');" ondragleave="this.classList.remove('border-primary', 'bg-amber-50/20');" ondrop="window.clientWorkspace.handleRevisionPhotoDrop(event)" class="border-2 border-dashed border-slate-300 dark:border-primary/30 hover:border-primary rounded-xl p-3.5 sm:p-4 text-center cursor-pointer bg-slate-50/50 dark:bg-slate-950/40 transition-all hover:bg-slate-100/60 dark:hover:bg-slate-900/60">
-                        <span class="material-symbols-outlined text-amber-600 dark:text-primary text-2xl mb-1">add_a_photo</span>
-                        <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Upload Photo or Screenshot</p>
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Attach a photo of the stitch-out, garment, or marked-up artwork to show what needs fixing. (Optional)</p>
-                        <input type="file" id="revision-photo-file" onchange="window.clientWorkspace.handleRevisionPhotoSelected(event)" class="hidden" accept="image/*" />
+                        <span class="material-symbols-outlined text-amber-600 dark:text-primary text-2xl mb-1 pointer-events-none">add_a_photo</span>
+                        <p class="text-xs font-bold text-slate-800 dark:text-slate-200 pointer-events-none">Upload Photo or Screenshot</p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 pointer-events-none">Attach a photo of the stitch-out, garment, or marked-up artwork to show what needs fixing. (Optional)</p>
                     </div>
+                    <input type="file" id="revision-photo-file" onchange="window.clientWorkspace.handleRevisionPhotoSelected(event)" class="hidden" accept="image/*,.webp" onclick="event.stopPropagation()" />
                     <!-- Live Thumbnail Preview -->
                     <div id="revision-photo-preview-card" class="hidden mt-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-primary/20 flex items-center justify-between">
                         <div class="flex items-center gap-2.5">
