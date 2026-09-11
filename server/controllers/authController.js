@@ -85,6 +85,10 @@ const register = async (req, res) => {
             console.warn('[Guest Order Claim Notice]:', claimErr.message);
         }
 
+        // Notify master admin of new client registration
+        emailService.sendNewUserRegistrationAdminAlert(newUser)
+            .catch(e => console.warn('[Admin New User Alert Error]:', e.message));
+
         const token = generateToken(newUser);
 
         return success(res, {
@@ -484,6 +488,10 @@ const googleAuth = async (req, res) => {
             } catch (claimErr) {
                 console.warn('[Google Guest Claim]:', claimErr.message);
             }
+
+            // Notify master admin of new client registration
+            emailService.sendNewUserRegistrationAdminAlert(user)
+                .catch(e => console.warn('[Admin Google User Alert Error]:', e.message));
         }
 
         const token = generateToken(user);

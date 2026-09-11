@@ -112,7 +112,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 
 ### 4.4 Staff Account Order & Quote Restriction Policy (Admin & Digitizer)
 - **Problem & Requirement**:
-  - Administrative and digitizer production staff members must not create customer orders or quote appraisals under their staff credentials or staff email addresses (`admin@dezandigitizing.com`, `digitizer@dezandigitizing.com`).
+  - Administrative and digitizer production staff members must not create customer orders or quote appraisals under their staff credentials or staff email addresses (`fdezan91@gmail.com`, `admin@dezandigitizing.com`, `digitizer@dezandigitizing.com`).
   - When an authenticated admin or digitizer attempts to order or request a quote from any button across the marketing website or portals, show: **"You can't place orders from this account"**.
 - **Implementation & Architecture**:
   1. **Frontend Dispatcher Guard (`app.js`)**:
@@ -121,13 +121,13 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
      - `window.signOutStaffToGuestOrder()`: Clears storage sessions and opens the order modal cleanly for guest checkout.
   2. **Unified Modal Guard (`js/order-quote-modal.js`)**:
      - `window.openOrderQuoteModal()`: Aborts immediately and triggers `showStaffOrderBlockModal` if current session has role `admin` or `digitizer`.
-     - `window.submitOrderQuoteForm()`: Fallback guard intercepting form submissions with staff session or staff emails (`admin@dezandigitizing.com` / `digitizer@dezandigitizing.com`).
+     - `window.submitOrderQuoteForm()`: Fallback guard intercepting form submissions with staff session or staff emails (`fdezan91@gmail.com` / `admin@dezandigitizing.com` / `digitizer@dezandigitizing.com`).
   3. **Client SDK Guard (`js/insforge-client.js`)**:
-     - `createOrder()`: Throws an explicit `Error("You can't place orders from this account")` if `user.role === 'admin' || user.role === 'digitizer'` or matching staff email addresses.
+     - `createOrder()`: Throws an explicit `Error("You can't place orders from this account")` if `user.role === 'admin' || user.role === 'digitizer'` or matching staff email addresses (`fdezan91@gmail.com`, `admin@dezandigitizing.com`, `digitizer@dezandigitizing.com`).
   4. **Client Workspace Protection (`js/client-workspace.js`)**:
      - Automatically redirects staff users visiting `client-portal.html` back to `admin-portal.html` or `worker-portal.html` rather than overwriting their staff session with a demo client.
   5. **Backend Database & API Controller Enforcement (`server/controllers/orderController.js` & `quoteController.js`)**:
-     - `POST /api/orders` & `POST /api/quotes`: Strict 403 Forbidden rejection with `"You can't place orders from this account"` if `req.user.role` is `admin` or `digitizer`, or if client email equals `admin@dezandigitizing.com` or `digitizer@dezandigitizing.com`.
+     - `POST /api/orders` & `POST /api/quotes`: Strict 403 Forbidden rejection with `"You can't place orders from this account"` if `req.user.role` is `admin` or `digitizer`, or if client email equals `fdezan91@gmail.com`, `admin@dezandigitizing.com`, or `digitizer@dezandigitizing.com`. Runs before general payload parameter checks.
 
 ### 4.5 Hero Comparison Slider & Brand Logo Refresh Glitch Elimination
 - **Problem**:
@@ -739,11 +739,21 @@ To prevent data leakage via browser DevTools:
     - **Automated Verification**:
       - 100% verified with automated Playwright headless test (`scratch/test_single_digitizer_workflow.js`): verified toggle ON, direct auto-assignment to Digitizer, immediate presence in worker portal active queue, toggle OFF, and 1-click batch assignment.
 - **Strict Staff Credentials & Role-Based Authentication (`portal-login.html`, `server/controllers/authController.js`, `js/insforge-client.js`)**:
-  - Only two internal staff accounts exist:
-    1. **Master Admin**: `admin@dezandigitizing.com` / `Wasif8899@@@`
+  - Only two internal staff roles exist:
+    1. **Master Admin**: `fdezan91@gmail.com` (Primary Operational Admin Inbox & Account) & `admin@dezandigitizing.com` / `Wasif8899@@@` (display name: **Felix Dezan (Admin)**)
+       - Registered in PostgreSQL `auth.users` (`id: 00000000-0000-0000-0000-000000000002`, `is_project_admin: true`) and `public.profiles` (`role: 'admin'`).
+       - Supports direct password authentication (`Wasif8899@@@`) and 1-click Google OAuth authentication with immediate `role: 'admin'` resolution.
     2. **Digitizer**: `digitizer@dezandigitizing.com` / `Pakistan6677@@@` (display name: strictly **Digitizer**)
-  - All old demo worker accounts (`worker.alex@...`, `worker.sam@...`, `worker.maria@...`) permanently removed from PostgreSQL DB and client-side code.
-  - Password enforcement strictly verified: only the given password functions for the Digitizer account; invalid passwords return HTTP 401.
+  - All old demo worker accounts permanently removed from PostgreSQL DB and client-side code.
+  - Password enforcement strictly verified: only the designated passwords function for staff accounts; invalid passwords return HTTP 401.
+- **Universal Admin Event Alert Architecture (`server/services/emailService.js`)**:
+  - Destination: Every administrative email and dashboard notification is routed to `fdezan91@gmail.com` (configured via `ADMIN_EMAIL` in `.env.local`, `config.email.adminEmail`, and `EmailService.adminEmail`).
+  - Automated Event Triggers:
+    1. **New Customer Order Placed (`sendNewOrderAdminAlert`)**: Immediate notification with order number, customer contact, service tier, placement, and price.
+    2. **New Quote Appraisal Request (`sendNewQuoteAdminAlert`)**: Immediate notification with quote number, customer contact, service type, artwork specs, and direct admin appraisal link.
+    3. **Customer Revision Requested (`sendRevisionAdminAlert`)**: Priority notification with order number, customer correction notes, and sew-out defect photos attached.
+    4. **Digitizer Deliverables Uploaded (`sendDeliverablesUploadedAdminAlert`)**: Production completion notification when assigned digitizer finishes work, listing files and direct admin inspection link.
+    5. **New Customer Registration (`sendNewUserRegistrationAdminAlert`)**: Notification when a customer registers via regular email or Google OAuth with profile details.
 - **Optional Account Convenience & Automatic Guest Order Claiming**:
   - Customer checkout is completely frictionless: client can upload logo, specify details, pay, and receive instant confirmation without creating an account.
   - On `order-success.html`, guest customers can optionally create a password with 1 click.

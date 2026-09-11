@@ -24,15 +24,12 @@ const requestQuote = async (req, res) => {
             instructions,
             rawArtworkFiles = [],
             specialOptions = {},
+            turnaroundSpeed = 'standard',
             // Guest details if not logged in
             clientName,
             clientEmail,
             clientCompany
         } = req.body;
-
-        if (!serviceType || !projectName || !placement) {
-            return badRequest(res, 'Service type, project name, and placement are required');
-        }
 
         let clientId = null;
         let finalClientName = clientName;
@@ -50,8 +47,12 @@ const requestQuote = async (req, res) => {
         }
 
         const normalizedCheckEmail = (finalClientEmail || '').trim().toLowerCase();
-        if (normalizedCheckEmail === 'admin@dezandigitizing.com' || normalizedCheckEmail === 'digitizer@dezandigitizing.com') {
+        if (normalizedCheckEmail === 'admin@dezandigitizing.com' || normalizedCheckEmail === 'fdezan91@gmail.com' || normalizedCheckEmail === 'digitizer@dezandigitizing.com') {
             return forbidden(res, "You can't place orders from this account");
+        }
+
+        if (!serviceType || !projectName || !placement) {
+            return badRequest(res, 'Service type, project name, and placement are required');
         }
 
         if (!finalClientEmail || !finalClientName) {
@@ -64,29 +65,28 @@ const requestQuote = async (req, res) => {
         const insertRes = await query(
             `INSERT INTO public.orders 
                 (id, order_number, client_id, client_name, client_email, client_company,
-                 service_type, plan_name, project_name, placement, sizing, fabric_type,
-                 file_format, instructions, raw_artwork_files, price, currency,
-                 payment_status, status, is_quote, special_options, turnaround_speed,
-                 revision_count, created_at, updated_at)
-             VALUES 
-                ($1, $2, $3, $4, $5, $6, $7, 'Custom Quote Appraisal', $8, $9, $10, $11,
-                 $12, $13, $14, 0.00, 'USD', 'unpaid', 'quote_requested', true, $15,
-                 'standard', 0, NOW(), NOW())
+                 service_type, plan_name, project_name, turnaround_speed, placement, sizing,
+                 fabric_type, file_format, instructions, price, currency, status,
+                 payment_status, is_quote, raw_artwork_files, special_options, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, 'USD', 'quote_requested', 'unpaid', true, $17, $18, NOW(), NOW())
              RETURNING *`,
             [
                 quoteId,
                 quoteNumber,
-                clientId,
-                finalClientName,
+                req.user ? req.user.id : null,
+                finalClientName.trim(),
                 finalClientEmail.toLowerCase().trim(),
                 finalClientCompany,
                 serviceType,
-                projectName,
-                placement,
-                sizing || 'Custom Dimensions',
-                fabricType || 'Standard Material',
-                fileFormat || 'DST, EMB',
+                'Quote Request',
+                projectName || 'Custom Artwork',
+                turnaroundSpeed || 'standard',
+                placement || 'Standard',
+                sizing || 'Standard',
+                fabricType || 'Standard',
+                fileFormat || '.DST, .PES, .EMB',
                 instructions || '',
+                0.00,
                 JSON.stringify(rawArtworkFiles),
                 JSON.stringify(specialOptions)
             ]
@@ -94,21 +94,11 @@ const requestQuote = async (req, res) => {
 
         const createdQuote = insertRes.rows[0];
 
-        // Trigger asynchronous email alerts
+        // Trigger asynchronous email alerts (Client Confirmation + Admin Notification to fdezan91@gmail.com)
         emailService.sendQuoteEstimationAlert(createdQuote, finalClientEmail.toLowerCase().trim())
             .catch(e => console.warn('[Quote Email Warning]:', e.message));
-        emailService.sendNewOrderAdminAlert({
-            order_number: createdQuote.order_number,
-            customer_name: createdQuote.client_name,
-            customer_email: createdQuote.client_email,
-            service_type: createdQuote.service_type,
-            plan: 'Quote Request',
-            placement: createdQuote.placement,
-            target_size: createdQuote.sizing,
-            price: 0,
-            payment_method: 'N/A (Quote)',
-            payment_status: 'quote_requested'
-        }).catch(e => console.warn('[Quote Admin Alert Warning]:', e.message));
+        emailService.sendNewQuoteAdminAlert(createdQuote)
+            .catch(e => console.warn('[Quote Admin Alert Warning]:', e.message));
 
         return success(res, createdQuote, 'Quote request submitted successfully. Admin will appraise shortly.', 201);
     } catch (err) {

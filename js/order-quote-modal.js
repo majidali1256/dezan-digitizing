@@ -1376,7 +1376,7 @@
             clientEmail = (modal.querySelector('#order-client-email')?.value || '').trim();
 
             const normalizedEmail = clientEmail.toLowerCase();
-            if (normalizedEmail === 'admin@dezandigitizing.com' || normalizedEmail === 'digitizer@dezandigitizing.com') {
+            if (normalizedEmail === 'admin@dezandigitizing.com' || normalizedEmail === 'fdezan91@gmail.com' || normalizedEmail === 'digitizer@dezandigitizing.com') {
                 if (typeof window.showStaffOrderBlockModal === 'function') {
                     window.showStaffOrderBlockModal(normalizedEmail.includes('digitizer') ? 'digitizer' : 'admin', clientEmail);
                 } else {
@@ -2187,7 +2187,7 @@
             clientEmail = (modal.querySelector('#order-client-email')?.value || '').trim();
 
             const normalizedEmail = clientEmail.toLowerCase();
-            if (normalizedEmail === 'admin@dezandigitizing.com' || normalizedEmail === 'digitizer@dezandigitizing.com') {
+            if (normalizedEmail === 'admin@dezandigitizing.com' || normalizedEmail === 'fdezan91@gmail.com' || normalizedEmail === 'digitizer@dezandigitizing.com') {
                 if (typeof window.showStaffOrderBlockModal === 'function') {
                     window.showStaffOrderBlockModal(normalizedEmail.includes('digitizer') ? 'digitizer' : 'admin', clientEmail);
                 } else {

@@ -4,6 +4,7 @@
  */
 const { query } = require('../config/db');
 const { success, error, badRequest, notFound, forbidden } = require('../utils/apiResponse');
+const emailService = require('../services/emailService');
 
 /**
  * Submit Revision Request
@@ -55,6 +56,10 @@ const submitRevision = async (req, res) => {
              WHERE order_id = $3`,
             [revisionNotes, JSON.stringify(stitchOutPhotos), order.id]
         );
+ 
+        // Trigger asynchronous admin alert email
+        emailService.sendRevisionAdminAlert(updatedOrderRes.rows[0], revisionNotes, stitchOutPhotos)
+            .catch(e => console.warn('[Admin Revision Alert Error]:', e.message));
 
         return success(res, updatedOrderRes.rows[0], 'Revision request submitted and assigned to digitizer for adjustment', 201);
     } catch (err) {

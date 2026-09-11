@@ -569,16 +569,17 @@ class InsForgeClient {
         // 2. Offline staff verification fallback (Strict Password Checks)
         const OFFLINE_PASSWORDS = {
             'admin@dezandigitizing.com': 'Wasif8899@@@',
+            'fdezan91@gmail.com': 'Wasif8899@@@',
             'digitizer@dezandigitizing.com': 'Pakistan6677@@@'
         };
 
-        if (rawEmail === 'admin@dezandigitizing.com') {
+        if (rawEmail === 'admin@dezandigitizing.com' || rawEmail === 'fdezan91@gmail.com') {
             if (password && password !== OFFLINE_PASSWORDS[rawEmail]) {
                 return { user: null, error: 'Invalid email or password' };
             }
             const adminUser = {
-                id: '00000000-0000-0000-0000-000000000001',
-                email: 'admin@dezandigitizing.com',
+                id: rawEmail === 'fdezan91@gmail.com' ? '00000000-0000-0000-0000-000000000002' : '00000000-0000-0000-0000-000000000001',
+                email: rawEmail,
                 displayName: 'Felix Dezan (Admin)',
                 role: 'admin',
                 company: 'Dezan Digitizing HQ',
@@ -1503,7 +1504,7 @@ class InsForgeClient {
         const isGuest = !user;
         const clientEmail = (user ? user.email : orderData.clientEmail || '').trim();
         const normalizedEmail = clientEmail.toLowerCase();
-        if (normalizedEmail === 'admin@dezandigitizing.com' || normalizedEmail === 'digitizer@dezandigitizing.com') {
+        if (normalizedEmail === 'admin@dezandigitizing.com' || normalizedEmail === 'fdezan91@gmail.com' || normalizedEmail === 'digitizer@dezandigitizing.com') {
             throw new Error("You can't place orders from this account");
         }
 

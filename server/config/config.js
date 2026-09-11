@@ -36,8 +36,11 @@ const config = {
         deliverablesDir: (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME)
             ? '/tmp/uploads/deliverables'
             : path.resolve(__dirname, '../../uploads/deliverables')
+    },
+    email: {
+        adminEmail: process.env.ADMIN_EMAIL || 'fdezan91@gmail.com',
+        fromAddress: process.env.SMTP_FROM || `"Dezan Digitizing" <${process.env.SMTP_USER || 'notifications@dezandigitizing.com'}>`
     }
 };
-
 
 module.exports = config;

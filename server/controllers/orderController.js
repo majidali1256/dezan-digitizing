@@ -38,10 +38,6 @@ const createOrder = async (req, res) => {
             customerEmail
         } = req.body;
 
-        if (!serviceType || !projectName || !placement) {
-            return badRequest(res, 'Service type, project name, and target placement are required');
-        }
-
         // Determine client metadata
         let clientId = null;
         let finalClientName = clientName || customerName;
@@ -59,8 +55,12 @@ const createOrder = async (req, res) => {
         }
 
         const normalizedCheckEmail = (finalClientEmail || '').trim().toLowerCase();
-        if (normalizedCheckEmail === 'admin@dezandigitizing.com' || normalizedCheckEmail === 'digitizer@dezandigitizing.com') {
+        if (normalizedCheckEmail === 'admin@dezandigitizing.com' || normalizedCheckEmail === 'fdezan91@gmail.com' || normalizedCheckEmail === 'digitizer@dezandigitizing.com') {
             return forbidden(res, "You can't place orders from this account");
+        }
+
+        if (!serviceType || !projectName || !placement) {
+            return badRequest(res, 'Service type, project name, and target placement are required');
         }
 
         if (!finalClientEmail || !finalClientName) {

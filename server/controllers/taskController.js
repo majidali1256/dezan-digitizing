@@ -210,8 +210,10 @@ const uploadDeliverables = async (req, res) => {
 
         if (updatedOrderRes.rows.length > 0) {
             const completedOrder = updatedOrderRes.rows[0];
-            emailService.sendDeliverablesReadyAlert(completedOrder, completedOrder.customer_email)
+            emailService.sendDeliverablesReadyAlert(completedOrder, completedOrder.customer_email || completedOrder.client_email)
                 .catch(e => console.warn('[Deliverables Email Alert Warning]:', e.message));
+            emailService.sendDeliverablesUploadedAdminAlert(completedOrder, deliverables)
+                .catch(e => console.warn('[Admin Deliverables Alert Warning]:', e.message));
         }
 
         return success(res, updatedTask.rows[0], 'Deliverables submitted and synchronized to order successfully');

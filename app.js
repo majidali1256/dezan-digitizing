@@ -518,7 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const portalBtn = modal.querySelector('#staff-portal-btn');
 
         if (roleEl) roleEl.textContent = roleText;
-        if (emailEl) emailEl.textContent = email || (role === 'digitizer' ? 'digitizer@dezandigitizing.com' : 'admin@dezandigitizing.com');
+        if (emailEl) emailEl.textContent = email || (role === 'digitizer' ? 'digitizer@dezandigitizing.com' : 'fdezan91@gmail.com');
         if (portalBtn) {
             portalBtn.href = (role === 'digitizer') ? 'worker-portal.html' : 'admin-portal.html';
         }

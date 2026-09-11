@@ -13,7 +13,7 @@ const sentEmailsLog = [];
 class EmailService {
     constructor() {
         this.transporter = null;
-        this.adminEmail = process.env.ADMIN_EMAIL || 'fdezan91@gmail.com';
+        this.adminEmail = process.env.ADMIN_EMAIL || config.email?.adminEmail || 'fdezan91@gmail.com';
         this.fromAddress = `"Dezan Digitizing" <${process.env.SMTP_USER || 'notifications@dezandigitizing.com'}>`;
         this.initTransporter();
     }
@@ -233,6 +233,129 @@ class EmailService {
             subject,
             html: this.wrapTemplate({ title: subject, preheader: `New order ${order.order_number} needs assignment`, content, actionBtn }),
             text: `New order ${order.order_number} received for $${order.price}. View in admin: https://dezan-digitizing.vercel.app/admin-orders.html`
+        });
+    }
+
+    /**
+     * Send New Quote Request Alert to Admin
+     */
+    async sendNewQuoteAdminAlert(quote) {
+        const quoteNum = quote.quote_number || quote.order_number || quote.id;
+        const subject = `📋 NEW QUOTE REQUEST: ${quoteNum} (${quote.service_type || 'Digitizing'})`;
+        const content = `
+            <div class="badge" style="background: rgba(147, 51, 234, 0.15); border-color: rgba(147, 51, 234, 0.3); color: #c084fc;">Admin Quote Appraisal Alert</div>
+            <h2 style="color: #ffffff; margin-top: 0; font-size: 20px;">New Quote Request Needs Price Estimation!</h2>
+            <p>A customer has submitted a new quote request awaiting appraisal and price estimation.</p>
+
+            <div class="info-card">
+                <div class="info-row"><span class="info-label">Quote Number</span><span class="info-val" style="color: #d4af35;">${quoteNum}</span></div>
+                <div class="info-row"><span class="info-label">Customer</span><span class="info-val">${quote.customer_name || quote.client_name || 'Guest'} (${quote.customer_email || quote.client_email || 'N/A'})</span></div>
+                <div class="info-row"><span class="info-label">Service</span><span class="info-val">${quote.service_type || 'Embroidery Digitizing'}</span></div>
+                <div class="info-row"><span class="info-label">Design Name</span><span class="info-val">${quote.design_name || quote.project_name || 'Custom Artwork'}</span></div>
+                <div class="info-row"><span class="info-label">Target Placement / Sizing</span><span class="info-val">${quote.placement || 'Standard'} · ${quote.target_size || quote.sizing || 'Standard'}</span></div>
+                <div class="info-row"><span class="info-label">Fabric / Material</span><span class="info-val">${quote.fabric_type || 'Standard'}</span></div>
+            </div>
+        `;
+        const actionBtn = `<a href="https://dezan-digitizing.vercel.app/admin-orders.html?quote=${quoteNum}" class="btn-cta">Appraise Quote in Admin &rarr;</a>`;
+
+        return this.sendMail({
+            to: this.adminEmail,
+            subject,
+            html: this.wrapTemplate({ title: subject, preheader: `New quote ${quoteNum} awaiting appraisal`, content, actionBtn }),
+            text: `New quote request ${quoteNum} received from ${quote.customer_email || quote.client_email || 'customer'}. Review and estimate in admin: https://dezan-digitizing.vercel.app/admin-orders.html`
+        });
+    }
+
+    /**
+     * Send Revision Request Alert to Admin
+     */
+    async sendRevisionAdminAlert(order, revisionNotes, stitchOutPhotos = []) {
+        const orderNum = order.order_number || order.id;
+        const photoCount = Array.isArray(stitchOutPhotos) ? stitchOutPhotos.length : 0;
+        const subject = `↻ REVISION REQUESTED: ${orderNum} · Dezan Digitizing`;
+        const content = `
+            <div class="badge" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">Revision Priority Alert</div>
+            <h2 style="color: #ffffff; margin-top: 0; font-size: 20px;">Customer Requested Order Revision!</h2>
+            <p>Customer has submitted adjustment instructions for order <strong>${orderNum}</strong>.</p>
+
+            <div class="info-card">
+                <div class="info-row"><span class="info-label">Order Reference</span><span class="info-val" style="color: #d4af35;">${orderNum}</span></div>
+                <div class="info-row"><span class="info-label">Customer</span><span class="info-val">${order.customer_name || order.client_name || 'Client'} (${order.customer_email || order.client_email || 'N/A'})</span></div>
+                <div class="info-row"><span class="info-label">Design Name</span><span class="info-val">${order.design_name || 'Artwork'}</span></div>
+                <div class="info-row"><span class="info-label">Sew-Out Defect Photos</span><span class="info-val">${photoCount > 0 ? `${photoCount} Photo(s) Attached` : 'None'}</span></div>
+            </div>
+
+            <div style="margin-top: 16px; padding: 16px; border-radius: 12px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2);">
+                <h4 style="margin: 0 0 8px 0; color: #f87171; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Client Correction Instructions:</h4>
+                <p style="margin: 0; font-size: 13px; color: #f1f5f9; line-height: 1.6; white-space: pre-wrap;">${revisionNotes || 'No notes provided'}</p>
+            </div>
+        `;
+        const actionBtn = `<a href="https://dezan-digitizing.vercel.app/admin-orders.html?order=${orderNum}" class="btn-cta">Review Revision in Admin &rarr;</a>`;
+
+        return this.sendMail({
+            to: this.adminEmail,
+            subject,
+            html: this.wrapTemplate({ title: subject, preheader: `Revision requested on ${orderNum}`, content, actionBtn }),
+            text: `Customer requested revision for ${orderNum}:\n\n${revisionNotes}\n\nReview in admin: https://dezan-digitizing.vercel.app/admin-orders.html`
+        });
+    }
+
+    /**
+     * Send Deliverables Uploaded Alert to Admin (Digitizer Completed Task)
+     */
+    async sendDeliverablesUploadedAdminAlert(order, deliverables = []) {
+        const orderNum = order.order_number || order.id;
+        const count = Array.isArray(deliverables) ? deliverables.length : 0;
+        const formats = Array.isArray(deliverables) ? deliverables.map(d => d.format || d.name?.split('.').pop()?.toUpperCase()).filter(Boolean).join(', ') : 'Ready';
+        const subject = `✅ DELIVERABLES UPLOADED: ${orderNum} (${count} files ready)`;
+        const content = `
+            <div class="badge" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); color: #10b981;">Digitizer Production Complete</div>
+            <h2 style="color: #ffffff; margin-top: 0; font-size: 20px;">Digitizer Uploaded Finished Files!</h2>
+            <p>The assigned digitizer has completed production and uploaded deliverables for order <strong>${orderNum}</strong>.</p>
+
+            <div class="info-card">
+                <div class="info-row"><span class="info-label">Order Reference</span><span class="info-val" style="color: #d4af35;">${orderNum}</span></div>
+                <div class="info-row"><span class="info-label">Customer</span><span class="info-val">${order.customer_name || order.client_name || 'Client'} (${order.customer_email || order.client_email || 'N/A'})</span></div>
+                <div class="info-row"><span class="info-label">Design Name</span><span class="info-val">${order.design_name || 'Artwork'}</span></div>
+                <div class="info-row"><span class="info-label">Deliverable Files</span><span class="info-val">${count} File(s) (${formats || 'Ready'})</span></div>
+                <div class="info-row"><span class="info-label">Order Status</span><span class="info-val" style="color: #10b981;">COMPLETED</span></div>
+            </div>
+        `;
+        const actionBtn = `<a href="https://dezan-digitizing.vercel.app/admin-orders.html?order=${orderNum}" class="btn-cta">Inspect Deliverables in Admin &rarr;</a>`;
+
+        return this.sendMail({
+            to: this.adminEmail,
+            subject,
+            html: this.wrapTemplate({ title: subject, preheader: `Deliverables ready for ${orderNum}`, content, actionBtn }),
+            text: `Digitizer uploaded ${count} deliverables for ${orderNum}. View in admin: https://dezan-digitizing.vercel.app/admin-orders.html`
+        });
+    }
+
+    /**
+     * Send New User Registration Alert to Admin
+     */
+    async sendNewUserRegistrationAdminAlert(user) {
+        const subject = `👤 NEW CLIENT REGISTERED: ${user.email}`;
+        const content = `
+            <div class="badge" style="background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.3); color: #60a5fa;">New Client Registration</div>
+            <h2 style="color: #ffffff; margin-top: 0; font-size: 20px;">A New Customer Registered</h2>
+            <p>A new customer account was created on the Dezan Digitizing portal.</p>
+
+            <div class="info-card">
+                <div class="info-row"><span class="info-label">Name</span><span class="info-val">${user.display_name || user.displayName || 'Client'}</span></div>
+                <div class="info-row"><span class="info-label">Email</span><span class="info-val" style="color: #d4af35;">${user.email}</span></div>
+                <div class="info-row"><span class="info-label">Company</span><span class="info-val">${user.company || 'Not provided'}</span></div>
+                <div class="info-row"><span class="info-label">Phone</span><span class="info-val">${user.phone || 'Not provided'}</span></div>
+                <div class="info-row"><span class="info-label">Registered At</span><span class="info-val">${new Date().toLocaleString()}</span></div>
+            </div>
+        `;
+        const actionBtn = `<a href="https://dezan-digitizing.vercel.app/admin-portal.html" class="btn-cta">Open Admin Dashboard &rarr;</a>`;
+
+        return this.sendMail({
+            to: this.adminEmail,
+            subject,
+            html: this.wrapTemplate({ title: subject, preheader: `New client registered: ${user.email}`, content, actionBtn }),
+            text: `New client registered: ${user.email} (${user.display_name || 'Client'}). Open admin: https://dezan-digitizing.vercel.app/admin-portal.html`
         });
     }
 
