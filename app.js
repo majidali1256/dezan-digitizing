@@ -314,7 +314,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const dashboardUrl = session && session.role ? getDashboardUrlForRole(session.role) : (prefix + 'portal-login.html');
         const tooltip = session && session.role 
             ? `Return to ${session.role.charAt(0).toUpperCase() + session.role.slice(1)} Dashboard`
-            : 'Sign In to Access Dashboard';
+            : 'Access Dashboard';
+
+        const profileUrl = session && session.role === 'admin' 
+            ? (prefix + 'admin-portal.html') 
+            : (session && session.role === 'digitizer' ? (prefix + 'worker-portal.html') : (prefix + 'client-profile.html'));
 
         slots.forEach(slot => {
             if (session && session.role) {
@@ -329,20 +333,39 @@ document.addEventListener("DOMContentLoaded", () => {
                             <button id="user-header-btn" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-slate-800 dark:text-primary hover:bg-primary/30 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer" title="${session.displayName || 'My Account'}" aria-label="User profile and options">
                                 <span class="material-symbols-outlined text-lg sm:text-xl">account_circle</span>
                             </button>
-                            <div id="user-header-menu" class="hidden absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/20 shadow-xl py-2 z-50 transition-all text-xs">
-                                <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
-                                    <p class="font-bold text-slate-900 dark:text-white truncate">${session.displayName || 'User'}</p>
-                                    <p class="text-[11px] text-slate-500 truncate">${session.email || ''}</p>
-                                    <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-primary/15 text-slate-900 dark:text-primary">${session.role}</span>
+                            <div id="user-header-menu" class="hidden absolute right-0 mt-2 w-60 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/20 shadow-xl py-2 z-50 transition-all text-xs">
+                                <div class="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-xs">
+                                            ${(session.displayName || session.email || 'U').charAt(0).toUpperCase()}
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="font-bold text-slate-900 dark:text-white truncate text-sm leading-tight">${session.displayName || 'User'}</p>
+                                            <p class="text-[11px] text-slate-500 truncate">${session.email || ''}</p>
+                                        </div>
+                                    </div>
+                                    <span class="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-primary/15 text-slate-900 dark:text-primary border border-primary/30">${session.role}</span>
                                 </div>
-                                <a href="${dashboardUrl}" class="flex items-center gap-2 px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-primary/10 transition-colors font-semibold">
-                                    <span class="material-symbols-outlined text-base">dashboard</span>
-                                    <span>Go to Dashboard</span>
-                                </a>
-                                <button id="header-signout-btn" class="w-full flex items-center gap-2 px-4 py-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors font-semibold text-left cursor-pointer">
-                                    <span class="material-symbols-outlined text-base">logout</span>
-                                    <span>Sign Out</span>
-                                </button>
+                                <div class="py-1">
+                                    <a href="${dashboardUrl}" class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-primary/10 transition-colors font-semibold">
+                                        <span class="material-symbols-outlined text-base text-primary">dashboard</span>
+                                        <span>Go to Dashboard</span>
+                                    </a>
+                                    <a href="${profileUrl}" class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-primary/10 transition-colors font-semibold">
+                                        <span class="material-symbols-outlined text-base text-primary">person</span>
+                                        <span>Profile & Settings</span>
+                                    </a>
+                                    <a href="${prefix}track-order.html" class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-primary/10 transition-colors font-semibold">
+                                        <span class="material-symbols-outlined text-base text-primary">local_shipping</span>
+                                        <span>Track Orders</span>
+                                    </a>
+                                </div>
+                                <div class="border-t border-slate-100 dark:border-slate-800 pt-1">
+                                    <button id="header-signout-btn" class="w-full flex items-center gap-2.5 px-4 py-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors font-semibold text-left cursor-pointer">
+                                        <span class="material-symbols-outlined text-base">logout</span>
+                                        <span>Sign Out</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -370,13 +393,66 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
                 } 
             } else {
-                // Logged out: replace Login button with Dashboard button!
+                // Logged out / Guest: Profile button is ALWAYS present and clearly displays "Guest"
                 slot.innerHTML = `
-                    <a href="${prefix}portal-login.html" onclick="window.handleDashboardNavClick(event)" class="nav-dashboard-link px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 cursor-pointer shadow-xs" title="Access Dashboard" aria-label="Access Dashboard">
-                        <span class="material-symbols-outlined text-[17px]">dashboard</span>
-                        <span>Dashboard</span>
-                    </a>
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                        <a href="${prefix}portal-login.html" onclick="window.handleDashboardNavClick(event)" class="nav-dashboard-link px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 cursor-pointer shadow-xs" title="Access Dashboard" aria-label="Access Dashboard">
+                            <span class="material-symbols-outlined text-[17px]">dashboard</span>
+                            <span>Dashboard</span>
+                        </a>
+                        <div class="relative">
+                            <button id="user-header-btn" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-slate-800 dark:text-primary hover:bg-primary/30 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer" title="Guest (Not Signed In)" aria-label="Guest Profile">
+                                <span class="material-symbols-outlined text-lg sm:text-xl">account_circle</span>
+                            </button>
+                            <div id="user-header-menu" class="hidden absolute right-0 mt-2 w-64 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/25 shadow-2xl py-2 z-50 transition-all text-xs">
+                                <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-8 h-8 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-primary">
+                                                <span class="material-symbols-outlined text-lg">account_circle</span>
+                                            </div>
+                                            <div>
+                                                <p class="font-extrabold text-slate-900 dark:text-white text-sm leading-tight">Guest</p>
+                                                <p class="text-[11px] text-slate-500 dark:text-slate-400">Browsing as Guest</p>
+                                            </div>
+                                        </div>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Guest
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="p-3">
+                                    <div class="p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-[11.5px] text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                                        Sign in to access your orders, stitch files & free sew-out revisions.
+                                    </div>
+                                    <a href="${prefix}portal-login.html" onclick="window.handleDashboardNavClick(event)" class="mt-2.5 w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-primary text-slate-950 font-black hover:bg-primary-hover transition-all text-xs shadow-xs cursor-pointer text-center">
+                                        <span class="material-symbols-outlined text-base">login</span>
+                                        <span>Sign In / Register</span>
+                                    </a>
+                                </div>
+                                <div class="border-t border-slate-100 dark:border-slate-800 pt-1">
+                                    <a href="${prefix}track-order.html" class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-primary/10 transition-colors font-semibold">
+                                        <span class="material-symbols-outlined text-base text-primary">local_shipping</span>
+                                        <span>Track Order (Guest)</span>
+                                    </a>
+                                    <button type="button" onclick="if(window.openOrderQuoteModal){window.openOrderQuoteModal('order');} document.querySelectorAll('#user-header-menu').forEach(m => m.classList.add('hidden'));" class="w-full flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-primary/10 transition-colors font-semibold text-left cursor-pointer">
+                                        <span class="material-symbols-outlined text-base text-primary">add_circle</span>
+                                        <span>Place New Order</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 `;
+
+                const btn = slot.querySelector('#user-header-btn');
+                const menu = slot.querySelector('#user-header-menu');
+                if (btn && menu) {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        menu.classList.toggle('hidden');
+                    });
+                }
             }
         });
 

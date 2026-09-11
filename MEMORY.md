@@ -219,10 +219,10 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
      - Centered auth card: Material Symbols `dashboard` badge, `Sign In to Dashboard` title, and subtitle `Access your client, digitizer, or admin workspace`.
      - Sign-in button: `Enter Dashboard`.
   4. **Dynamic Header & Bottom Bar Synchronization**:
-     - `initHeaderAuthState()`: Dynamically renders the gold `.nav-dashboard-link` in `#header-auth-slot` pointing directly to `portal-login.html` when logged out, and renders both the `.nav-dashboard-link` and the user avatar dropdown menu (`#user-header-btn` + `#user-header-menu`) when logged in.
+     - `initHeaderAuthState()`: Dynamically renders both the gold `.nav-dashboard-link` and the circular user profile avatar button (`#user-header-btn`) permanently across both authenticated and unauthenticated (guest) states. When logged out, the profile button displays "Guest" and opens a dedicated Guest dropdown card with guest status, login CTA, order tracking, and order placement actions. When logged in, it displays user details, role badge (`ADMIN`, `DIGITIZER`, `CLIENT`), dashboard route, and sign out.
      - `initUniversalDashboardNav(session)`: Cleans up any duplicate `.nav-dashboard-link` from middle `<nav>` or `.nav-dashboard-mobile-btn`, and synchronizes `.bottom-nav-dashboard` on script load, DOM ready, and storage change events across all browser tabs.
   5. **Static HTML Pre-Rendering Across Public Pages**:
-     - All primary public pages (`index.html`, `services.html`, `portfolio.html`, `pricing.html`, `about.html`, `contact.html`, `embroidery-digitizing.html`, `vector-art-conversion.html`, `terms.html`, `privacy.html`, `track-order.html`, `order-success.html`, `404.html`, `stitch-lab/index.html`, etc.) updated with static `href="portal-login.html"` (or `/portal-login.html`) in `#header-auth-slot` and `.bottom-nav-dashboard` to ensure zero CLS and instant navigation even prior to script execution.
+     - All primary public pages (`index.html`, `services.html`, `portfolio.html`, `pricing.html`, `about.html`, `contact.html`, `embroidery-digitizing.html`, `vector-art-conversion.html`, `terms.html`, `privacy.html`, `track-order.html`, `order-success.html`, `404.html`, `stitch-lab/index.html`, etc.) updated with static `href="portal-login.html"` (or `/portal-login.html`) and static `#user-header-btn` in `#header-auth-slot` and `.bottom-nav-dashboard` to ensure zero CLS and instant navigation even prior to script execution.
 
 ### 4.10 Full-Site WebP Image Optimization & Performance Overhaul
 - **Objective & Scope**:
@@ -513,9 +513,15 @@ Powered by shared stylesheet [`worker-workspace.css`](file:///Users/macbookair/V
   - **Financial Analytics & Export**: KPI metrics with Realized vs. Due revenue breakdown, full itemized tax invoice modal, financial ledger CSV export, and 1-click automated payment reminder dispatching.
 
 ### Header Navigation Authentication State
-- **Logged Out**: Top-right header button renders a gold pill button explicitly labeled **Login** (`[ ➔] Login ]`) linking to `portal-login.html`.
-- **Logged In**: Top-right button automatically renders the previous user account icon (`account_circle`) with quick dashboard navigation and sign out.
-- **On Logout**: Instantly switches back to **Login** without page reload. Real-time multi-tab synchronization via `storage` event in `app.js`.
+- **Permanent Profile Avatar (`#user-header-btn`)**: The circular profile avatar button `( 👤 )` is permanently visible in the header navigation beside `[ ⊞ Dashboard ]` on all viewports (desktop, tablet, mobile), regardless of authentication state.
+- **Logged Out / Guest State**:
+  - Profile button displays `account_circle` icon with tooltip `Guest (Not Signed In)`.
+  - Clicking toggles a luxury Guest dropdown card showing user name **Guest**, subtitle **Browsing as Guest**, and **● GUEST** status badge.
+  - Includes a sign-in guidance note ("Sign in to access your orders, stitch files & free sew-out revisions."), a golden primary CTA **Sign In / Register** (routing to `portal-login.html`), and guest quick links (**Track Order (Guest)** and **Place New Order**).
+- **Logged In State**:
+  - Displays user's initial or profile picture, display name, email, and role badge (`ADMIN`, `DIGITIZER`, `CLIENT`).
+  - Dropdown card provides direct links to role workspace (`Go to Dashboard`), `Profile & Settings`, `Track Orders`, and `Sign Out`.
+- **On Logout**: Instantly switches back to Guest dropdown state without page reload. Real-time multi-tab synchronization via `storage` event in `app.js`.
 
 ---
 

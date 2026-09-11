@@ -94,10 +94,17 @@
                     <span class="material-symbols-outlined theme-toggle-icon text-xl">light_mode</span>
                 </button>
                 <div id="header-auth-slot" class="flex items-center">
-                    <a href="/portal-login.html" onclick="window.handleDashboardNavClick(event)" class="nav-dashboard-link px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 shadow-xs cursor-pointer" title="Access Dashboard" aria-label="Access Dashboard">
-                        <span class="material-symbols-outlined text-[17px]">dashboard</span>
-                        <span>Dashboard</span>
-                    </a>
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                        <a href="/portal-login.html" onclick="window.handleDashboardNavClick(event)" class="nav-dashboard-link px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 shadow-xs cursor-pointer" title="Access Dashboard" aria-label="Access Dashboard">
+                            <span class="material-symbols-outlined text-[17px]">dashboard</span>
+                            <span>Dashboard</span>
+                        </a>
+                        <div class="relative">
+                            <button id="user-header-btn" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-slate-800 dark:text-primary hover:bg-primary/30 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer" title="Guest (Not Signed In)" aria-label="Guest Profile">
+                                <span class="material-symbols-outlined text-lg sm:text-xl">account_circle</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
