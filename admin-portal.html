@@ -214,6 +214,194 @@
         </section>
 
         <!-- =================================================================== -->
+        <!-- TRAFFIC & ADS CONVERSION ANALYTICS SECTION                         -->
+        <!-- =================================================================== -->
+        <section id="admin-traffic-analytics" aria-labelledby="traffic-analytics-title" class="mt-8 rounded-2xl bg-white dark:bg-card-dark border border-primary/20 dark:border-primary/25 shadow-xs overflow-hidden p-5 sm:p-6">
+            <!-- Section Header -->
+            <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-primary/15 dark:border-primary/20">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-700 dark:text-blue-400 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-lg">insights</span>
+                        </span>
+                        <h2 id="traffic-analytics-title" class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">Traffic & Google Ads Conversion Analytics</h2>
+                    </div>
+                    <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">
+                        Exact traffic sources, paid ad attribution, campaign performance, customer retention, and return on ad spend (ROAS).
+                    </p>
+                </div>
+                <!-- Interactive Ad Spend / Budget Input for CPA & ROAS Calculator -->
+                <div class="flex items-center gap-2.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2">
+                    <label for="admin-ad-spend-input" class="text-xs font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm text-blue-600 dark:text-blue-400">attach_money</span>
+                        <span>Google Ad Spend:</span>
+                    </label>
+                    <div class="relative flex items-center">
+                        <span class="absolute left-2.5 text-xs text-slate-500 font-bold">$</span>
+                        <input type="number" id="admin-ad-spend-input" min="0" step="10" value="100" oninput="if(typeof updateRoasMetrics==='function')updateRoasMetrics()" class="w-24 pl-6 pr-2 py-1 rounded-lg bg-white dark:bg-card-dark border border-slate-300 dark:border-slate-700 text-xs font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:border-primary" title="Enter monthly or campaign ad spend to calculate real-time CPA and ROAS" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8 KPI Attribution Cards Grid -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mt-5">
+                <!-- Card 1: Google Ads Paid Orders & Revenue -->
+                <div class="p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/80 dark:border-blue-500/30 flex flex-col justify-between shadow-2xs">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[11px] font-black text-blue-900 dark:text-blue-300 uppercase tracking-wider">Google Ads</span>
+                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-lg">ads_click</span>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="kpi-google-ads-orders" class="text-2xl sm:text-3xl font-black text-blue-950 dark:text-white">0</span>
+                        <span class="text-xs font-bold text-blue-800 dark:text-blue-300">orders</span>
+                    </div>
+                    <div class="mt-2 pt-1.5 border-t border-blue-200/60 dark:border-blue-500/20 text-xs flex justify-between items-center">
+                        <span class="text-slate-600 dark:text-slate-400 font-medium">Revenue:</span>
+                        <strong id="kpi-google-ads-rev" class="text-blue-950 dark:text-blue-200 font-black">$0.00</strong>
+                    </div>
+                </div>
+
+                <!-- Card 2: Organic Search Orders & Revenue -->
+                <div class="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-500/30 flex flex-col justify-between shadow-2xs">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[11px] font-black text-emerald-900 dark:text-emerald-300 uppercase tracking-wider">Organic Google</span>
+                        <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-lg">search</span>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="kpi-google-organic-orders" class="text-2xl sm:text-3xl font-black text-emerald-950 dark:text-white">0</span>
+                        <span class="text-xs font-bold text-emerald-800 dark:text-emerald-300">orders</span>
+                    </div>
+                    <div class="mt-2 pt-1.5 border-t border-emerald-200/60 dark:border-emerald-500/20 text-xs flex justify-between items-center">
+                        <span class="text-slate-600 dark:text-slate-400 font-medium">Revenue:</span>
+                        <strong id="kpi-google-organic-rev" class="text-emerald-950 dark:text-emerald-200 font-black">$0.00</strong>
+                    </div>
+                </div>
+
+                <!-- Card 3: Social Orders (TikTok, FB, IG) -->
+                <div class="p-4 rounded-2xl bg-pink-50/50 dark:bg-pink-950/20 border border-pink-200/80 dark:border-pink-500/30 flex flex-col justify-between shadow-2xs">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[11px] font-black text-pink-900 dark:text-pink-300 uppercase tracking-wider">Social Channels</span>
+                        <span class="material-symbols-outlined text-pink-600 dark:text-pink-400 text-lg">share</span>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="kpi-social-orders" class="text-2xl sm:text-3xl font-black text-pink-950 dark:text-white">0</span>
+                        <span class="text-xs font-bold text-pink-800 dark:text-pink-300">orders</span>
+                    </div>
+                    <div class="mt-2 pt-1.5 border-t border-pink-200/60 dark:border-pink-500/20 text-[11px] flex justify-between items-center text-slate-600 dark:text-slate-400">
+                        <span id="kpi-social-breakdown" class="truncate">TT: 0 · FB: 0 · IG: 0</span>
+                        <strong id="kpi-social-rev" class="text-pink-950 dark:text-pink-200 font-black">$0.00</strong>
+                    </div>
+                </div>
+
+                <!-- Card 4: Repeat Customer Orders -->
+                <div class="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-500/30 flex flex-col justify-between shadow-2xs">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[11px] font-black text-amber-900 dark:text-amber-300 uppercase tracking-wider">Repeat Customers</span>
+                        <span class="material-symbols-outlined text-amber-600 dark:text-primary text-lg">repeat</span>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="kpi-repeat-orders" class="text-2xl sm:text-3xl font-black text-amber-950 dark:text-white">0</span>
+                        <span id="kpi-repeat-pct" class="text-xs font-bold text-amber-800 dark:text-primary">(0%)</span>
+                    </div>
+                    <div class="mt-2 pt-1.5 border-t border-amber-200/60 dark:border-amber-500/20 text-xs flex justify-between items-center">
+                        <span class="text-slate-600 dark:text-slate-400 font-medium">Repeat Rev:</span>
+                        <strong id="kpi-repeat-rev" class="text-amber-950 dark:text-amber-200 font-black">$0.00</strong>
+                    </div>
+                </div>
+
+                <!-- Card 5: Cost Per Paid Order (CPA) -->
+                <div class="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-200/80 dark:border-indigo-500/30 flex flex-col justify-between shadow-2xs">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[11px] font-black text-indigo-900 dark:text-indigo-300 uppercase tracking-wider">Cost Per Order (CPA)</span>
+                        <span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400 text-lg">price_check</span>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="kpi-cpa" class="text-2xl sm:text-3xl font-black text-indigo-950 dark:text-white">$0.00</span>
+                        <span class="text-[11px] text-slate-500 font-medium">/ paid ad order</span>
+                    </div>
+                    <div class="mt-2 pt-1.5 border-t border-indigo-200/60 dark:border-indigo-500/20 text-[11px] text-slate-500">
+                        <span id="kpi-cpa-formula">Ad spend ÷ Google Ads orders</span>
+                    </div>
+                </div>
+
+                <!-- Card 6: Return on Ad Spend (ROAS) -->
+                <div class="p-4 rounded-2xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200/80 dark:border-purple-500/30 flex flex-col justify-between shadow-2xs">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[11px] font-black text-purple-900 dark:text-purple-300 uppercase tracking-wider">ROAS (Ad Return)</span>
+                        <span class="material-symbols-outlined text-purple-600 dark:text-purple-400 text-lg">trending_up</span>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="kpi-roas" class="text-2xl sm:text-3xl font-black text-purple-950 dark:text-white">0.00x</span>
+                        <span id="kpi-roas-pct" class="text-xs font-bold text-purple-700 dark:text-purple-300">(0%)</span>
+                    </div>
+                    <div class="mt-2 pt-1.5 border-t border-purple-200/60 dark:border-purple-500/20 text-[11px] text-slate-500">
+                        <span>Ad revenue ÷ ad spend</span>
+                    </div>
+                </div>
+
+                <!-- Card 7: Direct & Referral Orders -->
+                <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-2xs">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[11px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider">Direct / Referral</span>
+                        <span class="material-symbols-outlined text-slate-600 dark:text-slate-400 text-lg">link</span>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="kpi-direct-orders" class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">0</span>
+                        <span class="text-xs font-bold text-slate-600 dark:text-slate-400">orders</span>
+                    </div>
+                    <div class="mt-2 pt-1.5 border-t border-slate-200/80 dark:border-slate-800 text-xs flex justify-between items-center">
+                        <span class="text-slate-500 font-medium">Revenue:</span>
+                        <strong id="kpi-direct-rev" class="text-slate-900 dark:text-white font-black">$0.00</strong>
+                    </div>
+                </div>
+
+                <!-- Card 8: Total Paid Conversion Rate -->
+                <div class="p-4 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 flex flex-col justify-between shadow-2xs">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[11px] font-black text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">Paid Conversion Rate</span>
+                        <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-lg">verified</span>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="kpi-paid-rate" class="text-2xl sm:text-3xl font-black text-emerald-950 dark:text-white">0%</span>
+                        <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400">of total bookings</span>
+                    </div>
+                    <div class="mt-2 pt-1.5 border-t border-emerald-500/20 text-xs flex justify-between items-center">
+                        <span class="text-slate-600 dark:text-slate-400 font-medium">Total Settled:</span>
+                        <strong id="kpi-total-paid-rev" class="text-emerald-900 dark:text-emerald-200 font-black">$0.00</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Channel & Traffic Source Breakdown Table -->
+            <div class="mt-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-sm text-amber-700 dark:text-primary">table_chart</span>
+                        <span>Orders & Revenue by Traffic Source</span>
+                    </h3>
+                    <span class="text-[11px] text-slate-500 dark:text-slate-400">Multi-touch attribution data saved per order</span>
+                </div>
+                <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-primary/15 shadow-2xs">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-50 dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 font-black uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-primary/15">
+                            <tr>
+                                <th class="p-3">Source / Channel</th>
+                                <th class="p-3 text-center">Total Orders</th>
+                                <th class="p-3 text-center">Paid Orders</th>
+                                <th class="p-3 text-right">Total Revenue</th>
+                                <th class="p-3 text-right">Avg Order Value (AOV)</th>
+                                <th class="p-3 text-right">Revenue Share</th>
+                            </tr>
+                        </thead>
+                        <tbody id="traffic-sources-table-body" class="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-card-dark text-slate-800 dark:text-slate-200">
+                            <!-- Injected dynamically by renderTrafficAnalytics() -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================== -->
 
 
         <!-- =================================================================== -->
@@ -818,6 +1006,52 @@
                     </div>
                     <div id="order-details-deliverables-container" class="mt-2 pt-2 border-t border-slate-200/60 dark:border-primary/10">
                         <!-- Deliverables List or Empty State -->
+                    </div>
+                </div>
+
+                <!-- Section 6: Traffic & Campaign Attribution Dossier -->
+                <div class="rounded-2xl border border-slate-200 dark:border-primary/20 bg-slate-50/50 dark:bg-slate-900/40 p-4 sm:p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-xs font-black uppercase tracking-wider text-amber-800 dark:text-primary flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-base">ads_click</span>
+                            <span>Traffic & Campaign Attribution Dossier</span>
+                        </h4>
+                        <span id="order-details-attribution-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/15 text-blue-800 dark:text-blue-300 border border-blue-500/30">Google Ads</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Original Traffic Source</span>
+                            <strong id="order-details-original-source" class="text-slate-900 dark:text-white text-sm font-black block">-</strong>
+                            <span id="order-details-first-touch-date" class="text-[11px] text-slate-500 mt-0.5 block">First touch</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Last Touch Source</span>
+                            <strong id="order-details-last-source" class="text-slate-900 dark:text-white text-sm font-black block">-</strong>
+                            <span id="order-details-last-touch-date" class="text-[11px] text-slate-500 mt-0.5 block">Converting touch</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Google Click ID (GCLID)</span>
+                            <div class="flex items-center justify-between gap-1 mt-0.5">
+                                <span id="order-details-gclid" class="font-mono text-[11px] text-slate-700 dark:text-slate-300 truncate max-w-[170px]">-</span>
+                                <button type="button" id="order-details-copy-gclid-btn" onclick="copyGclidToClipboard()" class="text-amber-700 dark:text-primary hover:underline text-[10px] font-bold cursor-pointer hidden">Copy</button>
+                            </div>
+                            <span class="text-[10px] text-slate-400 block mt-0.5">Auto-tagging identifier</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">UTM Campaign & Medium</span>
+                            <strong id="order-details-utm-campaign" class="text-slate-900 dark:text-white text-xs font-bold block truncate">-</strong>
+                            <span id="order-details-utm-medium" class="text-[11px] text-slate-500 mt-0.5 block truncate">-</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Initial Landing Page</span>
+                            <span id="order-details-landing-page" class="text-slate-700 dark:text-slate-300 font-mono text-[11px] block truncate" title="">-</span>
+                            <span class="text-[10px] text-slate-400 mt-0.5 block">Entry point on site</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Referral Source & Term</span>
+                            <span id="order-details-referral" class="text-slate-700 dark:text-slate-300 text-[11px] block truncate">-</span>
+                            <span id="order-details-utm-term" class="text-[10px] text-slate-400 mt-0.5 block truncate">-</span>
+                        </div>
                     </div>
                 </div>
             </div>

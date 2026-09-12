@@ -23,6 +23,9 @@ desktop.ini
 *.rar
 scratch/*
 !scratch/.gitkeep
+uploads/*
+!uploads/.gitkeep
+
 
 # Logs
 logs/

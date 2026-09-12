@@ -89,6 +89,22 @@ CREATE TABLE public.orders (
         'pending_review', 'assigned', 'in_progress', 'qa_review', 'completed', 'revision', 'cancelled'
     )),
     deliverables JSONB DEFAULT '[]'::jsonb,   -- [{ format: 'dst', url: '...', name: '...' }]
+    
+    -- Traffic & Google Ads Attribution (Masked from Worker)
+    original_source VARCHAR(100) DEFAULT 'direct', -- e.g. 'google_ads', 'google_organic', 'tiktok'
+    last_source VARCHAR(100) DEFAULT 'direct',
+    landing_page TEXT,
+    referral_source TEXT,
+    utm_source VARCHAR(255),
+    utm_medium VARCHAR(255),
+    utm_campaign VARCHAR(255),
+    utm_content VARCHAR(255),
+    utm_term VARCHAR(255),
+    gclid TEXT,
+    gbraid TEXT,
+    wbraid TEXT,
+    attribution_data JSONB DEFAULT '{}'::jsonb,
+
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

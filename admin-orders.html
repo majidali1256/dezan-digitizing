@@ -1200,6 +1200,52 @@
                         <!-- Deliverables List or Empty State -->
                     </div>
                 </div>
+
+                <!-- Section 6: Traffic & Campaign Attribution Dossier -->
+                <div class="rounded-2xl border border-slate-200 dark:border-primary/20 bg-slate-50/50 dark:bg-slate-900/40 p-4 sm:p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-xs font-black uppercase tracking-wider text-amber-800 dark:text-primary flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-base">ads_click</span>
+                            <span>Traffic & Campaign Attribution Dossier</span>
+                        </h4>
+                        <span id="order-details-attribution-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/15 text-blue-800 dark:text-blue-300 border border-blue-500/30">Google Ads</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Original Traffic Source</span>
+                            <strong id="order-details-original-source" class="text-slate-900 dark:text-white text-sm font-black block">-</strong>
+                            <span id="order-details-first-touch-date" class="text-[11px] text-slate-500 mt-0.5 block">First touch</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Last Touch Source</span>
+                            <strong id="order-details-last-source" class="text-slate-900 dark:text-white text-sm font-black block">-</strong>
+                            <span id="order-details-last-touch-date" class="text-[11px] text-slate-500 mt-0.5 block">Converting touch</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Google Click ID (GCLID)</span>
+                            <div class="flex items-center justify-between gap-1 mt-0.5">
+                                <span id="order-details-gclid" class="font-mono text-[11px] text-slate-700 dark:text-slate-300 truncate max-w-[170px]">-</span>
+                                <button type="button" id="order-details-copy-gclid-btn" onclick="copyGclidToClipboard()" class="text-amber-700 dark:text-primary hover:underline text-[10px] font-bold cursor-pointer hidden">Copy</button>
+                            </div>
+                            <span class="text-[10px] text-slate-400 block mt-0.5">Auto-tagging identifier</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">UTM Campaign & Medium</span>
+                            <strong id="order-details-utm-campaign" class="text-slate-900 dark:text-white text-xs font-bold block truncate">-</strong>
+                            <span id="order-details-utm-medium" class="text-[11px] text-slate-500 mt-0.5 block truncate">-</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Initial Landing Page</span>
+                            <span id="order-details-landing-page" class="text-slate-700 dark:text-slate-300 font-mono text-[11px] block truncate" title="">-</span>
+                            <span class="text-[10px] text-slate-400 mt-0.5 block">Entry point on site</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-card-dark border border-slate-200/80 dark:border-primary/15 shadow-2xs">
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Referral Source & Term</span>
+                            <span id="order-details-referral" class="text-slate-700 dark:text-slate-300 text-[11px] block truncate">-</span>
+                            <span id="order-details-utm-term" class="text-[10px] text-slate-400 mt-0.5 block truncate">-</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Modal Footer Actions -->

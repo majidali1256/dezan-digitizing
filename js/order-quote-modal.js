@@ -875,6 +875,9 @@
                         }
                     });
                     renderArtworkFileChips();
+                    if (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackArtworkUploaded === 'function') {
+                        window.dezanTracker.trackArtworkUploaded(state.uploadedFiles.length, state.uploadedFiles.map(f => f.name.split('.').pop()));
+                    }
                 }
             }, false);
         }
@@ -1152,6 +1155,10 @@
 
         // Dynamic Stepper Transition: Step 1 -> Step 2
         updateStepperState(2);
+
+        if (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackServiceSelected === 'function') {
+            window.dezanTracker.trackServiceSelected(service, plan || service);
+        }
 
         if (headerDesc) {
             headerDesc.textContent = state.isQuote ? 'Provide specifications for accurate quotation' : 'Provide specifications to complete your order';
@@ -1584,6 +1591,16 @@
         // Update Stepper to Step 3
         updateStepperState(3);
 
+        if (!isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackBeginCheckout === 'function') {
+            window.dezanTracker.trackBeginCheckout({
+                service: service,
+                plan: (service === 'PetPortrait' ? 'Realistic / Pet Portrait' : (service === 'Digitizing' ? 'Embroidery Digitizing' : 'Vector Art Conversion')),
+                placement: (service === 'PetPortrait' ? modal.querySelector('#pet-placement')?.value : modal.querySelector('#dig-placement')?.value) || 'Standard',
+                turnaround: isRush ? 'rush' : 'standard',
+                amount: calculatedPrice
+            });
+        }
+
         return true;
     };
 
@@ -1850,6 +1867,9 @@
             }
         });
         renderArtworkFileChips();
+        if (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackArtworkUploaded === 'function') {
+            window.dezanTracker.trackArtworkUploaded(state.uploadedFiles.length, state.uploadedFiles.map(f => f.name.split('.').pop()));
+        }
     };
     window.handleModalFileSelect = window.handleFileSelected;
 
@@ -1904,6 +1924,12 @@
             if (tabCard) tabCard.className = 'p-2 sm:p-2.5 rounded-xl border-2 border-primary bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer';
             if (tabPaypal) tabPaypal.className = 'p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
         }
+        if (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackAddPaymentInfo === 'function') {
+            window.dezanTracker.trackAddPaymentInfo(method, {
+                plan: modal.querySelector('#selected-plan-name')?.value || 'Embroidery Digitizing',
+                amount: window.calculateAdaptivePrice ? window.calculateAdaptivePrice() : 15.00
+            });
+        }
     };
 
     /**
@@ -1913,6 +1939,10 @@
         const modal = ensureModalElement();
         const isQuote = !!options.isQuote;
         window.setModalMode(isQuote);
+
+        if (!isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackOrderStarted === 'function') {
+            window.dezanTracker.trackOrderStarted(options.triggerSource || 'order_modal_open');
+        }
 
         // Session check & contact block update
         const session = getSession();
@@ -2297,7 +2327,8 @@
             paymentMethod: isQuote ? 'Quote Request' : state.paymentMethod,
             clientName: clientName,
             clientEmail: clientEmail,
-            clientId: session?.id || session?.userId || null
+            clientId: session?.id || session?.userId || null,
+            attribution: (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.getAttribution === 'function') ? window.dezanTracker.getAttribution() : {}
         };
 
         try {
@@ -2410,20 +2441,68 @@
                     );
                 }
 
+                if (isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackQuoteLead === 'function') {
+                    window.dezanTracker.trackQuoteLead({
+                        quoteId: createdRecord.order_number || createdRecord.id,
+                        email: clientEmail,
+                        service: serviceType,
+                        project: projectName
+                    });
+                } else if (!isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackOrderPurchase === 'function') {
+                    window.dezanTracker.trackOrderPurchase({
+                        orderId: createdRecord.order_number || createdRecord.id,
+                        txnId: createdRecord.transaction_id || ('TXN-' + Math.floor(100000 + Math.random() * 900000)),
+                        amount: calculatedPrice,
+                        service: serviceType,
+                        plan: planName,
+                        placement: placement,
+                        turnaround: turnaroundSpeed,
+                        email: clientEmail
+                    });
+                }
+
                 if (window.clientWorkspace && typeof window.clientWorkspace.loadOrders === 'function') {
                     await window.clientWorkspace.loadOrders();
                 } else if (typeof renderOrders === 'function') {
                     await renderOrders();
                 }
             } else {
+                if (isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackQuoteLead === 'function') {
+                    window.dezanTracker.trackQuoteLead({
+                        quoteId: createdRecord.order_number || createdRecord.id,
+                        email: clientEmail,
+                        service: serviceType,
+                        project: projectName
+                    });
+                }
+
+                try {
+                    sessionStorage.setItem('dezan_last_guest_order', JSON.stringify({
+                        id: createdRecord.id,
+                        order_number: createdRecord.order_number || createdRecord.id,
+                        service_type: serviceType,
+                        plan_name: planName,
+                        project_name: projectName,
+                        placement: placement,
+                        turnaround_speed: turnaroundSpeed,
+                        client_email: clientEmail,
+                        price: calculatedPrice.toFixed(2),
+                        is_quote: isQuote,
+                        transaction_id: createdRecord.transaction_id || ''
+                    }));
+                } catch (_) {}
+
                 const query = new URLSearchParams({
                     orderId: createdRecord.order_number || createdRecord.id,
                     service: serviceType,
                     plan: planName,
+                    placement: placement || 'Standard',
+                    turnaround: turnaroundSpeed || 'standard',
                     project: projectName,
                     email: clientEmail,
                     amount: calculatedPrice.toFixed(2),
-                    type: isQuote ? 'quote' : 'order'
+                    type: isQuote ? 'quote' : 'order',
+                    txn: createdRecord.transaction_id || ''
                 });
                 window.location.href = `order-success.html?${query.toString()}`;
             }

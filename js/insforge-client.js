@@ -1526,6 +1526,9 @@ class InsForgeClient {
         const assignedAt = autoAssign ? new Date().toISOString() : null;
         const initialStatus = isQuote ? 'quote_requested' : (autoAssign ? 'in_progress' : 'pending_review');
 
+        // Capture traffic and campaign attribution
+        const attribution = orderData.attribution || (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.getAttribution === 'function' ? window.dezanTracker.getAttribution() : {});
+
         const newOrder = {
             id: this.generateUUID(),
             order_number: orderNumber,
@@ -1554,6 +1557,19 @@ class InsForgeClient {
             status: initialStatus,
             is_quote: isQuote,
             deliverables: [],
+            original_source: attribution.original_source || 'direct',
+            last_source: attribution.last_source || attribution.original_source || 'direct',
+            landing_page: attribution.landing_page || null,
+            referral_source: attribution.referral_source || null,
+            utm_source: attribution.utm_source || null,
+            utm_medium: attribution.utm_medium || null,
+            utm_campaign: attribution.utm_campaign || null,
+            utm_content: attribution.utm_content || null,
+            utm_term: attribution.utm_term || null,
+            gclid: attribution.gclid || null,
+            gbraid: attribution.gbraid || null,
+            wbraid: attribution.wbraid || null,
+            attribution_data: attribution,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
@@ -1578,7 +1594,8 @@ class InsForgeClient {
                 paymentStatus: newOrder.payment_status,
                 clientName: newOrder.client_name,
                 clientEmail: newOrder.client_email,
-                clientCompany: newOrder.client_company
+                clientCompany: newOrder.client_company,
+                attribution: attribution
             });
             if (apiRes.success && apiRes.data) {
                 newOrder.id = apiRes.data.id;

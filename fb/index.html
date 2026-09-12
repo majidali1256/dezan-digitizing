@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://dezandigitizing.com/">
+  <title>Dezan Digitizing — Connecting...</title>
+  
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#d4af35',
+            'card-dark': '#16140c'
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-5K8L9W2');</script>
+  <!-- End Google Tag Manager -->
+
+  <!-- Instant Clean Attribution Capture & Redirect Engine -->
+  <script>
+    (function () {
+      var channel = 'facebook';
+      var defaultMedium = 'organic_social';
+      var defaultCampaign = 'profile_bio';
+
+      var urlParams = new URLSearchParams(window.location.search);
+      var destination = urlParams.get('dest') || urlParams.get('to') || urlParams.get('redirect') || '/';
+      
+      var utmSource = urlParams.get('utm_source') || channel;
+      var utmMedium = urlParams.get('utm_medium') || defaultMedium;
+      var utmCampaign = urlParams.get('utm_campaign') || defaultCampaign;
+      var utmContent = urlParams.get('utm_content') || null;
+      var utmTerm = urlParams.get('utm_term') || null;
+      var gclid = urlParams.get('gclid') || null;
+      var gbraid = urlParams.get('gbraid') || null;
+      var wbraid = urlParams.get('wbraid') || null;
+      var referrer = document.referrer || 'facebook.com';
+      var landingPage = window.location.pathname || '/fb';
+      var nowIso = new Date().toISOString();
+
+      var trackingObj = {
+        source: channel,
+        landing_page: landingPage,
+        referral_source: referrer,
+        utm_source: utmSource,
+        utm_medium: utmMedium,
+        utm_campaign: utmCampaign,
+        utm_content: utmContent,
+        utm_term: utmTerm,
+        gclid: gclid,
+        gbraid: gbraid,
+        wbraid: wbraid,
+        captured_at: nowIso
+      };
+
+      // 1. Persist to localStorage (First Touch + Last Touch)
+      try {
+        var existingFirst = localStorage.getItem('dezan_first_touch_attribution');
+        if (!existingFirst) {
+          localStorage.setItem('dezan_first_touch_attribution', JSON.stringify(trackingObj));
+        }
+        localStorage.setItem('dezan_last_touch_attribution', JSON.stringify(trackingObj));
+        sessionStorage.setItem('dezan_current_session_attribution', JSON.stringify(trackingObj));
+      } catch (_) {}
+
+      // 2. Persist to 90-Day Root-Scoped Cookies
+      try {
+        var d = new Date();
+        d.setTime(d.getTime() + (90 * 24 * 60 * 60 * 1000));
+        var expires = '; expires=' + d.toUTCString();
+        var jsonStr = encodeURIComponent(JSON.stringify(trackingObj));
+        document.cookie = 'dezan_last_touch=' + jsonStr + expires + '; path=/; SameSite=Lax';
+        document.cookie = 'dezan_tracking_data=' + jsonStr + expires + '; path=/; SameSite=Lax';
+        if (!document.cookie.includes('dezan_first_touch=')) {
+          document.cookie = 'dezan_first_touch=' + jsonStr + expires + '; path=/; SameSite=Lax';
+        }
+      } catch (_) {}
+
+      // 3. Dispatch to GTM dataLayer
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'clean_tracking_redirect',
+        channel: channel,
+        utm_source: utmSource,
+        utm_medium: utmMedium,
+        utm_campaign: utmCampaign,
+        destination: destination,
+        timestamp: nowIso
+      });
+
+      // 4. Instant seamless redirect (zero history stack pollution)
+      if (typeof window !== 'undefined' && window.location) {
+        window.location.replace(destination);
+      }
+    })();
+  </script>
+  <noscript>
+    <meta http-equiv="refresh" content="0; url=/">
+  </noscript>
+</head>
+<body class="h-full bg-[#f8f7f6] dark:bg-[#201d12] text-slate-800 dark:text-slate-100 flex items-center justify-center p-4">
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5K8L9W2"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+  <div class="max-w-md w-full text-center bg-white dark:bg-[#16140c] p-8 rounded-2xl border border-primary/20 shadow-xl">
+    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 border border-primary/30 mb-5 relative">
+      <img src="/logo.webp" alt="Dezan Digitizing" class="w-10 h-10 object-contain rounded-full">
+      <div class="absolute inset-0 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+    </div>
+
+    <!-- Stacked Luxury Brand Lockup -->
+    <div class="flex flex-col items-center leading-none mb-3">
+      <span class="text-xl font-black tracking-tight text-slate-900 dark:text-white">DEZAN</span>
+      <span class="text-[11px] font-extrabold tracking-[0.2em] text-primary uppercase mt-0.5">Digitizing</span>
+    </div>
+
+    <h1 class="text-lg font-bold text-slate-900 dark:text-white mb-2 font-display">Connecting to Dezan Digitizing</h1>
+    <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">Redirecting you to high-precision stitch craftsmanship...</p>
+
+    <div class="w-full bg-slate-100 dark:bg-slate-800/80 rounded-full h-1.5 overflow-hidden mb-5">
+      <div class="bg-primary h-full rounded-full animate-pulse w-3/4"></div>
+    </div>
+
+    <p class="text-xs text-slate-400">
+      If you are not redirected automatically, <a id="manual-redirect" href="/" class="text-primary font-bold underline hover:text-amber-500">click here to proceed</a>.
+    </p>
+  </div>
+
+  <script>
+    setTimeout(function () {
+      var dest = new URLSearchParams(window.location.search).get('dest') || '/';
+      window.location.href = dest;
+    }, 1500);
+  </script>
+</body>
+</html>

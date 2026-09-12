@@ -1555,6 +1555,14 @@
             ? order.deliverables
             : (order.deliverable_url ? [{ name: `${order.order_number || 'design'}.dst`, url: order.deliverable_url }] : []);
 
+        if (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackFilesDownloaded === 'function') {
+            window.dezanTracker.trackFilesDownloaded({
+                orderNumber: orderNumber,
+                format: (delivs[0]?.name?.split('.')?.pop()) || 'dst',
+                fileName: delivs[0]?.name || 'deliverable'
+            });
+        }
+
         if (delivs.length > 1) {
             if (e && e.preventDefault) e.preventDefault();
             delivs.forEach((del, idx) => {
@@ -1642,6 +1650,14 @@
 
             if (window.insforgeClient && typeof window.insforgeClient.submitOrderRevision === 'function') {
                 await window.insforgeClient.submitOrderRevision(orderNumber, notes, stitchOutPhotos);
+            }
+
+            if (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackRevisionRequested === 'function') {
+                window.dezanTracker.trackRevisionRequested({
+                    orderNumber: orderNumber,
+                    notes: notes,
+                    photosCount: stitchOutPhotos.length
+                });
             }
 
             closeRevisionModal();

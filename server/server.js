@@ -47,6 +47,22 @@ if (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
     const rootDir = path.resolve(__dirname, '..');
     const uploadsDir = path.resolve(rootDir, 'uploads');
     app.use('/uploads', express.static(uploadsDir));
+
+    // Clean Vanity Tracking Routes
+    const cleanRoutes = [
+        { path: '/tiktok', file: 'tiktok.html' },
+        { path: '/instagram', file: 'instagram.html' },
+        { path: '/facebook', file: 'facebook.html' },
+        { path: '/fb', file: 'fb.html' },
+        { path: '/ig', file: 'ig.html' },
+        { path: '/youtube', file: 'youtube.html' },
+        { path: '/yt', file: 'yt.html' },
+        { path: '/pinterest', file: 'pinterest.html' }
+    ];
+    cleanRoutes.forEach(r => {
+        app.get(r.path, (req, res) => res.sendFile(path.join(rootDir, r.file)));
+    });
+
     app.use(express.static(rootDir));
 }
 

@@ -2,6 +2,13 @@
 <html lang="en">
 
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-5K8L9W2');</script>
+    <!-- End Google Tag Manager -->
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Client Dashboard | Dezan Digitizing</title>
@@ -67,6 +74,10 @@
 </head>
 
 <body data-client-page="dashboard" class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/30 transition-colors duration-200">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5K8L9W2"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
 
 
 
@@ -4113,6 +4124,20 @@
                         headers,
                         body: JSON.stringify({ paymentMethod: method, transactionId })
                     }).catch(e => console.warn('[Backend Order Payment Sync Notice]:', e.message));
+                }
+
+                // 3. Fire Google Ads Conversion Tracking & GA4 Ecommerce Purchase Event
+                if (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackOrderPurchase === 'function') {
+                    window.dezanTracker.trackOrderPurchase({
+                        orderId: order.order_number || order.id,
+                        txnId: transactionId || ('TXN-' + Math.floor(100000 + Math.random() * 900000)),
+                        amount: order.price || 15.00,
+                        service: order.service_type || 'Embroidery Digitizing',
+                        plan: order.plan_name || order.service_type || 'Standard Order',
+                        placement: order.placement || 'Standard',
+                        turnaround: order.turnaround_speed || 'standard',
+                        email: order.client_email || (session && session.email) || ''
+                    });
                 }
 
                 closeCheckoutModal();

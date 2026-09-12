@@ -2,6 +2,38 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/tiktok",
+      "destination": "/tiktok.html"
+    },
+    {
+      "source": "/instagram",
+      "destination": "/instagram.html"
+    },
+    {
+      "source": "/facebook",
+      "destination": "/facebook.html"
+    },
+    {
+      "source": "/fb",
+      "destination": "/fb.html"
+    },
+    {
+      "source": "/ig",
+      "destination": "/ig.html"
+    },
+    {
+      "source": "/youtube",
+      "destination": "/youtube.html"
+    },
+    {
+      "source": "/yt",
+      "destination": "/yt.html"
+    },
+    {
+      "source": "/pinterest",
+      "destination": "/pinterest.html"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api"
     }

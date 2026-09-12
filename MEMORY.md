@@ -289,12 +289,12 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 ## 5. Site Map & Route Architecture
 
 ### Public Marketing Pages
-- `/index.html`: Home page (Title: `Embroidery Digitizing Services | Dezan Digitizing®️`; Hero with Before/After Comparison Slider: zero bounding box or card border around the astronaut patch, allowing the slider divider line to sweep end-to-end across the full artwork; on mobile view, astronaut slider is calibrated to `max-w-[285px]` (~14% reduction) leaving optimal space for the text block; DEZAN brand eyebrow shifted upward; 2-line headline `Professional Embroidery Digitizing` & `and Vector Art Services` enlarged by 12-15% (`text-[19.5px]` on mobile) strictly on two non-wrapping lines; value proposition `Production-ready embroidery files at just $15.` increased by 8-10% (`text-[13.5px]`) with clean unadorned typography (no underlines) and prominent ultra-bold gold emphasis on `just $15.` (`font-black`); supporting copy `Fast turnaround | Premium quality` maintained as compact secondary text; bespoke 3-button horizontal row matching reference design: 1. Solid Gold Primary `Order Now` + `Flat Rates` with shopping bag icon badge, 2. Soft-tinted `View Pricing` with tag icon badge, 3. Soft-tinted `Get Quote` with document icon badge; Live Feedback Carousel; Trust reviews; Portfolio section (`#portfolio`) sequence: 1. Custom Hats (`images/Custom Hats.png`), 2. Jacket Backs (`images/Jacket Backs.png`), 3. Left Chest (`images/Left Chest Logos.png` - updated St. Patrick's parade jackets photo), 4. Pet Portraits (`images/Pet Embroidery.png`); the dedicated **"Why Choose Dezan Digitizing?"** section highlighting manual craftsmanship, production-ready stitch files, fast turnaround, and free revisions with 4 How-It-Works styled circular icon feature cards; and the modern, interactive **"Frequently Asked Questions" (FAQ) Accordion** at the bottom of the page featuring 5 rows with CSS grid transitions, rotating gold-accented chevrons, accessible `aria-expanded` attributes, and responsive typography).
+- `/index.html`: Home page (Title: `Embroidery Digitizing Services | Dezan Digitizing®️`; Hero with Before/After Comparison Slider: zero bounding box or card border around the astronaut patch, allowing the slider divider line to sweep end-to-end across the full artwork; on mobile view, astronaut slider is calibrated to `max-w-[285px]` (~14% reduction) leaving optimal space for the text block; DEZAN brand eyebrow shifted upward; 2-line headline `Professional Embroidery Digitizing` & `and Vector Art Services` enlarged by 12-15% (`text-[19.5px]` on mobile) strictly on two non-wrapping lines; value proposition `Production-ready embroidery files at just $15.` increased by 8-10% (`text-[13.5px]`) with clean unadorned typography (no underlines) and prominent ultra-bold gold emphasis on `just $15.` (`font-black`); supporting copy `Fast turnaround | Premium quality` maintained as compact secondary text; bespoke 3-button horizontal row matching reference design: 1. Solid Gold Primary `Order Now` + `Flat Rates` with shopping bag icon badge, 2. Soft-tinted `View Pricing` with tag icon badge, 3. Soft-tinted `Get Quote` with document icon badge; Live Feedback Carousel; Trust reviews; Portfolio section (`#portfolio`) streamlined to exactly 4 primary services in a balanced 4-column responsive grid (`grid-cols-2 sm:grid-cols-4`): 1. Custom Hats (`images/custom-hats.webp?v=4`), 2. Jacket Backs (`images/jacket-backs.webp?v=4`), 3. Left Chest (`images/left-chest-logos.webp?v=4`), 4. Pet Portraits (`images/pet-embroidery.webp?v=4`), with 3D puff and vector art removed from this teaser grid; the dedicated **"Why Choose Dezan Digitizing?"** section highlighting manual craftsmanship, production-ready stitch files, fast turnaround, and free revisions with 4 How-It-Works styled circular icon feature cards; and the modern, interactive **"Frequently Asked Questions" (FAQ) Accordion** at the bottom of the page featuring 5 rows with CSS grid transitions, rotating gold-accented chevrons, accessible `aria-expanded` attributes, and responsive typography).
 - `/about.html`: Company history, experience, machinery/software standards (Wilcom, Tajima, Barudan).
 - `/services.html` (`/services`): **Main Services Navigation Hub**. Displays the two core pillars with 100% clickable cards (image, heading, CTA):
   - **Embroidery Digitizing Card**: Direct link to `/embroidery-digitizing/` with CTA `Explore Embroidery Digitizing →`.
   - **Vector Art Conversion Card**: Direct link to `/vector-art-conversion/` with CTA `Explore Vector Art Conversion →`.
-  - **Specialized Work Categories**: Balanced 6-card crawlable grid linking to all 5 embroidery sub-services and vector conversion.
+  - **Specialized Work Categories**: Streamlined 4-card crawlable grid (`grid-cols-2 sm:grid-cols-4`) featuring the 4 primary services: 1. Cap & Hat Digitizing, 2. Jacket Back, 3. Left Chest, 4. Pet Portraits.
   - **Clean & Fast**: Free of excessive SEO paragraphs, functioning as a high-converting, visual service navigation hub.
 
 ### Dedicated SEO Service Pillar & Specialist Architecture
@@ -307,8 +307,21 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
    - Built with independent `<title>`, `<meta name="description">`, `<h1>`, canonical tag, OG tags, image alt text, and placement-specific FAQs.
    - **Template Sequence**: 1. Hero (H1, intro, price, CTAs) &bull; 2. Real Result (Digitized map $\rightarrow$ real physical stitch-out) &bull; 3. About This Service &bull; 4. Production Considerations (pull comp, backing, underlay, machine frames) &bull; 5. Real Work Gallery &bull; 6. Why This Service Is Different &bull; 7. Client Results & Testimonials &bull; 8. Custom FAQ Accordion &bull; 9. Related Services Internal Link Strip &bull; 10. Final Conversion CTA.
    - **Page 1: Cap & Hat Digitizing (`/embroidery-digitizing/cap-hat-digitizing/`)**:
-     - Specialized in 270° cap frames, center-out bottom-up sequencing, seam bridge underlay, and zero-pucker curve compensation.
-     - Real proof: Barbacoa Bandits Steer Skull on Richardson 112 Trucker Hat. Flat rate $15.
+      - **SEO Title**: `Cap & Hat Embroidery Digitizing Services | Dezan Digitizing`
+      - **Meta Description**: `Professional cap and hat embroidery digitizing services for embroidery shops across the U.S. Get production-ready DST, PES and EMB files for structured caps, trucker hats, snapbacks, beanies and 3D puff designs.`
+      - **H1**: `Cap & Hat Embroidery Digitizing Services`
+      - **Hero Copy**: `Production-ready embroidery files for structured caps, trucker hats, snapbacks, beanies and 3D puff hat designs. Every file is digitized for the selected size, placement and cap style.`
+      - **8-Section Production Architecture & Media Placeholders**:
+         1. **Hero**: H1 `Cap & Hat Embroidery Digitizing Services`, copy, single centered CTA `Order Hat Digitizing` with `$15 flat rate` subline (70–80% width on mobile `w-[76%] sm:w-auto`).
+         2. **Real Cap Stitch-Out Proof**: Heading, subtext (`Digitized file preview → actual embroidered cap result.`), caption note, and 2 empty media slots: `Digitized Preview Placeholder` & `Actual Cap Stitch-Out Placeholder`.
+         3. **What You Get With Cap Digitizing**: 4 clean cards (Cap-ready embroidery file, Machine formats included, 3D Puff supported, Real production focus).
+         4. **Service Overview**: Heading `Cap Digitizing Made for Real Hat Embroidery` + 2-paragraph technical explanation.
+         5. **Things We Check Before Digitizing a Hat File**: 5 cards (Cap height limit, Center seam, Small text, 3D Puff suitability, Flat file vs hat file).
+         6. **Recent Cap & Hat Projects**: Heading, subtext, and 3 empty media slots: `Cap video placeholder`, `Hat stitch-out image placeholder`, `3D puff cap placeholder`.
+         7. **FAQ**: 4 modular `<details class="group">` questions easily editable by client.
+         8. **Final CTA**: Heading `Get Your Cap File Digitized for $15`, subtext, and button `Order Hat Digitizing Now`.
+      - **Internal Linking**: Clean, descriptive anchor text `Cap & Hat Digitizing` linked from `services.html` (Specialized Categories), `index.html` (Portfolio card & FAQ 5), `embroidery-digitizing/index.html` & `embroidery-digitizing.html` (service card and bottom cross-link strip), `portfolio.html` (exploration pill), and related specialist service pages (`3d-puff-digitizing`, `left-chest-digitizing`, `jacket-back-digitizing`, `pet-portrait-digitizing`, `stitch-lab/richardson-112-cap-digitizing`).
+      - **Crawlability & Sitemap**: Self-referencing canonical tag `<link rel="canonical" href="https://dezandigitizing.com/embroidery-digitizing/cap-hat-digitizing/" />` and registered in `sitemap.xml` with `lastmod: 2026-09-12`. Richardson 112 Trucker Hat sewout. Flat rate $15.
    - **Page 2: Left Chest Digitizing (`/embroidery-digitizing/left-chest-digitizing/`)**:
      - Specialized in 4mm micro-lettering clarity, pique knit mesh underlays, and uniform chest placements up to 4.5".
      - Real proof: Mill Creek Kennels Hunting Dog on Heather Grey Polo. Flat rate $15.
@@ -2556,3 +2569,127 @@ The Worker Studio provides an isolated, production-focused environment for embro
     - `03_client_portal_attachments.png`
     - `04_client_orders_revision_attachment.png`
     - `05_global_order_modal_attachment.png`
+
+### 35.15 Full-Funnel Traffic Attribution & Google Ads Conversion Tracking Architecture (Live & Verified)
+- **User Mandate & Problem Statement**:
+  - *"Please set up proper traffic and conversion tracking before we start running Google Ads. I want to know exactly which ad, search click, traffic source, and campaign brought each paid order. Please install Google Tag Manager on all public pages and dashboard/order pages where tracking is needed."*
+  - **Core Requirements**:
+    1. **Google Ads Conversion Tracking**: Fires strictly post-payment and successful order creation on the confirmation/thank-you step. Never count "Order Now" button clicks as purchases. Include: Order ID/transaction ID, Order value, Currency (USD), Service name, Placement, Turnaround (rush/standard).
+    2. **GA4 Ecommerce Funnel Tracking**: Track all 10 events: `service page view`, `order started`, `service selected`, `artwork uploaded`, `begin checkout`, `add payment info`, `purchase`, `quote submitted`, `revision requested`, `files downloaded`.
+    3. **Google Ads Auto-Tagging Support**: Capture and preserve `gclid`, `gbraid`, `wbraid`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term` across redirects, login, checkout, PayPal/Card payment, and dashboard routing.
+    4. **Store Source Data in Database**: Save original and last traffic source, landing page, referral source, UTM parameters, and Google click IDs on every order in PostgreSQL, viewable in the Admin Portal.
+    5. **Admin Analytics Dashboard**: Add analytics area displaying orders by source, revenue by source, Google Ads orders, organic Google orders, TikTok/Facebook/Instagram orders, repeat customer orders, cost per paid order (CPA), and return on ad spend (ROAS).
+    6. **Enhanced Conversions**: Prepare Google Ads Enhanced Conversions using normalized SHA-256 hashed customer email data.
+- **Architectural Implementation**:
+  1. **Dual-Touch Attribution & Session Persistence Engine (`js/analytics.js`)**:
+     - Captures all 8 URL parameters (`gclid`, `gbraid`, `wbraid`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`) upon entry along with `landing_page` and `referral_source`.
+     - Maintains dual-touch tracking:
+       - **First Touch (`dezan_first_touch`)**: Preserved indefinitely in `localStorage` + 90-day cookies. Never overwritten by subsequent visits.
+       - **Last Touch (`dezan_last_touch`)**: Updated whenever a user arrives with new UTMs, click IDs, or an external referrer.
+     - **Cross-Domain & Cross-Route Preservation**: Stored in both `localStorage` and root-scoped browser cookies (`dezan_tracking_data`, `dezan_gclid`, `dezan_first_touch`, `dezan_last_touch`). Survives full page reloads, authentication redirects, PayPal payment gateways, and client portal navigation.
+     - **Synchronous SHA-256 Fallback Hashing**: Pure JavaScript implementation of SHA-256 in `fallbackSha256` operating synchronously without Promise latency, ensuring Enhanced Conversion data pushes to `dataLayer` instantly before any page unload or redirect.
+     - **Purchase Deduplication Safeguard**: Maintains a cache of converted order IDs in `localStorage` (`dezan_converted_orders`) to guarantee conversion pixels never fire multiple times on page refreshes.
+     - **Strict Conversion Rule**: Pure form open or "Order Now" button clicks are tracked exclusively as `order_started` or `service_selected`; only verified post-payment confirmation triggers `purchase` and `conversion`.
+  2. **10 Sitewide GA4 Ecommerce & Funnel Events (`js/analytics.js`)**:
+     - `trackServicePageView(serviceName, category)`: Fires on service pages and portfolio modals.
+     - `trackOrderStarted(serviceName, entryPoint)`: Fires when an order modal or checkout starts.
+     - `trackServiceSelected(serviceName, turnaround)`: Fires on service option selection.
+     - `trackArtworkUploaded(fileCount, serviceName)`: Fires when files are staged in dropzones.
+     - `trackBeginCheckout(items, totalValue)`: Fires when entering checkout / payment step.
+     - `trackAddPaymentInfo(paymentMethod, totalValue)`: Fires when selecting PayPal or Card.
+     - `trackOrderPurchase(orderData)`: Fires strictly post-payment with `transaction_id`, `value`, `currency: 'USD'`, `items`, `service_name`, `placement`, `turnaround`, and `enhanced_conversion_data`.
+     - `trackQuoteLead(quoteData)`: Fires when instant quote form is submitted (`generate_lead`).
+     - `trackRevisionRequested(orderNumber, reason)`: Fires when client submits a revision request.
+     - `trackFilesDownloaded(orderNumber, fileType)`: Fires when deliverables are downloaded.
+  3. **Database Migration & Persistent Schema (`migrations/20260912120000_add_traffic_attribution_columns.sql`)**:
+     - Applied migration to live InsForge PostgreSQL database (`e8rw998g.us-east.database.insforge.app:5432`):
+       - `original_source VARCHAR(100)`
+       - `last_source VARCHAR(100)`
+       - `landing_page TEXT`
+       - `referral_source TEXT`
+       - `utm_source VARCHAR(100)`, `utm_medium VARCHAR(100)`, `utm_campaign VARCHAR(150)`, `utm_content VARCHAR(150)`, `utm_term VARCHAR(150)`
+       - `gclid VARCHAR(150)`, `gbraid VARCHAR(150)`, `wbraid VARCHAR(150)`
+       - `attribution_data JSONB`
+     - Created indexes on `(utm_source, utm_medium)`, `gclid`, and `original_source` for performant reporting.
+     - Updated `DATABASE_SCHEMA.md` to reflect the new attribution schema.
+  4. **Backend Controllers & Client Integration**:
+     - `server/controllers/orderController.js`: Extracts attribution fields and JSONB from incoming order requests and writes them to PostgreSQL.
+     - `server/controllers/quoteController.js`: Extracts and persists traffic attribution data on quotes.
+     - `js/insforge-client.js`: Automatically attaches `getAttributionPayload()` from `window.dezanAnalytics` on every `createOrder` and `requestQuote`.
+     - `app.js` (`initSuccessPage`): Dispatches `trackOrderPurchase` on `order-success.html` after validating payment state.
+     - `client-portal.html`: Dispatches `trackOrderPurchase` on in-portal order completion.
+     - `js/client-workspace.js`: Wired `trackRevisionRequested` and `trackFilesDownloaded`.
+     - `js/order-quote-modal.js`: Wired `trackArtworkUploaded`, `trackServiceSelected`, and `trackOrderStarted`.
+  5. **Sitewide Google Tag Manager (GTM) Installation**:
+     - Standardized Google Tag Manager container `GTM-5K8L9W2` with head script and body `<noscript>` fallback across all 30 HTML pages in the codebase.
+  6. **Admin Analytics Dashboard & Order Attribution Dossier (`admin-portal.html`, `admin-orders.html`, `js/admin-workspace.js`)**:
+     - **Admin Portal Section (`#admin-traffic-analytics`)**:
+       - 8 Interactive KPI Cards: Total Orders, Total Revenue, Google Ads Orders, Organic Google Orders, Social Media Orders (TikTok/FB/IG), Repeat Customer Orders, Cost Per Acquisition (CPA), and Return on Ad Spend (ROAS).
+       - Interactive Google Ads Spend Input with real-time recalculation of CPA (`Ad Spend / Paid Google Orders`) and ROAS (`(Google Ads Revenue / Ad Spend) * 100%`).
+       - Channel Breakdown Table: Displays Orders, Revenue, Avg Order Value, and % of Total across Google Ads, Organic Search, TikTok / Social, Direct / Returning, and Email / Referral.
+     - **Admin Order Details Modal (Section 6: Traffic & Campaign Attribution Dossier)**:
+       - Displays First-Touch Channel, Last-Touch Channel, Click ID (with one-click clipboard copy), Campaign, Ad Group / Content, Keyword / Term, Landing Page, and Referrer.
+       - Integrated into both `admin-portal.html` and `admin-orders.html`.
+- **Verification & Test Coverage**:
+  - `tests/tracking.test.js`: 10/10 automated test suites passing:
+    1. Analytics initialization and default config.
+    2. URL parameter parsing and dual-touch attribution storage.
+    3. Purchase conversion tracking payload and deduplication guard.
+    4. Quote lead generation tracking.
+    5. GTM script and noscript tags sitewide across HTML pages.
+    6. All 10 GA4 event methods execution without errors.
+    7. Parameter preservation across cross-route navigation and storage.
+    8. Enhanced Conversions SHA-256 email normalization and hashing.
+    9. PostgreSQL attribution columns schema verification.
+    10. CPA and ROAS mathematical formulation and calculations.
+  - Headless Chrome Visual QA (`scripts/verify_traffic_tracking_visuals.js`):
+    - `tests/visual_proofs/admin_traffic_analytics_section.png`: 8 KPI cards and channel breakdown rendered accurately.
+    - `tests/visual_proofs/admin_order_details_attribution_modal.png`: Section 6 Attribution Dossier rendered with badges and click ID copy.
+    - `tests/visual_proofs/order_success_conversion_page.png`: Live purchase conversion with Enhanced Conversion dataLayer push.
+
+### 35.16 Clean Vanity Tracking Links Architecture (Live & Verified)
+- **User Mandate & Problem Statement**:
+  - *"Please create clean tracking links so I do not have to use long UTM links publicly. I want links like: dezandigitizing.com/tiktok, dezandigitizing.com/instagram, dezandigitizing.com/facebook. These links should look clean to clients, but the website should still save the tracking source in the background."*
+  - *"Example: When someone clicks dezandigitizing.com/tiktok, the system should save utm_source=tiktok, utm_medium=organic_social, utm_campaign=profile_bio, then redirect the visitor to the correct page ... The public link should stay clean and professional, but the tracking should still work in the background."*
+- **Architectural Implementation**:
+  1. **Clean Route Bridge Architecture**:
+     - Created standalone clean entry pages in repository root:
+       - `tiktok.html` & `tiktok/index.html` $\rightarrow$ `dezandigitizing.com/tiktok`
+       - `instagram.html` & `instagram/index.html` $\rightarrow$ `dezandigitizing.com/instagram`
+       - `facebook.html` & `facebook/index.html` $\rightarrow$ `dezandigitizing.com/facebook`
+       - `fb.html` & `fb/index.html` $\rightarrow$ `dezandigitizing.com/fb`
+       - `ig.html` & `ig/index.html` $\rightarrow$ `dezandigitizing.com/ig`
+       - `youtube.html` & `youtube/index.html` $\rightarrow$ `dezandigitizing.com/youtube`
+       - `yt.html` & `yt/index.html` $\rightarrow$ `dezandigitizing.com/yt`
+       - `pinterest.html` & `pinterest/index.html` $\rightarrow$ `dezandigitizing.com/pinterest`
+  2. **Instant Headless Attribution & Zero-Flicker Redirection**:
+     - Script in `<head>` executes before rendering:
+       - Sets `source`: channel (`tiktok`, `instagram`, `facebook`)
+       - Sets `utm_source`: channel
+       - Sets `utm_medium`: `'organic_social'`
+       - Sets `utm_campaign`: `'profile_bio'`
+       - Sets `landing_page`: `window.location.pathname` (e.g. `'/tiktok'`)
+       - Sets `referral_source`: `document.referrer` or `'tiktok.com'`
+     - Persists attribution to `localStorage` (`dezan_first_touch_attribution`, `dezan_last_touch_attribution`) and 90-day cookies.
+     - Supports optional destination routing via `?dest=...` (e.g. `/tiktok?dest=/pricing.html` redirects cleanly to `/pricing.html`, default redirects to `/`).
+     - Performs instant `window.location.replace(destination)`.
+     - `replace()` preserves clean browser address bar (`https://dezandigitizing.com/` with zero ugly UTM parameters) and prevents back-button trapping inside in-app social browsers (TikTok, Instagram).
+  3. **Universal Analytics Engine Integration (`js/analytics.js`)**:
+     - Integrated `CLEAN_VANITY_ROUTES` lookup table into `captureTrafficAttribution()`.
+     - Added `recordCleanLinkVisit(channel, customParams, destination)` to `DezanTracker`.
+     - Dual-touch preservation guarantees that even after navigation to `/pricing`, `/services`, logging in, and paying on PayPal, the final order sent to PostgreSQL and conversion events dispatched to Google Ads & GA4 retain the exact origin channel.
+  4. **Platform & Server Routing Compatibility**:
+     - `vercel.json`: Added explicit rewrites for `/tiktok`, `/instagram`, `/facebook`, etc.
+     - `server/server.js`: Added clean vanity route handlers for Express standalone/local environments.
+- **Verification & Test Coverage**:
+  - `tests/tracking.test.js`: 11/11 automated unit/integration tests passing.
+  - Headless Chrome Verification (`scripts/verify_clean_tracking_links.js`):
+    - Flow 1: `/tiktok` $\rightarrow$ redirected to clean `http://localhost:8092/`, first-touch stored as `tiktok / organic_social / profile_bio`.
+    - Flow 2: `/instagram?dest=/pricing.html` $\rightarrow$ redirected to clean `http://localhost:8092/pricing.html`, first-touch preserved (`tiktok`), last-touch updated to `instagram`.
+    - Flow 3: `/facebook` $\rightarrow$ redirected to clean `http://localhost:8092/`, last-touch updated to `facebook`.
+    - Flow 4: Order confirmation simulation post-payment $\rightarrow$ purchase conversion successfully dispatched to `dataLayer` with `original_source: 'tiktok'`, `last_source: 'facebook'`, and `utm_campaign: 'profile_bio'`.
+  - Visual artifacts generated in `tests/visual_proofs/`:
+    - `clean_link_tiktok_redirected_home.png`
+    - `clean_link_instagram_redirected_pricing.png`
+
+

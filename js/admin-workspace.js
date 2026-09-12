@@ -526,6 +526,7 @@
             window.dezanAdminClients = clients;
             window.dezanAdminCatalog = catalogDesigns;
             renderAdminOrders();
+            renderTrafficAnalytics(allOrders);
             renderClientsDirectory(clients);
             renderDesignCatalog(catalogDesigns);
             renderDigitizerTeamHub(allOrders, digitizers);
@@ -593,6 +594,7 @@
             const stageUnassignedUnion = [...stageNewOrders, ...stageRevisionOrders];
 
             renderAdminInsights(allOrders, [stageNewOrders, stageRevisionOrders, stageQuotesOrders, stageProductionOrders, stageCompletedOrders]);
+            renderTrafficAnalytics(allOrders);
 
             // Update Header & Pill Counts
             const totalCount = stageNewOrders.length + stageRevisionOrders.length + stageQuotesOrders.length + stageProductionOrders.length + stageCompletedOrders.length;
@@ -1058,7 +1060,10 @@
                         <!-- Header Bar: ID, Date/Time, Rush Status -->
                         <div class="flex items-start justify-between gap-2 mb-3">
                             <div>
-                                <span class="px-2.5 py-1 rounded-lg border font-mono text-xs font-black ${theme.orderIdClass} tracking-wide whitespace-nowrap select-all inline-block bg-slate-100/80 dark:bg-slate-800/80">#${safeOrderNumber}</span>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="px-2.5 py-1 rounded-lg border font-mono text-xs font-black ${theme.orderIdClass} tracking-wide whitespace-nowrap select-all inline-block bg-slate-100/80 dark:bg-slate-800/80">#${safeOrderNumber}</span>
+                                    ${getTrafficSourceBadge(order)}
+                                </div>
                                 <div class="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium mt-1 leading-tight flex items-center gap-1">
                                     <span class="material-symbols-outlined text-[11px] text-slate-400 dark:text-slate-500">schedule</span>
                                     <span>${orderDt.date}</span>
@@ -1221,6 +1226,7 @@
                         <span class="inline-block whitespace-nowrap select-all font-mono font-black ${theme.orderIdClass}" style="white-space: nowrap !important; word-break: keep-all !important; letter-spacing: -0.01em;">
                             ${safeOrderNumber}
                         </span>
+                        <div class="mt-1">${getTrafficSourceBadge(order)}</div>
                         <div class="text-[10px] text-slate-500 dark:text-slate-400 font-sans font-medium mt-0.5 leading-tight flex items-center gap-1">
                             <span>${orderDt.date}</span>
                             <span class="text-slate-300 dark:text-slate-600">·</span>
@@ -1836,6 +1842,47 @@
                 default:
                     return '<span class="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-500/35 text-[11px] font-bold leading-none shrink-0" style="white-space: nowrap !important;">New Order</span>';
             }
+        }
+
+        function getTrafficSourceBadge(order) {
+            if (!order) return '';
+            const src = (order.original_source || order.last_source || order.utm_source || 'direct').toLowerCase();
+            const hasGclid = Boolean(order.gclid || order.gbraid || order.wbraid);
+            const med = (order.utm_medium || '').toLowerCase();
+            const isGoogleAds = src.includes('google_ads') || src.includes('google-ads') || hasGclid || med === 'cpc' || med === 'ppc' || med === 'paid';
+
+            if (isGoogleAds) {
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-500/15 text-blue-800 dark:text-blue-300 border border-blue-500/30 whitespace-nowrap shadow-2xs" title="Google Ads / Paid Campaign: ${escapeHtml(order.utm_campaign || 'Active')}"><span class="material-symbols-outlined text-[11px] text-blue-600 dark:text-blue-400">ads_click</span> Google Ads</span>`;
+            }
+            if (src.includes('google') || src.includes('organic') || med === 'organic') {
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 whitespace-nowrap shadow-2xs" title="Google Organic Search"><span class="material-symbols-outlined text-[11px] text-emerald-600 dark:text-emerald-400">search</span> Organic</span>`;
+            }
+            if (src.includes('tiktok')) {
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-pink-500/15 text-pink-800 dark:text-pink-300 border border-pink-500/30 whitespace-nowrap shadow-2xs" title="TikTok"><span class="material-symbols-outlined text-[11px] text-pink-600 dark:text-pink-400">play_circle</span> TikTok</span>`;
+            }
+            if (src.includes('facebook') || src.includes('fb') || src.includes('meta')) {
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/15 text-indigo-800 dark:text-indigo-300 border border-indigo-500/30 whitespace-nowrap shadow-2xs" title="Facebook"><span class="material-symbols-outlined text-[11px] text-indigo-600 dark:text-indigo-400">thumb_up</span> Facebook</span>`;
+            }
+            if (src.includes('instagram') || src.includes('ig')) {
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-800 dark:text-rose-300 border border-rose-500/30 whitespace-nowrap shadow-2xs" title="Instagram"><span class="material-symbols-outlined text-[11px] text-rose-600 dark:text-rose-400">photo_camera</span> Instagram</span>`;
+            }
+            if (src.includes('referral') || (order.referral_source && !order.referral_source.includes('google'))) {
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/15 text-purple-800 dark:text-purple-300 border border-purple-500/30 whitespace-nowrap shadow-2xs" title="Referral: ${escapeHtml(order.referral_source || 'External')}"><span class="material-symbols-outlined text-[11px] text-purple-600 dark:text-purple-400">link</span> Referral</span>`;
+            }
+            return `<span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9.5px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 whitespace-nowrap" title="Direct Navigation"><span class="material-symbols-outlined text-[10px] text-slate-400">navigation</span> Direct</span>`;
+        }
+
+        function formatChannelName(src) {
+            if (!src) return 'Direct / Unknown';
+            const s = String(src).toLowerCase();
+            if (s.includes('google_ads') || s.includes('google-ads') || s === 'cpc') return 'Google Ads (Paid)';
+            if (s.includes('google') || s.includes('organic')) return 'Google Organic Search';
+            if (s.includes('tiktok')) return 'TikTok';
+            if (s.includes('facebook') || s.includes('fb') || s.includes('meta')) return 'Facebook';
+            if (s.includes('instagram') || s.includes('ig')) return 'Instagram';
+            if (s.includes('referral')) return 'Referral Link';
+            if (s.includes('direct')) return 'Direct Navigation';
+            return src;
         }
 
         // ===== ADMIN REVISION DETAILS MODAL LOGIC =====
@@ -3067,6 +3114,76 @@ Email: fdezan91@gmail.com`;
                 footerActionsEl.innerHTML = actions.join('');
             }
 
+            // Section 6: Traffic & Campaign Attribution Dossier
+            const origSrc = order.original_source || order.utm_source || 'direct';
+            const lastSrc = order.last_source || order.original_source || 'direct';
+            const gclidVal = order.gclid || order.gbraid || order.wbraid || '';
+            const attrBadge = document.getElementById('order-details-attribution-badge');
+            if (attrBadge) {
+                attrBadge.outerHTML = `<span id="order-details-attribution-badge">${getTrafficSourceBadge(order)}</span>`;
+            }
+
+            const origSrcEl = document.getElementById('order-details-original-source');
+            if (origSrcEl) origSrcEl.textContent = formatChannelName(origSrc);
+
+            const firstTouchDateEl = document.getElementById('order-details-first-touch-date');
+            if (firstTouchDateEl) {
+                const firstDt = (order.attribution_data && order.attribution_data.first_touch_at) ? new Date(order.attribution_data.first_touch_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : (order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'First visit');
+                firstTouchDateEl.textContent = `Recorded: ${firstDt}`;
+            }
+
+            const lastSrcEl = document.getElementById('order-details-last-source');
+            if (lastSrcEl) lastSrcEl.textContent = formatChannelName(lastSrc);
+
+            const lastTouchDateEl = document.getElementById('order-details-last-touch-date');
+            if (lastTouchDateEl) {
+                const lastDt = (order.attribution_data && order.attribution_data.last_touch_at) ? new Date(order.attribution_data.last_touch_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : (order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Checkout visit');
+                lastTouchDateEl.textContent = `Converted: ${lastDt}`;
+            }
+
+            const gclidEl = document.getElementById('order-details-gclid');
+            const copyBtn = document.getElementById('order-details-copy-gclid-btn');
+            if (gclidEl) {
+                if (gclidVal) {
+                    gclidEl.textContent = gclidVal;
+                    gclidEl.title = gclidVal;
+                    if (copyBtn) copyBtn.classList.remove('hidden');
+                } else {
+                    gclidEl.textContent = 'None / Direct Click';
+                    gclidEl.title = '';
+                    if (copyBtn) copyBtn.classList.add('hidden');
+                }
+            }
+
+            const utmCampaignEl = document.getElementById('order-details-utm-campaign');
+            if (utmCampaignEl) {
+                utmCampaignEl.textContent = order.utm_campaign || 'Default Campaign';
+                utmCampaignEl.title = order.utm_campaign || '';
+            }
+
+            const utmMediumEl = document.getElementById('order-details-utm-medium');
+            if (utmMediumEl) {
+                utmMediumEl.textContent = `Medium: ${order.utm_medium || (gclidVal ? 'cpc' : 'organic/none')}`;
+            }
+
+            const landingPageEl = document.getElementById('order-details-landing-page');
+            if (landingPageEl) {
+                landingPageEl.textContent = order.landing_page || '/';
+                landingPageEl.title = order.landing_page || '/';
+            }
+
+            const referralEl = document.getElementById('order-details-referral');
+            if (referralEl) {
+                referralEl.textContent = order.referral_source || 'Direct Entry / None';
+                referralEl.title = order.referral_source || '';
+            }
+
+            const utmTermEl = document.getElementById('order-details-utm-term');
+            if (utmTermEl) {
+                const termStr = [order.utm_term ? `Term: ${order.utm_term}` : '', order.utm_content ? `Content: ${order.utm_content}` : ''].filter(Boolean).join(' · ');
+                utmTermEl.textContent = termStr || 'No search keywords passed';
+            }
+
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
@@ -3231,7 +3348,190 @@ function openAdminChartStage(stage) {
     window.location.href = adminPages.orders + '?stage=' + encodeURIComponent(stage);
 }
 
+// ===== TRAFFIC & GOOGLE ADS CONVERSION ANALYTICS ENGINE =====
+function renderTrafficAnalytics(orders) {
+    const container = document.getElementById('admin-traffic-analytics');
+    if (!container) return;
+
+    const allOrders = Array.isArray(orders) ? orders : (window.insforgeClient ? window.insforgeClient.getOrders() : []);
+    const validOrders = allOrders.filter(o => o.status !== 'cancelled');
+    const paidOrders = validOrders.filter(o => o.payment_status === 'paid');
+
+    function classifyChannel(order) {
+        const src = (order.original_source || order.last_source || order.utm_source || '').toLowerCase();
+        const med = (order.utm_medium || '').toLowerCase();
+        if (src.includes('google_ads') || src.includes('google-ads') || order.gclid || order.gbraid || order.wbraid || med === 'cpc' || med === 'ppc' || med === 'paid') {
+            return 'google_ads';
+        }
+        if (src.includes('google') || src.includes('organic') || med === 'organic') {
+            return 'google_organic';
+        }
+        if (src.includes('tiktok')) return 'tiktok';
+        if (src.includes('facebook') || src.includes('fb') || src.includes('meta')) return 'facebook';
+        if (src.includes('instagram') || src.includes('ig')) return 'instagram';
+        if (src.includes('referral') || (order.referral_source && !order.referral_source.includes('google'))) return 'referral';
+        return 'direct';
+    }
+
+    const channels = {
+        google_ads: { label: 'Google Ads (Paid Search)', icon: 'ads_click', color: 'blue', orders: 0, paidOrders: 0, revenue: 0 },
+        google_organic: { label: 'Google Organic Search', icon: 'search', color: 'emerald', orders: 0, paidOrders: 0, revenue: 0 },
+        tiktok: { label: 'TikTok Ads & Organic', icon: 'play_circle', color: 'pink', orders: 0, paidOrders: 0, revenue: 0 },
+        facebook: { label: 'Facebook / Meta', icon: 'thumb_up', color: 'indigo', orders: 0, paidOrders: 0, revenue: 0 },
+        instagram: { label: 'Instagram', icon: 'photo_camera', color: 'rose', orders: 0, paidOrders: 0, revenue: 0 },
+        referral: { label: 'Referral / Partners', icon: 'link', color: 'purple', orders: 0, paidOrders: 0, revenue: 0 },
+        direct: { label: 'Direct / Navigation', icon: 'navigation', color: 'slate', orders: 0, paidOrders: 0, revenue: 0 }
+    };
+
+    validOrders.forEach(o => {
+        const chKey = classifyChannel(o);
+        const ch = channels[chKey] || channels.direct;
+        ch.orders++;
+        const val = Number(o.price || 0);
+        if (o.payment_status === 'paid') {
+            ch.paidOrders++;
+            ch.revenue += val;
+        }
+    });
+
+    const totalPaidRev = paidOrders.reduce((sum, o) => sum + Number(o.price || 0), 0);
+
+    // Repeat Customer Analysis (Grouped by email)
+    const emailCounts = {};
+    paidOrders.forEach(o => {
+        const email = (o.client_email || '').toLowerCase().trim();
+        if (!email) return;
+        emailCounts[email] = (emailCounts[email] || 0) + 1;
+    });
+
+    let repeatOrdersCount = 0;
+    let repeatRev = 0;
+    paidOrders.forEach(o => {
+        const email = (o.client_email || '').toLowerCase().trim();
+        if (email && emailCounts[email] > 1) {
+            repeatOrdersCount++;
+            repeatRev += Number(o.price || 0);
+        }
+    });
+
+    const repeatPct = paidOrders.length > 0 ? Math.round((repeatOrdersCount / paidOrders.length) * 100) : 0;
+
+    // Social summary
+    const socialOrders = channels.tiktok.paidOrders + channels.facebook.paidOrders + channels.instagram.paidOrders;
+    const socialRev = channels.tiktok.revenue + channels.facebook.revenue + channels.instagram.revenue;
+
+    // Update KPI Elements
+    if (document.getElementById('kpi-google-ads-orders')) document.getElementById('kpi-google-ads-orders').textContent = channels.google_ads.paidOrders;
+    if (document.getElementById('kpi-google-ads-rev')) document.getElementById('kpi-google-ads-rev').textContent = '$' + channels.google_ads.revenue.toFixed(2);
+
+    if (document.getElementById('kpi-google-organic-orders')) document.getElementById('kpi-google-organic-orders').textContent = channels.google_organic.paidOrders;
+    if (document.getElementById('kpi-google-organic-rev')) document.getElementById('kpi-google-organic-rev').textContent = '$' + channels.google_organic.revenue.toFixed(2);
+
+    if (document.getElementById('kpi-social-orders')) document.getElementById('kpi-social-orders').textContent = socialOrders;
+    if (document.getElementById('kpi-social-rev')) document.getElementById('kpi-social-rev').textContent = '$' + socialRev.toFixed(2);
+    if (document.getElementById('kpi-social-breakdown')) {
+        document.getElementById('kpi-social-breakdown').textContent = `TT: ${channels.tiktok.paidOrders} · FB: ${channels.facebook.paidOrders} · IG: ${channels.instagram.paidOrders}`;
+    }
+
+    if (document.getElementById('kpi-repeat-orders')) document.getElementById('kpi-repeat-orders').textContent = repeatOrdersCount;
+    if (document.getElementById('kpi-repeat-pct')) document.getElementById('kpi-repeat-pct').textContent = `(${repeatPct}%)`;
+    if (document.getElementById('kpi-repeat-rev')) document.getElementById('kpi-repeat-rev').textContent = '$' + repeatRev.toFixed(2);
+
+    const directAndReferralOrders = channels.direct.paidOrders + channels.referral.paidOrders;
+    const directAndReferralRev = channels.direct.revenue + channels.referral.revenue;
+    if (document.getElementById('kpi-direct-orders')) document.getElementById('kpi-direct-orders').textContent = directAndReferralOrders;
+    if (document.getElementById('kpi-direct-rev')) document.getElementById('kpi-direct-rev').textContent = '$' + directAndReferralRev.toFixed(2);
+
+    const paidRate = validOrders.length > 0 ? Math.round((paidOrders.length / validOrders.length) * 100) : 0;
+    if (document.getElementById('kpi-paid-rate')) document.getElementById('kpi-paid-rate').textContent = `${paidRate}%`;
+    if (document.getElementById('kpi-total-paid-rev')) document.getElementById('kpi-total-paid-rev').textContent = '$' + totalPaidRev.toFixed(2);
+
+    // Calculate CPA & ROAS
+    updateRoasMetrics(channels.google_ads);
+
+    // Render Table
+    const tableBody = document.getElementById('traffic-sources-table-body');
+    if (tableBody) {
+        const rows = Object.values(channels).map(ch => {
+            const aov = ch.paidOrders > 0 ? (ch.revenue / ch.paidOrders).toFixed(2) : '0.00';
+            const share = totalPaidRev > 0 ? ((ch.revenue / totalPaidRev) * 100).toFixed(1) : '0.0';
+            return `
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
+                    <td class="p-3 font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base text-${ch.color}-600 dark:text-${ch.color}-400">${ch.icon}</span>
+                        <span>${ch.label}</span>
+                    </td>
+                    <td class="p-3 text-center font-mono font-bold">${ch.orders}</td>
+                    <td class="p-3 text-center font-mono font-bold text-emerald-700 dark:text-emerald-400">${ch.paidOrders}</td>
+                    <td class="p-3 text-right font-mono font-black">$${ch.revenue.toFixed(2)}</td>
+                    <td class="p-3 text-right font-mono text-slate-600 dark:text-slate-300">$${aov}</td>
+                    <td class="p-3 text-right font-mono font-bold text-amber-700 dark:text-primary">${share}%</td>
+                </tr>
+            `;
+        }).join('');
+        tableBody.innerHTML = rows;
+    }
+}
+
+function updateRoasMetrics(passedGoogleAds) {
+    const spendInput = document.getElementById('admin-ad-spend-input');
+    const adSpend = spendInput ? Math.max(0, Number(spendInput.value) || 0) : 100;
+    try { localStorage.setItem('dezan_admin_ad_spend', adSpend); } catch(e) {}
+
+    const allOrders = window.insforgeClient ? window.insforgeClient.getOrders() : [];
+    const googleAdsOrders = allOrders.filter(o => {
+        if (o.status === 'cancelled' || o.payment_status !== 'paid') return false;
+        const src = (o.original_source || o.last_source || o.utm_source || '').toLowerCase();
+        const med = (o.utm_medium || '').toLowerCase();
+        return src.includes('google_ads') || src.includes('google-ads') || o.gclid || o.gbraid || o.wbraid || med === 'cpc' || med === 'ppc' || med === 'paid';
+    });
+
+    const paidCount = passedGoogleAds ? passedGoogleAds.paidOrders : googleAdsOrders.length;
+    const revenue = passedGoogleAds ? passedGoogleAds.revenue : googleAdsOrders.reduce((sum, o) => sum + Number(o.price || 0), 0);
+
+    const cpaEl = document.getElementById('kpi-cpa');
+    const roasEl = document.getElementById('kpi-roas');
+    const roasPctEl = document.getElementById('kpi-roas-pct');
+
+    if (cpaEl) {
+        if (paidCount > 0) {
+            const cpa = (adSpend / paidCount).toFixed(2);
+            cpaEl.textContent = `$${cpa}`;
+        } else {
+            cpaEl.textContent = adSpend > 0 ? `$${adSpend.toFixed(2)}` : '$0.00';
+        }
+    }
+
+    if (roasEl) {
+        if (adSpend > 0) {
+            const roasRatio = (revenue / adSpend).toFixed(2);
+            roasEl.textContent = `${roasRatio}x`;
+            const roasPct = Math.round((revenue / adSpend) * 100);
+            if (roasPctEl) roasPctEl.textContent = `(${roasPct}%)`;
+        } else {
+            roasEl.textContent = revenue > 0 ? '∞' : '0.00x';
+            if (roasPctEl) roasPctEl.textContent = '(0%)';
+        }
+    }
+}
+
+function copyGclidToClipboard() {
+    const el = document.getElementById('order-details-gclid');
+    if (!el || !el.textContent || el.textContent === '-' || el.textContent.includes('None')) return;
+    navigator.clipboard.writeText(el.textContent.trim()).then(() => {
+        const btn = document.getElementById('order-details-copy-gclid-btn');
+        if (btn) {
+            const orig = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => { btn.textContent = orig; }, 2000);
+        }
+    }).catch(() => {});
+}
+
 // Global Window Exposures for Testing & Inline HTML Callbacks
+window.renderTrafficAnalytics = renderTrafficAnalytics;
+window.updateRoasMetrics = updateRoasMetrics;
+window.copyGclidToClipboard = copyGclidToClipboard;
 window.setAdminLayout = setAdminLayout;
 window.renderAdminOrders = renderAdminOrders;
 window.renderAllAdminData = renderAllAdminData;

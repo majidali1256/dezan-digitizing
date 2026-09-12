@@ -832,6 +832,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (currentPage === "order-success.html" || currentPage === "order-success") {
         initSuccessPage();
     }
+
+    // ===================================================================
+    //  GA4 SERVICE PAGE VIEW TRACKING
+    // ===================================================================
+    initServicePageViewTracking();
     
     // ===================================================================
     //  LIGHTBOX FOR FEEDBACK IMAGES
@@ -847,6 +852,38 @@ document.addEventListener("DOMContentLoaded", () => {
     initStickyHeader();
     initInteractiveElements();
 });
+
+function initServicePageViewTracking() {
+    if (typeof window === 'undefined') return;
+    const path = window.location.pathname.toLowerCase();
+    
+    function fireServiceView() {
+        if (!window.dezanTracker || typeof window.dezanTracker.trackServicePageView !== 'function') return;
+        if (path.includes('cap-hat-digitizing')) {
+            window.dezanTracker.trackServicePageView({ id: 'cap_hat_digitizing', name: 'Cap & Hat Embroidery Digitizing', category: 'Embroidery Digitizing', price: 15.00 });
+        } else if (path.includes('left-chest-digitizing')) {
+            window.dezanTracker.trackServicePageView({ id: 'left_chest_digitizing', name: 'Left Chest Embroidery Digitizing', category: 'Embroidery Digitizing', price: 15.00 });
+        } else if (path.includes('3d-puff-digitizing')) {
+            window.dezanTracker.trackServicePageView({ id: '3d_puff_digitizing', name: '3D Puff Embroidery Digitizing', category: 'Embroidery Digitizing', price: 15.00 });
+        } else if (path.includes('jacket-back-digitizing')) {
+            window.dezanTracker.trackServicePageView({ id: 'jacket_back_digitizing', name: 'Jacket Back Embroidery Digitizing', category: 'Embroidery Digitizing', price: 25.00 });
+        } else if (path.includes('pet-portrait-digitizing')) {
+            window.dezanTracker.trackServicePageView({ id: 'pet_portrait_digitizing', name: 'Pet Portrait Embroidery Digitizing', category: 'Embroidery Digitizing', price: 25.00 });
+        } else if (path.includes('embroidery-digitizing')) {
+            window.dezanTracker.trackServicePageView({ id: 'embroidery_digitizing', name: 'Embroidery Digitizing Services', category: 'Embroidery Digitizing', price: 15.00 });
+        } else if (path.includes('vector-art-conversion')) {
+            window.dezanTracker.trackServicePageView({ id: 'vector_art_conversion', name: 'Vector Art Conversion', category: 'Vector Art', price: 15.00 });
+        } else if (path.includes('services.html') || path.endsWith('/services') || path.endsWith('/services/')) {
+            window.dezanTracker.trackServicePageView({ id: 'services_overview', name: 'Services Overview', category: 'Services', price: 15.00 });
+        }
+    }
+
+    if (window.dezanTracker) {
+        fireServiceView();
+    } else {
+        window.addEventListener('load', fireServiceView);
+    }
+}
 
 
 
@@ -1105,10 +1142,12 @@ function initSuccessPage() {
     } catch (_) {}
 
     const orderId = params.get("orderId") || (guestOrder ? guestOrder.order_number : "DZ-" + Math.floor(1000 + Math.random() * 9000));
-    const txnId = params.get("txn") || (guestOrder ? (guestOrder.id ? guestOrder.id.slice(0, 8) : 'TXN-884192') : "TXN-" + Math.floor(100000 + Math.random() * 900000));
+    const txnId = params.get("txn") || (guestOrder ? (guestOrder.transaction_id || (guestOrder.id ? guestOrder.id.slice(0, 8) : 'TXN-884192')) : "TXN-" + Math.floor(100000 + Math.random() * 900000));
     const plan = params.get("plan") || (guestOrder ? guestOrder.plan_name : "Left Chest / Hat");
     const project = params.get("project") || (guestOrder ? guestOrder.project_name : "Custom Embroidery Design");
     const service = params.get("service") || (guestOrder ? guestOrder.service_type : "Digitizing");
+    const placement = params.get("placement") || (guestOrder ? guestOrder.placement : "Standard Placement");
+    const turnaround = params.get("turnaround") || (guestOrder ? guestOrder.turnaround_speed : "standard");
     const amount = params.get("amount") || (guestOrder ? guestOrder.price : "15.00");
     const email = params.get("email") || (guestOrder ? guestOrder.client_email : "");
 
@@ -1202,7 +1241,8 @@ function initSuccessPage() {
                 quoteId: orderId,
                 email: email,
                 service: service,
-                project: project
+                project: project,
+                turnaround: turnaround
             });
         } else {
             window.dezanTracker.trackOrderPurchase({
@@ -1211,6 +1251,8 @@ function initSuccessPage() {
                 amount: amount,
                 service: service,
                 plan: plan,
+                placement: placement,
+                turnaround: turnaround,
                 project: project,
                 email: email
             });

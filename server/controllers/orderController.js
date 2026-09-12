@@ -71,16 +71,36 @@ const createOrder = async (req, res) => {
         const orderNumber = generateOrderNumber();
         const finalPrice = parseFloat(price) || 0.00;
 
+        // Extract traffic and marketing attribution
+        const attr = req.body.attribution || {};
+        const originalSource = (req.body.originalSource || req.body.original_source || attr.original_source || attr.originalSource || 'direct').slice(0, 100);
+        const lastSource = (req.body.lastSource || req.body.last_source || attr.last_source || attr.lastSource || originalSource || 'direct').slice(0, 100);
+        const landingPage = req.body.landingPage || req.body.landing_page || attr.landing_page || attr.landingPage || null;
+        const referralSource = req.body.referralSource || req.body.referral_source || attr.referral_source || attr.referralSource || null;
+        const utmSource = req.body.utmSource || req.body.utm_source || attr.utm_source || attr.utmSource || null;
+        const utmMedium = req.body.utmMedium || req.body.utm_medium || attr.utm_medium || attr.utmMedium || null;
+        const utmCampaign = req.body.utmCampaign || req.body.utm_campaign || attr.utm_campaign || attr.utmCampaign || null;
+        const utmContent = req.body.utmContent || req.body.utm_content || attr.utm_content || attr.utmContent || null;
+        const utmTerm = req.body.utmTerm || req.body.utm_term || attr.utm_term || attr.utmTerm || null;
+        const gclid = req.body.gclid || attr.gclid || null;
+        const gbraid = req.body.gbraid || attr.gbraid || null;
+        const wbraid = req.body.wbraid || attr.wbraid || null;
+        const attributionData = JSON.stringify(attr.attributionData || attr.attribution_data || (typeof attr === 'object' ? attr : {}));
+
         const insertRes = await query(
             `INSERT INTO public.orders 
                 (id, order_number, client_id, client_name, client_email, client_company,
                  service_type, plan_name, project_name, placement, sizing, fabric_type,
                  file_format, instructions, raw_artwork_files, price, currency,
                  payment_status, payment_method, transaction_id, status, is_quote,
-                 special_options, turnaround_speed, revision_count, created_at, updated_at)
+                 special_options, turnaround_speed, revision_count,
+                 original_source, last_source, landing_page, referral_source,
+                 utm_source, utm_medium, utm_campaign, utm_content, utm_term,
+                 gclid, gbraid, wbraid, attribution_data, created_at, updated_at)
              VALUES 
                 ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-                 'USD', $17, $18, $19, 'pending_review', false, $20, $21, 0, NOW(), NOW())
+                 'USD', $17, $18, $19, 'pending_review', false, $20, $21, 0,
+                 $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, NOW(), NOW())
              RETURNING *`,
             [
                 orderId,
@@ -103,7 +123,20 @@ const createOrder = async (req, res) => {
                 paymentMethod,
                 transactionId,
                 JSON.stringify(specialOptions),
-                turnaroundSpeed
+                turnaroundSpeed,
+                originalSource,
+                lastSource,
+                landingPage,
+                referralSource,
+                utmSource,
+                utmMedium,
+                utmCampaign,
+                utmContent,
+                utmTerm,
+                gclid,
+                gbraid,
+                wbraid,
+                attributionData
             ]
         );
 
