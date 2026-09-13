@@ -3157,3 +3157,35 @@ The Worker Studio provides an isolated, production-focused environment for embro
    - `npm test`: 19/19 tests passing.
    - `node scripts/verify_all_buttons_and_redirects.js`: 91 redirect rules verified, 0 broken links/anchors.
    - `node scripts/verify_dedicated_order_flow.js`: 8/8 Playwright tests passed across Desktop and Mobile viewports.
+
+## 57. Fixing Cloudflare Wrangler Deploy Failure (`_redirects` Validation)
+
+### Problem & Diagnostic Evidence
+- **User Provided Evidence**: Screenshot of Cloudflare Dashboard (`dash.cloudflare.com` / Workers & Pages / `dezan-digitizing` / Deployments):
+  ```
+  [ERROR] A request to the Cloudflare API (/accounts/.../workers/scripts/dezan-digitizing/versions) failed.
+  Invalid _redirects configuration:
+  Line 93: Infinite loop detected in this rule. This would cause a redirect to strip '.html' or '/index' and end up triggering this rule again.
+  Line 95: Infinite loop detected in this rule. ...
+  Line 97: ...
+  ...
+  Line 107: Infinite loop detected in this rule.
+  Failed: error occurred while running deploy command
+  ```
+- **Root Cause Analysis**:
+  - Cloudflare Pages / Workers validates `_redirects` before deploying.
+  - Using wildcards like `/facebook/* /facebook/index.html 200` causes an infinite loop in Cloudflare's clean URLs engine because `/facebook/index.html` matches `/facebook/*`, and clean URLs strips `/index.html` back to `/facebook/`, re-triggering the wildcard rule.
+  - Because of this validation error, the Cloudflare build aborted on every push, leaving the old broken deployment running on `workers.dev`.
+
+### Solution & Hardening
+1. **Purged All Recursive Wildcards (`/*`)**:
+   - Replaced all recursive wildcards in `_redirects` with clean, exact 1-to-1 route pairs:
+     - Exact path: `/route /route.html 200`
+     - Trailing slash path: `/route/ /route.html 200`
+   - For attribution routes:
+     - `/facebook /facebook/index.html 200`
+     - `/facebook/ /facebook/index.html 200`
+2. **Added `"build": "exit 0"` to `package.json`**:
+   - Prevents `Missing script: "build"` errors when Cloudflare CI/CD runs the build command.
+3. **Committed and Pushed**:
+   - Commits `31921d5` and `6836351` pushed to `origin/main`.
