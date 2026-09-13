@@ -58,7 +58,8 @@ if (!process.env.AWS_LAMBDA_FUNCTION_NAME) {
         { path: '/ig', file: 'ig.html' },
         { path: '/youtube', file: 'youtube.html' },
         { path: '/yt', file: 'yt.html' },
-        { path: '/pinterest', file: 'pinterest.html' }
+        { path: '/pinterest', file: 'pinterest.html' },
+        { path: '/pricing', file: 'pricing.html' }
     ];
     cleanRoutes.forEach(r => {
         app.get(r.path, (req, res) => res.sendFile(path.join(rootDir, r.file)));

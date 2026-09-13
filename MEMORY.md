@@ -361,13 +361,14 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
    - All public URLs registered with canonical domain `https://dezandigitizing.com/` in `sitemap.xml` and permitted in `robots.txt`.
    - Vercel preview/staging headers configured with `X-Robots-Tag: noindex, nofollow` to prevent staging duplicate indexation.
 - `/portfolio.html`: High-resolution gallery and customer feedback showcase.
-- `/pricing.html`: Dedicated flat-rate Pricing showcase in responsive 2-column grid layout, strictly adhering to Dezan's brand color scheme (Dezan Gold `#d4af35` / `#9a7810`, Dark Luxury `#201d12`, Card Dark `#16140c`, Warm Canvas `#f8f7f6`):
-  - **Brand Color Harmonization**: Eliminated all mismatched amber/brown shades (`text-amber-800`, `text-amber-950`, `bg-amber-500/10`, `border-amber-400`, `to-amber-600`) in favor of brand tokens `text-primary`, `bg-primary/10`, `border-primary/25`, ensuring 100% aesthetic consistency with `index.html` and `services.html`.
-  - **Hero**: "QUALITY DIGITIZING. REAL PEOPLE.", "Simple Flat-Rate Pricing", subtitle "Know your digitizing cost before you quote your customer. Our flat rates make it easy to price jobs, place orders, and keep production moving.", 3 circular icon badges (Next Day Turnaround, Digitized by hand - no auto conversion, Order history and online downloads), and real stitch proof embroidery patch visual floating freely with zero bounding box or card border.
+- `/pricing.html` (Clean route `/pricing`): Dedicated flat-rate Pricing showcase in responsive layout, strictly adhering to Dezan's brand color scheme (Dezan Gold `#d4af35` / `#9a7810`, Dark Luxury `#201d12`, Card Dark `#16140c`, Warm Canvas `#f8f7f6`):
+  - **Brand Color Harmonization**: Eliminated all mismatched amber/brown shades in favor of brand tokens `text-primary`, `bg-primary/10`, `border-primary/25`, ensuring 100% aesthetic consistency with `index.html` and `services.html`.
+  - **SEO-Optimized Hero**: Eyebrow: `SIMPLE PRICING FOR EMBROIDERY SHOPS`, H1: `Flat-Rate Embroidery Digitizing Pricing`, Hero Paragraph: `Know your digitizing cost before you quote your customer. Our flat rates make it easy to price jobs, place orders, and keep production moving.`, 3 circular icon badges: `12–24 Hour Turnaround`, `Digitized by Hand — No Auto Conversion`, `Order History & Online Downloads`, and real stitch proof embroidery patch visual floating freely with zero bounding box or card border.
+  - **Digitizing Pricing Section**: Section Eyebrow: `OUR PRICING`, H2: `Simple Flat Rates`, subtitle `High-quality digitizing. One simple price.`.
   - **Digitizing Pricing Grid & Cards**: Responsive 3-column desktop layout (`max-w-6xl`) and sleek horizontal mobile cards:
-    - Card 1: **$15 Hat / Left Chest Logos** (Up to 5.5 inches) with compact bespoke SVG icon featuring baseball cap and collared polo shirt.
-    - Card 2: **$25 Larger Designs** (Over 5.5 inches) with compact bespoke SVG icon featuring varsity/bomber jacket and back embroidery emblem.
-    - Card 3: **Realistic / Pet Portrait** ($25 flat for ≤ 5.5" / $40 flat for > 5.5") with custom thread shading and fur icon.
+    - Card 1: **Hat & Left Chest Digitizing** ($15, Up to 5.5 inches) with compact bespoke SVG icon featuring baseball cap and collared polo shirt.
+    - Card 2: **Large / Jacket Back Digitizing** ($25, Over 5.5 inches) with compact bespoke SVG icon featuring varsity/bomber jacket and back embroidery emblem.
+    - Card 3: **Realistic / Pet Portrait Digitizing** ($25 flat for ≤ 5.5" / $40 flat for > 5.5") with custom thread shading and photorealistic fur icon.
     - Full-width Trust Bar: "Flat rate pricing you can depend on. Zero hidden stitch-count charges."
   - **Vector Art 2-Column Grid (Compact & Centered)**: Centered `max-w-2xl mx-auto` container:
     - Card 1: **$15 Simple Vector Redraw** with bespoke SVG bezier pen tool icon.
