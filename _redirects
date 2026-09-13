@@ -5,6 +5,7 @@
 
 # 1. Primary Public Marketing Routes
 /order                     /order.html                     200
+/order/                    /order.html                     200
 /order/*                   /order.html                     200
 /pricing                   /pricing.html                   200
 /pricing/*                 /pricing.html                   200

@@ -3118,5 +3118,42 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - `desktop_modal_paypal_step3_scrolled.png`: Verified PayPal smart button mounts in under 1.5s on desktop.
   - `mobile_modal_paypal_step3_scrolled.png`: Verified clean, compact rendering with active PayPal button on mobile.
 
+## 56. Resolving Cloudflare Infinite Redirect Loop on `/order` (Directory/File Collision)
 
+### Problem & User Report
+- **User Feedback**: "its runs well locally but not here why? i can open order form"
+- **Visual Evidence**: In Safari on `https://dezan-digitizing.wasifnaqvi02.workers.dev/order?service=embroidery`:
+  - Error: *"Safari Can't Open the Page — Too many redirects occurred trying to open 'https://dezan-digitizing.wasifnaqvi02.workers.dev/order?service=embroidery'"*.
+- **Root Cause Analysis**:
+  1. Live HTTP analysis revealed that `GET /order?service=embroidery` returned `HTTP/2 307` with `location: /order?service=embroidery` repeatedly until reaching the maximum redirect limit.
+  2. The collision occurred because both the physical folder `order/` (containing `order/index.html`) and the root file `order.html` existed simultaneously.
+  3. In `_redirects`, lines 7–8 had:
+     ```
+     /order                     /order.html                     200
+     /order/*                   /order.html                     200
+     ```
+  4. On Cloudflare Pages / Workers Assets:
+     - Cloudflare detected directory `order/` on disk, canonicalizing requests without a trailing slash to directory paths (`/order` $\rightarrow$ `/order/`).
+     - Cloudflare's Clean URLs feature automatically strips `.html` and trailing slashes, redirecting `.html` paths back to `/order`.
+     - `_redirects` rewrote `/order` to `/order.html`.
+     - Cloudflare Clean URLs intercepted `/order.html` and 307 redirected to `/order`.
+     - This formed an infinite loop (`/order` $\rightarrow$ `/order.html` $\rightarrow$ `/order` $\rightarrow$ `/order.html` ...).
+  5. In contrast, routes like `/pricing`, `/services`, `/portfolio`, `/about`, `/contact`, and `/order-success` never looped because they existed only as root `.html` files (`pricing.html`, `services.html`, etc.) without a competing subdirectory.
 
+### Solution & Architectural Hardening
+1. **Eliminated File/Directory Collision**:
+   - Removed the redundant `order/` subdirectory (`order/index.html`).
+   - Kept `order.html` as the single authoritative standalone order page, aligning `/order` with every other top-level route in the repository.
+2. **Updated Asset Paths (`order.html`)**:
+   - Converted favicon, logo, and stylesheet links in `order.html` to root-relative paths (`/favicon.ico`, `/logo.webp`, `/styles.css`).
+3. **Hardened `_redirects`**:
+   - Added explicit rewrite rules in `_redirects`:
+     ```
+     /order                     /order.html                     200
+     /order/                    /order.html                     200
+     /order/*                   /order.html                     200
+     ```
+4. **Verification**:
+   - `npm test`: 19/19 tests passing.
+   - `node scripts/verify_all_buttons_and_redirects.js`: 91 redirect rules verified, 0 broken links/anchors.
+   - `node scripts/verify_dedicated_order_flow.js`: 8/8 Playwright tests passed across Desktop and Mobile viewports.
