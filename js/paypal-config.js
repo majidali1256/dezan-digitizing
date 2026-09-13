@@ -14,14 +14,14 @@
     'use strict';
 
     const PayPalConfig = {
-        // Fallback Sandbox Client ID (defaults to 'sb' if server route is unreachable)
+        // Production PayPal Client ID (public-facing, safe for browser)
         clientId: (typeof window !== 'undefined' && window.DEZAN_PAYPAL_CLIENT_ID) || 
                   (typeof window !== 'undefined' && window.ENV && window.ENV.PAYPAL_CLIENT_ID) || 
-                  'sb',
+                  'BAAZCK8sjpq6lmHZ2GSQL9ig6DZt0HUD4Kx78GiV-uwpX1P_o5z-Lw6AamZSOx5kV8QfN47QqZBRdwE02c',
         
         currency: 'USD',
         intent: 'capture',
-        environment: 'sandbox',
+        environment: 'production',
         isLoaded: false,
         isLoading: false,
         _loadPromise: null,
