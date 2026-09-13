@@ -26,6 +26,13 @@ scratch/*
 uploads/*
 !uploads/.gitkeep
 
+# Test Artifacts & QA Screenshots
+playwright_artifacts/
+artifacts_media/
+tests/visual_evidence/
+tests/visual_proofs/
+tests/*.png
+
 
 # Logs
 logs/

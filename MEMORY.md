@@ -2834,5 +2834,12 @@ The Worker Studio provides an isolated, production-focused environment for embro
        - `GET /api/paypal/config` -> HTTP 200, environment `production`, live client ID.
        - `POST /api/paypal/create-order` -> HTTP 200, PayPal live order created (`7JX83088B80150036`, status `CREATED`).
 
-
-
+### 35.18 Workspace Housekeeping & Unwanted Files Purge
+- **Objective**: Clear unwanted scratch files, test screenshot dumps, temporary artwork uploads, and obsolete debug artifacts from the repository.
+- **Actions Executed**:
+  1. **Purged Scratch Directory (`scratch/`)**: Removed all 24 temporary test scripts, mock files, and debug screenshots while preserving `scratch/.gitkeep`.
+  2. **Purged Test Uploads (`uploads/artworks/`)**: Removed all 10 local test artwork files while preserving `uploads/.gitkeep`.
+  3. **Purged Visual QA Artifacts**: Removed 32 heavy test screenshot files from `artifacts_media/`, `playwright_artifacts/`, `tests/visual_evidence/`, and `tests/visual_proofs/`, reclaiming over 7.4 MB from git tracking.
+  4. **Cleaned Build Cache**: Removed local `.wrangler/` cache directory.
+  5. **Updated `.gitignore`**: Added `playwright_artifacts/`, `artifacts_media/`, `tests/visual_evidence/`, `tests/visual_proofs/`, and `tests/*.png` to ensure future test runs never pollute repository history.
+  6. **Zero-Regression Verification**: Ran complete automated test suite (`tests/api.test.js`, `tests/paypal.test.js`); all 19 tests passed with 100% success.
