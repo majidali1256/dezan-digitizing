@@ -89,8 +89,8 @@
 
                 const script = document.createElement('script');
                 script.id = 'dezan-paypal-sdk';
-                // components=buttons enable Smart Payment Buttons & Inline Cards
-                script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(activeClientId)}&currency=${encodeURIComponent(activeCurrency)}&intent=capture&components=buttons`;
+                // components=buttons enable Smart Payment Buttons & Inline Cards, enable-funding=card ensures Debit/Credit Card button
+                script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(activeClientId)}&currency=${encodeURIComponent(activeCurrency)}&intent=capture&components=buttons&enable-funding=card`;
                 script.async = true;
 
                 script.onload = () => {
