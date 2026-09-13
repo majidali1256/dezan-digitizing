@@ -520,6 +520,26 @@ class InsForgeClient {
         }
     }
 
+    _resolvePath(filename) {
+        if (typeof window === 'undefined') return filename;
+        const cleanFile = String(filename).replace(/^\//, '');
+        if (window.location.protocol === 'file:') {
+            const subdirs = ['embroidery-digitizing', 'vector-art-conversion', 'stitch-lab', 'order', 'facebook', 'fb', 'ig', 'instagram', 'tiktok', 'youtube', 'yt', 'pinterest'];
+            let depth = 0;
+            for (const sub of subdirs) {
+                if (window.location.pathname.includes('/' + sub + '/')) {
+                    depth = 1;
+                    const afterSub = window.location.pathname.split('/' + sub + '/')[1] || '';
+                    if (afterSub.includes('/')) depth = 2;
+                    break;
+                }
+            }
+            return '../'.repeat(depth) + cleanFile;
+        }
+        const isGh = window.location.pathname.includes('/dezan-digitizing/');
+        return (isGh ? '/dezan-digitizing/' : '/') + cleanFile;
+    }
+
     signOut() {
         if (typeof sessionStorage !== 'undefined') {
             sessionStorage.removeItem('dezan_session');
@@ -529,7 +549,7 @@ class InsForgeClient {
             localStorage.removeItem('dezan_session');
             localStorage.removeItem('dezan_jwt_token');
         }
-        window.location.href = 'portal-login.html';
+        window.location.href = this._resolvePath('portal-login.html');
     }
 
     // Predefined & Standard Sign In
@@ -945,16 +965,16 @@ class InsForgeClient {
         }
 
         if (redirectTarget) {
-            window.location.href = redirectTarget;
+            window.location.href = this._resolvePath(redirectTarget);
             return;
         }
 
         if (role === 'admin') {
-            window.location.href = 'admin-portal.html';
+            window.location.href = this._resolvePath('admin-portal.html');
         } else if (role === 'digitizer') {
-            window.location.href = 'worker-portal.html';
+            window.location.href = this._resolvePath('worker-portal.html');
         } else {
-            window.location.href = 'client-portal.html';
+            window.location.href = this._resolvePath('client-portal.html');
         }
     }
 
@@ -962,7 +982,7 @@ class InsForgeClient {
     requireAuth(allowedRoles = []) {
         const user = this.getCurrentUser();
         if (!user) {
-            window.location.href = 'portal-login.html';
+            window.location.href = this._resolvePath('portal-login.html');
             return null;
         }
         if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {

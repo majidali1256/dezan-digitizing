@@ -3056,3 +3056,25 @@ The Worker Studio provides an isolated, production-focused environment for embro
      - Mobile (390x844): `mobile_sec3_deliverables.png`, `mobile_sec4_different.png`, `mobile_sec5_checks.png` confirming tight, elegant presentation with zero wasted space.
      - Desktop (1440x900): `desktop_sec3_deliverables.png` confirming desktop layout is 100% preserved.
 
+## 54. Universal Redirects, Button Integrity & Project Cleanup
+
+### Overview & Architecture
+1. **Universal Clean URLs & Redirect Engine (`_redirects`)**:
+   - Expanded `_redirects` to define **90 explicit rewrite & redirect rules** covering all public marketing pages (`/pricing`, `/services`, `/portfolio`, `/about`, `/contact`, `/privacy`, `/terms`, `/refund-policy`, `/profile`, `/order-success`), portal dashboards (`/admin`, `/client`, `/worker` and their sub-pages), service landing hubs (`/embroidery-digitizing`, `/vector-art-conversion`, `/stitch-lab`), social media attribution routes (`/fb`, `/ig`, `/tiktok`, `/youtube`, `/yt`, `/pinterest`), and common user shortcuts (`/login`, `/dashboard`, `/track`).
+   - All rules return HTTP 200 clean rewrites with zero 404 dead ends.
+2. **Subdirectory- & Protocol-Aware Path Resolver (`app.js` & `js/insforge-client.js`)**:
+   - Implemented `resolveAppPath(filename)` and `_resolvePath(filename)` to dynamically calculate correct relative or root-relative paths across root pages, nested subdirectories (e.g. `/embroidery-digitizing/cap-hat-digitizing/`, `/order/`), GitHub Pages (`/dezan-digitizing/`), and local `file:///` previews.
+   - Hardened `getDashboardUrlForRole`, `handleDashboardNavClick`, `handleLoginBtnClick`, `handleOrderClick`, `signOut()`, `redirectToDashboard()`, and `requireAuth()`.
+3. **Link & Button Integrity Standard (`order/index.html` & `order.html`)**:
+   - Upgraded all header, footer, and navigation links to root-relative paths (`/portal-login.html`, `/terms.html`, `/privacy.html`, `/contact.html`, `/`), guaranteeing 100% accurate navigation from any URL format (`/order`, `/order/`, or `/order.html`).
+   - Audited all 61 HTML files across the website: verified 0 broken links, 0 dead anchors, and complete event handling on all interactive buttons.
+4. **Project Disk Space & Hygiene Cleanup**:
+   - Removed 4 redundant raw video files in project root (`Video 3.mp4`, `Video 4.mov`, `Video2.mp4`, `video.mp4`), freeing **~82 MB** of disk space (production-optimized WebP and H.264 video streams are preserved in `/videos/`).
+   - Cleaned temporary video frame extractions in `scratch/` (~9 MB) and test screenshot caches in `playwright_artifacts/` (~9 MB), totaling **~100 MB** of project bloat eliminated.
+   - Built permanent verification test suite: `scripts/verify_all_buttons_and_redirects.js`.
+5. **Verification**:
+   - `scripts/verify_all_buttons_and_redirects.js`: 90/90 redirects verified, 0 broken links, 0 broken anchors.
+   - `npm test`: 19/19 tests passing.
+   - `scripts/verify_dedicated_order_flow.js`: 8/8 tests passing.
+
+

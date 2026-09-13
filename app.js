@@ -38,14 +38,31 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // ===== UNIVERSAL DASHBOARD NAVIGATION & ROLE-BASED REDIRECT ENGINE =====
+    function resolveAppPath(filename) {
+        if (typeof window === 'undefined') return filename;
+        const cleanFile = String(filename).replace(/^\//, '');
+        if (window.location.protocol === 'file:') {
+            const subdirs = ['embroidery-digitizing', 'vector-art-conversion', 'stitch-lab', 'order', 'facebook', 'fb', 'ig', 'instagram', 'tiktok', 'youtube', 'yt', 'pinterest'];
+            let depth = 0;
+            for (const sub of subdirs) {
+                if (window.location.pathname.includes('/' + sub + '/')) {
+                    depth = 1;
+                    const afterSub = window.location.pathname.split('/' + sub + '/')[1] || '';
+                    if (afterSub.includes('/')) depth = 2;
+                    break;
+                }
+            }
+            return '../'.repeat(depth) + cleanFile;
+        }
+        const isGh = window.location.pathname.includes('/dezan-digitizing/');
+        return (isGh ? '/dezan-digitizing/' : '/') + cleanFile;
+    }
+    window.resolveAppPath = resolveAppPath;
+
     function getDashboardUrlForRole(role) {
-        const isSubdir = window.location.pathname.includes('/embroidery-digitizing/') || 
-                         window.location.pathname.includes('/vector-art-conversion/') || 
-                         window.location.pathname.includes('/stitch-lab/');
-        const prefix = isSubdir ? '/' : '';
-        if (role === 'admin') return prefix + 'admin-portal.html';
-        if (role === 'digitizer') return prefix + 'worker-portal.html';
-        return prefix + 'client-portal.html';
+        if (role === 'admin') return resolveAppPath('admin-portal.html');
+        if (role === 'digitizer') return resolveAppPath('worker-portal.html');
+        return resolveAppPath('client-portal.html');
     }
     window.getDashboardUrlForRole = getDashboardUrlForRole;
 
@@ -60,28 +77,16 @@ document.addEventListener("DOMContentLoaded", () => {
             session = null;
         }
 
-        const isSubdir = window.location.pathname.includes('/embroidery-digitizing/') || 
-                         window.location.pathname.includes('/vector-art-conversion/') || 
-                         window.location.pathname.includes('/stitch-lab/');
-        const prefix = isSubdir ? '/' : '';
-
         if (session && session.role) {
-            // Already logged in -> Immediately open their correct role dashboard
-            const target = getDashboardUrlForRole(session.role);
-            window.location.href = target;
+            window.location.href = getDashboardUrlForRole(session.role);
         } else {
-            // Visitor is not logged in -> Directly navigate to Dashboard Sign In page without popup
-            window.location.href = prefix + 'portal-login.html';
+            window.location.href = resolveAppPath('portal-login.html');
         }
     };
 
     window.handleLoginBtnClick = function(e) {
         if (e) e.preventDefault();
-        const isSubdir = window.location.pathname.includes('/embroidery-digitizing/') || 
-                         window.location.pathname.includes('/vector-art-conversion/') || 
-                         window.location.pathname.includes('/stitch-lab/');
-        const prefix = isSubdir ? '/' : '';
-        window.location.href = prefix + 'portal-login.html';
+        window.location.href = resolveAppPath('portal-login.html');
     };
 
     // ===== PORTAL LOGIN MODAL CONTROLLERS =====
@@ -675,14 +680,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 else if (sLower.includes('pet') || sLower.includes('portrait') || sLower.includes('realistic')) serviceSlug = 'pet-portrait';
             }
 
-            let targetUrl = 'order.html';
-            if (typeof window !== 'undefined' && window.location.protocol !== 'file:') {
-                let basePath = '/order.html';
-                if (window.location.pathname.includes('/dezan-digitizing/')) {
-                    basePath = '/dezan-digitizing/order.html';
-                }
-                targetUrl = basePath;
-            }
+            let targetUrl = resolveAppPath('order.html');
 
             let destUrl = `${targetUrl}?service=${encodeURIComponent(serviceSlug)}`;
             if (plan) {
