@@ -11,7 +11,7 @@
     "pages:deploy": "wrangler pages deploy .",
     "pages:build": "rm -rf node_modules",
     "build:pages": "rm -rf node_modules",
-    "test": "node --test tests/api.test.js tests/paypal.test.js"
+    "test": "node --test tests/api.test.js tests/paypal.test.js tests/payment-regression.test.js"
   },
   "repository": {
     "type": "git",

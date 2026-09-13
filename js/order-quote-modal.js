@@ -2210,6 +2210,7 @@
 
     let modalPayPalButtonsInstance = null;
     let isModalPayPalMounting = false;
+    let pendingPayPalMethod = null;
     let uploadedArtworkFilesCache = [];
 
     /**
@@ -2273,12 +2274,15 @@
             return;
         }
 
-        if (isModalPayPalMounting) return;
+        if (isModalPayPalMounting) {
+            pendingPayPalMethod = currentMethod;
+            return;
+        }
         isModalPayPalMounting = true;
 
         // Clean up previous instance before mounting anew
         if (modalPayPalButtonsInstance && typeof modalPayPalButtonsInstance.close === 'function') {
-            try { modalPayPalButtonsInstance.close(); } catch(e) {}
+            try { await modalPayPalButtonsInstance.close(); } catch(e) {}
             modalPayPalButtonsInstance = null;
         }
 
@@ -2305,7 +2309,7 @@
                     const srcPath = typeof window.resolveAppPath === 'function' ? window.resolveAppPath('js/paypal-config.js') : '/js/paypal-config.js';
                     sc.src = srcPath;
                     sc.onload = () => resolve(window.PayPalConfig);
-                    sc.onerror = () => reject(new Error('PayPal configuration script could not be loaded'));
+                    sc.onerror = () => { sc.remove(); reject(new Error('PayPal configuration script could not be loaded')); };
                     document.head.appendChild(sc);
                 });
             }
@@ -2314,12 +2318,7 @@
                 throw new Error('PayPal configuration module unavailable');
             }
 
-            // Race SDK load against 6.5-second timeout so user is never frozen indefinitely
-            const sdkPromise = window.PayPalConfig.loadSdk();
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Gateway connection timed out (taking longer than expected).')), 6500);
-            });
-            const paypal = await Promise.race([sdkPromise, timeoutPromise]);
+            const paypal = await window.PayPalConfig.loadSdk();
 
             if (!paypal || !paypal.Buttons) {
                 throw new Error('PayPal Buttons component not available');
@@ -2518,6 +2517,9 @@
             }
         } finally {
             isModalPayPalMounting = false;
+            const nextMethod = pendingPayPalMethod;
+            pendingPayPalMethod = null;
+            if (nextMethod && nextMethod !== currentMethod) window.initModalPayPal(nextMethod);
         }
     };
 

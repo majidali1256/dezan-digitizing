@@ -61,7 +61,13 @@ export async function onRequestPost(context) {
         const status = captureData.status; // Expected: 'COMPLETED'
         const captures = captureData.purchase_units?.[0]?.payments?.captures || [];
         const primaryCapture = captures[0] || {};
-        const captureId = primaryCapture.id || captureData.id;
+        const captureId = primaryCapture.id;
+        if (status !== 'COMPLETED' || primaryCapture.status !== 'COMPLETED' || !captureId) {
+            return Response.json({
+                success: false,
+                message: 'Payment has not completed. Please contact support before retrying.'
+            }, { status: 409, headers: corsHeaders() });
+        }
 
         // Synchronize with InsForge PostgreSQL database if orderId is provided
         const insforgeUrl = context.env.NEXT_PUBLIC_INSFORGE_URL || 'https://e8rw998g.us-east.insforge.app';

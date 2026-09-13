@@ -23,3 +23,10 @@ uploads/**
 .env*
 .dev.vars
 .wrangler
+functions/**
+payment-worker.mjs
+wrangler.jsonc
+.agents/**
+.codex/**
+.insforge/**
+scripts/**
