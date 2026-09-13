@@ -1,0 +1,25 @@
+# Cloudflare Pages Assets Ignore
+# Files and folders to exclude from public static asset distribution
+node_modules
+node_modules/*
+node_modules/**
+server
+server/*
+server/**
+api
+api/*
+api/**
+tests
+tests/*
+tests/**
+scratch
+scratch/*
+scratch/**
+uploads
+uploads/*
+uploads/**
+.git
+.github
+.env*
+.dev.vars
+.wrangler

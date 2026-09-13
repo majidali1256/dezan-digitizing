@@ -8,6 +8,8 @@
     "dev": "node --watch server/server.js",
     "pages:dev": "wrangler pages dev . --port 8788 --compatibility-date 2024-01-01",
     "pages:deploy": "wrangler pages deploy .",
+    "pages:build": "rm -rf node_modules",
+    "build:pages": "rm -rf node_modules",
     "test": "node --test tests/api.test.js tests/paypal.test.js"
   },
   "repository": {

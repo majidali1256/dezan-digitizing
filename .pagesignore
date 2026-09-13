@@ -1,0 +1,25 @@
+# Cloudflare Pages Ignore
+# Excludes non-public directories from static CDN deployment
+node_modules
+node_modules/*
+node_modules/**
+server
+server/*
+server/**
+api
+api/*
+api/**
+tests
+tests/*
+tests/**
+scratch
+scratch/*
+scratch/**
+uploads
+uploads/*
+uploads/**
+.git
+.github
+.env*
+.dev.vars
+.wrangler
