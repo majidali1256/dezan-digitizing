@@ -32,7 +32,10 @@
          */
         fetchServerConfig: async function() {
             try {
-                const res = await fetch('/api/paypal/config');
+                const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+                const timeoutId = controller ? setTimeout(() => controller.abort(), 2500) : null;
+                const res = await fetch('/api/paypal/config', controller ? { signal: controller.signal } : {});
+                if (timeoutId) clearTimeout(timeoutId);
                 if (res.ok) {
                     const json = await res.json();
                     if (json.success && json.data && json.data.clientId) {
@@ -55,8 +58,9 @@
          */
         loadSdk: async function(options = {}) {
             if (typeof window === 'undefined') return Promise.reject(new Error('Window not available'));
-            if (window.paypal) {
+            if (window.paypal && typeof window.paypal.Buttons === 'function') {
                 this.isLoaded = true;
+                this.isLoading = false;
                 return Promise.resolve(window.paypal);
             }
 
@@ -73,15 +77,37 @@
             const activeCurrency = options.currency || this.currency || 'USD';
 
             this._loadPromise = new Promise((resolve, reject) => {
+                let timeoutId = null;
+                const cleanup = () => {
+                    if (timeoutId) clearTimeout(timeoutId);
+                };
+
+                // Safeguard against indefinite hanging if PayPal CDN is blocked or slow
+                timeoutId = setTimeout(() => {
+                    this.isLoading = false;
+                    this._loadPromise = null;
+                    reject(new Error('PayPal gateway connection timed out (6s)'));
+                }, 6000);
+
                 const existingScript = document.getElementById('dezan-paypal-sdk');
                 if (existingScript) {
+                    if (window.paypal && typeof window.paypal.Buttons === 'function') {
+                        cleanup();
+                        this.isLoaded = true;
+                        this.isLoading = false;
+                        resolve(window.paypal);
+                        return;
+                    }
                     existingScript.addEventListener('load', () => {
+                        cleanup();
                         this.isLoaded = true;
                         this.isLoading = false;
                         resolve(window.paypal);
                     });
                     existingScript.addEventListener('error', (err) => {
+                        cleanup();
                         this.isLoading = false;
+                        this._loadPromise = null;
                         reject(err);
                     });
                     return;
@@ -94,6 +120,7 @@
                 script.async = true;
 
                 script.onload = () => {
+                    cleanup();
                     this.isLoaded = true;
                     this.isLoading = false;
                     console.log(`[PayPal SDK] Loaded successfully [Environment: ${this.environment}]`);
@@ -101,6 +128,7 @@
                 };
 
                 script.onerror = (err) => {
+                    cleanup();
                     this.isLoading = false;
                     this._loadPromise = null;
                     console.error('[PayPal SDK] Failed to load SDK script:', err);

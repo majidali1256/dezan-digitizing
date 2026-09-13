@@ -2260,13 +2260,16 @@
     /**
      * Mount and initialize PayPal Smart Buttons in Step 3
      */
-    window.initModalPayPal = async function() {
+    window.initModalPayPal = async function(preferredMethod) {
         const modal = ensureModalElement();
         const container = modal.querySelector('#modal-paypal-button-container');
         if (!container) return;
 
+        const currentMethod = (preferredMethod === 'Card' || preferredMethod === 'CreditCard' || state.paymentMethod === 'Card') ? 'Card' : 'PayPal';
+        const isCard = currentMethod === 'Card';
+
         // If buttons are already mounted and active in the container, do not re-render
-        if (modalPayPalButtonsInstance && container.children.length > 0 && !container.textContent.includes('Connecting') && !container.textContent.includes('Notice') && !container.textContent.includes('Could not load')) {
+        if (modalPayPalButtonsInstance && container.children.length > 0 && container.dataset.renderedMethod === currentMethod && !container.textContent.includes('Connecting') && !container.textContent.includes('Notice') && !container.textContent.includes('Could not load') && !container.textContent.includes('Delayed')) {
             return;
         }
 
@@ -2287,10 +2290,37 @@
         `;
 
         try {
+            // Auto-load paypal-config.js if not preloaded on the page
             if (!window.PayPalConfig) {
-                throw new Error('PayPal configuration module not loaded');
+                await new Promise((resolve, reject) => {
+                    const existing = document.getElementById('dezan-paypal-config-script');
+                    if (existing) {
+                        if (window.PayPalConfig) return resolve(window.PayPalConfig);
+                        existing.addEventListener('load', () => resolve(window.PayPalConfig));
+                        existing.addEventListener('error', () => reject(new Error('PayPal configuration script failed to load')));
+                        return;
+                    }
+                    const sc = document.createElement('script');
+                    sc.id = 'dezan-paypal-config-script';
+                    const srcPath = typeof window.resolveAppPath === 'function' ? window.resolveAppPath('js/paypal-config.js') : '/js/paypal-config.js';
+                    sc.src = srcPath;
+                    sc.onload = () => resolve(window.PayPalConfig);
+                    sc.onerror = () => reject(new Error('PayPal configuration script could not be loaded'));
+                    document.head.appendChild(sc);
+                });
             }
-            const paypal = await window.PayPalConfig.loadSdk();
+
+            if (!window.PayPalConfig || typeof window.PayPalConfig.loadSdk !== 'function') {
+                throw new Error('PayPal configuration module unavailable');
+            }
+
+            // Race SDK load against 6.5-second timeout so user is never frozen indefinitely
+            const sdkPromise = window.PayPalConfig.loadSdk();
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Gateway connection timed out (taking longer than expected).')), 6500);
+            });
+            const paypal = await Promise.race([sdkPromise, timeoutPromise]);
+
             if (!paypal || !paypal.Buttons) {
                 throw new Error('PayPal Buttons component not available');
             }
@@ -2427,12 +2457,17 @@
                     const currentContainer = modal.querySelector('#modal-paypal-button-container');
                     if (currentContainer) {
                         currentContainer.innerHTML = `
-                            <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs text-center space-y-1.5">
-                                <p class="font-bold">Gateway Error</p>
-                                <p class="text-[11px]">Could not load payment buttons. Please click retry to reconnect.</p>
-                                <button type="button" onclick="window.initModalPayPal('${currentMethod}')" class="px-3 py-1 rounded-lg bg-rose-600 text-white font-bold text-[10px] hover:bg-rose-700 cursor-pointer">
-                                    Retry Connection
-                                </button>
+                            <div class="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs text-center space-y-2">
+                                <p class="font-bold">Payment Gateway Notice</p>
+                                <p class="text-[11px] text-slate-600 dark:text-slate-300">Could not initialize payment buttons on this network.</p>
+                                <div class="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
+                                    <button type="button" onclick="window.handleAdaptiveOrderSubmit()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-primary text-background-dark font-black text-xs hover:bg-primary-hover cursor-pointer shadow-sm">
+                                        Place Order &amp; Pay Later
+                                    </button>
+                                    <button type="button" onclick="window.initModalPayPal('${currentMethod}')" class="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 font-bold text-xs text-slate-700 dark:text-slate-200 hover:border-primary cursor-pointer">
+                                        Retry Connection
+                                    </button>
+                                </div>
                             </div>
                         `;
                     }
@@ -2467,12 +2502,17 @@
             const currentContainer = modal.querySelector('#modal-paypal-button-container');
             if (currentContainer) {
                 currentContainer.innerHTML = `
-                    <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 text-xs text-center space-y-1.5">
-                        <p class="font-bold">Payment Gateway Notice</p>
-                        <p class="text-[11px]">${err.message || 'Unable to connect to payment gateway.'}</p>
-                        <button type="button" onclick="window.initModalPayPal('${currentMethod}')" class="px-3 py-1 rounded-lg bg-primary text-background-dark font-black text-[10px] hover:bg-primary-hover cursor-pointer">
-                            Retry Connection
-                        </button>
+                    <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-800 dark:text-amber-300 text-xs text-center space-y-2">
+                        <p class="font-bold">Payment Gateway Response Delayed</p>
+                        <p class="text-[11px] text-slate-600 dark:text-slate-300">${err?.message || 'Connecting to PayPal is taking longer than expected.'}</p>
+                        <div class="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
+                            <button type="button" onclick="window.handleAdaptiveOrderSubmit()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-primary text-background-dark font-black text-xs hover:bg-primary-hover cursor-pointer shadow-sm">
+                                Place Order &amp; Pay Later
+                            </button>
+                            <button type="button" onclick="window.initModalPayPal('${currentMethod}')" class="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 font-bold text-xs text-slate-700 dark:text-slate-200 hover:border-primary cursor-pointer">
+                                Retry Connection
+                            </button>
+                        </div>
                     </div>
                 `;
             }

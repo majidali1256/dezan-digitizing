@@ -885,12 +885,35 @@
         `;
 
         try {
+            if (!window.PayPalConfig) {
+                await new Promise((resolve, reject) => {
+                    const existing = document.getElementById('dezan-paypal-config-script');
+                    if (existing) {
+                        if (window.PayPalConfig) return resolve(window.PayPalConfig);
+                        existing.addEventListener('load', () => resolve(window.PayPalConfig));
+                        existing.addEventListener('error', () => reject(new Error('PayPal configuration script failed to load')));
+                        return;
+                    }
+                    const sc = document.createElement('script');
+                    sc.id = 'dezan-paypal-config-script';
+                    const srcPath = typeof window.resolveAppPath === 'function' ? window.resolveAppPath('js/paypal-config.js') : '/js/paypal-config.js';
+                    sc.src = srcPath;
+                    sc.onload = () => resolve(window.PayPalConfig);
+                    sc.onerror = () => reject(new Error('PayPal configuration script failed to load'));
+                    document.head.appendChild(sc);
+                });
+            }
+
             if (!window.PayPalConfig || typeof window.PayPalConfig.loadSdk !== 'function') {
                 throw new Error('PayPal SDK configuration not loaded');
             }
 
-            await window.PayPalConfig.fetchServerConfig();
-            const paypal = await window.PayPalConfig.loadSdk();
+            // Race SDK load against 6.5s timeout so client is never stuck
+            const sdkPromise = window.PayPalConfig.loadSdk();
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('PayPal gateway response delayed on current network.')), 6500);
+            });
+            const paypal = await Promise.race([sdkPromise, timeoutPromise]);
 
             if (!paypal || !paypal.Buttons) {
                 throw new Error('PayPal Buttons engine unavailable');
@@ -974,42 +997,60 @@
                 onError: function(err) {
                     console.error('[PayPal Error]:', err);
                     container.innerHTML = `
-                        <div class="p-3 rounded-xl bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-xs">
+                        <div class="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs text-center space-y-2">
                             <p class="font-bold">Gateway Connection Error</p>
-                            <p class="text-[11px] mt-0.5">${err.message || 'Unable to open checkout window.'}</p>
-                            <button type="button" onclick="window.setPaymentMethod('${preferredMethod}')" class="mt-2 px-3 py-1 rounded-lg bg-primary text-background-dark font-black text-[10.5px] cursor-pointer">
-                                Retry Connection
-                            </button>
+                            <p class="text-[11px] text-slate-600 dark:text-slate-300">${err.message || 'Could not open checkout on this network.'}</p>
+                            <div class="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
+                                <button type="button" onclick="window.handleOrderPageDirectSubmit()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-primary text-background-dark font-black text-xs hover:bg-primary-hover cursor-pointer shadow-sm">
+                                    Place Order &amp; Pay Later
+                                </button>
+                                <button type="button" onclick="window.setPaymentMethod('${preferredMethod}')" class="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 font-bold text-xs text-slate-700 dark:text-slate-200 hover:border-primary cursor-pointer">
+                                    Retry Connection
+                                </button>
+                            </div>
                         </div>
                     `;
                 }
             };
 
             const buttons = paypal.Buttons(buttonConfig);
-            if (!buttons.isEligible()) {
+            if (typeof buttons.isEligible === 'function' && !buttons.isEligible()) {
                 // Fallback to standard buttons if standalone card is ineligible
                 delete buttonConfig.fundingSource;
-                paypal.Buttons(buttonConfig).render(container);
+                await paypal.Buttons(buttonConfig).render(container);
             } else {
-                buttons.render(container);
+                await buttons.render(container);
             }
 
             state.paypalMountedMethod = preferredMethod;
         } catch (err) {
             console.error('[PayPal Mount Error]:', err);
             container.innerHTML = `
-                <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-200 text-xs">
-                    <p class="font-bold">Gateway Initialization Notice</p>
-                    <p class="text-[11px] mt-0.5">${err.message || 'Connecting to payment gateway.'}</p>
-                    <button type="button" onclick="window.setPaymentMethod('${preferredMethod}')" class="mt-2 px-3 py-1 rounded-lg bg-primary text-background-dark font-black text-[10.5px] cursor-pointer">
-                        Reload Payment Gateway
-                    </button>
+                <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-800 dark:text-amber-300 text-xs text-center space-y-2">
+                    <p class="font-bold">Payment Gateway Response Delayed</p>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-300">${err.message || 'PayPal is taking longer to respond on your connection.'}</p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
+                        <button type="button" onclick="window.handleOrderPageDirectSubmit()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-primary text-background-dark font-black text-xs hover:bg-primary-hover cursor-pointer shadow-sm">
+                            Place Order &amp; Pay Later
+                        </button>
+                        <button type="button" onclick="window.setPaymentMethod('${preferredMethod}')" class="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 font-bold text-xs text-slate-700 dark:text-slate-200 hover:border-primary cursor-pointer">
+                            Retry Connection
+                        </button>
+                    </div>
                 </div>
             `;
         } finally {
             state.isMountingPayPal = false;
         }
     }
+
+    // Expose direct order submission helper on window for fallback usage
+    global.handleOrderPageDirectSubmit = function() {
+        finalizeOrder({
+            paymentStatus: 'pending_invoice',
+            paymentMethod: state.paymentMethod || 'PayPal'
+        });
+    };
 
     // -------------------------------------------------------------
     // 8. Order Finalization & Database Storage

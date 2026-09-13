@@ -3077,4 +3077,46 @@ The Worker Studio provides an isolated, production-focused environment for embro
    - `npm test`: 19/19 tests passing.
    - `scripts/verify_dedicated_order_flow.js`: 8/8 tests passing.
 
+## 55. Fix: PayPal Gateway Loading Stall & Fail-Safe Fallbacks (`js/order-quote-modal.js`, `js/paypal-config.js`, `js/order-page.js`)
+
+### Problem & User Report
+- **User Feedback**: "why is it taking this much time loading."
+- **Visual Evidence**: Attached screenshot (`media_1789311516151.png`) showed Step 3 of the Order Modal ("Choose Payment Method", PayPal tab selected, instructions "Fast, 1-click settlement via PayPal balance or PayPal Pay Later:") stuck indefinitely with a spinning sync icon displaying:
+  `Connecting to secure PayPal gateway...`
+- **Root Causes Identified**:
+  1. **Missing Variable Declarations in `window.initModalPayPal` (`js/order-quote-modal.js`)**:
+     - `isCard` was used on line 2303 (`color: isCard ? 'black' : 'gold'`) without being declared. In `'use strict'` mode, this threw an immediate `ReferenceError: isCard is not defined`.
+     - In the `catch (err)` block, the retry button interpolated `${currentMethod}`, which was ALSO undeclared, throwing a second fatal `ReferenceError: currentMethod is not defined`.
+     - Because the error handler itself crashed, the container innerHTML was never updated and remained permanently frozen with the initial spinning `Connecting to secure PayPal gateway...` state.
+  2. **Missing `paypal-config.js` on Public Marketing Pages**:
+     - `<script src="/js/paypal-config.js"></script>` was missing from public pages (`index.html`, `pricing.html`, `services.html`, etc.).
+     - `order-quote-modal.js` previously assumed `window.PayPalConfig` was always present in the global scope and threw immediately if absent instead of auto-injecting it.
+  3. **Indefinite Hangs in `loadSdk()` (`js/paypal-config.js`)**:
+     - If `document.getElementById('dezan-paypal-sdk')` was already in the DOM and had finished loading, calling `existingScript.addEventListener('load')` would never fire, hanging the promise indefinitely.
+     - There was no timeout on `loadSdk()` or `fetchServerConfig()`; if the PayPal CDN was slow or blocked by privacy/ad-blocking extensions, the UI stayed on the spinner forever.
+
+### Solutions & Architectural Enhancements
+1. **Hardened Variable Scope & Definitions (`js/order-quote-modal.js`)**:
+   - Explicitly declared `const currentMethod = (preferredMethod === 'Card' || preferredMethod === 'CreditCard' || state.paymentMethod === 'Card') ? 'Card' : 'PayPal';` and `const isCard = currentMethod === 'Card';` at the top of `window.initModalPayPal(preferredMethod)`.
+2. **Dynamic Script Auto-Injection**:
+   - Added automatic dynamic script injection: if `!window.PayPalConfig`, `order-quote-modal.js` loads `js/paypal-config.js` dynamically via `resolveAppPath` with full path resolution.
+3. **Timeout Safeguards & Fast Existing Script Resolution (`js/paypal-config.js`)**:
+   - `fetchServerConfig()`: Added a 2.5s `AbortController` timeout so static hosting or unreachable endpoints fail gracefully to fallback client ID without delay.
+   - `loadSdk()`: Added immediate resolution if `window.paypal && typeof window.paypal.Buttons === 'function'`, and wrapped the SDK script load in a 6-second timeout race.
+4. **Instant Dual-Action Fallback**:
+   - If PayPal takes longer than 6.5s or is blocked by client adblockers, both `order-quote-modal.js` and `order-page.js` immediately display a clean notice with two actionable options:
+     - **Place Order & Pay Later** (submits the order immediately with `pending_invoice` status so production starts without delay).
+     - **Retry Connection** (allows re-attempting gateway connection).
+   - Customers are NEVER blocked or left waiting on a spinner.
+
+### Verification
+- **Automated Tests**:
+  - `npm test`: 19/19 tests passing.
+  - Verified dynamic script load, server config fetch, SDK loading, and iframe mount in ~1.3–1.5s on `index.html`, `pricing.html`, and `cap-hat-digitizing.html`.
+  - Verified graceful fallback behavior when `paypal.com` is simulated as blocked by content blockers.
+- **Visual Evidence**:
+  - `desktop_modal_paypal_step3_scrolled.png`: Verified PayPal smart button mounts in under 1.5s on desktop.
+  - `mobile_modal_paypal_step3_scrolled.png`: Verified clean, compact rendering with active PayPal button on mobile.
+
+
 
