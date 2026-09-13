@@ -2974,10 +2974,26 @@ The Worker Studio provides an isolated, production-focused environment for embro
        - `stitch-lab/richardson-112-cap-digitizing/index.html`
        - `client-profile.html`, `client-portal.html`, `worker-portal.html`, `worker-settings.html`, `worker-tasks.html`, `worker-specs.html`, `js/worker-workspace.js`, `ARCHITECTURE.md`.
      - Zero occurrences of "Wilcom" remain in any active code, markup, or scripts.
+   4. **Mobile Vertical Section Spacing Equalization (`embroidery-digitizing/cap-hat-digitizing/index.html`)**:
+      - Standardized all 9 section containers on mobile to `py-4` (or `pt-5 pb-4` for Hero):
+        - Hero (`pt-5 sm:pt-16 pb-4 sm:pb-10`)
+        - Top Proof Comparison (`py-4 sm:py-10`)
+        - What You Get Deliverables (`py-4 sm:py-14`)
+        - Why Cap Digitizing Is Different (`py-4 sm:py-14`)
+        - Quality Assurance Checklist (`py-4 sm:py-14`)
+        - Recent Cap & Hat Projects (`py-4 sm:py-16`)
+        - Cap Digitizing FAQ (`py-4 sm:py-14`)
+        - Related Services Strip (`py-4 sm:py-8`)
+        - Final CTA (`py-4 sm:py-10`)
+        - Main wrapper bottom padding (`pb-6 sm:pb-20`)
+      - **Mathematical Spacing Equality**: Inter-section gaps on mobile are identically **32.0px** (16px bottom padding + 16px top padding) across all 8 consecutive section boundaries.
+      - **Mobile vs Desktop Proportions**: Reduced mobile vertical dead space by 60%–75% compared to desktop (80px–120px) while maintaining spacious desktop layouts via `sm:` responsive modifiers.
+      - **Proportional Component Rhythm**: Tightened card inner paddings to `p-5 sm:p-10/12` and section header margins to `mb-5 sm:mb-8/10`.
 - **Visual Verification & Quality Assurance**:
   - Playwright automated multi-viewport testing executed via Node.js + Google Chrome:
-    - Desktop (1512x982): `desktop_top_proof_section.png`, `desktop_recent_cap_projects_section.png`.
-    - Mobile (390x844): `mobile_top_proof_section.png`.
+    - Desktop (1512x982): `desktop_top_proof_section.png`, `desktop_recent_cap_projects_section.png`, `desktop_all_sections_flow.png`.
+    - Mobile (390x844): `mobile_top_proof_section.png`, `mobile_all_sections_flow.png` confirming uniform 32px gaps.
   - Media asset verification: All images (`naturalWidth > 0`, complete: true) and videos (`readyState = 4`, valid dimensions) verified with zero 404 errors.
   - Zero layout shifts, explicit aspect ratios, WCAG 2.1 AA compliant contrast.
+
 
