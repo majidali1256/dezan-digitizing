@@ -180,37 +180,42 @@
             return 'tiktok';
         }
 
-        // 3. Instagram
+        // 3. WhatsApp
+        if (utmSource.includes('whatsapp') || utmSource.includes('wa') || ref.includes('whatsapp.com') || ref.includes('wa.me') || ref.includes('api.whatsapp.com')) {
+            return 'whatsapp';
+        }
+
+        // 4. Instagram
         if (utmSource.includes('instagram') || ref.includes('instagram.com') || ref.includes('l.instagram.com')) {
             return 'instagram';
         }
 
-        // 4. Facebook
+        // 5. Facebook
         if (utmSource.includes('facebook') || utmSource.includes('fb') || ref.includes('facebook.com') || ref.includes('fb.com') || ref.includes('l.facebook.com')) {
             return 'facebook';
         }
 
-        // 5. Organic Google
+        // 6. Organic Google
         if (ref.includes('google.') && !gclid && utmMedium !== 'cpc') {
             return 'google_organic';
         }
 
-        // 6. Other Organic Search (Bing, Yahoo, DuckDuckGo)
+        // 7. Other Organic Search (Bing, Yahoo, DuckDuckGo)
         if (ref.includes('bing.com') || ref.includes('yahoo.com') || ref.includes('duckduckgo.com') || utmMedium === 'organic') {
             return 'organic_search';
         }
 
-        // 7. General External Referral
+        // 8. General External Referral
         if (ref && !ref.includes('dezandigitizing.com') && !ref.includes('localhost') && !ref.includes('127.0.0.1')) {
             return 'referral';
         }
 
-        // 8. Custom UTM Source
+        // 9. Custom UTM Source
         if (utmSource) {
             return utmSource;
         }
 
-        // 9. Direct Traffic
+        // 10. Direct Traffic
         return 'direct';
     }
 
@@ -245,6 +250,18 @@
                 utm_source: 'tiktok',
                 utm_medium: 'organic_social',
                 utm_campaign: 'profile_bio'
+            },
+            '/whatsapp': {
+                source: 'whatsapp',
+                utm_source: 'whatsapp',
+                utm_medium: 'direct_chat',
+                utm_campaign: 'support_link'
+            },
+            '/wa': {
+                source: 'whatsapp',
+                utm_source: 'whatsapp',
+                utm_medium: 'direct_chat',
+                utm_campaign: 'support_link'
             },
             '/instagram': {
                 source: 'instagram',
@@ -683,6 +700,60 @@
             };
             gtag('event', 'artwork_uploaded', payload);
             global.dataLayer.push(payload);
+        },
+
+        /**
+         * 5b. GA4 Funnel Event: order details completed (Step 2 completed)
+         */
+        trackOrderDetailsCompleted: function (details) {
+            details = details || {};
+            const service = details.service || 'Embroidery Digitizing';
+            const plan = details.plan || service;
+            const placement = details.placement || 'Standard';
+            const val = parseFloat(details.amount || details.price) || 15.00;
+            const turnaround = (details.turnaround || details.turnaroundSpeed || 'standard').toLowerCase();
+            const isRush = turnaround.includes('rush');
+
+            const payload = {
+                event: 'order_details_completed',
+                ecommerce: {
+                    currency: config.currency,
+                    value: val,
+                    items: [{
+                        item_name: plan,
+                        item_category: service,
+                        item_variant: placement,
+                        price: val,
+                        quantity: 1
+                    }]
+                },
+                service_name: service,
+                placement: placement,
+                turnaround_speed: isRush ? 'rush' : 'standard',
+                timestamp: new Date().toISOString()
+            };
+            gtag('event', 'order_details_completed', payload);
+            global.dataLayer.push(payload);
+        },
+
+        /**
+         * Preserve attribution parameters across internal links and redirects
+         */
+        buildAttributionUrl: function (targetUrl) {
+            if (!targetUrl) return '/order';
+            const attr = captureTrafficAttribution();
+            try {
+                const url = new URL(targetUrl, typeof window !== 'undefined' ? window.location.origin : 'https://dezandigitizing.com');
+                const keys = ['gclid', 'gbraid', 'wbraid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+                keys.forEach(function (k) {
+                    if (!url.searchParams.has(k) && attr[k]) {
+                        url.searchParams.set(k, attr[k]);
+                    }
+                });
+                return url.pathname + url.search + url.hash;
+            } catch (_) {
+                return targetUrl;
+            }
         },
 
         /**

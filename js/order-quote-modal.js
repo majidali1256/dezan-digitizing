@@ -1180,6 +1180,50 @@
      */
     window.selectOrderService = function(service, plan) {
         state.selectedService = service;
+
+        // In Order Mode: Redirect immediately to the dedicated full-page /order flow
+        if (!state.isQuote) {
+            let serviceSlug = 'embroidery';
+            const sLower = String(service || '').toLowerCase();
+            if (sLower.includes('vector')) {
+                serviceSlug = 'vector-art';
+            } else if (sLower.includes('pet') || sLower.includes('portrait') || sLower.includes('realistic')) {
+                serviceSlug = 'pet-portrait';
+            }
+
+            if (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackServiceSelected === 'function') {
+                window.dezanTracker.trackServiceSelected(service, plan || service);
+            }
+
+            if (typeof window.closeOrderQuoteModal === 'function') {
+                window.closeOrderQuoteModal();
+            }
+
+            let basePath = '/order';
+            if (typeof window !== 'undefined' && window.location.pathname.includes('/dezan-digitizing/')) {
+                basePath = '/dezan-digitizing/order';
+            }
+
+            let destUrl = `${basePath}?service=${encodeURIComponent(serviceSlug)}`;
+            if (plan) {
+                const lowerPlan = String(plan).toLowerCase();
+                if (lowerPlan.includes('cap') || lowerPlan.includes('hat')) {
+                    destUrl += '&placement=cap';
+                } else if (lowerPlan.includes('chest')) {
+                    destUrl += '&placement=left-chest';
+                } else if (lowerPlan.includes('jacket') || lowerPlan.includes('back')) {
+                    destUrl += '&placement=jacket-back';
+                }
+            }
+
+            if (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.buildAttributionUrl === 'function') {
+                destUrl = window.dezanTracker.buildAttributionUrl(destUrl);
+            }
+
+            window.location.href = destUrl;
+            return;
+        }
+
         const modal = ensureModalElement();
 
         const serviceTypeInput = modal.querySelector('#selected-service-type');

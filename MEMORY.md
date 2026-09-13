@@ -320,7 +320,16 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
       - **Hero Copy**: `Production-ready embroidery files for structured caps, trucker hats, snapbacks, beanies and 3D puff hat designs. Every file is digitized for the selected size, placement and cap style.`
       - **8-Section Production Architecture & Media Placeholders**:
          1. **Hero**: H1 `Cap & Hat Embroidery Digitizing Services`, copy, single centered CTA `Order Hat Digitizing` with `$15 flat rate` subline (70–80% width on mobile `w-[76%] sm:w-auto`).
-         2. **Real Cap Stitch-Out Proof**: Heading, subtext (`Digitized file preview → actual embroidered cap result.`), caption note, and 2 empty media slots: `Digitized Preview Placeholder` & `Actual Cap Stitch-Out Placeholder`.
+         2. **Featured Production Case Study (Apple Roofing)**:
+             - Eyebrow: `REAL PRODUCTION PROOF`
+             - Heading: `From Digitized File to Finished Caps`
+             - Subtext: `See the same Apple Roofing design in the digitized file, stitched on the client's cap, and across the finished production batch.`
+             - 60/40 Desktop Layout & 3-Step Production Showcase:
+               1. **Real Client Stitch-Out Video** (~60% main card): Commercial Melco sewout on Richardson 112 (`/videos/apple-roofing-cap-stitch-out.mp4`), WebP poster thumbnail (`/images/apple-roofing-stitch-out-poster.webp`), custom play button overlay with click-to-play interaction.
+               2. **Digitized File Preview** (top right card): Wilcom Embroidery Studio headwear sequence screenshot (`/images/apple-roofing-digitized-software-preview.webp`).
+               3. **Finished Production** (bottom right card): Full delivered batch photo on workbench (`/images/apple-roofing-finished-production-caps.webp`).
+             - Mobile Order: 1 (Video) $\rightarrow$ 2 (Preview) $\rightarrow$ 3 (Production batch).
+             - Bottom Proof Bar: `One design. One cap-ready file. Real production results.` with direct conversion button to portal.
          3. **What You Get With Cap Digitizing**: 4 clean cards (Cap-ready embroidery file, Machine formats included, 3D Puff supported, Real production focus).
          4. **Service Overview**: Heading `Cap Digitizing Made for Real Hat Embroidery` + 2-paragraph technical explanation.
          5. **Things We Check Before Digitizing a Hat File**: 5 cards (Cap height limit, Center seam, Small text, 3D Puff suitability, Flat file vs hat file).
@@ -2866,3 +2875,56 @@ The Worker Studio provides an isolated, production-focused environment for embro
     - Mobile screenshot (390px): `mobile_step3_payment_box.png`.
     - `npm test`: 19/19 tests passing.
     - `scripts/verify_review_pay_flow.js`: End-to-end multi-viewport verification passing with zero errors.
+
+### 50. Dedicated Full-Page Order Flow (/order), Session Draft Engine & Multi-Channel Attribution Continuity (Implemented & Verified)
+- **Problem & Requirement**:
+  - The customer requested a dedicated, distraction-free full-page order experience at `/order` while retaining the initial "Choose Service" popup/modal strictly as a quick service selector:
+    - When selecting **Embroidery Digitizing**, **Vector Art Conversion**, or **Realistic / Pet Portrait Digitizing** in order mode, close the modal and redirect to `/order` with the selected service and active traffic attribution.
+    - Dedicated order page manages Step 2 (Order Details) and Step 3 (Review & Pay) with real-time pricing and side-by-side PayPal & Credit/Debit Card selector.
+    - Deep-linking support: incoming links from specific service pages (e.g. `/order?service=embroidery&placement=cap`) automatically pre-select both service and specific placement (e.g. Cap / Hat Front — $15).
+    - Session & local draft preservation: all entered customer information (job name, placement, fabric, size, machine formats, special technical options, notes, rush option, uploaded artwork references, delivery email, pricing) must survive back navigation, step changes, and accidental page reloads until final submission or intentional cancellation.
+    - Tracking continuity: preserve `gclid`, `gbraid`, `wbraid`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term` across the entire journey and save original source to the database for Admin analytics (Google Ads, Organic Google, TikTok, Facebook, Instagram, WhatsApp, referral, direct).
+    - GA4 / Google Ads conversion funnel: `order_started`, `service_selected`, `order_details_completed`, `begin_checkout`, `add_payment_info`, and `purchase` (strictly after verified payment confirmation with transaction ID, USD value, service name, placement, rush/standard; NEVER on checkout button clicks).
+    - Free Quote flow preserved inside the popup/modal for rapid, low-friction estimates.
+- **Architectural Implementation**:
+  1. **Routing & Server Rewrite (`_redirects`)**:
+     - Added clean rewrite `/order    /order.html    200` to `_redirects` for Cloudflare Pages / modern static hosts.
+  2. **Dedicated Full-Page View (`order.html`)**:
+     - Luxury branding header with secure checkout indicator and theme toggles.
+     - Auto-restored draft alert banner with quick "Clear Draft / Start Over" trigger.
+     - 3-step luxury progress indicator (1: Choose Service $\rightarrow$ 2: Order Details $\rightarrow$ 3: Review & Pay).
+     - Responsive specification forms for Embroidery, Vector Art, and Pet Portraits.
+     - Drag-and-drop artwork upload dropzone with thumbnail previews and remove actions.
+     - Comprehensive Review & Pay summary card displaying line items, rush queue fees, and total.
+     - Side-by-side PayPal & Credit/Debit Card checkout box with live PayPal Smart Buttons.
+  3. **Order Page Engine (`js/order-page.js`)**:
+     - **URL Parameter Parser**: Reads `service`, `placement`, `turnaround`, and attribution queries; maps deep links to proper dropdown values and pricing tiers.
+     - **Dual-Tier Draft Engine**: Synchronously persists inputs and lightweight artwork base64 strings to `sessionStorage` and `localStorage`, backed by IndexedDB (`dezan_order_artworks_db`) for high-volume files.
+     - **Form Validation & Step Transitions**: Enforces required job reference, dimensions, delivery contact info, and artwork presence before advancing to Step 3.
+     - **Side-by-Side PayPal & Card Mounting**: Dynamically mounts PayPal and standalone Credit Card buttons via `paypal.Buttons()` using official funding sources and verified capture via `/api/paypal/capture-order`.
+     - **InsForge Order Finalization**: Creates order in database with complete technical specifications, line items, and traffic attribution parameters.
+  4. **Attribution & Analytics Enhancements (`js/analytics.js`, `js/admin-workspace.js`)**:
+     - Added WhatsApp organic traffic classification (`whatsapp`, `wa`, `whatsapp.com`, `wa.me`, `/whatsapp`, `/wa`).
+     - Added `DezanTracker.trackOrderDetailsCompleted(details)` for Step 2 completion tracking.
+     - Added `DezanTracker.buildAttributionUrl(targetUrl)` to forward query parameters and active attribution during redirects.
+     - Added emerald WhatsApp channel badge to Admin order views.
+  5. **Modal Quick Selector & Deep Link Updates (`js/order-quote-modal.js`, `app.js`)**:
+     - Updated `selectOrderService`: in Order Mode, closes modal and redirects to `/order?service=${slug}&placement=...` with full attribution query string.
+     - In Quote Mode, stays inside modal and opens Step 2 for rapid quotation.
+     - Updated `window.handleOrderClick` across all landing page CTAs.
+- **Verification & Visual Proof**:
+  - `scripts/verify_dedicated_order_flow.js`: 8/8 comprehensive automated tests passing:
+    1. Service selector modal redirects in Order Mode to `/order` with attribution.
+    2. Deep-linking (`?service=embroidery&placement=cap`) selects Embroidery Digitizing and Cap / Hat Front — $15.
+    3. Input and artwork file persistence across page reload verified.
+    4. Step 2 $\rightarrow$ Step 3 transition fires `order_details_completed` and `begin_checkout`.
+    5. Back navigation preserves all form specifications.
+    6. Side-by-side payment tabs toggle cleanly and dispatch `add_payment_info`.
+    7. Free Quote flow remains in popup modal.
+    8. Desktop and mobile screenshots captured.
+  - Test suites: `npm test` passing (19/19 unit/security tests passed).
+  - Screenshots:
+    - `order_page_step2_desktop.png`
+    - `order_page_step3_desktop.png`
+    - `order_page_step2_mobile.png`
+    - `order_page_step3_mobile.png`

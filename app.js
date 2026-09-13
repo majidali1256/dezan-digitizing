@@ -655,7 +655,36 @@ document.addEventListener("DOMContentLoaded", () => {
             window.showStaffOrderBlockModal(session.role, session.email);
             return;
         } else {
-            // Open the unified Order modal directly on current page
+            // If a specific service or placement is already specified, deep-link directly to /order
+            if (service) {
+                let serviceSlug = 'embroidery';
+                const sLower = String(service).toLowerCase();
+                if (sLower.includes('vector')) serviceSlug = 'vector-art';
+                else if (sLower.includes('pet') || sLower.includes('portrait') || sLower.includes('realistic')) serviceSlug = 'pet-portrait';
+
+                let basePath = '/order';
+                if (typeof window !== 'undefined' && window.location.pathname.includes('/dezan-digitizing/')) {
+                    basePath = '/dezan-digitizing/order';
+                }
+                let destUrl = `${basePath}?service=${encodeURIComponent(serviceSlug)}`;
+                if (plan) {
+                    const lowerPlan = String(plan).toLowerCase();
+                    if (lowerPlan.includes('cap') || lowerPlan.includes('hat')) {
+                        destUrl += '&placement=cap';
+                    } else if (lowerPlan.includes('chest')) {
+                        destUrl += '&placement=left-chest';
+                    } else if (lowerPlan.includes('jacket') || lowerPlan.includes('back')) {
+                        destUrl += '&placement=jacket-back';
+                    }
+                }
+                if (window.dezanTracker && typeof window.dezanTracker.buildAttributionUrl === 'function') {
+                    destUrl = window.dezanTracker.buildAttributionUrl(destUrl);
+                }
+                window.location.href = destUrl;
+                return;
+            }
+
+            // Otherwise, open the unified Choose Service modal
             if (typeof window.openOrderQuoteModal === 'function') {
                 window.openOrderQuoteModal({ service, plan, isQuote: false });
             } else if (typeof window.openNewOrderModal === 'function') {

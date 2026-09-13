@@ -1860,6 +1860,9 @@
             if (src.includes('tiktok')) {
                 return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-pink-500/15 text-pink-800 dark:text-pink-300 border border-pink-500/30 whitespace-nowrap shadow-2xs" title="TikTok"><span class="material-symbols-outlined text-[11px] text-pink-600 dark:text-pink-400">play_circle</span> TikTok</span>`;
             }
+            if (src.includes('whatsapp') || src.includes('wa')) {
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 whitespace-nowrap shadow-2xs" title="WhatsApp Chat / Link"><span class="material-symbols-outlined text-[11px] text-emerald-600 dark:text-emerald-400">chat</span> WhatsApp</span>`;
+            }
             if (src.includes('facebook') || src.includes('fb') || src.includes('meta')) {
                 return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/15 text-indigo-800 dark:text-indigo-300 border border-indigo-500/30 whitespace-nowrap shadow-2xs" title="Facebook"><span class="material-symbols-outlined text-[11px] text-indigo-600 dark:text-indigo-400">thumb_up</span> Facebook</span>`;
             }
@@ -1878,6 +1881,7 @@
             if (s.includes('google_ads') || s.includes('google-ads') || s === 'cpc') return 'Google Ads (Paid)';
             if (s.includes('google') || s.includes('organic')) return 'Google Organic Search';
             if (s.includes('tiktok')) return 'TikTok';
+            if (s.includes('whatsapp') || s.includes('wa')) return 'WhatsApp';
             if (s.includes('facebook') || s.includes('fb') || s.includes('meta')) return 'Facebook';
             if (s.includes('instagram') || s.includes('ig')) return 'Instagram';
             if (s.includes('referral')) return 'Referral Link';

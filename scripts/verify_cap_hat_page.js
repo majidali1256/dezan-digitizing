@@ -55,16 +55,31 @@ async function main() {
     }
     console.log('✔ "$15 flat rate" subline verified');
 
-    // Section 2: Real Cap Stitch-Out Proof & Placeholders
-    const expectedSection2 = 'Real Cap Stitch-Out Proof';
-    const expectedSection2Sub = 'Digitized file preview → actual embroidered cap result.';
-    const expectedSlot1 = 'Digitized Preview Placeholder';
-    const expectedSlot2 = 'Actual Cap Stitch-Out Placeholder';
-    const expectedSection2Caption = 'This cap file was digitized specifically for headwear, not reused from a flat left-chest file. The final stitch-out shows how the design runs on a real structured cap.';
-    if (!capHtml.includes(expectedSection2) || !capHtml.includes(expectedSection2Sub) || !capHtml.includes(expectedSlot1) || !capHtml.includes(expectedSlot2) || !capHtml.includes(expectedSection2Caption)) {
-        throw new Error('Section 2 (Real Cap Stitch-Out Proof) content or placeholders mismatch');
+    // Section 2: Real Production Proof Case Study
+    const expectedSection2Eyebrow = 'REAL PRODUCTION PROOF';
+    const expectedSection2Heading = 'From Digitized File to Finished Caps';
+    const expectedSection2Sub = 'See the same Apple Roofing design in the digitized file, stitched on the client\'s cap, and across the finished production batch.';
+    const expectedMedia1Title = 'Real Client Stitch-Out';
+    const expectedMedia1Desc = 'The digitized file running on a structured cap in the client\'s embroidery shop.';
+    const expectedMedia2Title = 'Digitized File Preview';
+    const expectedMedia2Desc = 'The same Apple Roofing design prepared as a cap embroidery file before production.';
+    const expectedMedia3Title = 'Finished Production';
+    const expectedMedia3Desc = 'The completed cap run using the digitized file.';
+    const expectedBottomProof = 'One design. One cap-ready file. Real production results.';
+
+    if (!capHtml.includes(expectedSection2Eyebrow) ||
+        !capHtml.includes(expectedSection2Heading) ||
+        !capHtml.includes(expectedSection2Sub) ||
+        !capHtml.includes(expectedMedia1Title) ||
+        !capHtml.includes(expectedMedia1Desc) ||
+        !capHtml.includes(expectedMedia2Title) ||
+        !capHtml.includes(expectedMedia2Desc) ||
+        !capHtml.includes(expectedMedia3Title) ||
+        !capHtml.includes(expectedMedia3Desc) ||
+        !capHtml.includes(expectedBottomProof)) {
+        throw new Error('Section 2 (Real Production Proof Case Study) content mismatch');
     }
-    console.log('✔ Section 2: Real Cap Stitch-Out Proof & Placeholders verified');
+    console.log('✔ Section 2: Real Production Proof Case Study content verified');
 
     // Section 3: What You Get With Cap Digitizing (4 cards)
     const expectedSection3 = 'What You Get With Cap Digitizing';
@@ -203,21 +218,47 @@ async function main() {
             deviceScaleFactor: 2
         });
         const page = await context.newPage();
+        await page.addInitScript(() => {
+            localStorage.setItem('dezan_cookie_consent', 'accepted');
+        });
         await page.goto('http://localhost:8091/embroidery-digitizing/cap-hat-digitizing/', { waitUntil: 'networkidle' });
-        await page.waitForTimeout(800);
+        await page.waitForTimeout(600);
+
+        // Remove banner if still present
+        await page.evaluate(() => {
+            const banner = document.getElementById('dezan-cookie-banner');
+            if (banner) banner.remove();
+        });
 
         // Check hero button dimensions
         const buttonBox = await page.locator('button:has-text("Order Hat Digitizing")').first().boundingBox();
         console.log(`[${vp.name.toUpperCase()}] Viewport width: ${vp.width}px, Button width: ${Math.round(buttonBox.width)}px (${Math.round((buttonBox.width / vp.width) * 100)}% of viewport)`);
 
-        if (vp.name === 'mobile') {
-            const ratio = buttonBox.width / vp.width;
-            if (ratio > 0.85 || ratio < 0.65) {
-                console.warn(`Note: mobile button ratio is ${(ratio * 100).toFixed(1)}%`);
-            } else {
-                console.log(`✔ Mobile button width is optimal: ${(ratio * 100).toFixed(1)}% (within 70-80% target)`);
-            }
+        // Check Section 2 Proof Case Study presence and images
+        const proofSection = page.locator('#production-proof');
+        if (await proofSection.count() === 0) {
+            throw new Error('Section #production-proof not found on page');
         }
+
+        const imagesValid = await page.evaluate(() => {
+            const imgs = Array.from(document.querySelectorAll('#production-proof img'));
+            return imgs.every(img => img.complete && img.naturalWidth > 0);
+        });
+        if (!imagesValid) {
+            throw new Error('One or more images in #production-proof failed to load or has 0 naturalWidth');
+        }
+        console.log(`✔ [${vp.name.toUpperCase()}] All case study images loaded with naturalWidth > 0`);
+
+        const videoPoster = await page.locator('#proofCaseVideo').getAttribute('poster');
+        if (!videoPoster || !videoPoster.includes('apple-roofing-stitch-out-poster.webp')) {
+            throw new Error('Video poster missing or mismatch');
+        }
+        console.log(`✔ [${vp.name.toUpperCase()}] Video poster verified: ${videoPoster}`);
+
+        // Capture dedicated Section 2 Proof Case Study screenshot
+        const proofScreenshotPath = path.join(screenshotDir, `case_study_${vp.name}.png`);
+        await proofSection.screenshot({ path: proofScreenshotPath });
+        console.log(`Captured ${proofScreenshotPath}`);
 
         const screenshotPath = path.join(screenshotDir, `cap_hat_${vp.name}.png`);
         await page.screenshot({ path: screenshotPath, fullPage: false });

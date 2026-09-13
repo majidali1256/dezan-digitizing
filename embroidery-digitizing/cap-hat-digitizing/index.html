@@ -233,49 +233,195 @@
             </div>
         </section>
 
-        <!-- 2. Real Cap Stitch-Out Proof -->
-        <section class="py-8 sm:py-12 px-4 max-w-6xl mx-auto">
-            <div class="bg-white dark:bg-card-dark rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-primary/25 shadow-md">
-                <div class="mb-6 pb-4 border-b border-slate-100 dark:border-primary/15">
-                    <span class="text-xs font-bold tracking-widest text-primary uppercase block mb-1">Production Comparison</span>
-                    <h2 class="text-xl sm:text-3xl font-black text-slate-900 dark:text-white mb-1.5">Real Cap Stitch-Out Proof</h2>
-                    <p class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400">Digitized file preview → actual embroidered cap result.</p>
-                </div>
-
-                <!-- Empty Media Placeholders Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch mb-6">
-                    <!-- Placeholder 1: Digitized Preview Placeholder -->
-                    <!-- USER_MEDIA_SLOT: Replace content inside with your digitized preview image when ready -->
-                    <div class="rounded-2xl border-2 border-dashed border-primary/30 dark:border-primary/40 bg-slate-50/70 dark:bg-black/30 p-8 flex flex-col items-center justify-center text-center min-h-[300px] sm:min-h-[360px] transition-all hover:border-primary/60 group">
-                        <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                            <span class="material-symbols-outlined text-3xl">image</span>
+        <!-- 2. Real Production Proof Case Study -->
+        <section id="production-proof" class="py-10 sm:py-16 px-4 max-w-6xl mx-auto">
+            <div class="bg-white dark:bg-card-dark rounded-3xl p-6 sm:p-10 border border-slate-200/90 dark:border-primary/25 shadow-xl relative overflow-hidden">
+                <!-- Section Header -->
+                <div class="mb-8 pb-6 border-b border-slate-100 dark:border-primary/15 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-widest mb-2.5">
+                            <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                            REAL PRODUCTION PROOF
                         </div>
-                        <span class="text-xs font-bold uppercase tracking-wider text-primary mb-1">Preview Slot</span>
-                        <h3 class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200 mb-1">Digitized Preview Placeholder</h3>
-                        <p class="text-xs text-slate-400 max-w-xs leading-relaxed">
-                            Upload your digitized stitch simulation map or run sheet here.
+                        <h2 class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
+                            From Digitized File to Finished Caps
+                        </h2>
+                        <p class="text-xs sm:text-sm md:text-base font-medium text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+                            See the same Apple Roofing design in the digitized file, stitched on the client's cap, and across the finished production batch.
                         </p>
                     </div>
-
-                    <!-- Placeholder 2: Actual Cap Stitch-Out Placeholder -->
-                    <!-- USER_MEDIA_SLOT: Replace content inside with your actual cap stitch-out photo when ready -->
-                    <div class="rounded-2xl border-2 border-dashed border-primary/30 dark:border-primary/40 bg-slate-50/70 dark:bg-black/30 p-8 flex flex-col items-center justify-center text-center min-h-[300px] sm:min-h-[360px] transition-all hover:border-primary/60 group">
-                        <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                            <span class="material-symbols-outlined text-3xl">photo_camera</span>
-                        </div>
-                        <span class="text-xs font-bold uppercase tracking-wider text-primary mb-1">Stitch-Out Slot</span>
-                        <h3 class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200 mb-1">Actual Cap Stitch-Out Placeholder</h3>
-                        <p class="text-xs text-slate-400 max-w-xs leading-relaxed">
-                            Upload your physical finished cap photo or sewout proof here.
-                        </p>
+                    <div class="hidden sm:inline-flex items-center gap-2 self-start sm:self-auto px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-black/40 border border-slate-200/80 dark:border-primary/20 text-xs font-bold text-slate-700 dark:text-slate-300">
+                        <span class="material-symbols-outlined text-base text-primary">verified</span>
+                        <span>Client Verified Stitch-Out</span>
                     </div>
                 </div>
 
-                <!-- Caption -->
-                <div class="p-4 rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200/80 dark:border-primary/15 text-center sm:text-left">
-                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                        This cap file was digitized specifically for headwear, not reused from a flat left-chest file. The final stitch-out shows how the design runs on a real structured cap.
-                    </p>
+                <!-- Media Showcase: 60% Left Video / 40% Right Side Cards (Mobile 1 -> 2 -> 3) -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch mb-8">
+                    <!-- 1. Real Client Stitch-Out Video (Main Item: ~60% on Desktop) -->
+                    <div class="lg:col-span-7 flex flex-col">
+                        <div class="rounded-2xl border border-slate-200/90 dark:border-primary/25 bg-slate-50/70 dark:bg-black/30 overflow-hidden flex flex-col h-full shadow-sm hover:border-primary/50 transition-all group">
+                            <!-- Video Container with Poster & Interactive Play Button -->
+                            <div class="relative bg-black rounded-t-2xl overflow-hidden aspect-[4/5] sm:aspect-[16/11] lg:aspect-[4/5] max-h-[560px] flex items-center justify-center">
+                                <video
+                                    id="proofCaseVideo"
+                                    class="w-full h-full object-cover bg-black"
+                                    playsinline
+                                    preload="metadata"
+                                    poster="/images/apple-roofing-stitch-out-poster.webp"
+                                    controls
+                                >
+                                    <source src="/videos/apple-roofing-cap-stitch-out.mp4" type="video/mp4" />
+                                    Your browser does not support the video tag.
+                                </video>
+                                
+                                <!-- Play Button & Thumbnail Overlay -->
+                                <button
+                                    id="proofPlayBtn"
+                                    type="button"
+                                    onclick="toggleProofVideo()"
+                                    aria-label="Play client stitch-out video"
+                                    class="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-black/35 hover:bg-black/25 transition-all duration-300 cursor-pointer group/play focus:outline-none z-10"
+                                >
+                                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary text-background-dark shadow-2xl flex items-center justify-center transform group-hover/play:scale-110 transition-transform ring-4 ring-white/30 backdrop-blur-sm">
+                                        <span class="material-symbols-outlined text-4xl sm:text-5xl ml-1">play_arrow</span>
+                                    </div>
+                                    <div class="mt-4 px-3.5 py-1.5 rounded-full bg-black/75 backdrop-blur-md text-white text-xs font-bold tracking-wide border border-white/15 shadow-xl flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-sm text-primary">videocam</span>
+                                        <span>Click to Watch Stitch-Out (8s)</span>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <!-- Video Card Info -->
+                            <div class="p-5 flex flex-col justify-between flex-grow">
+                                <div>
+                                    <div class="flex items-center justify-between gap-2 mb-2">
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wider text-primary bg-primary/10 dark:bg-primary/20 px-2.5 py-1 rounded-md">
+                                            <span class="material-symbols-outlined text-xs">precision_manufacturing</span>
+                                            Primary Evidence
+                                        </span>
+                                        <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Melco Machine • Richardson 112</span>
+                                    </div>
+                                    <h3 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white mb-1.5">Real Client Stitch-Out</h3>
+                                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                                        The digitized file running on a structured cap in the client's embroidery shop.
+                                    </p>
+                                </div>
+                                <div class="mt-4 pt-3.5 border-t border-slate-200/80 dark:border-primary/15 flex flex-wrap items-center gap-3 sm:gap-4 text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                                    <span class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                                        <span class="material-symbols-outlined text-sm">check_circle</span> Seamless Center Seam
+                                    </span>
+                                    <span class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                                        <span class="material-symbols-outlined text-sm">check_circle</span> Zero Flagging
+                                    </span>
+                                    <span class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                                        <span class="material-symbols-outlined text-sm">check_circle</span> Clean Lettering
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: 2 Smaller Cards Stacked Beside Video (~40% on Desktop) -->
+                    <div class="lg:col-span-5 flex flex-col gap-6">
+                        <!-- 2. Digitized File Preview Card -->
+                        <div class="rounded-2xl border border-slate-200/90 dark:border-primary/25 bg-slate-50/70 dark:bg-black/30 overflow-hidden flex flex-col flex-1 shadow-sm hover:border-primary/50 transition-all group">
+                            <div class="relative bg-slate-950 overflow-hidden aspect-[16/10] sm:aspect-[16/9] lg:aspect-[16/10]">
+                                <img
+                                    src="/images/apple-roofing-digitized-software-preview.webp"
+                                    alt="Digitized Apple Roofing file preview inside Wilcom Embroidery Studio at Dezan Digitizing"
+                                    width="633"
+                                    height="1024"
+                                    loading="lazy"
+                                    class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                                />
+                                <div class="absolute top-2.5 left-2.5">
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-white bg-black/80 backdrop-blur-md px-2.5 py-1 rounded border border-white/15">
+                                        <span class="material-symbols-outlined text-xs text-primary">desktop_windows</span>
+                                        Wilcom Studio
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-4 sm:p-5 flex flex-col justify-between flex-grow">
+                                <div>
+                                    <div class="flex items-center justify-between gap-2 mb-1.5">
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wider text-primary bg-primary/10 dark:bg-primary/20 px-2.5 py-0.5 rounded-md">
+                                            Step 1: Digitizing
+                                        </span>
+                                        <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Headwear Sequence</span>
+                                    </div>
+                                    <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-1">Digitized File Preview</h3>
+                                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                                        The same Apple Roofing design prepared as a cap embroidery file before production.
+                                    </p>
+                                </div>
+                                <div class="mt-3 pt-2.5 border-t border-slate-200/80 dark:border-primary/15 flex items-center gap-3 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-primary">check</span> Center-Out Underlay</span>
+                                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-primary">check</span> Pull-Compensation</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Finished Production Card -->
+                        <div class="rounded-2xl border border-slate-200/90 dark:border-primary/25 bg-slate-50/70 dark:bg-black/30 overflow-hidden flex flex-col flex-1 shadow-sm hover:border-primary/50 transition-all group">
+                            <div class="relative bg-slate-950 overflow-hidden aspect-[16/10] sm:aspect-[16/9] lg:aspect-[16/10]">
+                                <img
+                                    src="/images/apple-roofing-finished-production-caps.webp"
+                                    alt="Completed production batch of Apple Roofing embroidered caps on Richardson 112 headwear"
+                                    width="768"
+                                    height="1024"
+                                    loading="lazy"
+                                    class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                                />
+                                <div class="absolute top-2.5 left-2.5">
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-white bg-black/80 backdrop-blur-md px-2.5 py-1 rounded border border-white/15">
+                                        <span class="material-symbols-outlined text-xs text-emerald-400">inventory_2</span>
+                                        Finished Run
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-4 sm:p-5 flex flex-col justify-between flex-grow">
+                                <div>
+                                    <div class="flex items-center justify-between gap-2 mb-1.5">
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wider text-primary bg-primary/10 dark:bg-primary/20 px-2.5 py-0.5 rounded-md">
+                                            Step 3: Delivered Batch
+                                        </span>
+                                        <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Full Production Run</span>
+                                    </div>
+                                    <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-1">Finished Production</h3>
+                                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                                        The completed cap run using the digitized file.
+                                    </p>
+                                </div>
+                                <div class="mt-3 pt-2.5 border-t border-slate-200/80 dark:border-primary/15 flex items-center gap-3 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-emerald-500">check</span> Zero Puckering</span>
+                                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-emerald-500">check</span> Client Approved</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Proof Summary Banner (Under Media) -->
+                <div class="p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-slate-50 to-primary/10 dark:from-primary/15 dark:via-black/40 dark:to-primary/15 border border-primary/25 dark:border-primary/30 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left shadow-sm">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-11 h-11 rounded-xl bg-primary text-background-dark font-black flex items-center justify-center shrink-0 shadow-md">
+                            <span class="material-symbols-outlined text-2xl">verified</span>
+                        </div>
+                        <div>
+                            <p class="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white tracking-tight">
+                                One design. One cap-ready file. Real production results.
+                            </p>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+                                Digitized specifically for headwear curvature and center seams — ready to run on any commercial embroidery machine.
+                            </p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="window.handleOrderClick(event, 'Digitizing', 'Hat / Left Chest Logos')" class="shrink-0 w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs sm:text-sm tracking-wide shadow-md transition-all hover:scale-[1.02] flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span>Order Hat Digitizing</span>
+                        <span class="material-symbols-outlined text-base">arrow_forward</span>
+                    </button>
                 </div>
             </div>
         </section>
@@ -656,6 +802,34 @@
     <script src="/js/insforge-client.js"></script>
     <script src="/js/order-quote-modal.js"></script>
     <script src="/app.js"></script>
+    <script>
+        function toggleProofVideo() {
+            const video = document.getElementById('proofCaseVideo');
+            const playBtn = document.getElementById('proofPlayBtn');
+            if (video) {
+                if (video.paused) {
+                    video.play().catch(e => console.log('Autoplay blocked or playback error:', e));
+                } else {
+                    video.pause();
+                }
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const video = document.getElementById('proofCaseVideo');
+            const playBtn = document.getElementById('proofPlayBtn');
+            if (video && playBtn) {
+                video.addEventListener('play', () => {
+                    playBtn.classList.add('opacity-0', 'pointer-events-none');
+                });
+                video.addEventListener('pause', () => {
+                    playBtn.classList.remove('opacity-0', 'pointer-events-none');
+                });
+                video.addEventListener('ended', () => {
+                    playBtn.classList.remove('opacity-0', 'pointer-events-none');
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
