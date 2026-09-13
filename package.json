@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server/server.js",
     "dev": "node --watch server/server.js",
+    "build": "exit 0",
     "pages:dev": "wrangler pages dev . --port 8788 --compatibility-date 2024-01-01",
     "pages:deploy": "wrangler pages deploy .",
     "pages:build": "rm -rf node_modules",
