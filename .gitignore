@@ -22,6 +22,8 @@ desktop.ini
 *.tar.gz
 *.rar
 video.mp4
+Video*.mp4
+Video*.mov
 scratch/*
 !scratch/.gitkeep
 uploads/*

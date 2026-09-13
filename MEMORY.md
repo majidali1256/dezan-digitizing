@@ -2928,3 +2928,56 @@ The Worker Studio provides an isolated, production-focused environment for embro
     - `order_page_step3_desktop.png`
     - `order_page_step2_mobile.png`
     - `order_page_step3_mobile.png`
+
+---
+
+## 51. Cap & Hat Digitizing Media Placement, Video Sourcing, Copy Calibration & Project-Wide Sanitization
+
+- **Problem & Requirement**:
+  - Re-structure media placement on the Cap & Hat Digitizing service page (`embroidery-digitizing/cap-hat-digitizing/index.html`):
+    - Replace the previous top Apple Roofing media block directly beneath the Hero with a high-converting side-by-side proof section comparing the finished digitized CAD file with the final stitched cap.
+    - Left side: 5–6s video showing the finished digitized file on the software screen (`videos/astronaut-cap-digitized-preview.mp4`). Titled: `Digitized File Preview`, subtext: `Prepared for cap embroidery.`. (Strictly prohibited from being called "Digitizing Process").
+    - Right side: Final stitched cap photo of the exact same astronaut design (`images/astronaut-cap-final-stitch-out.webp`). Titled: `Final Stitch-Out`, subtext: `Real embroidered result.`.
+    - Both cards in portrait/mobile-style ratio (`grid-cols-2`) maintained side-by-side on **both desktop and mobile**.
+    - Heading: `From Digitized File to Final Stitch-Out`, subtitle: `See the same design in the digitized file and the final embroidered cap result.`.
+    - Under cards: `Same design. Digitized for caps. Real stitched result.`.
+  - Relocate the Apple Roofing production case study into Section 6 (`Recent Cap & Hat Projects` / `Work Showcase`).
+  - Section 4: Update heading to `Why Cap Digitizing Is Different?` and replace copy with the exact 3-paragraph text detailing curved front, center seams, bottom-up/center-out sequencing, and why flat garment files cannot simply be reused on hats.
+  - Stitch Specification Label: Update `Center-Out Underlay` to `Centre-Out Sequence`.
+  - Product Videos 3 & 4 Combination: User noted that `Video 4.mov` (software screen CAD simulation) and `Video 3.mp4` (commercial machine stitchout on cream structured cap) are the same "Knews '26" headwear product. Concatenate into a single continuous 14s video.
+  - Project-Wide Sanitization: Strict prohibition against mentioning "Wilcom" anywhere across public pages, metadata, alt tags, scripts, and markup.
+- **Architectural Implementation**:
+  1. **Video & Image Production**:
+     - `videos/astronaut-cap-digitized-preview.mp4`: Precision-sliced from `Video2.mp4` (18.5s to 24.25s), terminating strictly before the cut to physical hats to guarantee 100% of the clip displays the finished digitized file in the software screen (5.73s, 30fps, H.264 `avc1`).
+     - `images/astronaut-cap-digitized-preview-poster.webp`: WebP poster captured at frame 140 showing full astronaut digitized stitches inside CAD studio.
+     - `images/astronaut-cap-final-stitch-out.webp`: Lossless WebP crop of the embroidered astronaut design on black structured caps.
+     - `videos/knews-cap-digitizing-and-stitchout.mp4`: Combined `Video 4.mov` (0:00-0:06) and `Video 3.mp4` (0:06-0:14) at 720x1280 30fps H.264 (2.8MB, 13.6s) with poster `images/knews-cap-digitizing-and-stitchout-poster.webp`.
+  2. **Page Structure Overhaul (`embroidery-digitizing/cap-hat-digitizing/index.html`)**:
+     - **Top Proof Section (`#top-proof-comparison`)**: Side-by-side portrait layout (`grid-cols-2`), 0:06 duration badge, play overlay toggle, and requested exact headings/subtexts.
+     - **Section 4 Copy**: Updated heading to `Why Cap Digitizing Is Different?` with 3 curated paragraphs.
+     - **Stitch Specifications**: Replaced all mentions of `Center-Out Underlay` with `Centre-Out Sequence`.
+     - **Section 6 (`Recent Cap & Hat Projects`)**: Dual case study architecture:
+       - Case Study 1: Apple Roofing (`From Digitized File to Finished Caps`) with 8s Melco stitch-out video, CAD preview, and finished production batch caps.
+       - Case Study 2: Knews '26 (`Software Pathing to Commercial Machine Run`) with 14s combined video and 4 technical breakdown cards (Centre-Out Sequence, Bottom-Up Foundation Underlay, Crisp Typography & Small Script, Universal Machine Ready).
+     - **Interactive Media Engine**: Added `toggleAstronautVideo()`, `toggleProofVideo()`, and `toggleKnewsVideo()` with synchronized overlay states on play/pause/ended.
+  3. **Repository-Wide "Wilcom" Sanitization**:
+     - Audited and sanitized across all workspace files:
+       - `embroidery-digitizing/cap-hat-digitizing/index.html`
+       - `embroidery-digitizing/3d-puff-digitizing/index.html`
+       - `embroidery-digitizing/pet-portrait-digitizing/index.html`
+       - `embroidery-digitizing/left-chest-digitizing/index.html`
+       - `embroidery-digitizing/jacket-back-digitizing/index.html`
+       - `embroidery-digitizing/index.html`
+       - `embroidery-digitizing.html`
+       - `index.html`
+       - `about.html`
+       - `stitch-lab/richardson-112-cap-digitizing/index.html`
+       - `client-profile.html`, `client-portal.html`, `worker-portal.html`, `worker-settings.html`, `worker-tasks.html`, `worker-specs.html`, `js/worker-workspace.js`, `ARCHITECTURE.md`.
+     - Zero occurrences of "Wilcom" remain in any active code, markup, or scripts.
+- **Visual Verification & Quality Assurance**:
+  - Playwright automated multi-viewport testing executed via Node.js + Google Chrome:
+    - Desktop (1512x982): `desktop_top_proof_section.png`, `desktop_recent_cap_projects_section.png`.
+    - Mobile (390x844): `mobile_top_proof_section.png`.
+  - Media asset verification: All images (`naturalWidth > 0`, complete: true) and videos (`readyState = 4`, valid dimensions) verified with zero 404 errors.
+  - Zero layout shifts, explicit aspect ratios, WCAG 2.1 AA compliant contrast.
+

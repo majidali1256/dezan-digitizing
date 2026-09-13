@@ -1185,7 +1185,7 @@
 
         setInputValue('worker-name', state.session?.displayName || 'Digitizer');
         setInputValue('worker-specialty', 'Embroidery Digitizing (3D Puff & Left Chest)');
-        setInputValue('worker-software', 'Wilcom EmbroideryStudio e4.5');
+        setInputValue('worker-software', 'Professional Digitizing Suite e4.5');
         setInputValue('worker-daily-capacity', '6');
     }
 

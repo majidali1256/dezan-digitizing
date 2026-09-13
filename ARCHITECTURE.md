@@ -78,7 +78,7 @@ We enforce strict server-side physical projection and sanitization:
        (Assigned)
            │
            ▼
-      (In Progress)   ──► Digitizer downloads raw logo, executes Wilcom stitches
+      (In Progress)   ──► Digitizer downloads raw logo, executes CAD embroidery stitches
            │
            ▼
       (QA Review)     ──► Digitizer uploads .dst & .emb deliverables
