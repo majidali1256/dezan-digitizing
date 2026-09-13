@@ -787,59 +787,94 @@
                                 </div>
 
                                 <!-- Payment Method Selector (Order Mode Only) -->
-                                <div id="order-payment-terms-box" class="space-y-2.5">
-                                    <div class="p-3 rounded-xl bg-amber-50/60 dark:bg-primary/10 border border-amber-200/80 dark:border-primary/20 text-xs flex items-center justify-between gap-2.5">
-                                        <div class="flex items-center gap-2.5">
-                                            <span class="material-symbols-outlined text-amber-800 dark:text-primary text-base flex-shrink-0">lock</span>
-                                            <div>
-                                                <strong class="text-xs font-bold text-slate-900 dark:text-white block">Secure Instant Checkout</strong>
-                                                <span class="text-[10.5px] text-slate-600 dark:text-slate-400">Payment required to start production. Choose your preferred method:</span>
+                                <div id="order-payment-terms-box" class="space-y-3">
+                                    <!-- Header: Choose Payment Method -->
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-primary/20 flex items-center justify-center text-slate-800 dark:text-primary shadow-xs shrink-0">
+                                            <span class="material-symbols-outlined text-xl">credit_card</span>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Choose Payment Method</h3>
+                                            <p class="text-[11.5px] text-slate-500 dark:text-slate-400">Select your preferred checkout option.</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Side-by-Side Cards: PayPal & Credit Card -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <!-- 1. PayPal Card -->
+                                        <div id="modal-tab-paypal" onclick="window.setModalPaymentMethod('PayPal')" class="relative p-3.5 sm:p-4 rounded-2xl border-2 border-primary bg-amber-50/50 dark:bg-primary/10 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between">
+                                            <!-- Most Popular Badge -->
+                                            <div class="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100/90 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 text-[10.5px] font-black shadow-xs">
+                                                <span>👑</span>
+                                                <span>Most Popular</span>
+                                            </div>
+
+                                            <div class="flex items-start gap-3">
+                                                <!-- Radio circle -->
+                                                <div id="modal-radio-paypal" class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900">
+                                                    <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+                                                </div>
+
+                                                <div class="pr-16 sm:pr-20">
+                                                    <div class="flex items-center gap-2 mb-1">
+                                                        <svg class="w-6 h-6 shrink-0" viewBox="0 0 24 24" fill="none">
+                                                            <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.79.79 0 0 1 .778-.667h6.634c4.12 0 6.643 1.946 6.012 5.92-.544 3.428-2.678 5.34-5.94 5.34H9.414l-1.396 6.357a.789.789 0 0 1-.778.667h-.164z" fill="#003087"/>
+                                                            <path d="M9.414 14.313h2.973c3.262 0 5.396-1.912 5.94-5.34.63-3.974-1.892-5.92-6.012-5.92H7.68a.79.79 0 0 0-.778.667L4.31 20.597a.641.641 0 0 0 .633.74h4.472l1.397-6.357a.789.789 0 0 1 .778-.667h-.176z" fill="#0079C1"/>
+                                                            <path d="M8.636 9.973h4.75c3.084 0 5.09-1.442 5.48-4.03.353-2.339-1.04-3.89-4.306-3.89H8.487a.79.79 0 0 0-.778.667L6.467 10.64a.641.641 0 0 0 .633.74h1.536z" fill="#00457C"/>
+                                                        </svg>
+                                                        <span class="text-sm font-black text-slate-900 dark:text-white">PayPal</span>
+                                                    </div>
+                                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">Fast, secure, and trusted by millions.</p>
+                                                </div>
                                             </div>
                                         </div>
-                                        <span class="hidden sm:inline-flex px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">256-bit SSL</span>
+
+                                        <!-- 2. Credit / Debit Card Card -->
+                                        <div id="modal-tab-card" onclick="window.setModalPaymentMethod('Card')" class="relative p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between">
+                                            <div class="flex items-start gap-3 mb-2.5">
+                                                <!-- Radio circle -->
+                                                <div id="modal-radio-card" class="w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900">
+                                                    <div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>
+                                                </div>
+
+                                                <div>
+                                                    <div class="flex items-center gap-2 mb-1">
+                                                        <span class="material-symbols-outlined text-slate-700 dark:text-slate-300 text-lg">credit_card</span>
+                                                        <span class="text-sm font-black text-slate-900 dark:text-white">Credit / Debit Card</span>
+                                                    </div>
+                                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">Visa, Mastercard, AMEX</p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Card Brand Icons Row -->
+                                            <div class="flex items-center gap-2.5 pl-8 pt-1">
+                                                <span class="font-black text-[#1434CB] text-xs tracking-wider italic font-sans">VISA</span>
+                                                <span class="inline-flex items-center">
+                                                    <svg class="w-6 h-4" viewBox="0 0 36 24" fill="none">
+                                                        <circle cx="14" cy="12" r="10" fill="#EB001B"/>
+                                                        <circle cx="22" cy="12" r="10" fill="#F79E1B" fill-opacity="0.88"/>
+                                                    </svg>
+                                                </span>
+                                                <span class="px-1.5 py-0.5 rounded-[3px] bg-[#006FCF] text-white font-black text-[9px] tracking-tight font-sans leading-none">AMEX</span>
+                                                <span class="text-slate-600 dark:text-slate-400 flex items-center">
+                                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                                        <line x1="2" y1="10" x2="22" y2="10"/>
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <button type="button" id="modal-tab-paypal" onclick="window.setModalPaymentMethod('PayPal')" class="p-2 sm:p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer">
-                                            <span class="material-symbols-outlined text-sm text-primary">account_balance_wallet</span>
-                                            <span>PayPal &amp; Cards</span>
-                                        </button>
-                                        <button type="button" id="modal-tab-payoneer" onclick="window.setModalPaymentMethod('Payoneer')" class="p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer">
-                                            <span class="material-symbols-outlined text-sm">receipt_long</span>
-                                            <span>Payoneer / ACH</span>
-                                        </button>
-                                    </div>
-
-                                    <!-- PayPal Smart Buttons View -->
-                                    <div id="modal-panel-paypal" class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 text-center space-y-2.5">
-                                        <p class="text-xs text-slate-600 dark:text-slate-300 font-medium">Fast, 1-click settlement via PayPal balance or Debit/Credit Card:</p>
+                                    <!-- Active Payment Action Area -->
+                                    <div id="modal-panel-payment" class="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-primary/10 text-center space-y-2.5">
+                                        <p id="modal-payment-instruction" class="text-xs text-slate-600 dark:text-slate-300 font-medium">Fast, 1-click settlement via PayPal balance or PayPal Pay Later:</p>
                                         <!-- Dynamic PayPal Smart Buttons Mounted Here -->
                                         <div id="modal-paypal-button-container" class="w-full min-h-[44px] flex flex-col justify-center"></div>
                                         <p class="text-[10.5px] text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1">
                                             <span class="material-symbols-outlined text-xs text-emerald-500">verified_user</span>
-                                            <span>PayPal Buyer Protection · Zero transaction surcharges</span>
+                                            <span>256-bit Encrypted SSL · Zero transaction surcharges</span>
                                         </p>
-                                    </div>
-
-                                    <!-- Payoneer / Invoice Panel -->
-                                    <div id="modal-panel-payoneer" class="hidden p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 text-left space-y-2.5">
-                                        <div class="flex items-start gap-2.5">
-                                            <span class="material-symbols-outlined text-primary text-base mt-0.5">business</span>
-                                            <div>
-                                                <strong class="text-xs font-bold text-slate-900 dark:text-white block">Corporate &amp; B2B Billing (Payoneer / Wire)</strong>
-                                                <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">We will create your order immediately and send an official Payoneer / ACH invoice to your email.</p>
-                                            </div>
-                                        </div>
-                                        <div class="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-primary/10 text-[11px] text-slate-700 dark:text-slate-300 space-y-1">
-                                            <div class="flex justify-between">
-                                                <span class="text-slate-500">Billing Email:</span>
-                                                <span class="font-mono font-bold">billing@dezandigitizing.com</span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span class="text-slate-500">Supported:</span>
-                                                <span>Payoneer Transfer, ACH Wire, International Wire</span>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
 
@@ -2261,12 +2296,12 @@
 
             container.innerHTML = '';
 
-            modalPayPalButtonsInstance = paypal.Buttons({
+            const buttonOptions = {
                 style: {
                     layout: 'vertical',
-                    color: 'gold',
+                    color: isCard ? 'black' : 'gold',
                     shape: 'rect',
-                    label: 'paypal',
+                    label: isCard ? 'pay' : 'paypal',
                     height: 44
                 },
                 createOrder: async function(data, actions) {
@@ -2338,14 +2373,17 @@
                     return json.data.id || json.data.orderID;
                 },
                 onApprove: async function(data, actions) {
-                    const btnBox = modal.querySelector('#modal-paypal-button-container');
-                    if (btnBox) {
-                        btnBox.innerHTML = `
-                            <div class="flex items-center justify-center gap-2 py-4 text-xs text-primary font-bold">
-                                <span class="material-symbols-outlined animate-spin text-base">sync</span>
-                                <span>Payment Authorized! Verifying capture & finalizing order...</span>
-                            </div>
+                    let processingOverlay = document.getElementById('modal-paypal-processing-overlay');
+                    if (!processingOverlay) {
+                        processingOverlay = document.createElement('div');
+                        processingOverlay.id = 'modal-paypal-processing-overlay';
+                        processingOverlay.className = 'fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-white text-center';
+                        processingOverlay.innerHTML = `
+                            <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                            <h4 class="text-lg font-black tracking-tight mb-1">Verifying Payment &amp; Finalizing Order...</h4>
+                            <p class="text-xs text-slate-300 max-w-sm">Please do not close this window while we secure your digitizing order.</p>
                         `;
+                        document.body.appendChild(processingOverlay);
                     }
 
                     try {
@@ -2359,7 +2397,7 @@
 
                         const captureJson = await captureRes.json().catch(() => ({}));
                         if (!captureRes.ok || !captureJson.success) {
-                            throw new Error(captureJson.message || 'Failed to capture PayPal payment');
+                            throw new Error(captureJson.message || 'Failed to capture payment');
                         }
 
                         const captureData = captureJson.data || {};
@@ -2367,13 +2405,13 @@
 
                         await finalizeModalOrder({
                             paymentStatus: 'paid',
-                            paymentMethod: 'PayPal',
+                            paymentMethod: isCard ? 'CreditCard' : 'PayPal',
                             transactionId: transactionId,
                             paypalCaptureData: captureData
                         });
 
                     } catch (captureErr) {
-                        console.error('PayPal capture error:', captureErr);
+                        console.error('Payment capture error:', captureErr);
                         alert(`Payment could not be verified: ${captureErr.message}. If your account was debited, please contact support@dezandigitizing.com.`);
                     } finally {
                         const overlay = document.getElementById('modal-paypal-processing-overlay');
@@ -2381,41 +2419,57 @@
                     }
                 },
                 onCancel: function(data) {
-                    console.log('PayPal checkout cancelled by client');
+                    console.log('Payment cancelled by client');
                 },
                 onError: function(err) {
-                    console.error('PayPal Button runtime error:', err);
+                    console.error('Payment Button runtime error:', err);
                     const currentContainer = modal.querySelector('#modal-paypal-button-container');
                     if (currentContainer) {
                         currentContainer.innerHTML = `
                             <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs text-center space-y-1.5">
-                                <p class="font-bold">PayPal Gateway Error</p>
-                                <p class="text-[11px]">Could not load PayPal buttons. Please retry or choose Payoneer / ACH.</p>
-                                <button type="button" onclick="window.initModalPayPal()" class="px-3 py-1 rounded-lg bg-rose-600 text-white font-bold text-[10px] hover:bg-rose-700 cursor-pointer">
+                                <p class="font-bold">Gateway Error</p>
+                                <p class="text-[11px]">Could not load payment buttons. Please click retry to reconnect.</p>
+                                <button type="button" onclick="window.initModalPayPal('${currentMethod}')" class="px-3 py-1 rounded-lg bg-rose-600 text-white font-bold text-[10px] hover:bg-rose-700 cursor-pointer">
                                     Retry Connection
                                 </button>
                             </div>
                         `;
                     }
                 }
-            });
+            };
+
+            if (isCard && paypal.FUNDING && paypal.FUNDING.CARD) {
+                buttonOptions.fundingSource = paypal.FUNDING.CARD;
+            } else if (!isCard && paypal.FUNDING && paypal.FUNDING.PAYPAL) {
+                buttonOptions.fundingSource = paypal.FUNDING.PAYPAL;
+            }
+
+            modalPayPalButtonsInstance = paypal.Buttons(buttonOptions);
+            if (typeof modalPayPalButtonsInstance.isEligible === 'function' && !modalPayPalButtonsInstance.isEligible()) {
+                // If specific funding source is not eligible in current locale, fallback to standard buttons
+                delete buttonOptions.fundingSource;
+                buttonOptions.style.color = 'gold';
+                buttonOptions.style.label = 'paypal';
+                modalPayPalButtonsInstance = paypal.Buttons(buttonOptions);
+            }
 
             if (modal.querySelector('#modal-paypal-button-container')) {
                 await modalPayPalButtonsInstance.render('#modal-paypal-button-container');
+                container.dataset.renderedMethod = currentMethod;
             }
 
         } catch (err) {
             if (err && (err.message?.includes('removed from DOM') || err.message?.includes('closed'))) {
                 return;
             }
-            console.error('[Modal PayPal Init Error]:', err);
+            console.error('[Modal Payment Init Error]:', err);
             const currentContainer = modal.querySelector('#modal-paypal-button-container');
             if (currentContainer) {
                 currentContainer.innerHTML = `
                     <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 text-xs text-center space-y-1.5">
-                        <p class="font-bold">PayPal Gateway Notice</p>
-                        <p class="text-[11px]">${err.message || 'Unable to connect to PayPal gateway.'}</p>
-                        <button type="button" onclick="window.initModalPayPal()" class="px-3 py-1 rounded-lg bg-primary text-background-dark font-black text-[10px] hover:bg-primary-hover cursor-pointer">
+                        <p class="font-bold">Payment Gateway Notice</p>
+                        <p class="text-[11px]">${err.message || 'Unable to connect to payment gateway.'}</p>
+                        <button type="button" onclick="window.initModalPayPal('${currentMethod}')" class="px-3 py-1 rounded-lg bg-primary text-background-dark font-black text-[10px] hover:bg-primary-hover cursor-pointer">
                             Retry Connection
                         </button>
                     </div>
@@ -2427,47 +2481,70 @@
     };
 
     /**
-     * Payment method selection: PayPal vs Payoneer
+     * Payment method selection: PayPal vs Credit / Debit Card (Side-by-Side)
      */
     window.setModalPaymentMethod = function(method) {
-        state.paymentMethod = method || 'PayPal';
+        state.paymentMethod = (method === 'Card' || method === 'CreditCard') ? 'Card' : 'PayPal';
         const modal = ensureModalElement();
-        const tabPaypal = modal.querySelector('#modal-tab-paypal');
-        const tabPayoneer = modal.querySelector('#modal-tab-payoneer');
-        const panelPaypal = modal.querySelector('#modal-panel-paypal');
-        const panelPayoneer = modal.querySelector('#modal-panel-payoneer');
+        const cardPaypal = modal.querySelector('#modal-tab-paypal') || modal.querySelector('#modal-card-paypal');
+        const cardCard = modal.querySelector('#modal-tab-card') || modal.querySelector('#modal-card-card');
+        const radioPaypal = modal.querySelector('#modal-radio-paypal');
+        const radioCard = modal.querySelector('#modal-radio-card');
+        const instruction = modal.querySelector('#modal-payment-instruction');
         const submitBtn = modal.querySelector('#adaptive-order-submit-btn');
         const checkoutNote = modal.querySelector('#modal-paypal-checkout-note');
 
-        if (state.paymentMethod === 'Payoneer') {
-            if (tabPayoneer) tabPayoneer.className = 'p-2 sm:p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer';
-            if (tabPaypal) tabPaypal.className = 'p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
-            if (panelPayoneer) panelPayoneer.classList.remove('hidden');
-            if (panelPaypal) panelPaypal.classList.add('hidden');
-            if (submitBtn) {
-                submitBtn.classList.remove('hidden');
-                const price = window.calculateAdaptivePrice ? window.calculateAdaptivePrice() : 15.00;
-                const icon = submitBtn.querySelector('#order-submit-btn-icon') || submitBtn.querySelector('.material-symbols-outlined');
-                const text = submitBtn.querySelector('#order-submit-btn-text');
-                if (icon) icon.textContent = 'receipt_long';
-                if (text) text.textContent = `Submit Order & Request Invoice ($${price.toFixed(2)})`;
+        if (state.paymentMethod === 'Card') {
+            // Card Selected (Gold Border & Filled Radio)
+            if (cardCard) {
+                cardCard.className = 'relative p-3.5 sm:p-4 rounded-2xl border-2 border-primary bg-amber-50/50 dark:bg-primary/10 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between ring-1 ring-primary/20';
             }
-            if (checkoutNote) checkoutNote.classList.add('hidden');
-        } else {
-            // Default: PayPal & Cards
-            state.paymentMethod = 'PayPal';
-            if (tabPaypal) tabPaypal.className = 'p-2 sm:p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer';
-            if (tabPayoneer) tabPayoneer.className = 'p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
-            if (panelPaypal) panelPaypal.classList.remove('hidden');
-            if (panelPayoneer) panelPayoneer.classList.add('hidden');
-            if (submitBtn) {
-                submitBtn.classList.add('hidden');
+            if (radioCard) {
+                radioCard.className = 'w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900';
+                radioCard.innerHTML = '<div class="w-2.5 h-2.5 rounded-full bg-primary"></div>';
             }
-            if (checkoutNote) checkoutNote.classList.remove('hidden');
 
-            // Render PayPal Smart Buttons
-            window.initModalPayPal();
+            // PayPal Unselected (Subtle Border & Empty Radio)
+            if (cardPaypal) {
+                cardPaypal.className = 'relative p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between';
+            }
+            if (radioPaypal) {
+                radioPaypal.className = 'w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900';
+                radioPaypal.innerHTML = '<div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>';
+            }
+
+            if (instruction) {
+                instruction.textContent = 'Pay securely with any major credit or debit card (Visa, Mastercard, AMEX):';
+            }
+        } else {
+            // PayPal Selected (Gold Border & Filled Radio)
+            if (cardPaypal) {
+                cardPaypal.className = 'relative p-3.5 sm:p-4 rounded-2xl border-2 border-primary bg-amber-50/50 dark:bg-primary/10 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between ring-1 ring-primary/20';
+            }
+            if (radioPaypal) {
+                radioPaypal.className = 'w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900';
+                radioPaypal.innerHTML = '<div class="w-2.5 h-2.5 rounded-full bg-primary"></div>';
+            }
+
+            // Card Unselected (Subtle Border & Empty Radio)
+            if (cardCard) {
+                cardCard.className = 'relative p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between';
+            }
+            if (radioCard) {
+                radioCard.className = 'w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900';
+                radioCard.innerHTML = '<div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>';
+            }
+
+            if (instruction) {
+                instruction.textContent = 'Fast, 1-click settlement via PayPal balance or PayPal Pay Later:';
+            }
         }
+
+        if (submitBtn) submitBtn.classList.add('hidden');
+        if (checkoutNote) checkoutNote.classList.remove('hidden');
+
+        // Render appropriate buttons for selected method
+        window.initModalPayPal(state.paymentMethod);
 
         if (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackAddPaymentInfo === 'function') {
             window.dezanTracker.trackAddPaymentInfo(state.paymentMethod, {

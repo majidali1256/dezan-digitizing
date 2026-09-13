@@ -2835,12 +2835,34 @@ The Worker Studio provides an isolated, production-focused environment for embro
        - `GET /api/paypal/config` -> HTTP 200, environment `production`, live client ID.
        - `POST /api/paypal/create-order` -> HTTP 200, PayPal live order created (`7JX83088B80150036`, status `CREATED`).
 
-### 35.18 Workspace Housekeeping & Unwanted Files Purge
-- **Objective**: Clear unwanted scratch files, test screenshot dumps, temporary artwork uploads, and obsolete debug artifacts from the repository.
-- **Actions Executed**:
-  1. **Purged Scratch Directory (`scratch/`)**: Removed all 24 temporary test scripts, mock files, and debug screenshots while preserving `scratch/.gitkeep`.
-  2. **Purged Test Uploads (`uploads/artworks/`)**: Removed all 10 local test artwork files while preserving `uploads/.gitkeep`.
-  3. **Purged Visual QA Artifacts**: Removed 32 heavy test screenshot files from `artifacts_media/`, `playwright_artifacts/`, `tests/visual_evidence/`, and `tests/visual_proofs/`, reclaiming over 7.4 MB from git tracking.
-  4. **Cleaned Build Cache**: Removed local `.wrangler/` cache directory.
-  5. **Updated `.gitignore`**: Added `playwright_artifacts/`, `artifacts_media/`, `tests/visual_evidence/`, `tests/visual_proofs/`, and `tests/*.png` to ensure future test runs never pollute repository history.
-  6. **Zero-Regression Verification**: Ran complete automated test suite (`tests/api.test.js`, `tests/paypal.test.js`); all 19 tests passed with 100% success.
+### 49. Redesigned Side-by-Side Payment Method Selector (PayPal & Credit / Debit Card)
+- **Problem & Requirement**:
+  - The customer requested: *"payment should look like this, no google pay, just paypal and credit cards side by side . thats all, having all these icons like this."*
+  - Replaced the previous single-column / Payoneer invoice tab selector with a modern, high-converting side-by-side card grid matching the reference design.
+- **Architectural Implementation**:
+  - **Files Synchronized**:
+    1. `js/order-quote-modal.js`: Global Order/Quote modal Step 3 Review & Pay view, `setModalPaymentMethod(method)`, and `initModalPayPal(preferredMethod)`.
+    2. `client-portal.html`: Inline workspace order modal Step 3 (`#new-order-modal`) and invoice checkout modal (`#checkout-payment-modal`).
+    3. `js/client-workspace.js`: Client workspace order invoice checkout modal (`ensureCheckoutModalInDom()`), `selectCheckoutMethod(method)`, and `initPayPalForOrder(order, selectedMethod)`.
+  - **Layout & Visual Design**:
+    - **Header**: Soft circular card icon + `"Choose Payment Method"` (bold) + `"Select your preferred checkout option."`
+    - **Card 1: PayPal**:
+      - Radio indicator: gold ring + filled center dot when active.
+      - Official dual-P PayPal monogram SVG.
+      - Title: `"PayPal"`, Subtitle: `"Fast, secure, and trusted by millions."`
+      - Top-right badge: `"👑 Most Popular"` in a soft gold pill badge.
+    - **Card 2: Credit / Debit Card**:
+      - Radio indicator: neutral border when inactive, gold ring + filled center dot when active.
+      - Outline credit card icon.
+      - Title: `"Credit / Debit Card"`, Subtitle: `"Visa, Mastercard, AMEX"`
+      - Brand logos row: authentic **VISA** (blue wordmark), **Mastercard** (overlapping red & orange circles), **AMEX** (blue badge), and card outline icon.
+  - **Payment Processing Logic & Direct Card Funding**:
+    - When **PayPal** is selected: mounts standard PayPal smart buttons (`fundingSource: paypal.FUNDING.PAYPAL`) and displays helper message: `"Fast, 1-click settlement via PayPal balance or PayPal Pay Later:"`.
+    - When **Credit / Debit Card** is selected: mounts standalone black Debit/Credit card button (`fundingSource: paypal.FUNDING.CARD`) with fallback to standard buttons if standalone card funding is unsupported by the browser, and displays helper message: `"Pay securely with any major credit or debit card (Visa, Mastercard, AMEX):"`.
+    - Records `paymentMethod: 'CreditCard'` vs `'PayPal'` upon approval in InsForge PostgreSQL.
+    - **Quote Mode Preservation**: Automatically hidden in Quote Mode (`isQuote === true`), seamlessly presenting `"Submit Free Custom Quote"`.
+  - **Verification & Visual Proof**:
+    - Desktop screenshots: `step3_payment_box_paypal.png` and `step3_payment_box_card.png`.
+    - Mobile screenshot (390px): `mobile_step3_payment_box.png`.
+    - `npm test`: 19/19 tests passing.
+    - `scripts/verify_review_pay_flow.js`: End-to-end multi-viewport verification passing with zero errors.

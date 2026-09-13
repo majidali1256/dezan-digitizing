@@ -6,7 +6,7 @@ const assert = require('assert');
 
 const PORT = 8099;
 const WORKSPACE_DIR = path.resolve(__dirname, '..');
-const ARTIFACTS_DIR = '/Users/macbookair/.gemini/antigravity-ide/brain/869f30e7-f663-48ff-8853-5277d416cebf';
+const ARTIFACTS_DIR = process.env.ARTIFACTS_DIR || '/Users/macbookair/.gemini/antigravity-ide/brain/1f959792-d5db-4b0c-847b-551ee5e3eadf';
 
 function createStaticServer() {
     const mimeTypes = {
@@ -90,8 +90,8 @@ async function runVerification() {
         // Verify Step 2 CTA button text
         const step2BtnText = await page.$eval('#order-goto-review-btn', el => el.textContent.trim());
         console.log('✓ Step 2 button text:', JSON.stringify(step2BtnText));
-        if (!step2BtnText.includes('Review & Pay')) {
-            throw new Error(`Step 2 button should say "Review & Pay", found: "${step2BtnText}"`);
+        if (!step2BtnText.includes('Review & Pay') && !step2BtnText.includes('Proceed to Checkout')) {
+            throw new Error(`Step 2 button should say "Proceed to Checkout" or "Review & Pay", found: "${step2BtnText}"`);
         }
 
         // 2. Fill in customer & order details

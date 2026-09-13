@@ -1600,45 +1600,91 @@
                     </div>
 
                     <!-- Payment Method Selection -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Select Payment Method</label>
-                        <div class="grid grid-cols-2 gap-2 mb-3">
-                            <button type="button" onclick="window.clientWorkspace.selectCheckoutMethod('paypal')" id="checkout-tab-paypal" class="p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-900 dark:text-white">
-                                <span class="material-symbols-outlined text-sm text-primary">account_balance_wallet</span> PayPal &amp; Cards
-                            </button>
-                            <button type="button" onclick="window.clientWorkspace.selectCheckoutMethod('payoneer')" id="checkout-tab-payoneer" class="p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer">
-                                <span class="material-symbols-outlined text-sm">currency_exchange</span> Payoneer / ACH
-                            </button>
+                    <div class="space-y-3">
+                        <!-- Header: Choose Payment Method -->
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-primary/20 flex items-center justify-center text-slate-800 dark:text-primary shadow-xs shrink-0">
+                                <span class="material-symbols-outlined text-lg">credit_card</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">Choose Payment Method</h3>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400">Select your preferred checkout option.</p>
+                            </div>
                         </div>
 
-                        <!-- PayPal Smart Buttons Container -->
-                        <div id="checkout-panel-paypal" class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 text-center space-y-2.5">
-                            <p class="text-xs text-slate-600 dark:text-slate-300">Fast, 1-click settlement via PayPal balance or Debit/Credit Card:</p>
+                        <!-- Side-by-Side Cards: PayPal & Credit Card -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <!-- 1. PayPal Card -->
+                            <div id="checkout-tab-paypal" onclick="window.clientWorkspace.selectCheckoutMethod('paypal')" class="relative p-3.5 rounded-2xl border-2 border-primary bg-amber-50/50 dark:bg-primary/10 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between">
+                                <!-- Most Popular Badge -->
+                                <div class="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100/90 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 text-[10px] font-black shadow-xs">
+                                    <span>👑</span>
+                                    <span>Most Popular</span>
+                                </div>
+
+                                <div class="flex items-start gap-2.5">
+                                    <!-- Radio circle -->
+                                    <div id="checkout-radio-paypal" class="w-4 h-4 rounded-full border-2 border-primary flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900">
+                                        <div class="w-2 h-2 rounded-full bg-primary"></div>
+                                    </div>
+
+                                    <div class="pr-14">
+                                        <div class="flex items-center gap-1.5 mb-1">
+                                            <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none">
+                                                <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.79.79 0 0 1 .778-.667h6.634c4.12 0 6.643 1.946 6.012 5.92-.544 3.428-2.678 5.34-5.94 5.34H9.414l-1.396 6.357a.789.789 0 0 1-.778.667h-.164z" fill="#003087"/>
+                                                <path d="M9.414 14.313h2.973c3.262 0 5.396-1.912 5.94-5.34.63-3.974-1.892-5.92-6.012-5.92H7.68a.79.79 0 0 0-.778.667L4.31 20.597a.641.641 0 0 0 .633.74h4.472l1.397-6.357a.789.789 0 0 1 .778-.667h-.176z" fill="#0079C1"/>
+                                                <path d="M8.636 9.973h4.75c3.084 0 5.09-1.442 5.48-4.03.353-2.339-1.04-3.89-4.306-3.89H8.487a.79.79 0 0 0-.778.667L6.467 10.64a.641.641 0 0 0 .633.74h1.536z" fill="#00457C"/>
+                                            </svg>
+                                            <span class="text-xs font-black text-slate-900 dark:text-white">PayPal</span>
+                                        </div>
+                                        <p class="text-[10.5px] text-slate-500 dark:text-slate-400 leading-snug">Fast, secure, and trusted by millions.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. Credit / Debit Card Card -->
+                            <div id="checkout-tab-card" onclick="window.clientWorkspace.selectCheckoutMethod('card')" class="relative p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between">
+                                <div class="flex items-start gap-2.5 mb-2">
+                                    <!-- Radio circle -->
+                                    <div id="checkout-radio-card" class="w-4 h-4 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900">
+                                        <div class="w-2 h-2 rounded-full bg-transparent"></div>
+                                    </div>
+
+                                    <div>
+                                        <div class="flex items-center gap-1.5 mb-1">
+                                            <span class="material-symbols-outlined text-slate-700 dark:text-slate-300 text-base">credit_card</span>
+                                            <span class="text-xs font-black text-slate-900 dark:text-white">Credit / Debit Card</span>
+                                        </div>
+                                        <p class="text-[10.5px] text-slate-500 dark:text-slate-400 leading-snug">Visa, Mastercard, AMEX</p>
+                                    </div>
+                                </div>
+
+                                <!-- Card Brand Icons Row -->
+                                <div class="flex items-center gap-2 pl-6 pt-1">
+                                    <span class="font-black text-[#1434CB] text-[11px] tracking-wider italic font-sans">VISA</span>
+                                    <span class="inline-flex items-center">
+                                        <svg class="w-5 h-3.5" viewBox="0 0 36 24" fill="none">
+                                            <circle cx="14" cy="12" r="10" fill="#EB001B"/>
+                                            <circle cx="22" cy="12" r="10" fill="#F79E1B" fill-opacity="0.88"/>
+                                        </svg>
+                                    </span>
+                                    <span class="px-1 py-0.5 rounded-[2px] bg-[#006FCF] text-white font-black text-[8px] tracking-tight font-sans leading-none">AMEX</span>
+                                    <span class="text-slate-600 dark:text-slate-400 flex items-center">
+                                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                            <line x1="2" y1="10" x2="22" y2="10"/>
+                                        </svg>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic PayPal Smart Buttons Container -->
+                        <div id="checkout-panel-paypal" class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 text-center space-y-2.5">
+                            <p id="checkout-payment-instruction" class="text-xs text-slate-600 dark:text-slate-300 font-medium">Fast, 1-click settlement via PayPal balance or PayPal Pay Later:</p>
                             
                             <!-- Dynamic PayPal Smart Buttons Mounted Here -->
                             <div id="paypal-button-container" class="w-full min-h-[44px] flex flex-col justify-center"></div>
-                        </div>
-
-                        <!-- Payoneer B2B / ACH Container -->
-                        <div id="checkout-panel-payoneer" class="hidden p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 space-y-2.5 text-left">
-                            <div class="flex items-start gap-2">
-                                <span class="material-symbols-outlined text-amber-500 text-lg shrink-0 mt-0.5">account_balance</span>
-                                <div>
-                                    <h4 class="text-xs font-bold text-slate-900 dark:text-white">Payoneer &amp; Direct U.S. Bank ACH</h4>
-                                    <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
-                                        Ideal for high-volume embroidery shops and batch invoicing with zero credit card transaction fees.
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs space-y-1">
-                                <div class="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400">Receiving Account:</div>
-                                <div class="text-[11px] text-slate-800 dark:text-slate-200">Bank: <strong>Community Federal Savings Bank (U.S.)</strong></div>
-                                <div class="text-[11px] text-slate-800 dark:text-slate-200">Account Type: <strong>Checking / ACH Direct Deposit</strong></div>
-                                <div class="text-[11px] text-slate-800 dark:text-slate-200">Email: <strong>billing@dezandigitizing.com</strong></div>
-                            </div>
-                            <button type="button" onclick="window.clientWorkspace.requestPayoneerInvoice()" class="w-full py-2.5 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-black text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer">
-                                <span class="material-symbols-outlined text-sm">mail</span> Request Payoneer Invoice / Payment Link
-                            </button>
                         </div>
                     </div>
 
@@ -1728,35 +1774,60 @@
     }
 
     function selectCheckoutMethod(method) {
+        const isCard = (method === 'card' || method === 'CreditCard');
         const paypalTab = document.getElementById('checkout-tab-paypal');
-        const payoneerTab = document.getElementById('checkout-tab-payoneer');
-        const paypalPanel = document.getElementById('checkout-panel-paypal');
-        const payoneerPanel = document.getElementById('checkout-panel-payoneer');
+        const cardTab = document.getElementById('checkout-tab-card');
+        const paypalRadio = document.getElementById('checkout-radio-paypal');
+        const cardRadio = document.getElementById('checkout-radio-card');
+        const instruction = document.getElementById('checkout-payment-instruction');
 
-        if (!paypalTab || !payoneerTab || !paypalPanel || !payoneerPanel) return;
+        if (isCard) {
+            if (cardTab) cardTab.className = 'relative p-3.5 rounded-2xl border-2 border-primary bg-amber-50/50 dark:bg-primary/10 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between ring-1 ring-primary/20';
+            if (cardRadio) {
+                cardRadio.className = 'w-4 h-4 rounded-full border-2 border-primary flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900';
+                cardRadio.innerHTML = '<div class="w-2 h-2 rounded-full bg-primary"></div>';
+            }
 
-        if (method === 'paypal') {
-            paypalTab.className = 'p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-900 dark:text-white';
-            payoneerTab.className = 'p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
-            paypalPanel.classList.remove('hidden');
-            payoneerPanel.classList.add('hidden');
+            if (paypalTab) paypalTab.className = 'relative p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between';
+            if (paypalRadio) {
+                paypalRadio.className = 'w-4 h-4 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900';
+                paypalRadio.innerHTML = '<div class="w-2 h-2 rounded-full bg-transparent"></div>';
+            }
+
+            if (instruction) instruction.textContent = 'Pay securely with any major credit or debit card (Visa, Mastercard, AMEX):';
         } else {
-            payoneerTab.className = 'p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-900 dark:text-white';
-            paypalTab.className = 'p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
-            payoneerPanel.classList.remove('hidden');
-            paypalPanel.classList.add('hidden');
+            if (paypalTab) paypalTab.className = 'relative p-3.5 rounded-2xl border-2 border-primary bg-amber-50/50 dark:bg-primary/10 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between ring-1 ring-primary/20';
+            if (paypalRadio) {
+                paypalRadio.className = 'w-4 h-4 rounded-full border-2 border-primary flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900';
+                paypalRadio.innerHTML = '<div class="w-2 h-2 rounded-full bg-primary"></div>';
+            }
+
+            if (cardTab) cardTab.className = 'relative p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between';
+            if (cardRadio) {
+                cardRadio.className = 'w-4 h-4 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900';
+                cardRadio.innerHTML = '<div class="w-2 h-2 rounded-full bg-transparent"></div>';
+            }
+
+            if (instruction) instruction.textContent = 'Fast, 1-click settlement via PayPal balance or PayPal Pay Later:';
+        }
+
+        const currentOrder = getCurrentCheckoutOrder();
+        if (currentOrder) {
+            initPayPalForOrder(currentOrder, isCard ? 'card' : 'paypal');
         }
     }
 
-    async function initPayPalForOrder(order) {
+    async function initPayPalForOrder(order, selectedMethod = 'paypal') {
         const container = document.getElementById('paypal-button-container');
         const fallback = document.getElementById('paypal-fallback-container');
         if (!container) return;
 
+        const isCard = (selectedMethod === 'card' || selectedMethod === 'CreditCard');
+
         container.innerHTML = `
             <div class="py-3 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
                 <span class="material-symbols-outlined animate-spin text-base text-primary">sync</span>
-                <span>Connecting to PayPal gateway...</span>
+                <span>Connecting to secure ${isCard ? 'Card' : 'PayPal'} gateway...</span>
             </div>
         `;
         if (fallback) fallback.classList.add('hidden');
@@ -1769,12 +1840,12 @@
             container.innerHTML = '';
 
             if (paypal && paypal.Buttons) {
-                paypalButtonsInstance = paypal.Buttons({
+                const buttonOpts = {
                     style: {
                         layout: 'vertical',
-                        color: 'gold',
+                        color: isCard ? 'black' : 'gold',
                         shape: 'rect',
-                        label: 'paypal',
+                        label: isCard ? 'pay' : 'paypal',
                         height: 40
                     },
                     createOrder: async function(data, actions) {
@@ -1790,7 +1861,10 @@
                                 body: JSON.stringify({
                                     orderId: order.id || order.order_number,
                                     amount: parseFloat(order.price || order.amount || 15).toFixed(2),
-                                    currency: 'USD'
+                                    currency: 'USD',
+                                    orderDetails: {
+                                        paymentMethod: isCard ? 'CreditCard' : 'PayPal'
+                                    }
                                 })
                             });
 
@@ -1852,39 +1926,53 @@
                                 transactionId = details.id || data.orderID;
                             }
 
-                            await completeSuccessfulPayment(order, 'PayPal', transactionId);
+                            await completeSuccessfulPayment(order, isCard ? 'CreditCard' : 'PayPal', transactionId);
                         } catch (err) {
-                            console.error('[PayPal Capture Error]:', err);
+                            console.error('[Payment Capture Error]:', err);
                             alert(`Payment capture notice: ${err.message}`);
                             if (fallback) fallback.classList.remove('hidden');
                         }
                     },
                     onError: function(err) {
-                        console.warn('[PayPal SDK Notice]:', err);
+                        console.warn('[Payment SDK Notice]:', err);
                         container.innerHTML = `
                             <div class="py-2 text-center text-xs text-rose-600 dark:text-rose-400 space-y-2">
-                                <p>PayPal encountered an issue. Please try again.</p>
-                                <button type="button" onclick="window.clientWorkspace.initPayPalForOrder(window.clientWorkspace.getCurrentCheckoutOrder())" class="px-3 py-1.5 rounded-lg bg-primary text-slate-950 font-bold text-xs inline-flex items-center gap-1 cursor-pointer">
+                                <p>Payment gateway encountered an issue. Please try again.</p>
+                                <button type="button" onclick="window.clientWorkspace.initPayPalForOrder(window.clientWorkspace.getCurrentCheckoutOrder(), '${selectedMethod}')" class="px-3 py-1.5 rounded-lg bg-primary text-slate-950 font-bold text-xs inline-flex items-center gap-1 cursor-pointer">
                                     <span class="material-symbols-outlined text-sm">refresh</span> Try Again
                                 </button>
                             </div>
                         `;
                     },
                     onCancel: function(data) {
-                        console.log('[PayPal Payment Cancelled]:', data);
+                        console.log('[Payment Cancelled]:', data);
                     }
-                });
+                };
+
+                if (isCard && paypal.FUNDING && paypal.FUNDING.CARD) {
+                    buttonOpts.fundingSource = paypal.FUNDING.CARD;
+                } else if (!isCard && paypal.FUNDING && paypal.FUNDING.PAYPAL) {
+                    buttonOpts.fundingSource = paypal.FUNDING.PAYPAL;
+                }
+
+                paypalButtonsInstance = paypal.Buttons(buttonOpts);
+                if (typeof paypalButtonsInstance.isEligible === 'function' && !paypalButtonsInstance.isEligible()) {
+                    delete buttonOpts.fundingSource;
+                    buttonOpts.style.color = 'gold';
+                    buttonOpts.style.label = 'paypal';
+                    paypalButtonsInstance = paypal.Buttons(buttonOpts);
+                }
 
                 await paypalButtonsInstance.render('#paypal-button-container');
             } else {
-                throw new Error('PayPal Buttons unavailable');
+                throw new Error('Payment Buttons unavailable');
             }
         } catch (err) {
-            console.warn('[PayPal Gateway Notice]:', err.message);
+            console.warn('[Payment Gateway Notice]:', err.message);
             container.innerHTML = `
                 <div class="py-2 text-center text-xs text-rose-600 dark:text-rose-400 space-y-2">
-                    <p>Unable to connect to PayPal gateway (${err.message}).</p>
-                    <button type="button" onclick="window.clientWorkspace.initPayPalForOrder(window.clientWorkspace.getCurrentCheckoutOrder())" class="px-3 py-1.5 rounded-lg bg-primary text-slate-950 font-bold text-xs inline-flex items-center gap-1 cursor-pointer">
+                    <p>Unable to connect to payment gateway (${err.message}).</p>
+                    <button type="button" onclick="window.clientWorkspace.initPayPalForOrder(window.clientWorkspace.getCurrentCheckoutOrder(), '${selectedMethod}')" class="px-3 py-1.5 rounded-lg bg-primary text-slate-950 font-bold text-xs inline-flex items-center gap-1 cursor-pointer">
                         <span class="material-symbols-outlined text-sm">refresh</span> Retry Connection
                     </button>
                 </div>
