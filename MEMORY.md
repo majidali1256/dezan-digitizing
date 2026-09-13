@@ -2818,8 +2818,14 @@ The Worker Studio provides an isolated, production-focused environment for embro
   4. **Multi-Payment & Quote Mode Transitions**:
      - Switching to **Payoneer / ACH** hides the PayPal buttons and reveals the `"Submit Order & Request Invoice ($XX.XX)"` submit button (`payment_status = 'unpaid'`).
      - Switching to **Free Quote Mode** hides payment panels and reveals the `"Submit Free Custom Quote"` button (`payment_status = 'unpaid'`, `$0.00`).
-  5. **Verification**:
-     - Verified end-to-end with Playwright browser testing, confirming modal step progression, container mounting, direct submit blocking, tab switching, and quote mode unhiding. Real screenshot saved to `scratch/step3_paypal_modal_verified.png`.
-     - Full automated test suite passes (19/19 tests in `npm test`).
+  6. **Vercel Production Deployment Configuration & Live Smoke Verification**:
+     - Linked workspace to Vercel production project `majid-alis-projects-3cdf3b37/dezan-digitizing`.
+     - Injected all required production environment variables: `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` (Secret), `PAYPAL_MODE=live`, `PAYPAL_CURRENCY=USD`, `ADMIN_EMAIL`, `DATABASE_URL` (Secret), `NEXT_PUBLIC_INSFORGE_URL`, `NEXT_PUBLIC_INSFORGE_ANON_KEY`.
+     - Deployed prebuilt production bundle to `https://dezan-digitizing.vercel.app` (Deployment ID: `dpl_7RgsDC7hJLHxq2bFQYCX223CwyLv`).
+     - Verified live production endpoints via curl:
+       - `GET /api/health` -> HTTP 200 `healthy`, database latency 202ms, 22 orders.
+       - `GET /api/paypal/config` -> HTTP 200, environment `production`, live client ID.
+       - `POST /api/paypal/create-order` -> HTTP 200, PayPal live order created (`7JX83088B80150036`, status `CREATED`).
+
 
 
