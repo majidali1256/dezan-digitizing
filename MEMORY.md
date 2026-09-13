@@ -11,16 +11,25 @@
 ---
 
 ## 2. Live Deployments & Hosting
-- **Vercel Production (Full-Stack Frontend + Backend):** `https://dezan-digitizing.vercel.app/`
-  - **Frontend Pages:** `https://dezan-digitizing.vercel.app/` (clean URLs, SSL, global CDN edge caching)
-  - **Express REST API Backend:** `https://dezan-digitizing.vercel.app/api` (Vercel Serverless Functions via `api/[[...slug]].js` and `api/index.js` routing to `server/server.js`)
-  - **API Health Endpoint:** `https://dezan-digitizing.vercel.app/api/health` (Reports live database status, latency, order counts)
+- **Primary Production (Cloudflare Pages — 100% Free Commercial Tier):**
+  - **Hosting Platform:** Cloudflare Pages with Global Anycast CDN (330+ edge locations, unmetered bandwidth, $0.00/mo forever, 100% commercial and e-commerce authorized).
+  - **Static Routing & Headers:** `_redirects` and `_headers` configuring edge caching (`max-age=31536000` for assets/webp, revalidation for JS, and security headers).
+  - **Edge API Backend (Cloudflare Pages Functions):**
+    - `functions/api/health.js`: Edge health check, runtime colo region, InsForge status.
+    - `functions/api/paypal/config.js`: Public PayPal Client ID & USD currency discovery.
+    - `functions/api/paypal/create-order.js`: Server-side OAuth 2.0 token generation & live PayPal order creation via REST API.
+    - `functions/api/paypal/capture-order.js`: Server-side payment capture & automatic InsForge PostgreSQL status synchronization (`payment_status = 'paid'`, `status = 'pending_review'`).
+    - `functions/api/orders/track.js`: Public order tracking via InsForge REST API.
+    - `functions/api/quotes/[id]/convert.js` & `functions/api/orders/[id]/payment.js`: Quote-to-order conversion & payment confirmation.
+  - **Server-Side Secret Isolation:** `PAYPAL_CLIENT_SECRET` is encrypted in Cloudflare Pages environment variables, strictly executed on the edge, and never leaked to client bundles.
+- **Secondary / Backup Deployment (Vercel):**
+  - **Vercel Production:** `https://dezan-digitizing.vercel.app/`
+  - **Dual-Platform Architecture:** The repository maintains dual compatibility (`vercel.json` + `api/` alongside Cloudflare Pages `functions/` + `_headers` + `_redirects`) with zero conflicts.
 - **Database Engine (Cloud):** PostgreSQL on InsForge BaaS (`e8rw998g.us-east.database.insforge.app:5432` with SSL)
 - **Cloud Storage (Cloud):** InsForge S3 Object Storage (`https://e8rw998g.us-east.insforge.app/api/storage`)
 - **GitHub Pages Production (Frontend Mirror):** `https://majidali1256.github.io/dezan-digitizing/`
 - **GitHub Repository:** `https://github.com/majidali1256/dezan-digitizing.git` (Branch: `main`)
-- **Configuration:** `vercel.json` (clean URLs, `/api/(.*)` rewrites to `/api`)
-- **Git Push Policy (Universal Rule across all projects)**: **NEVER run `git push` autonomously**. Because GitHub is linked directly to live production deployments (Vercel, GitHub Pages), the agent must always test locally and explicitly ask the user for permission before running any `git push`.
+- **Git Push Policy (Universal Rule across all projects)**: **NEVER run `git push` autonomously**. Because GitHub is linked directly to live production deployments, the agent must always test locally and explicitly ask the user for permission before running any `git push`.
 
 
 ---

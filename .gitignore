@@ -36,4 +36,6 @@ npm-debug.log*
 skills-lock.json
 
 .vercel
+.wrangler
+.dev.vars
 .env*
