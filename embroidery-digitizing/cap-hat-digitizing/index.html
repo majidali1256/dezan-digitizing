@@ -234,7 +234,7 @@
         </section>
 
         <!-- 2. Real Production Proof Comparison: Side-by-Side Finished Digitized File & Final Stitch-Out -->
-        <section id="top-proof-comparison" class="py-4 sm:py-10 px-4 max-w-4xl mx-auto">
+        <section id="top-proof-comparison" class="py-4 sm:py-10 px-4 max-w-6xl mx-auto">
             <div class="bg-white dark:bg-card-dark rounded-3xl p-4 sm:p-7 md:p-8 border border-slate-200/90 dark:border-primary/25 shadow-xl relative overflow-hidden">
                 <!-- Section Header -->
                 <div class="text-center max-w-2xl mx-auto mb-4 sm:mb-8">
@@ -251,10 +251,10 @@
                 <div class="grid grid-cols-2 gap-2.5 sm:gap-4 md:gap-6 items-stretch">
                     <!-- Left Card: Digitized File Preview -->
                     <div class="rounded-2xl border border-slate-200/90 dark:border-primary/25 bg-slate-50/70 dark:bg-black/30 overflow-hidden flex flex-col shadow-sm hover:border-primary/50 transition-all group">
-                        <div class="relative bg-black rounded-t-2xl overflow-hidden aspect-[4/5] sm:aspect-[4/5] flex items-center justify-center cursor-pointer" onclick="toggleAstronautVideo()">
+                        <div class="relative bg-black rounded-t-2xl overflow-hidden aspect-[4/5] sm:aspect-[4/3] flex items-center justify-center cursor-pointer" onclick="toggleAstronautVideo()">
                             <video
                                 id="astronautPreviewVideo"
-                                class="w-full h-full object-cover bg-black"
+                                class="w-full h-full object-cover object-center bg-black"
                                 playsinline
                                 muted
                                 loop
@@ -300,14 +300,14 @@
 
                     <!-- Right Card: Final Stitch-Out -->
                     <div class="rounded-2xl border border-slate-200/90 dark:border-primary/25 bg-slate-50/70 dark:bg-black/30 overflow-hidden flex flex-col shadow-sm hover:border-primary/50 transition-all group">
-                        <div class="relative bg-slate-950 rounded-t-2xl overflow-hidden aspect-[4/5] sm:aspect-[4/5]">
+                        <div class="relative bg-slate-950 rounded-t-2xl overflow-hidden aspect-[4/5] sm:aspect-[4/3]">
                             <img
                                 src="/images/astronaut-cap-final-stitch-out.webp"
                                 alt="Final stitch-out embroidered on commercial black caps from Dezan digitized file"
                                 width="624"
                                 height="768"
                                 loading="eager"
-                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                             />
                         </div>
 
@@ -392,20 +392,42 @@
         </section>
 
         <!-- 4. Why Cap Digitizing Is Different? -->
-        <section class="py-4 sm:py-14 px-4 max-w-4xl mx-auto">
-            <div class="bg-white dark:bg-card-dark rounded-3xl p-5 sm:p-10 border border-slate-200/90 dark:border-primary/25 shadow-xs">
-                <div class="text-center sm:text-left mb-4 sm:mb-6">
-                    <span class="text-xs font-bold tracking-widest text-primary uppercase block mb-1">Service Overview</span>
-                    <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">Why Cap Digitizing Is Different?</h2>
-                </div>
-                <div class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed space-y-4">
-                    <p>
+        <section class="py-4 sm:py-14 px-4 max-w-6xl mx-auto">
+            <div class="text-center max-w-2xl mx-auto mb-5 sm:mb-10">
+                <span class="text-xs font-bold tracking-widest text-primary uppercase block mb-1">Service Overview</span>
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">Why Cap Digitizing Is Different?</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+                <!-- Card 1 -->
+                <div class="bg-white dark:bg-card-dark p-6 rounded-2xl border border-slate-200/90 dark:border-primary/25 shadow-xs flex flex-col">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3">
+                        <span class="material-symbols-outlined">sports_baseball</span>
+                    </div>
+                    <h3 class="font-bold text-base text-slate-900 dark:text-white mb-2">Curved Front &amp; Seam Dynamics</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                         Caps don’t stitch like flat garments. The curved front, center seam and limited sewing area require a file that is prepared specifically for hat embroidery.
                     </p>
-                    <p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white dark:bg-card-dark p-6 rounded-2xl border border-slate-200/90 dark:border-primary/25 shadow-xs flex flex-col">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3">
+                        <span class="material-symbols-outlined">call_split</span>
+                    </div>
+                    <h3 class="font-bold text-base text-slate-900 dark:text-white mb-2">Centre-Out &amp; Bottom-Up Sequencing</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                         At Dezan, cap designs are planned to stitch from the bottom up and from the center outward, helping the design stay balanced as it runs across the crown. We also adjust the stitch sequence, compensation and details for the selected cap style and finished size.
                     </p>
-                    <p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white dark:bg-card-dark p-6 rounded-2xl border border-slate-200/90 dark:border-primary/25 shadow-xs flex flex-col">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3">
+                        <span class="material-symbols-outlined">tune</span>
+                    </div>
+                    <h3 class="font-bold text-base text-slate-900 dark:text-white mb-2">Placement-Dedicated Preparation</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                         A file made for left chest embroidery should not simply be reused on a hat. We prepare each cap file for the placement it will actually be embroidered on.
                     </p>
                 </div>

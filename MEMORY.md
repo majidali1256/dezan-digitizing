@@ -2988,12 +2988,17 @@ The Worker Studio provides an isolated, production-focused environment for embro
         - Main wrapper bottom padding (`pb-6 sm:pb-20`)
       - **Mathematical Spacing Equality**: Inter-section gaps on mobile are identically **32.0px** (16px bottom padding + 16px top padding) across all 8 consecutive section boundaries.
       - **Mobile vs Desktop Proportions**: Reduced mobile vertical dead space by 60%–75% compared to desktop (80px–120px) while maintaining spacious desktop layouts via `sm:` responsive modifiers.
-      - **Proportional Component Rhythm**: Tightened card inner paddings to `p-5 sm:p-10/12` and section header margins to `mb-5 sm:mb-8/10`.
+   5. **Laptop Width Restoration & Theme Alignment (`embroidery-digitizing/cap-hat-digitizing/index.html`)**:
+      - **Restored Universal `max-w-6xl` Container Width**: Expanded Section 2 (Top Proof Comparison) and Section 4 (Why Cap Digitizing Is Different) from narrowed `max-w-4xl` (896px) to the full website standard `max-w-6xl` (1152px), eliminating awkward flanking whitespace on laptop/desktop viewports.
+      - **Section 2 Laptop Media Aspect Proportions**: Adjusted preview containers to `aspect-[4/5] sm:aspect-[4/3]` with `object-cover object-center`, showcasing the full embroidery CAD screen without excessive close-up zooming while preserving 4:5 portrait cards on mobile.
+      - **Section 4 Website Theme Alignment**: Replaced the isolated plain card with Dezan's signature 3-card grid (`grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5`), featuring tailored gold icon badges (`sports_baseball`, `call_split`, `tune`), bold titles, and the exact 3-paragraph copy preserved word-for-word.
+      - **Comprehensive Page Audit**: Audited all remaining sections (Hero, Section 3, Section 5, Section 6 dual case studies, Section 7 FAQ, Section 8 Related Services, and Section 9 Final CTA) across laptop (1512px) and mobile (390px) to guarantee flawless alignment, zero layout clipping, and unified aesthetics.
 - **Visual Verification & Quality Assurance**:
   - Playwright automated multi-viewport testing executed via Node.js + Google Chrome:
-    - Desktop (1512x982): `desktop_top_proof_section.png`, `desktop_recent_cap_projects_section.png`, `desktop_all_sections_flow.png`.
-    - Mobile (390x844): `mobile_top_proof_section.png`, `mobile_all_sections_flow.png` confirming uniform 32px gaps.
+    - Desktop (1512x982): `laptop_top_proof_section_wide.png`, `laptop_why_cap_different_theme.png`, `laptop_hero_to_sec4_flow.png`, `laptop_faq_section.png`, `laptop_cta_section.png`.
+    - Mobile (390x844): `mobile_top_proof_section_check.png`, `mobile_why_cap_different_theme.png`, `mobile_all_sections_flow.png` confirming uniform 32px gaps.
   - Media asset verification: All images (`naturalWidth > 0`, complete: true) and videos (`readyState = 4`, valid dimensions) verified with zero 404 errors.
   - Zero layout shifts, explicit aspect ratios, WCAG 2.1 AA compliant contrast.
+
 
 
