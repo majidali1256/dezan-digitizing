@@ -30,10 +30,10 @@ const config = {
             '.dst', '.emb', '.pxf', '.pes', '.exp', '.cnd', '.jef', '.vp3', '.ofm', '.xxx', '.hus',
             '.zip', '.rar'
         ],
-        artworksDir: (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME)
+        artworksDir: process.env.AWS_LAMBDA_FUNCTION_NAME
             ? '/tmp/uploads/artworks'
             : path.resolve(__dirname, '../../uploads/artworks'),
-        deliverablesDir: (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME)
+        deliverablesDir: process.env.AWS_LAMBDA_FUNCTION_NAME
             ? '/tmp/uploads/deliverables'
             : path.resolve(__dirname, '../../uploads/deliverables')
     },
@@ -48,7 +48,7 @@ const config = {
         get isProduction() {
             if (process.env.PAYPAL_MODE === 'sandbox' || process.env.PAYPAL_ENV === 'sandbox') return false;
             if (process.env.PAYPAL_MODE === 'live' || process.env.PAYPAL_ENV === 'live' || process.env.PAYPAL_ENV === 'production') return true;
-            return process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
+            return process.env.NODE_ENV === 'production' || process.env.CF_PAGES === '1';
         },
         get baseUrl() {
             return this.isProduction

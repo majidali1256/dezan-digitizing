@@ -13,7 +13,7 @@
 - [x] Touch-enabled interactive Vector vs Embroidery comparison slider.
 - [x] 36-image touch carousel for verified customer feedback.
 - [x] Comprehensive service showcases (Left chest, Cap, 3D puff, Jacket Back, Vectorizing).
-- [x] Dual production deployment to **Vercel** (`dezan-digitizing.vercel.app`) and **GitHub Pages**.
+- [x] Production deployment to **Cloudflare Pages** (`dezan-digitizing.pages.dev`) and **GitHub Pages**.
 - [x] Multi-device Fiverr gig presentation mockups.
 
 ---

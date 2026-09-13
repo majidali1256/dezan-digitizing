@@ -1956,7 +1956,7 @@
 This is a friendly reminder from Dezan Digitizing regarding your pending invoice for Order #${orderNumber} (${order.project_name}) in the amount of $${price}.
 
 Your digitized stitch files are being prepped for production. Please log into your Dezan Client Portal to settle this invoice securely via PayPal or Credit Card:
-https://dezan-digitizing.vercel.app/client-portal.html
+https://dezandigitizing.com/client-portal.html
 
 Order Details:
 • Order Number: #${orderNumber}
@@ -2464,7 +2464,7 @@ Email: fdezan91@gmail.com`;
                         <strong class="font-bold text-slate-900 block text-sm">Dezan Digitizing Global Studio</strong>
                         <p class="text-slate-600 mt-0.5">Bahria Town Phase 7, Rawalpindi</p>
                         <p class="text-slate-600">Email: fdezan91@gmail.com</p>
-                        <p class="text-slate-600">Website: https://dezan-digitizing.vercel.app</p>
+                        <p class="text-slate-600">Website: https://dezandigitizing.com</p>
                     </div>
                     <div>
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Billed To (Customer)</span>

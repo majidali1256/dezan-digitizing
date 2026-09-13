@@ -153,7 +153,7 @@ class EmailService {
                     <div class="footer">
                         <p style="margin: 0 0 8px 0;"><strong>Dezan Digitizing</strong> — Operating since 2016</p>
                         <p style="margin: 0 0 8px 0;">Rawalpindi & Global Atelier · High-Precision Stitch Craftsmanship</p>
-                        <p style="margin: 0;">Inquiries: <a href="mailto:fdezan91@gmail.com">fdezan91@gmail.com</a> | <a href="https://dezan-digitizing.vercel.app">dezan-digitizing.vercel.app</a></p>
+                        <p style="margin: 0;">Inquiries: <a href="mailto:fdezan91@gmail.com">fdezan91@gmail.com</a> | <a href="https://dezandigitizing.com">dezan-digitizing.vercel.app</a></p>
                     </div>
                 </div>
             </td>
@@ -170,8 +170,8 @@ class EmailService {
     async sendOrderConfirmation(order, clientEmail) {
         if (!clientEmail) return;
         const subject = `Order Confirmed: ${order.order_number} · Dezan Digitizing`;
-        const trackUrl = `https://dezan-digitizing.vercel.app/track-order.html?order=${order.order_number}&email=${encodeURIComponent(clientEmail)}`;
-        const claimUrl = `https://dezan-digitizing.vercel.app/portal-login.html?tab=register&email=${encodeURIComponent(clientEmail)}&order=${order.order_number}&name=${encodeURIComponent(order.customer_name || '')}`;
+        const trackUrl = `https://dezandigitizing.com/track-order.html?order=${order.order_number}&email=${encodeURIComponent(clientEmail)}`;
+        const claimUrl = `https://dezandigitizing.com/portal-login.html?tab=register&email=${encodeURIComponent(clientEmail)}&order=${order.order_number}&name=${encodeURIComponent(order.customer_name || '')}`;
 
         const content = `
             <div class="badge">Order Confirmed</div>
@@ -211,7 +211,7 @@ class EmailService {
     async sendPasswordResetOTP({ email, otpCode, displayName }) {
         if (!email) return;
         const subject = `Your Password Reset Code: ${otpCode} · Dezan Digitizing`;
-        const resetUrl = `https://dezan-digitizing.vercel.app/portal-login.html?tab=forgot&email=${encodeURIComponent(email)}&code=${otpCode}`;
+        const resetUrl = `https://dezandigitizing.com/portal-login.html?tab=forgot&email=${encodeURIComponent(email)}&code=${otpCode}`;
 
         const content = `
             <div class="badge" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">Account Security</div>
@@ -256,13 +256,13 @@ class EmailService {
                 <div class="info-row"><span class="info-label">Payment</span><span class="info-val">$${parseFloat(order.price || 0).toFixed(2)} (${order.payment_method || 'PayPal'} - ${order.payment_status || 'paid'})</span></div>
             </div>
         `;
-        const actionBtn = `<a href="https://dezan-digitizing.vercel.app/admin-orders.html?order=${order.order_number}" class="btn-cta">Assign in Admin Console &rarr;</a>`;
+        const actionBtn = `<a href="https://dezandigitizing.com/admin-orders.html?order=${order.order_number}" class="btn-cta">Assign in Admin Console &rarr;</a>`;
 
         return this.sendMail({
             to: this.adminEmail,
             subject,
             html: this.wrapTemplate({ title: subject, preheader: `New order ${order.order_number} needs assignment`, content, actionBtn }),
-            text: `New order ${order.order_number} received for $${order.price}. View in admin: https://dezan-digitizing.vercel.app/admin-orders.html`
+            text: `New order ${order.order_number} received for $${order.price}. View in admin: https://dezandigitizing.com/admin-orders.html`
         });
     }
 
@@ -286,13 +286,13 @@ class EmailService {
                 <div class="info-row"><span class="info-label">Fabric / Material</span><span class="info-val">${quote.fabric_type || 'Standard'}</span></div>
             </div>
         `;
-        const actionBtn = `<a href="https://dezan-digitizing.vercel.app/admin-orders.html?quote=${quoteNum}" class="btn-cta">Appraise Quote in Admin &rarr;</a>`;
+        const actionBtn = `<a href="https://dezandigitizing.com/admin-orders.html?quote=${quoteNum}" class="btn-cta">Appraise Quote in Admin &rarr;</a>`;
 
         return this.sendMail({
             to: this.adminEmail,
             subject,
             html: this.wrapTemplate({ title: subject, preheader: `New quote ${quoteNum} awaiting appraisal`, content, actionBtn }),
-            text: `New quote request ${quoteNum} received from ${quote.customer_email || quote.client_email || 'customer'}. Review and estimate in admin: https://dezan-digitizing.vercel.app/admin-orders.html`
+            text: `New quote request ${quoteNum} received from ${quote.customer_email || quote.client_email || 'customer'}. Review and estimate in admin: https://dezandigitizing.com/admin-orders.html`
         });
     }
 
@@ -320,13 +320,13 @@ class EmailService {
                 <p style="margin: 0; font-size: 13px; color: #f1f5f9; line-height: 1.6; white-space: pre-wrap;">${revisionNotes || 'No notes provided'}</p>
             </div>
         `;
-        const actionBtn = `<a href="https://dezan-digitizing.vercel.app/admin-orders.html?order=${orderNum}" class="btn-cta">Review Revision in Admin &rarr;</a>`;
+        const actionBtn = `<a href="https://dezandigitizing.com/admin-orders.html?order=${orderNum}" class="btn-cta">Review Revision in Admin &rarr;</a>`;
 
         return this.sendMail({
             to: this.adminEmail,
             subject,
             html: this.wrapTemplate({ title: subject, preheader: `Revision requested on ${orderNum}`, content, actionBtn }),
-            text: `Customer requested revision for ${orderNum}:\n\n${revisionNotes}\n\nReview in admin: https://dezan-digitizing.vercel.app/admin-orders.html`
+            text: `Customer requested revision for ${orderNum}:\n\n${revisionNotes}\n\nReview in admin: https://dezandigitizing.com/admin-orders.html`
         });
     }
 
@@ -351,13 +351,13 @@ class EmailService {
                 <div class="info-row"><span class="info-label">Order Status</span><span class="info-val" style="color: #10b981;">COMPLETED</span></div>
             </div>
         `;
-        const actionBtn = `<a href="https://dezan-digitizing.vercel.app/admin-orders.html?order=${orderNum}" class="btn-cta">Inspect Deliverables in Admin &rarr;</a>`;
+        const actionBtn = `<a href="https://dezandigitizing.com/admin-orders.html?order=${orderNum}" class="btn-cta">Inspect Deliverables in Admin &rarr;</a>`;
 
         return this.sendMail({
             to: this.adminEmail,
             subject,
             html: this.wrapTemplate({ title: subject, preheader: `Deliverables ready for ${orderNum}`, content, actionBtn }),
-            text: `Digitizer uploaded ${count} deliverables for ${orderNum}. View in admin: https://dezan-digitizing.vercel.app/admin-orders.html`
+            text: `Digitizer uploaded ${count} deliverables for ${orderNum}. View in admin: https://dezandigitizing.com/admin-orders.html`
         });
     }
 
@@ -379,13 +379,13 @@ class EmailService {
                 <div class="info-row"><span class="info-label">Registered At</span><span class="info-val">${new Date().toLocaleString()}</span></div>
             </div>
         `;
-        const actionBtn = `<a href="https://dezan-digitizing.vercel.app/admin-portal.html" class="btn-cta">Open Admin Dashboard &rarr;</a>`;
+        const actionBtn = `<a href="https://dezandigitizing.com/admin-portal.html" class="btn-cta">Open Admin Dashboard &rarr;</a>`;
 
         return this.sendMail({
             to: this.adminEmail,
             subject,
             html: this.wrapTemplate({ title: subject, preheader: `New client registered: ${user.email}`, content, actionBtn }),
-            text: `New client registered: ${user.email} (${user.display_name || 'Client'}). Open admin: https://dezan-digitizing.vercel.app/admin-portal.html`
+            text: `New client registered: ${user.email} (${user.display_name || 'Client'}). Open admin: https://dezandigitizing.com/admin-portal.html`
         });
     }
 
@@ -410,13 +410,13 @@ class EmailService {
 
             <p style="font-size: 13px; color: #94a3b8;">Remember to adhere to zero-PII data standards and verify sew-out density rules in the SOP guide.</p>
         `;
-        const actionBtn = `<a href="https://dezan-digitizing.vercel.app/worker-tasks.html" class="btn-cta">Open Digitizer Workbench &rarr;</a>`;
+        const actionBtn = `<a href="https://dezandigitizing.com/worker-tasks.html" class="btn-cta">Open Digitizer Workbench &rarr;</a>`;
 
         return this.sendMail({
             to: workerEmail,
             subject,
             html: this.wrapTemplate({ title: subject, preheader: `Production ticket ${task.order_number} assigned to you`, content, actionBtn }),
-            text: `New production ticket ${task.order_number} assigned. Open workbench: https://dezan-digitizing.vercel.app/worker-tasks.html`
+            text: `New production ticket ${task.order_number} assigned. Open workbench: https://dezandigitizing.com/worker-tasks.html`
         });
     }
 
@@ -440,13 +440,13 @@ class EmailService {
 
             <p style="font-size: 13px; color: #94a3b8;">Need an adjustment or sizing tweak? We offer 100% free revisions directly through your Client Portal.</p>
         `;
-        const actionBtn = `<a href="https://dezan-digitizing.vercel.app/client-orders.html?order=${order.order_number}" class="btn-cta">Download Deliverables &rarr;</a>`;
+        const actionBtn = `<a href="https://dezandigitizing.com/client-orders.html?order=${order.order_number}" class="btn-cta">Download Deliverables &rarr;</a>`;
 
         return this.sendMail({
             to: clientEmail,
             subject,
             html: this.wrapTemplate({ title: subject, preheader: `Deliverables ready for ${order.order_number}`, content, actionBtn }),
-            text: `Deliverables for ${order.order_number} are ready! Download at https://dezan-digitizing.vercel.app/client-orders.html`
+            text: `Deliverables for ${order.order_number} are ready! Download at https://dezandigitizing.com/client-orders.html`
         });
     }
 
@@ -457,7 +457,7 @@ class EmailService {
         if (!clientEmail) return;
         const quoteNum = quote.quote_number || quote.order_number || quote.id;
         const subject = `Free Quote Estimate: ${quoteNum} · Dezan Digitizing`;
-        const claimUrl = `https://dezan-digitizing.vercel.app/portal-login.html?tab=register&email=${encodeURIComponent(clientEmail)}&quote=${quoteNum}&name=${encodeURIComponent(quote.customer_name || quote.client_name || '')}`;
+        const claimUrl = `https://dezandigitizing.com/portal-login.html?tab=register&email=${encodeURIComponent(clientEmail)}&quote=${quoteNum}&name=${encodeURIComponent(quote.customer_name || quote.client_name || '')}`;
 
         const content = `
             <div class="badge">Quote Received</div>
@@ -494,7 +494,7 @@ class EmailService {
         if (!email) return;
         const refLabel = orderNumber ? `Order ${orderNumber}` : quoteNumber ? `Quote ${quoteNumber}` : 'Your Dezan Account';
         const subject = `🔐 Create Your Account to Access ${refLabel} · Dezan Digitizing`;
-        const claimUrl = `https://dezan-digitizing.vercel.app/portal-login.html?tab=register&email=${encodeURIComponent(email)}${orderNumber ? `&order=${encodeURIComponent(orderNumber)}` : ''}${quoteNumber ? `&quote=${encodeURIComponent(quoteNumber)}` : ''}${customerName ? `&name=${encodeURIComponent(customerName)}` : ''}`;
+        const claimUrl = `https://dezandigitizing.com/portal-login.html?tab=register&email=${encodeURIComponent(email)}${orderNumber ? `&order=${encodeURIComponent(orderNumber)}` : ''}${quoteNumber ? `&quote=${encodeURIComponent(quoteNumber)}` : ''}${customerName ? `&name=${encodeURIComponent(customerName)}` : ''}`;
 
         const content = `
             <div class="badge">Account Setup</div>

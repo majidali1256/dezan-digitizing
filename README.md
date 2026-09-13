@@ -1,6 +1,6 @@
 # Dezan Digitizing — Premium Embroidery Digitizing & Vector Portal
 
-[![Live on Vercel](https://img.shields.io/badge/Vercel-Live%20Production-black?style=flat-square&logo=vercel)](https://dezan-digitizing.vercel.app/)
+[![Live on Cloudflare Pages](https://img.shields.io/badge/Cloudflare_Pages-Live%20Production-f38020?style=flat-square&logo=cloudflare)](https://dezan-digitizing.pages.dev)
 [![Live on GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Production-blue?style=flat-square&logo=github)](https://majidali1256.github.io/dezan-digitizing/)
 [![Design System](https://img.shields.io/badge/Design%20System-Awesome%20DESIGN.md-d4af35?style=flat-square)](DESIGN.md)
 
@@ -16,7 +16,7 @@ Welcome to the official repository for **Dezan Digitizing**, a premium embroider
   2. **Admin Master Backend:** Complete pipeline control, global client directory, revenue analytics, and single-click digitizer assignment.
   3. **Digitizer Worker Workspace:** Restricted worker dashboard with **100% cryptographic data masking** (workers never see client PII or job pricing).
 - **Zero Framework Footprint:** Pure Semantic HTML5, Vanilla JavaScript (ES6+), and utility-first Tailwind CSS. Ultra-fast page loads and zero compile overhead.
-- **Dual Live Deployments:** Configured for automated static delivery on both **Vercel** and **GitHub Pages**.
+- **Global Edge Deployment:** Powered by **Cloudflare Pages** (unlimited bandwidth, 0ms cold starts, and 100% legal commercial hosting).
 
 ---
 
@@ -24,7 +24,7 @@ Welcome to the official repository for **Dezan Digitizing**, a premium embroider
 
 | Platform | URL | Purpose |
 | :--- | :--- | :--- |
-| **Vercel (Primary)** | [dezan-digitizing.vercel.app](https://dezan-digitizing.vercel.app/) | High-speed global edge deployment |
+| **Cloudflare Pages (Primary)** | [dezan-digitizing.pages.dev](https://dezan-digitizing.pages.dev) | High-speed global edge deployment & Edge Functions |
 | **GitHub Pages** | [majidali1256.github.io/dezan-digitizing](https://majidali1256.github.io/dezan-digitizing/) | Continuous GitHub repository deployment |
 
 ---
@@ -48,7 +48,9 @@ Welcome to the official repository for **Dezan Digitizing**, a premium embroider
 ├── .env.example                          # Environment Variables Template
 ├── app.js                                # Core UI logic, interactive comparison sliders
 ├── styles.css                            # Custom CSS overrides and animations
-├── vercel.json                           # Vercel routing & cache headers
+├── _headers                              # Cloudflare Pages edge security & caching headers
+├── _redirects                            # Cloudflare Pages clean routing rules
+├── functions/                            # Cloudflare Pages Edge Functions (API)
 └── *.html                                # Marketing pages (index, services, portfolio, etc.)
 ```
 
@@ -56,7 +58,7 @@ Welcome to the official repository for **Dezan Digitizing**, a premium embroider
 
 ## 💻 Local Development Setup
 
-Because this project uses vanilla web standards, no `npm install` or node bundler is required:
+Because this project uses vanilla web standards, no complex build process is required:
 
 1. **Clone the repository:**
    ```bash
@@ -64,17 +66,11 @@ Because this project uses vanilla web standards, no `npm install` or node bundle
    cd "DEZAN Desitizing"
    ```
 
-2. **Serve locally using any static file server:**
+2. **Serve locally with Cloudflare Wrangler (Edge Emulation):**
    ```bash
-   # Using Python 3
-   python3 -m http.server 8000
-
-   # Or using Node.js
-   npx serve .
+   npm run pages:dev
    ```
-
-3. **Open in browser:**
-   Navigate to `http://localhost:8000` to view the website.
+   Navigate to `http://localhost:8788` to view the website with active edge functions.
 
 ---
 
@@ -91,4 +87,4 @@ For full technical specifications, consult [SECURITY.md](SECURITY.md) and [DATAB
 ## 📬 Contact & Support
 - **Owner & Master Digitizer:** Felix Dezan
 - **Email:** `fdezan91@gmail.com`
-- **Portfolio & Feedbacks:** [View Feedbacks](https://dezan-digitizing.vercel.app/portfolio.html)
+- **Portfolio & Feedbacks:** [View Feedbacks](https://dezandigitizing.com/portfolio.html)

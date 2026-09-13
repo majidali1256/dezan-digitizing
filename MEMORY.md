@@ -12,6 +12,7 @@
 
 ## 2. Live Deployments & Hosting
 - **Primary Production (Cloudflare Pages — 100% Free Commercial Tier):**
+  - **Live URL:** `https://dezandigitizing.com/` (and `https://dezan-digitizing.pages.dev/`)
   - **Hosting Platform:** Cloudflare Pages with Global Anycast CDN (330+ edge locations, unmetered bandwidth, $0.00/mo forever, 100% commercial and e-commerce authorized).
   - **Static Routing & Headers:** `_redirects` and `_headers` configuring edge caching (`max-age=31536000` for assets/webp, revalidation for JS, and security headers).
   - **Edge API Backend (Cloudflare Pages Functions):**
@@ -22,9 +23,6 @@
     - `functions/api/orders/track.js`: Public order tracking via InsForge REST API.
     - `functions/api/quotes/[id]/convert.js` & `functions/api/orders/[id]/payment.js`: Quote-to-order conversion & payment confirmation.
   - **Server-Side Secret Isolation:** `PAYPAL_CLIENT_SECRET` is encrypted in Cloudflare Pages environment variables, strictly executed on the edge, and never leaked to client bundles.
-- **Secondary / Backup Deployment (Vercel):**
-  - **Vercel Production:** `https://dezan-digitizing.vercel.app/`
-  - **Dual-Platform Architecture:** The repository maintains dual compatibility (`vercel.json` + `api/` alongside Cloudflare Pages `functions/` + `_headers` + `_redirects`) with zero conflicts.
 - **Database Engine (Cloud):** PostgreSQL on InsForge BaaS (`e8rw998g.us-east.database.insforge.app:5432` with SSL)
 - **Cloud Storage (Cloud):** InsForge S3 Object Storage (`https://e8rw998g.us-east.insforge.app/api/storage`)
 - **GitHub Pages Production (Frontend Mirror):** `https://majidali1256.github.io/dezan-digitizing/`
@@ -673,7 +671,7 @@ To prevent data leakage via browser DevTools:
     - Balance Due ($XX.00)
     - Client recipient name & verified email
     - Professional payment notification subject line
-    - Pre-composed email template with direct Client Portal link (`https://dezan-digitizing.vercel.app/client-portal.html`) and payment instructions
+    - Pre-composed email template with direct Client Portal link (`https://dezandigitizing.com/client-portal.html`) and payment instructions
     - Reminder history tracker (`Sent Xm ago (Total: Y reminders)` or `Never reminded`)
 - **Backend & Cloud Persistence (`sendPaymentReminder`)**:
   - Updates order with `last_payment_reminder_at`, increments `reminder_count`, and persists to `localStorage`.
@@ -844,7 +842,7 @@ To prevent data leakage via browser DevTools:
 1. **JavaScript DOM Standard**: All initialization code in `app.js` runs within `DOMContentLoaded` and is guarded by page URL checks.
 2. **Zero Framework Mandate**: Keep all scripts lightweight and vanilla. No bundle builds required.
 3. **Git Hygiene**: Clean atomic commits with descriptive commit messages.
-4. **Deployment Verification**: Always verify both `https://dezan-digitizing.vercel.app/` and `https://majidali1256.github.io/dezan-digitizing/` after major updates.
+4. **Deployment Verification**: Always verify both `https://dezandigitizing.com/` and `https://majidali1256.github.io/dezan-digitizing/` after major updates.
 
 ---
 
@@ -2830,7 +2828,7 @@ The Worker Studio provides an isolated, production-focused environment for embro
   6. **Vercel Production Deployment Configuration & Live Smoke Verification**:
      - Linked workspace to Vercel production project `majid-alis-projects-3cdf3b37/dezan-digitizing`.
      - Injected all required production environment variables: `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` (Secret), `PAYPAL_MODE=live`, `PAYPAL_CURRENCY=USD`, `ADMIN_EMAIL`, `DATABASE_URL` (Secret), `NEXT_PUBLIC_INSFORGE_URL`, `NEXT_PUBLIC_INSFORGE_ANON_KEY`.
-     - Deployed prebuilt production bundle to `https://dezan-digitizing.vercel.app` (Deployment ID: `dpl_7RgsDC7hJLHxq2bFQYCX223CwyLv`).
+     - Deployed prebuilt production bundle to `https://dezandigitizing.com` (Deployment ID: `dpl_7RgsDC7hJLHxq2bFQYCX223CwyLv`).
      - Verified live production endpoints via curl:
        - `GET /api/health` -> HTTP 200 `healthy`, database latency 202ms, 22 orders.
        - `GET /api/paypal/config` -> HTTP 200, environment `production`, live client ID.

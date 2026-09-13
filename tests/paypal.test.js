@@ -77,11 +77,11 @@ describe('1. PayPal Public Configuration & Secret Isolation', () => {
 describe('2. PayPal Environment Switching (Live Production vs Sandbox)', () => {
     it('config.paypal defaults to sandbox URL when NODE_ENV is development or test', () => {
         const origNodeEnv = process.env.NODE_ENV;
-        const origVercelEnv = process.env.VERCEL_ENV;
+        const origCfPages = process.env.CF_PAGES;
         const origPaypalMode = process.env.PAYPAL_MODE;
         const origPaypalEnv = process.env.PAYPAL_ENV;
 
-        delete process.env.VERCEL_ENV;
+        delete process.env.CF_PAGES;
         delete process.env.PAYPAL_MODE;
         delete process.env.PAYPAL_ENV;
         process.env.NODE_ENV = 'development';
@@ -90,14 +90,14 @@ describe('2. PayPal Environment Switching (Live Production vs Sandbox)', () => {
 
         // Restore
         process.env.NODE_ENV = origNodeEnv;
-        if (origVercelEnv) process.env.VERCEL_ENV = origVercelEnv;
+        if (origCfPages) process.env.CF_PAGES = origCfPages;
         if (origPaypalMode) process.env.PAYPAL_MODE = origPaypalMode;
         if (origPaypalEnv) process.env.PAYPAL_ENV = origPaypalEnv;
     });
 
-    it('config.paypal switches to live production URL when NODE_ENV or VERCEL_ENV is production', () => {
+    it('config.paypal switches to live production URL when NODE_ENV is production or PAYPAL_MODE is live', () => {
         const origNodeEnv = process.env.NODE_ENV;
-        const origVercelEnv = process.env.VERCEL_ENV;
+        const origCfPages = process.env.CF_PAGES;
         const origPaypalMode = process.env.PAYPAL_MODE;
         const origPaypalEnv = process.env.PAYPAL_ENV;
 
@@ -108,22 +108,22 @@ describe('2. PayPal Environment Switching (Live Production vs Sandbox)', () => {
         assert.equal(config.paypal.isProduction, true);
         assert.equal(config.paypal.baseUrl, 'https://api-m.paypal.com');
 
-        // Also test VERCEL_ENV=production
+        // Also test CF_PAGES=1
         process.env.NODE_ENV = 'development';
-        process.env.VERCEL_ENV = 'production';
+        process.env.CF_PAGES = '1';
         assert.equal(config.paypal.isProduction, true);
         assert.equal(config.paypal.baseUrl, 'https://api-m.paypal.com');
 
         // Also test PAYPAL_MODE=live
-        delete process.env.VERCEL_ENV;
+        delete process.env.CF_PAGES;
         process.env.PAYPAL_MODE = 'live';
         assert.equal(config.paypal.isProduction, true);
         assert.equal(config.paypal.baseUrl, 'https://api-m.paypal.com');
 
         // Restore
         process.env.NODE_ENV = origNodeEnv;
-        if (origVercelEnv) process.env.VERCEL_ENV = origVercelEnv;
-        else delete process.env.VERCEL_ENV;
+        if (origCfPages) process.env.CF_PAGES = origCfPages;
+        else delete process.env.CF_PAGES;
         if (origPaypalMode) process.env.PAYPAL_MODE = origPaypalMode;
         else delete process.env.PAYPAL_MODE;
         if (origPaypalEnv) process.env.PAYPAL_ENV = origPaypalEnv;
