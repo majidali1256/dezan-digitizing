@@ -230,7 +230,6 @@
                                 <span class="material-symbols-outlined text-lg sm:text-xl text-[#b8860b] dark:text-amber-300 group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
                             </div>
                             <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pl-0 sm:pl-[56px]">
-                                <span class="px-2.5 py-0.5 rounded-full bg-[#fef3d6] dark:bg-amber-950/40 text-[#9a7810] dark:text-amber-300 font-bold text-[10.5px] sm:text-[11px]">.DST &nbsp;.PES &nbsp;.EXP</span>
                                 <span class="px-2.5 py-0.5 rounded-full bg-[#f6f3eb] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px] sm:text-[11px]">Left Chest / Hats / Jacket Back</span>
                                 <span class="px-2.5 py-0.5 rounded-full bg-[#f6f3eb] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px] sm:text-[11px]">3D Puff</span>
                             </div>
@@ -265,7 +264,6 @@
                                 <span class="material-symbols-outlined text-lg sm:text-xl text-[#1d68d8] dark:text-blue-400 group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
                             </div>
                             <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pl-0 sm:pl-[56px]">
-                                <span class="px-2.5 py-0.5 rounded-full bg-[#dbeafe] dark:bg-blue-900/40 text-[#1d68d8] dark:text-blue-300 font-bold text-[10.5px] sm:text-[11px]">.AI &nbsp;.EPS &nbsp;.SVG &nbsp;.PDF</span>
                                 <span class="px-2.5 py-0.5 rounded-full bg-[#eef4fa] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px] sm:text-[11px]">Print-ready Vectors</span>
                             </div>
                         </button>
@@ -295,7 +293,6 @@
                                 <span class="material-symbols-outlined text-lg sm:text-xl text-[#7c3aed] dark:text-purple-400 group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
                             </div>
                             <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pl-0 sm:pl-[56px]">
-                                <span class="px-2.5 py-0.5 rounded-full bg-[#ede9fe] dark:bg-purple-900/40 text-[#6d28d9] dark:text-purple-200 font-bold text-[10.5px] sm:text-[11px]">.DST &nbsp;.PES &nbsp;.EXP &nbsp;.EMB</span>
                                 <span class="px-2.5 py-0.5 rounded-full bg-[#f3effa] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px] sm:text-[11px]">Pets, Animals &amp; Fur</span>
                                 <span class="px-2.5 py-0.5 rounded-full bg-[#f3effa] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px] sm:text-[11px]">Photorealistic Shading</span>
                             </div>
@@ -395,16 +392,22 @@
                                 <!-- Fabric Material & Sizing -->
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Fabric / Garment Material *</label>
-                                        <select id="dig-fabric" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
-                                            <option value="Cotton / Pique Knit">Cotton / Pique Knit (Polos, Tees)</option>
-                                            <option value="Structured Cap (6-Panel)">Structured Cap (6-Panel, Center-Out)</option>
-                                            <option value="Unstructured Cap / Beanie">Unstructured Cap / Beanie (Knit)</option>
-                                            <option value="Fleece / Heavy Hoodie">Fleece / Heavy Hoodie</option>
-                                            <option value="Denim / Heavy Twill">Denim / Heavy Twill Workwear</option>
-                                            <option value="Leather / Patches">Leather / Heavy Substrate</option>
-                                            <option value="Other Fabric">Other / General Purpose</option>
+                                        <label id="dig-fabric-label" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Fabric / Garment Material *</label>
+                                        <select id="dig-fabric" onchange="window.handleFabricChange ? window.handleFabricChange() : null" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
+                                            <option value="" disabled selected>Select fabric / garment material</option>
+                                            <option value="Polo / Pique Knit">Polo / Pique Knit</option>
+                                            <option value="T-Shirt">T-Shirt</option>
+                                            <option value="Hoodie / Sweatshirt">Hoodie / Sweatshirt</option>
+                                            <option value="Performance / Dri-Fit">Performance / Dri-Fit</option>
+                                            <option value="Workwear">Workwear</option>
+                                            <option value="Jacket">Jacket</option>
+                                            <option value="Other / Custom">Other / Custom</option>
                                         </select>
+                                        <!-- Custom Fabric / Hat Type Input Container -->
+                                        <div id="custom-fabric-container" class="hidden mt-2">
+                                            <label id="custom-fabric-label" class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Please enter fabric / garment material *</label>
+                                            <input type="text" id="dig-custom-fabric" placeholder="e.g. Cotton Twill, Canvas, Fleece..." class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary" />
+                                        </div>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Target Size *</label>
@@ -797,14 +800,46 @@
                                     </div>
 
                                     <div class="grid grid-cols-2 gap-2">
-                                        <button type="button" id="modal-tab-card" onclick="window.setModalPaymentMethod('Credit Card')" class="p-2 sm:p-2.5 rounded-xl border-2 border-primary bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer">
-                                            <span class="material-symbols-outlined text-sm text-primary">credit_card</span>
-                                            <span>Credit / Debit Card</span>
+                                        <button type="button" id="modal-tab-paypal" onclick="window.setModalPaymentMethod('PayPal')" class="p-2 sm:p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer">
+                                            <span class="material-symbols-outlined text-sm text-primary">account_balance_wallet</span>
+                                            <span>PayPal &amp; Cards</span>
                                         </button>
-                                        <button type="button" id="modal-tab-paypal" onclick="window.setModalPaymentMethod('PayPal')" class="p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer">
-                                            <span class="material-symbols-outlined text-sm">account_balance_wallet</span>
-                                            <span>PayPal</span>
+                                        <button type="button" id="modal-tab-payoneer" onclick="window.setModalPaymentMethod('Payoneer')" class="p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer">
+                                            <span class="material-symbols-outlined text-sm">receipt_long</span>
+                                            <span>Payoneer / ACH</span>
                                         </button>
+                                    </div>
+
+                                    <!-- PayPal Smart Buttons View -->
+                                    <div id="modal-panel-paypal" class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 text-center space-y-2.5">
+                                        <p class="text-xs text-slate-600 dark:text-slate-300 font-medium">Fast, 1-click settlement via PayPal balance or Debit/Credit Card:</p>
+                                        <!-- Dynamic PayPal Smart Buttons Mounted Here -->
+                                        <div id="modal-paypal-button-container" class="w-full min-h-[44px] flex flex-col justify-center"></div>
+                                        <p class="text-[10.5px] text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1">
+                                            <span class="material-symbols-outlined text-xs text-emerald-500">verified_user</span>
+                                            <span>PayPal Buyer Protection · Zero transaction surcharges</span>
+                                        </p>
+                                    </div>
+
+                                    <!-- Payoneer / Invoice Panel -->
+                                    <div id="modal-panel-payoneer" class="hidden p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 text-left space-y-2.5">
+                                        <div class="flex items-start gap-2.5">
+                                            <span class="material-symbols-outlined text-primary text-base mt-0.5">business</span>
+                                            <div>
+                                                <strong class="text-xs font-bold text-slate-900 dark:text-white block">Corporate &amp; B2B Billing (Payoneer / Wire)</strong>
+                                                <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">We will create your order immediately and send an official Payoneer / ACH invoice to your email.</p>
+                                            </div>
+                                        </div>
+                                        <div class="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-primary/10 text-[11px] text-slate-700 dark:text-slate-300 space-y-1">
+                                            <div class="flex justify-between">
+                                                <span class="text-slate-500">Billing Email:</span>
+                                                <span class="font-mono font-bold">billing@dezandigitizing.com</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-slate-500">Supported:</span>
+                                                <span>Payoneer Transfer, ACH Wire, International Wire</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -834,7 +869,11 @@
                                     <button type="button" onclick="window.closeOrderQuoteModal()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer transition-colors">
                                         Cancel
                                     </button>
-                                    <button type="submit" id="adaptive-order-submit-btn" class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0">
+                                    <div id="modal-paypal-checkout-note" class="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                        <span class="material-symbols-outlined text-sm text-primary">touch_app</span>
+                                        <span>Click <strong>PayPal</strong> or <strong>Card</strong> above</span>
+                                    </div>
+                                    <button type="submit" id="adaptive-order-submit-btn" class="hidden px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0">
                                         <span class="material-symbols-outlined text-sm" id="order-submit-btn-icon">lock</span>
                                         <span id="order-submit-btn-text">Pay &amp; Place Order ($15.00)</span>
                                     </button>
@@ -1063,6 +1102,8 @@
             if (standardCard) standardCard.classList.add('sm:col-span-2');
             if (standardDesc) standardDesc.textContent = 'Included free with every quote';
 
+            const submitBtn = modal.querySelector('#adaptive-order-submit-btn');
+            if (submitBtn) submitBtn.classList.remove('hidden');
             if (submitBtnIcon) submitBtnIcon.textContent = 'send';
             if (submitBtnText) submitBtnText.textContent = 'Submit Free Custom Quote';
         } else {
@@ -1074,9 +1115,9 @@
             if (headerDesc) headerDesc.textContent = isFormOpen ? 'Provide specifications to complete your order' : 'Choose a service to continue.';
             if (step2Label) step2Label.textContent = 'Order Details';
             if (step3Label) step3Label.textContent = 'Review & Pay';
-            if (gotoReviewBtnText) gotoReviewBtnText.textContent = 'Review & Pay';
-            if (reviewTitle) reviewTitle.textContent = 'Order Summary';
-            if (reviewSubtitle) reviewSubtitle.textContent = 'Please double-check your specifications before paying.';
+            if (gotoReviewBtnText) gotoReviewBtnText.textContent = 'Proceed to Checkout';
+            if (reviewTitle) reviewTitle.textContent = 'Order & Payment Review';
+            if (reviewSubtitle) reviewSubtitle.textContent = 'Please double-check your specifications before completing payment.';
 
             if (priceBox) priceBox.classList.remove('hidden');
             if (termsBox) termsBox.classList.remove('hidden');
@@ -1092,6 +1133,9 @@
 
             if (submitBtnIcon) submitBtnIcon.textContent = 'lock';
             window.calculateAdaptivePrice();
+            if (typeof window.setModalPaymentMethod === 'function') {
+                window.setModalPaymentMethod(state.paymentMethod || 'PayPal');
+            }
         }
     };
     window.setGuestMode = window.setModalMode;
@@ -1099,7 +1143,7 @@
     /**
      * Service selection: Digitizing vs. PetPortrait vs. Vectorizing
      */
-    window.selectOrderService = function(service) {
+    window.selectOrderService = function(service, plan) {
         state.selectedService = service;
         const modal = ensureModalElement();
 
@@ -1162,6 +1206,10 @@
 
         if (headerDesc) {
             headerDesc.textContent = state.isQuote ? 'Provide specifications for accurate quotation' : 'Provide specifications to complete your order';
+        }
+
+        if (typeof window.handlePlacementChange === 'function') {
+            window.handlePlacementChange();
         }
 
         window.calculateAdaptivePrice();
@@ -1355,6 +1403,30 @@
                 modal.querySelector('#dig-size')?.focus();
                 return false;
             }
+
+            // Validate Fabric / Hat Type
+            const fabricSelect = modal.querySelector('#dig-fabric');
+            const selectedFabric = fabricSelect ? fabricSelect.value : '';
+            const rawPlacement = service === 'PetPortrait'
+                ? (modal.querySelector('#pet-placement')?.value || 'Left Chest')
+                : (modal.querySelector('#dig-placement')?.value || 'Left Chest — $15');
+            const isCap = rawPlacement.toLowerCase().includes('cap') || rawPlacement.toLowerCase().includes('hat');
+
+            if (!selectedFabric) {
+                alert(isCap ? 'Please select a hat / cap type.' : 'Please select a fabric / garment material.');
+                fabricSelect?.focus();
+                return false;
+            }
+
+            if (selectedFabric === 'Other / Custom') {
+                const customFabricInput = modal.querySelector('#dig-custom-fabric');
+                const customVal = (customFabricInput?.value || '').trim();
+                if (!customVal) {
+                    alert(isCap ? 'Please enter your hat / cap type.' : 'Please enter your fabric / garment material.');
+                    customFabricInput?.focus();
+                    return false;
+                }
+            }
         } else {
             projectName = (modal.querySelector('#vec-job-name')?.value || '').trim();
             if (!projectName) {
@@ -1465,7 +1537,7 @@
             }
         }
 
-        // Garment / Material
+        // Garment / Material or Hat Type
         const summaryMaterialLabel = modal.querySelector('#review-summary-material-label');
         const summaryMaterial = modal.querySelector('#review-summary-material');
         if (summaryMaterial) {
@@ -1473,8 +1545,18 @@
                 if (summaryMaterialLabel) summaryMaterialLabel.textContent = 'Production Use';
                 summaryMaterial.textContent = modal.querySelector('#vec-use')?.value || 'Screen Printing';
             } else {
-                if (summaryMaterialLabel) summaryMaterialLabel.textContent = 'Garment / Material';
-                summaryMaterial.textContent = modal.querySelector('#dig-fabric')?.value || 'Cotton / Piqué Knit';
+                const rawPlacement = service === 'PetPortrait'
+                    ? (modal.querySelector('#pet-placement')?.value || 'Left Chest')
+                    : (modal.querySelector('#dig-placement')?.value || 'Left Chest — $15');
+                const isCap = rawPlacement.toLowerCase().includes('cap') || rawPlacement.toLowerCase().includes('hat');
+                if (summaryMaterialLabel) summaryMaterialLabel.textContent = isCap ? 'Hat / Cap Type' : 'Garment / Material';
+                const rawFabric = modal.querySelector('#dig-fabric')?.value || '';
+                if (rawFabric === 'Other / Custom') {
+                    const customVal = (modal.querySelector('#dig-custom-fabric')?.value || '').trim();
+                    summaryMaterial.textContent = customVal ? `Custom (${customVal})` : 'Other / Custom';
+                } else {
+                    summaryMaterial.textContent = rawFabric || (isCap ? 'Structured Cap' : 'Polo / Pique Knit');
+                }
             }
         }
 
@@ -1564,18 +1646,22 @@
         const submitBtnIcon = modal.querySelector('#order-submit-btn-icon');
         const submitBtnText = modal.querySelector('#order-submit-btn-text');
 
+        const submitBtn = modal.querySelector('#adaptive-order-submit-btn');
+        const checkoutNote = modal.querySelector('#modal-paypal-checkout-note');
+
         if (isQuote) {
             if (reviewPriceBox) reviewPriceBox.classList.add('hidden');
             if (paymentTermsBox) paymentTermsBox.classList.add('hidden');
             if (quoteModeBox) quoteModeBox.classList.remove('hidden');
+            if (submitBtn) submitBtn.classList.remove('hidden');
+            if (checkoutNote) checkoutNote.classList.add('hidden');
             if (submitBtnIcon) submitBtnIcon.textContent = 'send';
             if (submitBtnText) submitBtnText.textContent = 'Submit Free Custom Quote';
         } else {
             if (reviewPriceBox) reviewPriceBox.classList.remove('hidden');
             if (paymentTermsBox) paymentTermsBox.classList.remove('hidden');
             if (quoteModeBox) quoteModeBox.classList.add('hidden');
-            if (submitBtnIcon) submitBtnIcon.textContent = 'lock';
-            if (submitBtnText) submitBtnText.textContent = `Pay & Place Order (${formattedPrice})`;
+            window.setModalPaymentMethod(state.paymentMethod || 'PayPal');
         }
 
         // 3. Switch View: Step 2 -> Step 3
@@ -1626,6 +1712,176 @@
     window.modalBackToOrderDetailsStep = window.backToOrderDetailsStep;
 
     /**
+     * Placement-linked Garment & Hat Material Specifications
+     */
+    const PLACEMENT_MATERIALS_MAP = {
+        cap: {
+            title: 'Hat / Cap Type *',
+            prompt: 'Select hat / cap type',
+            options: [
+                'Structured Cap',
+                'Unstructured Cap / Dad Hat',
+                'Trucker / Mesh Cap',
+                'Snapback',
+                'Fitted Cap',
+                'Performance / Athletic Cap',
+                'Beanie / Knit Hat',
+                'Other / Custom'
+            ],
+            customLabel: 'Please enter hat / cap type *',
+            customPlaceholder: 'e.g. 5-Panel Camper, Visor, Bucket Hat...'
+        },
+        left_chest: {
+            title: 'Fabric / Garment Material *',
+            prompt: 'Select fabric / garment material',
+            options: [
+                'Polo / Pique Knit',
+                'T-Shirt',
+                'Hoodie / Sweatshirt',
+                'Performance / Dri-Fit',
+                'Workwear',
+                'Jacket',
+                'Other / Custom'
+            ],
+            customLabel: 'Please enter fabric / garment material *',
+            customPlaceholder: 'e.g. Cotton Twill, Canvas, Fleece...'
+        },
+        jacket_back: {
+            title: 'Fabric / Garment Material *',
+            prompt: 'Select fabric / garment material',
+            options: [
+                'Jacket',
+                'Denim',
+                'Heavy Twill / Workwear',
+                'Hoodie / Fleece',
+                'Leather',
+                'Other / Custom'
+            ],
+            customLabel: 'Please enter fabric / garment material *',
+            customPlaceholder: 'e.g. Satin Bomber, Softshell, Canvas...'
+        },
+        custom: {
+            title: 'Fabric / Garment Material *',
+            prompt: 'Select fabric / garment material',
+            options: [
+                'Cotton / Pique Knit',
+                'T-Shirt / Jersey',
+                'Hoodie / Fleece',
+                'Cap / Hat',
+                'Jacket / Outerwear',
+                'Workwear / Heavy Twill',
+                'Patches / Leather / Substrate',
+                'Other / Custom'
+            ],
+            customLabel: 'Please enter fabric / garment material *',
+            customPlaceholder: 'e.g. Apron, Tote Bag, Canvas, etc.'
+        }
+    };
+
+    function getPlacementCategory(placementVal) {
+        if (!placementVal) return 'left_chest';
+        const val = String(placementVal).toLowerCase();
+        if (val.includes('cap') || val.includes('hat')) {
+            return 'cap';
+        }
+        if (val.includes('jacket') || val.includes('large')) {
+            return 'jacket_back';
+        }
+        if (val.includes('custom') || val.includes('other')) {
+            return 'custom';
+        }
+        return 'left_chest';
+    }
+
+    function updateFabricOptionsForPlacement(placementVal, preserveSelection = false) {
+        const modal = ensureModalElement();
+        if (!modal) return;
+
+        const category = getPlacementCategory(placementVal);
+        const config = PLACEMENT_MATERIALS_MAP[category] || PLACEMENT_MATERIALS_MAP.left_chest;
+
+        const fabricLabel = modal.querySelector('#dig-fabric-label');
+        const fabricSelect = modal.querySelector('#dig-fabric');
+        const customContainer = modal.querySelector('#custom-fabric-container');
+        const customLabel = modal.querySelector('#custom-fabric-label');
+        const customInput = modal.querySelector('#dig-custom-fabric');
+
+        if (fabricLabel) {
+            fabricLabel.textContent = config.title;
+        }
+        if (customLabel) {
+            customLabel.textContent = config.customLabel;
+        }
+        if (customInput) {
+            customInput.placeholder = config.customPlaceholder;
+        }
+
+        if (fabricSelect) {
+            const previousValue = fabricSelect.value;
+            const previousCategory = fabricSelect.dataset.currentCategory;
+            const categoryChanged = previousCategory !== category;
+
+            // Rebuild options if category changed or options not populated
+            if (categoryChanged || fabricSelect.options.length <= 1) {
+                fabricSelect.dataset.currentCategory = category;
+
+                let html = `<option value="" disabled selected>${config.prompt}</option>`;
+                config.options.forEach(opt => {
+                    html += `<option value="${opt}">${opt}</option>`;
+                });
+                fabricSelect.innerHTML = html;
+
+                // Important Behavior:
+                // If client changes placement after already choosing garment/hat type,
+                // reset garment/hat field and make them select again.
+                if (!preserveSelection || categoryChanged || !config.options.includes(previousValue)) {
+                    fabricSelect.value = '';
+                    if (customContainer) customContainer.classList.add('hidden');
+                    if (customInput) customInput.value = '';
+                } else {
+                    fabricSelect.value = previousValue;
+                    if (previousValue === 'Other / Custom') {
+                        if (customContainer) customContainer.classList.remove('hidden');
+                    } else {
+                        if (customContainer) customContainer.classList.add('hidden');
+                        if (customInput) customInput.value = '';
+                    }
+                }
+            }
+        }
+    }
+
+    window.handleFabricChange = function() {
+        const modal = ensureModalElement();
+        if (!modal) return;
+
+        const fabricSelect = modal.querySelector('#dig-fabric');
+        const customContainer = modal.querySelector('#custom-fabric-container');
+        const customLabel = modal.querySelector('#custom-fabric-label');
+        const customInput = modal.querySelector('#dig-custom-fabric');
+
+        const service = modal.querySelector('#selected-service-type')?.value || 'Digitizing';
+        const placementSelect = service === 'PetPortrait'
+            ? modal.querySelector('#pet-placement')
+            : modal.querySelector('#dig-placement');
+        const category = getPlacementCategory(placementSelect?.value);
+        const config = PLACEMENT_MATERIALS_MAP[category] || PLACEMENT_MATERIALS_MAP.left_chest;
+
+        if (customLabel) customLabel.textContent = config.customLabel;
+        if (customInput) customInput.placeholder = config.customPlaceholder;
+
+        if (fabricSelect && fabricSelect.value === 'Other / Custom') {
+            if (customContainer) {
+                customContainer.classList.remove('hidden');
+                customInput?.focus();
+            }
+        } else {
+            if (customContainer) customContainer.classList.add('hidden');
+            if (customInput) customInput.value = '';
+        }
+    };
+
+    /**
      * Placement Change Handler
      */
     window.handlePlacementChange = function() {
@@ -1635,9 +1891,10 @@
             ? modal.querySelector('#pet-placement')
             : modal.querySelector('#dig-placement');
         const customContainer = modal.querySelector('#custom-placement-container');
+        const rawPlacementVal = placementSelect ? placementSelect.value : '';
         const isCustom = placementSelect && (
-            placementSelect.value.includes('Custom Placement') ||
-            placementSelect.value.includes('Other')
+            rawPlacementVal.includes('Custom Placement') ||
+            rawPlacementVal.includes('Other')
         );
 
         if (customContainer) {
@@ -1649,9 +1906,15 @@
             }
         }
 
+        // Dynamically update fabric options and reset on placement change
+        updateFabricOptionsForPlacement(rawPlacementVal, false);
+
         window.validatePlacementSize();
         window.calculateAdaptivePrice();
     };
+
+    window.modalHandleFabricChange = window.handleFabricChange;
+    window.modalHandlePlacementChange = window.handlePlacementChange;
 
     /**
      * Parses design size and returns width/dimension in inches.
@@ -1909,23 +2172,305 @@
         }).join('');
     }
 
+    let modalPayPalButtonsInstance = null;
+    let isModalPayPalMounting = false;
+    let uploadedArtworkFilesCache = [];
+
     /**
-     * Payment method selection
+     * Pre-upload artwork files for modal order
+     */
+    async function uploadModalArtworkFiles() {
+        const modal = ensureModalElement();
+        const files = (state.uploadedFiles && state.uploadedFiles.length > 0)
+            ? state.uploadedFiles
+            : (typeof selectedArtworkFiles !== 'undefined' && selectedArtworkFiles.length > 0 ? selectedArtworkFiles : []);
+
+        if (files.length === 0) return uploadedArtworkFilesCache;
+        if (uploadedArtworkFilesCache.length === files.length) {
+            return uploadedArtworkFilesCache;
+        }
+
+        uploadedArtworkFilesCache = [];
+        for (const file of files) {
+            if (window.insforgeClient && typeof window.insforgeClient.uploadFile === 'function') {
+                try {
+                    const uploaded = await window.insforgeClient.uploadFile('artworks', file);
+                    uploadedArtworkFilesCache.push({
+                        name: uploaded.name || file.name,
+                        url: uploaded.url,
+                        key: uploaded.key,
+                        size: uploaded.size || file.size,
+                        mimeType: uploaded.mimeType
+                    });
+                } catch (upErr) {
+                    console.warn('[Modal File Upload Fallback]:', upErr);
+                    uploadedArtworkFilesCache.push({
+                        name: file.name,
+                        url: 'logo.webp',
+                        size: file.size
+                    });
+                }
+            } else {
+                uploadedArtworkFilesCache.push({
+                    name: file.name,
+                    url: 'logo.webp',
+                    size: file.size
+                });
+            }
+        }
+        return uploadedArtworkFilesCache;
+    }
+
+    /**
+     * Mount and initialize PayPal Smart Buttons in Step 3
+     */
+    window.initModalPayPal = async function() {
+        const modal = ensureModalElement();
+        const container = modal.querySelector('#modal-paypal-button-container');
+        if (!container) return;
+
+        // If buttons are already mounted and active in the container, do not re-render
+        if (modalPayPalButtonsInstance && container.children.length > 0 && !container.textContent.includes('Connecting') && !container.textContent.includes('Notice') && !container.textContent.includes('Could not load')) {
+            return;
+        }
+
+        if (isModalPayPalMounting) return;
+        isModalPayPalMounting = true;
+
+        // Clean up previous instance before mounting anew
+        if (modalPayPalButtonsInstance && typeof modalPayPalButtonsInstance.close === 'function') {
+            try { modalPayPalButtonsInstance.close(); } catch(e) {}
+            modalPayPalButtonsInstance = null;
+        }
+
+        container.innerHTML = `
+            <div class="flex items-center justify-center gap-2 py-3 text-xs text-slate-500 dark:text-slate-400">
+                <span class="material-symbols-outlined animate-spin text-sm text-primary">sync</span>
+                <span>Connecting to secure PayPal gateway...</span>
+            </div>
+        `;
+
+        try {
+            if (!window.PayPalConfig) {
+                throw new Error('PayPal configuration module not loaded');
+            }
+            const paypal = await window.PayPalConfig.loadSdk();
+            if (!paypal || !paypal.Buttons) {
+                throw new Error('PayPal Buttons component not available');
+            }
+
+            container.innerHTML = '';
+
+            modalPayPalButtonsInstance = paypal.Buttons({
+                style: {
+                    layout: 'vertical',
+                    color: 'gold',
+                    shape: 'rect',
+                    label: 'paypal',
+                    height: 44
+                },
+                createOrder: async function(data, actions) {
+                    // 1. Validate fields from Step 1 and Step 2
+                    const serviceType = state.serviceType || modal.querySelector('#selected-service-type')?.value || 'Digitizing';
+                    let projectName = '';
+                    if (serviceType === 'Digitizing' || serviceType === 'PetPortrait') {
+                        projectName = modal.querySelector('#dig-job-name')?.value.trim();
+                        if (!projectName) {
+                            alert('Please provide a Job Name / Reference in Order Details.');
+                            window.backToOrderDetailsStep();
+                            modal.querySelector('#dig-job-name')?.focus();
+                            throw new Error('Missing job name');
+                        }
+                    } else {
+                        projectName = modal.querySelector('#vec-job-name')?.value.trim();
+                        if (!projectName) {
+                            alert('Please provide a Job Name / Reference in Order Details.');
+                            window.backToOrderDetailsStep();
+                            modal.querySelector('#vec-job-name')?.focus();
+                            throw new Error('Missing job name');
+                        }
+                    }
+
+                    // Validate contact details
+                    const session = getSession();
+                    const clientEmailInput = modal.querySelector('#order-client-email');
+                    const clientNameInput = modal.querySelector('#order-client-name');
+                    const clientEmail = (session && session.email) || (clientEmailInput ? clientEmailInput.value.trim() : '');
+                    const clientName = (session && (session.full_name || session.name)) || (clientNameInput ? clientNameInput.value.trim() : '') || 'Customer';
+
+                    if (!clientEmail || !clientEmail.includes('@')) {
+                        alert('Please provide a valid delivery email address.');
+                        window.backToOrderDetailsStep();
+                        modal.querySelector('#order-client-email')?.focus();
+                        throw new Error('Missing email');
+                    }
+
+                    const calculatedPrice = window.calculateAdaptivePrice ? window.calculateAdaptivePrice() : 15.00;
+
+                    // Pre-upload files
+                    await uploadModalArtworkFiles();
+
+                    const res = await fetch('/api/paypal/create-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            amount: calculatedPrice,
+                            currency: 'USD',
+                            orderDetails: {
+                                projectName: projectName,
+                                serviceType: serviceType,
+                                clientName: clientName,
+                                clientEmail: clientEmail
+                            }
+                        })
+                    });
+
+                    if (!res.ok) {
+                        const errData = await res.json().catch(() => ({}));
+                        throw new Error(errData.message || 'Failed to initialize PayPal order on server');
+                    }
+
+                    const json = await res.json();
+                    if (!json.success || !json.data) {
+                        throw new Error(json.message || 'Invalid response from PayPal server');
+                    }
+
+                    return json.data.id || json.data.orderID;
+                },
+                onApprove: async function(data, actions) {
+                    const btnBox = modal.querySelector('#modal-paypal-button-container');
+                    if (btnBox) {
+                        btnBox.innerHTML = `
+                            <div class="flex items-center justify-center gap-2 py-4 text-xs text-primary font-bold">
+                                <span class="material-symbols-outlined animate-spin text-base">sync</span>
+                                <span>Payment Authorized! Verifying capture & finalizing order...</span>
+                            </div>
+                        `;
+                    }
+
+                    try {
+                        const captureRes = await fetch('/api/paypal/capture-order', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                paypalOrderId: data.orderID
+                            })
+                        });
+
+                        const captureJson = await captureRes.json().catch(() => ({}));
+                        if (!captureRes.ok || !captureJson.success) {
+                            throw new Error(captureJson.message || 'Failed to capture PayPal payment');
+                        }
+
+                        const captureData = captureJson.data || {};
+                        const transactionId = captureData.captureId || captureData.id || data.orderID;
+
+                        await finalizeModalOrder({
+                            paymentStatus: 'paid',
+                            paymentMethod: 'PayPal',
+                            transactionId: transactionId,
+                            paypalCaptureData: captureData
+                        });
+
+                    } catch (captureErr) {
+                        console.error('PayPal capture error:', captureErr);
+                        alert(`Payment could not be verified: ${captureErr.message}. If your account was debited, please contact support@dezandigitizing.com.`);
+                    } finally {
+                        const overlay = document.getElementById('modal-paypal-processing-overlay');
+                        if (overlay) overlay.remove();
+                    }
+                },
+                onCancel: function(data) {
+                    console.log('PayPal checkout cancelled by client');
+                },
+                onError: function(err) {
+                    console.error('PayPal Button runtime error:', err);
+                    const currentContainer = modal.querySelector('#modal-paypal-button-container');
+                    if (currentContainer) {
+                        currentContainer.innerHTML = `
+                            <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs text-center space-y-1.5">
+                                <p class="font-bold">PayPal Gateway Error</p>
+                                <p class="text-[11px]">Could not load PayPal buttons. Please retry or choose Payoneer / ACH.</p>
+                                <button type="button" onclick="window.initModalPayPal()" class="px-3 py-1 rounded-lg bg-rose-600 text-white font-bold text-[10px] hover:bg-rose-700 cursor-pointer">
+                                    Retry Connection
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+            });
+
+            if (modal.querySelector('#modal-paypal-button-container')) {
+                await modalPayPalButtonsInstance.render('#modal-paypal-button-container');
+            }
+
+        } catch (err) {
+            if (err && (err.message?.includes('removed from DOM') || err.message?.includes('closed'))) {
+                return;
+            }
+            console.error('[Modal PayPal Init Error]:', err);
+            const currentContainer = modal.querySelector('#modal-paypal-button-container');
+            if (currentContainer) {
+                currentContainer.innerHTML = `
+                    <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 text-xs text-center space-y-1.5">
+                        <p class="font-bold">PayPal Gateway Notice</p>
+                        <p class="text-[11px]">${err.message || 'Unable to connect to PayPal gateway.'}</p>
+                        <button type="button" onclick="window.initModalPayPal()" class="px-3 py-1 rounded-lg bg-primary text-background-dark font-black text-[10px] hover:bg-primary-hover cursor-pointer">
+                            Retry Connection
+                        </button>
+                    </div>
+                `;
+            }
+        } finally {
+            isModalPayPalMounting = false;
+        }
+    };
+
+    /**
+     * Payment method selection: PayPal vs Payoneer
      */
     window.setModalPaymentMethod = function(method) {
-        state.paymentMethod = method;
+        state.paymentMethod = method || 'PayPal';
         const modal = ensureModalElement();
-        const tabCard = modal.querySelector('#modal-tab-card');
         const tabPaypal = modal.querySelector('#modal-tab-paypal');
-        if (method === 'PayPal') {
-            if (tabPaypal) tabPaypal.className = 'p-2 sm:p-2.5 rounded-xl border-2 border-primary bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer';
-            if (tabCard) tabCard.className = 'p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
-        } else {
-            if (tabCard) tabCard.className = 'p-2 sm:p-2.5 rounded-xl border-2 border-primary bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer';
+        const tabPayoneer = modal.querySelector('#modal-tab-payoneer');
+        const panelPaypal = modal.querySelector('#modal-panel-paypal');
+        const panelPayoneer = modal.querySelector('#modal-panel-payoneer');
+        const submitBtn = modal.querySelector('#adaptive-order-submit-btn');
+        const checkoutNote = modal.querySelector('#modal-paypal-checkout-note');
+
+        if (state.paymentMethod === 'Payoneer') {
+            if (tabPayoneer) tabPayoneer.className = 'p-2 sm:p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer';
             if (tabPaypal) tabPaypal.className = 'p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
+            if (panelPayoneer) panelPayoneer.classList.remove('hidden');
+            if (panelPaypal) panelPaypal.classList.add('hidden');
+            if (submitBtn) {
+                submitBtn.classList.remove('hidden');
+                const price = window.calculateAdaptivePrice ? window.calculateAdaptivePrice() : 15.00;
+                const icon = submitBtn.querySelector('#order-submit-btn-icon') || submitBtn.querySelector('.material-symbols-outlined');
+                const text = submitBtn.querySelector('#order-submit-btn-text');
+                if (icon) icon.textContent = 'receipt_long';
+                if (text) text.textContent = `Submit Order & Request Invoice ($${price.toFixed(2)})`;
+            }
+            if (checkoutNote) checkoutNote.classList.add('hidden');
+        } else {
+            // Default: PayPal & Cards
+            state.paymentMethod = 'PayPal';
+            if (tabPaypal) tabPaypal.className = 'p-2 sm:p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer';
+            if (tabPayoneer) tabPayoneer.className = 'p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
+            if (panelPaypal) panelPaypal.classList.remove('hidden');
+            if (panelPayoneer) panelPayoneer.classList.add('hidden');
+            if (submitBtn) {
+                submitBtn.classList.add('hidden');
+            }
+            if (checkoutNote) checkoutNote.classList.remove('hidden');
+
+            // Render PayPal Smart Buttons
+            window.initModalPayPal();
         }
+
         if (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackAddPaymentInfo === 'function') {
-            window.dezanTracker.trackAddPaymentInfo(method, {
+            window.dezanTracker.trackAddPaymentInfo(state.paymentMethod, {
                 plan: modal.querySelector('#selected-plan-name')?.value || 'Embroidery Digitizing',
                 amount: window.calculateAdaptivePrice ? window.calculateAdaptivePrice() : 15.00
             });
@@ -2086,6 +2631,10 @@
     };
 
     window.closeOrderQuoteModal = function() {
+        if (modalPayPalButtonsInstance && typeof modalPayPalButtonsInstance.close === 'function') {
+            try { modalPayPalButtonsInstance.close(); } catch(e) {}
+            modalPayPalButtonsInstance = null;
+        }
         const modal = document.getElementById('new-order-modal');
         if (modal) {
             modal.classList.add('hidden');
@@ -2163,7 +2712,29 @@
                 }
             }
 
-            fabricType = modal.querySelector('#dig-fabric')?.value || 'Cotton / Pique Knit';
+            // Validate Fabric / Hat Type
+            const fabricSelect = modal.querySelector('#dig-fabric');
+            const selectedFabric = fabricSelect ? fabricSelect.value : '';
+            const isCap = placement.toLowerCase().includes('cap') || placement.toLowerCase().includes('hat');
+
+            if (!selectedFabric) {
+                alert(isCap ? 'Please select a hat / cap type.' : 'Please select a fabric / garment material.');
+                fabricSelect?.focus();
+                return;
+            }
+
+            if (selectedFabric === 'Other / Custom') {
+                const customFabricInput = modal.querySelector('#dig-custom-fabric');
+                const customVal = (customFabricInput?.value || '').trim();
+                if (!customVal) {
+                    alert(isCap ? 'Please enter your hat / cap type.' : 'Please enter your fabric / garment material.');
+                    customFabricInput?.focus();
+                    return;
+                }
+                fabricType = `Custom: ${customVal}`;
+            } else {
+                fabricType = selectedFabric;
+            }
 
             // Validate target size (ensures positive size if entered)
             const isSizeValid = window.validatePlacementSize();
@@ -2238,49 +2809,99 @@
             }
         }
 
+        // CRITICAL GUARD: PayPal orders must be captured through PayPal Smart Buttons
+        if (!isQuote && (state.paymentMethod === 'PayPal' || state.paymentMethod === 'Credit Card')) {
+            alert('Please click the PayPal or Debit/Credit Card button above to complete your payment.');
+            return;
+        }
+
         state.isSubmitting = true;
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<span class="material-symbols-outlined animate-spin text-sm">sync</span> ${isQuote ? 'Submitting Quote Request...' : 'Placing Order & Uploading...'}`;
+            submitBtn.innerHTML = `<span class="material-symbols-outlined animate-spin text-sm">sync</span> ${isQuote ? 'Submitting Quote Request...' : 'Submitting Order & Requesting Invoice...'}`;
         }
 
-        // Upload files to InsForge Storage
-        let rawArtworkFiles = [];
         try {
-            if (state.uploadedFiles.length > 0) {
-                for (const file of state.uploadedFiles) {
-                    if (window.insforgeClient && typeof window.insforgeClient.uploadFile === 'function') {
-                        try {
-                            const uploaded = await window.insforgeClient.uploadFile('artworks', file);
-                            rawArtworkFiles.push({
-                                name: uploaded.name || file.name,
-                                url: uploaded.url,
-                                key: uploaded.key,
-                                size: uploaded.size || file.size,
-                                mimeType: uploaded.mimeType
-                            });
-                        } catch (upErr) {
-                            console.warn('Storage upload fallback:', upErr);
-                            rawArtworkFiles.push({
-                                name: file.name,
-                                url: 'logo.webp',
-                                size: file.size
-                            });
-                        }
-                    } else {
-                        rawArtworkFiles.push({
-                            name: file.name,
-                            url: 'logo.webp',
-                            size: file.size
-                        });
-                    }
+            await window.finalizeModalOrder({
+                paymentStatus: 'unpaid',
+                paymentMethod: isQuote ? 'Quote Request' : 'Payoneer / Invoice'
+            });
+        } catch (err) {
+            console.error('Submission error:', err);
+            alert('Could not submit. Please check your connection and try again.');
+        } finally {
+            state.isSubmitting = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
+            }
+        }
+    };
+    window.handleModalSubmit = window.handleAdaptiveOrderSubmit;
+
+    /**
+     * Finalizes order/quote creation in the database and broadcasts events
+     */
+    window.finalizeModalOrder = async function(paymentOverrides = {}) {
+        const modal = ensureModalElement();
+        const isQuote = state.isQuote;
+        const session = getSession();
+
+        const serviceType = state.serviceType || modal.querySelector('#selected-service-type')?.value || 'Digitizing';
+        let projectName = '';
+        let placement = 'Standard';
+        let fabricType = '';
+        let sizing = 'Standard';
+        let fileFormat = 'DST, EMB';
+        let specialOptions = [];
+
+        if (serviceType === 'Digitizing' || serviceType === 'PetPortrait') {
+            projectName = (modal.querySelector('#dig-job-name')?.value || '').trim() || 'Custom Embroidery Order';
+            if (serviceType === 'PetPortrait') {
+                const petPlacementSelect = modal.querySelector('#pet-placement');
+                const rawPlacement = petPlacementSelect?.value || 'Left Chest';
+                if (rawPlacement.includes('Other') || rawPlacement.includes('Custom')) {
+                    placement = `Custom Placement: ${(modal.querySelector('#dig-custom-placement')?.value || '').trim() || 'Custom'}`;
+                } else {
+                    placement = rawPlacement;
+                }
+            } else {
+                const rawPlacement = modal.querySelector('#dig-placement')?.value || 'Left Chest — $15';
+                if (rawPlacement.includes('Custom')) {
+                    placement = `Custom Placement: ${(modal.querySelector('#dig-custom-placement')?.value || '').trim() || 'Custom'}`;
+                } else {
+                    placement = rawPlacement.split('—')[0].trim();
                 }
             }
-        } catch (fileErr) {
-            console.warn('File preparation error:', fileErr);
+
+            const fabricSelect = modal.querySelector('#dig-fabric');
+            const selectedFabric = fabricSelect ? fabricSelect.value : '';
+            if (selectedFabric === 'Other / Custom') {
+                fabricType = `Custom: ${(modal.querySelector('#dig-custom-fabric')?.value || '').trim() || 'Custom'}`;
+            } else {
+                fabricType = selectedFabric || 'Standard Fabric';
+            }
+
+            const sizeVal = (modal.querySelector('#dig-size')?.value || '').trim();
+            const unit = modal.querySelector('#dig-size-unit')?.value || 'in';
+            sizing = sizeVal ? (sizeVal.toLowerCase().includes(unit.toLowerCase()) ? sizeVal : `${sizeVal} ${unit}`) : 'Standard';
+
+            const checkedFormats = Array.from(modal.querySelectorAll('input[name="dig-formats"]:checked')).map(cb => cb.value);
+            fileFormat = checkedFormats.length > 0 ? checkedFormats.join(', ') : '.DST';
+            specialOptions = Array.from(modal.querySelectorAll('input[name="dig-special"]:checked')).map(cb => cb.value);
+        } else {
+            projectName = (modal.querySelector('#vec-job-name')?.value || '').trim() || 'Vector Artwork';
+            placement = modal.querySelector('#vec-use')?.value || 'Screen Printing';
+            fabricType = 'Vector Scalable';
+            sizing = 'Resolution Independent Vector';
+            const checkedVecFormats = Array.from(modal.querySelectorAll('input[name="vec-formats"]:checked')).map(cb => cb.value);
+            fileFormat = checkedVecFormats.length > 0 ? checkedVecFormats.join(', ') : 'AI, EPS, PDF';
         }
 
+        const instructions = (modal.querySelector('#order-notes')?.value || '').trim();
+        const turnaroundSpeed = isQuote ? 'standard' : (modal.querySelector('input[name="order-turnaround"]:checked')?.value || 'standard');
         const calculatedPrice = isQuote ? 0 : window.calculateAdaptivePrice();
+
         let planName = '';
         if (serviceType === 'PetPortrait') {
             const activeRadio = modal.querySelector('input[name="pet-pricing-tier"]:checked');
@@ -2298,6 +2919,11 @@
                 : `Vector - ${placement}`;
         }
 
+        const clientNameInput = modal.querySelector('#order-client-name');
+        const clientEmailInput = modal.querySelector('#order-client-email');
+        const clientName = (session && (session.full_name || session.name)) || (clientNameInput ? clientNameInput.value.trim() : '') || 'Customer';
+        const clientEmail = (session && session.email) || (clientEmailInput ? clientEmailInput.value.trim() : '') || '';
+
         const combinedInstructions = [
             `Service: ${serviceType === 'PetPortrait' ? 'Realistic / Pet Portrait Digitizing' : serviceType}`,
             `Sizing: ${sizing}`,
@@ -2305,6 +2931,13 @@
             specialOptions.length > 0 ? `Special: ${specialOptions.join(', ')}` : '',
             instructions ? `Notes: ${instructions}` : ''
         ].filter(Boolean).join('\n');
+
+        // Pre-upload files
+        const rawArtworkFiles = await uploadModalArtworkFiles();
+
+        const paymentStatus = paymentOverrides.paymentStatus || (isQuote ? 'unpaid' : (state.paymentMethod === 'Payoneer' ? 'unpaid' : 'paid'));
+        const paymentMethod = paymentOverrides.paymentMethod || (isQuote ? 'Quote Request' : state.paymentMethod);
+        const transactionId = paymentOverrides.transactionId || null;
 
         const orderPayload = {
             isQuote: isQuote,
@@ -2323,202 +2956,195 @@
             rawArtworkFiles: rawArtworkFiles,
             price: isQuote ? null : calculatedPrice,
             amount: calculatedPrice,
-            paymentStatus: isQuote ? 'unpaid' : 'paid',
-            paymentMethod: isQuote ? 'Quote Request' : state.paymentMethod,
+            paymentStatus: paymentStatus,
+            paymentMethod: paymentMethod,
+            transactionId: transactionId,
+            payment_reference: transactionId,
             clientName: clientName,
             clientEmail: clientEmail,
             clientId: session?.id || session?.userId || null,
             attribution: (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.getAttribution === 'function') ? window.dezanTracker.getAttribution() : {}
         };
 
-        try {
-            let createdRecord = null;
-            if (window.insforgeClient && typeof window.insforgeClient.createOrder === 'function') {
-                createdRecord = await window.insforgeClient.createOrder(orderPayload);
-            } else {
-                const orderNum = (isQuote ? 'QUO-' : 'DZ-') + Math.floor(1000 + Math.random() * 9000);
-                createdRecord = {
-                    id: (isQuote ? 'quo_' : 'ord_') + Date.now(),
-                    order_number: orderNum,
-                    ...orderPayload,
-                    created_at: new Date().toISOString()
-                };
-                try {
-                    const localOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
-                    localOrders.unshift(createdRecord);
-                    localStorage.setItem('dezan_orders', JSON.stringify(localOrders));
-                } catch (e) {}
-            }
-
-            // Realtime sync broadcast
+        let createdRecord = null;
+        if (window.insforgeClient && typeof window.insforgeClient.createOrder === 'function') {
+            createdRecord = await window.insforgeClient.createOrder(orderPayload);
+        } else {
+            const orderNum = (isQuote ? 'QUO-' : 'DZ-') + Math.floor(1000 + Math.random() * 9000);
+            createdRecord = {
+                id: (isQuote ? 'quo_' : 'ord_') + Date.now(),
+                order_number: orderNum,
+                ...orderPayload,
+                created_at: new Date().toISOString()
+            };
             try {
-                if (typeof BroadcastChannel !== 'undefined') {
-                    const channel = new BroadcastChannel('dezan_realtime_sync');
-                    channel.postMessage({
-                        type: 'order_created',
-                        order: createdRecord,
-                        timestamp: Date.now()
-                    });
-                    channel.close();
-                }
+                const localOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+                localOrders.unshift(createdRecord);
+                localStorage.setItem('dezan_orders', JSON.stringify(localOrders));
             } catch (e) {}
+        }
 
-            // Broadcast live in-app notifications
-            if (window.dezanNotificationEngine && createdRecord) {
-                const orderNum = createdRecord.order_number || 'DZ-NEW';
-                if (isQuote) {
-                    window.dezanNotificationEngine.broadcastToRole('admin', {
-                        orderId: orderNum,
-                        type: 'quote_new',
-                        category: 'quotes',
-                        title: 'New Free Quote Request',
-                        message: `Customer ${orderPayload.clientName || 'Guest'} requested a quote for ${orderPayload.serviceType || 'Digitizing'}.`,
-                        meta: 'Free Appraisal Pending',
-                        clientName: orderPayload.clientName,
-                        actionLabel: 'Appraise Quote',
-                        actionType: 'view_quotes',
-                        accent: 'sky',
-                        icon: 'request_quote'
-                    });
-                    window.dezanNotificationEngine.broadcastToRole('client', {
-                        orderId: orderNum,
-                        type: 'quote_requested',
-                        category: 'quotes',
-                        title: 'Custom Quote Request Submitted',
-                        message: `Your artwork has been submitted for free estimation (#${orderNum}). Estimated review: 1 hour.`,
-                        meta: '100% Free Review · Zero Obligation',
-                        actionLabel: 'View Quotes',
-                        actionType: 'view_quote',
-                        accent: 'sky',
-                        icon: 'request_quote'
-                    });
-                } else {
-                    window.dezanNotificationEngine.broadcastToRole('admin', {
-                        orderId: orderNum,
-                        type: 'order_new',
-                        category: 'orders',
-                        title: 'New Customer Order Placed',
-                        message: `Order #${orderNum} placed for ${orderPayload.projectName || orderPayload.serviceType} ($${orderPayload.price || '15.00'}).`,
-                        meta: `$${orderPayload.price || '15.00'} · ${orderPayload.placement || 'Standard'} · Turnaround 12-24h`,
-                        clientName: orderPayload.clientName,
-                        actionLabel: 'Assign Digitizer',
-                        actionType: 'assign_order',
-                        accent: 'amber',
-                        icon: 'add_shopping_cart'
-                    });
-                    window.dezanNotificationEngine.broadcastToRole('client', {
-                        orderId: orderNum,
-                        type: 'order_confirmed',
-                        category: 'production',
-                        title: 'Order Confirmed & Queued',
-                        message: `Your payment was confirmed for #${orderNum}. Our master digitizers are preparing your files.`,
-                        meta: 'In Queue · Turnaround 12-24h',
-                        actionLabel: 'Track Order',
-                        actionType: 'track_order',
-                        accent: 'emerald',
-                        icon: 'receipt_long'
-                    });
-                }
-            }
-
-            window.closeOrderQuoteModal();
-            modal.querySelector('#adaptive-order-form')?.reset();
-            state.uploadedFiles = [];
-            state.isSubmitting = false;
-
-            // Context-specific redirection or in-place update
-            const isClientWorkspace = typeof window.clientWorkspace !== 'undefined' || 
-                                     document.body.dataset.clientPage !== undefined ||
-                                     window.location.pathname.includes('client-');
-
-            if (isClientWorkspace) {
-                if (window.insforgeClient && typeof window.insforgeClient.showToast === 'function') {
-                    window.insforgeClient.showToast(
-                        isQuote ? 'Quote Requested' : 'Order Placed Successfully',
-                        `Ticket #${createdRecord.order_number} has been recorded.`,
-                        isQuote ? 'request_quote' : 'check_circle',
-                        'success'
-                    );
-                }
-
-                if (isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackQuoteLead === 'function') {
-                    window.dezanTracker.trackQuoteLead({
-                        quoteId: createdRecord.order_number || createdRecord.id,
-                        email: clientEmail,
-                        service: serviceType,
-                        project: projectName
-                    });
-                } else if (!isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackOrderPurchase === 'function') {
-                    window.dezanTracker.trackOrderPurchase({
-                        orderId: createdRecord.order_number || createdRecord.id,
-                        txnId: createdRecord.transaction_id || ('TXN-' + Math.floor(100000 + Math.random() * 900000)),
-                        amount: calculatedPrice,
-                        service: serviceType,
-                        plan: planName,
-                        placement: placement,
-                        turnaround: turnaroundSpeed,
-                        email: clientEmail
-                    });
-                }
-
-                if (window.clientWorkspace && typeof window.clientWorkspace.loadOrders === 'function') {
-                    await window.clientWorkspace.loadOrders();
-                } else if (typeof renderOrders === 'function') {
-                    await renderOrders();
-                }
-            } else {
-                if (isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackQuoteLead === 'function') {
-                    window.dezanTracker.trackQuoteLead({
-                        quoteId: createdRecord.order_number || createdRecord.id,
-                        email: clientEmail,
-                        service: serviceType,
-                        project: projectName
-                    });
-                }
-
-                try {
-                    sessionStorage.setItem('dezan_last_guest_order', JSON.stringify({
-                        id: createdRecord.id,
-                        order_number: createdRecord.order_number || createdRecord.id,
-                        service_type: serviceType,
-                        plan_name: planName,
-                        project_name: projectName,
-                        placement: placement,
-                        turnaround_speed: turnaroundSpeed,
-                        client_email: clientEmail,
-                        price: calculatedPrice.toFixed(2),
-                        is_quote: isQuote,
-                        transaction_id: createdRecord.transaction_id || ''
-                    }));
-                } catch (_) {}
-
-                const query = new URLSearchParams({
-                    orderId: createdRecord.order_number || createdRecord.id,
-                    service: serviceType,
-                    plan: planName,
-                    placement: placement || 'Standard',
-                    turnaround: turnaroundSpeed || 'standard',
-                    project: projectName,
-                    email: clientEmail,
-                    amount: calculatedPrice.toFixed(2),
-                    type: isQuote ? 'quote' : 'order',
-                    txn: createdRecord.transaction_id || ''
+        // Realtime sync broadcast
+        try {
+            if (typeof BroadcastChannel !== 'undefined') {
+                const channel = new BroadcastChannel('dezan_realtime_sync');
+                channel.postMessage({
+                    type: 'order_created',
+                    order: createdRecord,
+                    timestamp: Date.now()
                 });
-                window.location.href = `order-success.html?${query.toString()}`;
+                channel.close();
             }
+        } catch (e) {}
 
-        } catch (err) {
-            console.error('Submission error:', err);
-            alert('Could not submit. Please check your connection and try again.');
-        } finally {
-            state.isSubmitting = false;
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalBtnHtml;
+        // Broadcast live in-app notifications
+        if (window.dezanNotificationEngine && createdRecord) {
+            const orderNum = createdRecord.order_number || 'DZ-NEW';
+            if (isQuote) {
+                window.dezanNotificationEngine.broadcastToRole('admin', {
+                    orderId: orderNum,
+                    type: 'quote_new',
+                    category: 'quotes',
+                    title: 'New Free Quote Request',
+                    message: `Customer ${orderPayload.clientName || 'Guest'} requested a quote for ${orderPayload.serviceType || 'Digitizing'}.`,
+                    meta: 'Free Appraisal Pending',
+                    clientName: orderPayload.clientName,
+                    actionLabel: 'Appraise Quote',
+                    actionType: 'view_quotes',
+                    accent: 'sky',
+                    icon: 'request_quote'
+                });
+                window.dezanNotificationEngine.broadcastToRole('client', {
+                    orderId: orderNum,
+                    type: 'quote_requested',
+                    category: 'quotes',
+                    title: 'Custom Quote Request Submitted',
+                    message: `Your artwork has been submitted for free estimation (#${orderNum}). Estimated review: 1 hour.`,
+                    meta: '100% Free Review · Zero Obligation',
+                    actionLabel: 'View Quotes',
+                    actionType: 'view_quote',
+                    accent: 'sky',
+                    icon: 'request_quote'
+                });
+            } else {
+                window.dezanNotificationEngine.broadcastToRole('admin', {
+                    orderId: orderNum,
+                    type: 'order_new',
+                    category: 'orders',
+                    title: 'New Customer Order Placed',
+                    message: `Order #${orderNum} placed for ${orderPayload.projectName || orderPayload.serviceType} ($${orderPayload.price || '15.00'}).`,
+                    meta: `$${orderPayload.price || '15.00'} · ${orderPayload.placement || 'Standard'} · Turnaround 12-24h`,
+                    clientName: orderPayload.clientName,
+                    actionLabel: 'Assign Digitizer',
+                    actionType: 'assign_order',
+                    accent: 'amber',
+                    icon: 'add_shopping_cart'
+                });
+                window.dezanNotificationEngine.broadcastToRole('client', {
+                    orderId: orderNum,
+                    type: 'order_confirmed',
+                    category: 'production',
+                    title: paymentStatus === 'paid' ? 'Order Confirmed & Queued' : 'Order Placed (Invoice Pending)',
+                    message: paymentStatus === 'paid' 
+                        ? `Your payment was confirmed for #${orderNum}. Our master digitizers are preparing your files.`
+                        : `Order #${orderNum} received. An invoice will be sent for payment.`,
+                    meta: 'In Queue · Turnaround 12-24h',
+                    actionLabel: 'Track Order',
+                    actionType: 'track_order',
+                    accent: 'emerald',
+                    icon: 'receipt_long'
+                });
             }
         }
+
+        window.closeOrderQuoteModal();
+        modal.querySelector('#adaptive-order-form')?.reset();
+        state.uploadedFiles = [];
+        uploadedArtworkFilesCache = [];
+        if (typeof selectedArtworkFiles !== 'undefined') selectedArtworkFiles = [];
+        state.isSubmitting = false;
+
+        // Context-specific redirection or in-place update
+        const isClientWorkspace = typeof window.clientWorkspace !== 'undefined' || 
+                                 document.body.dataset.clientPage !== undefined ||
+                                 window.location.pathname.includes('client-');
+
+        if (isClientWorkspace) {
+            if (window.insforgeClient && typeof window.insforgeClient.showToast === 'function') {
+                window.insforgeClient.showToast(
+                    isQuote ? 'Quote Requested' : (paymentStatus === 'paid' ? 'Payment Confirmed & Order Placed' : 'Order Placed Successfully'),
+                    isQuote ? `Ticket #${createdRecord.order_number} has been recorded.` : (paymentStatus === 'paid' ? `Payment captured via PayPal. Order #${createdRecord.order_number} queued.` : `Order #${createdRecord.order_number} submitted. Invoice pending.`),
+                    isQuote ? 'request_quote' : (paymentStatus === 'paid' ? 'verified' : 'check_circle'),
+                    'success'
+                );
+            }
+
+            if (isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackQuoteLead === 'function') {
+                window.dezanTracker.trackQuoteLead({
+                    quoteId: createdRecord.order_number || createdRecord.id,
+                    email: clientEmail,
+                    service: serviceType,
+                    project: projectName
+                });
+            } else if (!isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackOrderPurchase === 'function') {
+                window.dezanTracker.trackOrderPurchase({
+                    orderId: createdRecord.order_number || createdRecord.id,
+                    txnId: transactionId || ('TXN-' + Math.floor(100000 + Math.random() * 900000)),
+                    amount: calculatedPrice,
+                    service: serviceType,
+                    plan: planName,
+                    placement: placement,
+                    turnaround: turnaroundSpeed,
+                    email: clientEmail
+                });
+            }
+
+            if (window.clientWorkspace && typeof window.clientWorkspace.loadOrders === 'function') {
+                await window.clientWorkspace.loadOrders();
+            } else if (typeof renderOrders === 'function') {
+                await renderOrders();
+            }
+        } else {
+            if (isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackQuoteLead === 'function') {
+                window.dezanTracker.trackQuoteLead({
+                    quoteId: createdRecord.order_number || createdRecord.id,
+                    email: clientEmail,
+                    service: serviceType,
+                    project: projectName
+                });
+            }
+
+            try {
+                sessionStorage.setItem('dezan_last_guest_order', JSON.stringify({
+                    id: createdRecord.id,
+                    order_number: createdRecord.order_number || createdRecord.id,
+                    service_type: serviceType,
+                    plan_name: planName,
+                    project_name: projectName,
+                    placement: placement,
+                    turnaround_speed: turnaroundSpeed,
+                    client_email: clientEmail,
+                    price: calculatedPrice.toFixed(2),
+                    is_quote: isQuote,
+                    transaction_id: transactionId || ''
+                }));
+            } catch (_) {}
+
+            const query = new URLSearchParams({
+                orderId: createdRecord.order_number || createdRecord.id,
+                service: serviceType,
+                plan: planName,
+                placement: placement || 'Standard',
+                turnaround: turnaroundSpeed || 'standard',
+                project: projectName,
+                email: clientEmail,
+                amount: calculatedPrice.toFixed(2),
+                type: isQuote ? 'quote' : 'order',
+                txn: transactionId || ''
+            });
+            window.location.href = `order-success.html?${query.toString()}`;
+        }
     };
-    window.handleModalSubmit = window.handleAdaptiveOrderSubmit;
 
     // Auto-mount modal on DOM ready
     if (document.readyState === 'loading') {

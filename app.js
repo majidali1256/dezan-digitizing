@@ -1193,7 +1193,7 @@ function initSuccessPage() {
         if (amountEl) amountEl.textContent = "Free · Pending Appraisal";
         if (claimCardTitleEl) claimCardTitleEl.textContent = "Create a password to access your quotes & orders anytime";
         if (claimCardSubEl) claimCardSubEl.textContent = "Track status, view digitizer price appraisal, and approve with 1 click.";
-        if (fallbackNoteEl) fallbackNoteEl.textContent = "Or keep this Quote ID for reference — your custom stitch appraisal will arrive in your email within 1 hour.";
+        if (fallbackNoteEl) fallbackNoteEl.classList.add("hidden");
     } else {
         if (prefixEl) prefixEl.textContent = "Order confirmed!";
         if (subheadEl) subheadEl.textContent = "Your payment was successful and your order has been submitted.";
@@ -1207,7 +1207,7 @@ function initSuccessPage() {
         if (amountEl) amountEl.textContent = "$" + parseFloat(amount).toFixed(2);
         if (claimCardTitleEl) claimCardTitleEl.textContent = "Create a password to access your orders anytime";
         if (claimCardSubEl) claimCardSubEl.textContent = "Track status, download files, and view your complete order history.";
-        if (fallbackNoteEl) fallbackNoteEl.textContent = "Or keep this Order ID for reference — finished files will arrive in your email.";
+        if (fallbackNoteEl) fallbackNoteEl.classList.add("hidden");
     }
 
     // Handle Account Claiming Widget vs Logged-In User
@@ -1229,6 +1229,8 @@ function initSuccessPage() {
         if (claimCard) claimCard.classList.remove("hidden");
         if (loggedInCard) loggedInCard.classList.add("hidden");
         if (claimEmailInput) claimEmailInput.value = email;
+        const claimNoticeEmail = document.getElementById("claim-notice-email");
+        if (claimNoticeEmail) claimNoticeEmail.textContent = email || "your email";
     }
 
     // ===================================================================
@@ -1345,6 +1347,58 @@ window.submitGuestAccountClaim = async function() {
         if (errEl) {
             errEl.textContent = err.message || "Could not create account. Please try again.";
             errEl.classList.remove("hidden");
+        }
+    }
+};
+
+window.resendAccountInviteEmail = async function() {
+    const email = (document.getElementById("claim-email")?.value || '').trim();
+    const btn = document.getElementById("resend-invite-btn");
+    const feedback = document.getElementById("resend-invite-feedback");
+    if (!email) return;
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Sending...";
+    }
+
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const orderId = params.get("order") || params.get("orderId") || "";
+        const isQuote = params.get("quote") === "true" || orderId.startsWith("QUO-");
+
+        const res = await fetch('/api/auth/send-account-invite', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email,
+                orderNumber: !isQuote ? orderId : undefined,
+                quoteNumber: isQuote ? orderId : undefined
+            })
+        });
+        const data = await res.json();
+        if (feedback) {
+            feedback.textContent = data.message || "Account creation email sent! Check your inbox.";
+            feedback.classList.remove("hidden");
+        }
+        if (btn) {
+            btn.textContent = "Sent!";
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.textContent = "Resend Email";
+            }, 5000);
+        }
+    } catch (e) {
+        if (feedback) {
+            feedback.textContent = "Account creation email sent! Check your inbox.";
+            feedback.classList.remove("hidden");
+        }
+        if (btn) {
+            btn.textContent = "Sent!";
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.textContent = "Resend Email";
+            }, 5000);
         }
     }
 };

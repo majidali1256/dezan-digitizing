@@ -181,7 +181,7 @@
                 <div id="order-claim-notice" class="hidden p-3 rounded-xl bg-primary/10 border border-primary/30 text-amber-900 dark:text-primary text-xs flex items-start gap-2.5">
                     <span class="material-symbols-outlined text-base text-primary shrink-0 mt-0.5">folder_shared</span>
                     <div class="leading-relaxed">
-                        <span class="font-bold">Catalog Linking Active:</span> Your order <strong id="order-claim-ref" class="font-mono font-bold text-slate-900 dark:text-white"></strong> and stitch files will be automatically added to your client catalog upon registration.
+                        <span class="font-bold">Catalog Linking Active:</span> Your <span id="order-claim-type">order</span> <strong id="order-claim-ref" class="font-mono font-bold text-slate-900 dark:text-white"></strong> and stitch files will be automatically added to your client catalog upon registration.
                     </div>
                 </div>
 
@@ -1054,6 +1054,7 @@
                 const emailParam = urlParams.get('email');
                 const nameParam = urlParams.get('name');
                 const orderParam = urlParams.get('order');
+                const quoteParam = urlParams.get('quote');
                 const codeParam = urlParams.get('code');
 
                 if (emailParam) {
@@ -1070,12 +1071,22 @@
 
                 if (tabParam === 'register' || tabParam === 'signup') {
                     switchAuthTab('signup');
+                    const claimNotice = document.getElementById('order-claim-notice');
+                    const claimOrderRef = document.getElementById('order-claim-ref');
+                    const claimType = document.getElementById('order-claim-type');
                     if (orderParam) {
-                        const claimNotice = document.getElementById('order-claim-notice');
-                        const claimOrderRef = document.getElementById('order-claim-ref');
                         if (claimNotice) claimNotice.classList.remove('hidden');
                         if (claimOrderRef) claimOrderRef.textContent = orderParam;
+                        if (claimType) claimType.textContent = 'order';
+                    } else if (quoteParam) {
+                        if (claimNotice) claimNotice.classList.remove('hidden');
+                        if (claimOrderRef) claimOrderRef.textContent = quoteParam;
+                        if (claimType) claimType.textContent = 'quote request';
                     }
+                    setTimeout(() => {
+                        const pwd = document.getElementById('signup-password');
+                        if (pwd && emailParam) pwd.focus();
+                    }, 150);
                 } else if (tabParam === 'forgot' || tabParam === 'reset') {
                     openForgotPasswordModal();
                     if (emailParam) {

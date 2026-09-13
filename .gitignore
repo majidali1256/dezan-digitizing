@@ -35,3 +35,5 @@ npm-debug.log*
 # Skills lock
 skills-lock.json
 
+.vercel
+.env*

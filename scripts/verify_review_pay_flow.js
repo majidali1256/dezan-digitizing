@@ -98,7 +98,7 @@ async function runVerification() {
         await page.fill('#dig-job-name', 'Falcon Left Chest Polo');
         await page.selectOption('#dig-placement', 'Left Chest — $15');
         await page.fill('#dig-size', '4.0');
-        await page.selectOption('#dig-fabric', 'Cotton / Pique Knit');
+        await page.selectOption('#dig-fabric', 'Polo / Pique Knit');
 
         // Check file formats (.DST and .PES)
         await page.check('input[name="dig-formats"][value=".PES"]');

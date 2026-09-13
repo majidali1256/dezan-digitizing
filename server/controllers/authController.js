@@ -515,6 +515,45 @@ const googleAuth = async (req, res) => {
     }
 };
 
+/**
+ * Send Account Creation Invite to a Client
+ * POST /api/auth/send-account-invite
+ */
+const sendAccountInvite = async (req, res) => {
+    try {
+        const { email, customerName, orderNumber, quoteNumber } = req.body;
+        if (!email) {
+            return badRequest(res, 'Email is required');
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        // Check if user already exists
+        const userRes = await query('SELECT id, email, display_name FROM public.profiles WHERE LOWER(email) = $1', [normalizedEmail]);
+        if (userRes.rows.length > 0) {
+            return success(res, {
+                alreadyRegistered: true,
+                email: normalizedEmail
+            }, 'An account already exists for this email address. You can log in directly.');
+        }
+
+        await emailService.sendAccountInviteEmail({
+            email: normalizedEmail,
+            customerName: customerName || '',
+            orderNumber,
+            quoteNumber
+        });
+
+        return success(res, {
+            email: normalizedEmail,
+            sent: true
+        }, 'Account creation email sent successfully.');
+    } catch (err) {
+        console.error('[Send Account Invite Error]:', err);
+        return error(res, `Failed to send account invite: ${err.message}`);
+    }
+};
+
 module.exports = {
     register,
     login,
@@ -523,5 +562,6 @@ module.exports = {
     updateProfile,
     changePassword,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    sendAccountInvite
 };

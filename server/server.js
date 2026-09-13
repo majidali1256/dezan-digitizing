@@ -18,6 +18,7 @@ const quoteRoutes = require('./routes/quoteRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const revisionRoutes = require('./routes/revisionRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const paypalRoutes = require('./routes/paypalRoutes');
 
 // Middleware imports
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
@@ -75,6 +76,7 @@ app.use('/api/quotes', quoteRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/revisions', revisionRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/paypal', paypalRoutes);
 
 // Root API discovery endpoint
 app.get('/api', (req, res) => {
@@ -117,6 +119,11 @@ app.get('/api', (req, res) => {
             upload: {
                 single: 'POST /api/upload/single',
                 multiple: 'POST /api/upload/multiple'
+            },
+            paypal: {
+                config: 'GET /api/paypal/config',
+                createOrder: 'POST /api/paypal/create-order',
+                captureOrder: 'POST /api/paypal/capture-order'
             }
         }
     });

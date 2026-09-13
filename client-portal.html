@@ -599,7 +599,6 @@
                         <span class="material-symbols-outlined text-lg sm:text-xl text-[#b8860b] dark:text-amber-300 group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
                     </div>
                     <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pl-0 sm:pl-[56px]">
-                        <span class="px-2.5 py-0.5 rounded-full bg-[#fef3d6] dark:bg-amber-950/40 text-[#9a7810] dark:text-amber-300 font-bold text-[10.5px] sm:text-[11px]">.DST &nbsp;.PES &nbsp;.EXP</span>
                         <span class="px-2.5 py-0.5 rounded-full bg-[#f6f3eb] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px] sm:text-[11px]">Left Chest / Hats / Jacket Back</span>
                         <span class="px-2.5 py-0.5 rounded-full bg-[#f6f3eb] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px] sm:text-[11px]">3D Puff</span>
                     </div>
@@ -634,7 +633,6 @@
                         <span class="material-symbols-outlined text-lg sm:text-xl text-[#1d68d8] dark:text-blue-400 group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
                     </div>
                     <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pl-0 sm:pl-[56px]">
-                        <span class="px-2.5 py-0.5 rounded-full bg-[#dbeafe] dark:bg-blue-900/40 text-[#1d68d8] dark:text-blue-300 font-bold text-[10.5px] sm:text-[11px]">.AI &nbsp;.EPS &nbsp;.SVG &nbsp;.PDF</span>
                         <span class="px-2.5 py-0.5 rounded-full bg-[#eef4fa] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px] sm:text-[11px]">Print-ready Vectors</span>
                     </div>
                 </button>
@@ -664,7 +662,6 @@
                         <span class="material-symbols-outlined text-lg sm:text-xl text-[#7c3aed] dark:text-purple-400 group-hover:translate-x-1 transition-all shrink-0 font-bold">chevron_right</span>
                     </div>
                     <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pl-0 sm:pl-[56px]">
-                        <span class="px-2.5 py-0.5 rounded-full bg-[#ede9fe] dark:bg-purple-900/40 text-[#6d28d9] dark:text-purple-200 font-bold text-[10.5px] sm:text-[11px]">.DST &nbsp;.PES &nbsp;.EXP &nbsp;.EMB</span>
                         <span class="px-2.5 py-0.5 rounded-full bg-[#f3effa] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px] sm:text-[11px]">Pets, Animals &amp; Fur</span>
                         <span class="px-2.5 py-0.5 rounded-full bg-[#f3effa] dark:bg-slate-800 text-[#475569] dark:text-slate-300 font-medium text-[10.5px] sm:text-[11px]">Photorealistic Shading</span>
                     </div>
@@ -765,16 +762,22 @@
                             <!-- Fabric Material & Sizing -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Fabric / Garment Material *</label>
-                                    <select id="dig-fabric" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
-                                        <option value="Cotton / Pique Knit">Cotton / Pique Knit (Polos, Tees)</option>
-                                        <option value="Structured Cap (6-Panel)">Structured Cap (6-Panel, Center-Out)</option>
-                                        <option value="Unstructured Cap / Beanie">Unstructured Cap / Beanie (Knit)</option>
-                                        <option value="Fleece / Heavy Hoodie">Fleece / Heavy Hoodie</option>
-                                        <option value="Denim / Heavy Twill">Denim / Heavy Twill Workwear</option>
-                                        <option value="Leather / Patches">Leather / Heavy Substrate</option>
-                                        <option value="Other Fabric">Other / General Purpose</option>
+                                    <label id="dig-fabric-label" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Fabric / Garment Material *</label>
+                                    <select id="dig-fabric" onchange="handleFabricChange ? handleFabricChange() : null" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white focus:border-primary font-medium">
+                                        <option value="" disabled selected>Select fabric / garment material</option>
+                                        <option value="Polo / Pique Knit">Polo / Pique Knit</option>
+                                        <option value="T-Shirt">T-Shirt</option>
+                                        <option value="Hoodie / Sweatshirt">Hoodie / Sweatshirt</option>
+                                        <option value="Performance / Dri-Fit">Performance / Dri-Fit</option>
+                                        <option value="Workwear">Workwear</option>
+                                        <option value="Jacket">Jacket</option>
+                                        <option value="Other / Custom">Other / Custom</option>
                                     </select>
+                                    <!-- Custom Fabric / Hat Type Input Container -->
+                                    <div id="custom-fabric-container" class="hidden mt-2">
+                                        <label id="custom-fabric-label" class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Please enter fabric / garment material *</label>
+                                        <input type="text" id="dig-custom-fabric" placeholder="e.g. Cotton Twill, Canvas, Fleece..." class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-primary/25 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary" />
+                                    </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1">Target Size *</label>
@@ -1087,14 +1090,46 @@
                             </div>
 
                             <div class="grid grid-cols-2 gap-2">
-                                <button type="button" id="modal-tab-card" onclick="if(typeof setModalPaymentMethod==='function') setModalPaymentMethod('Credit Card')" class="p-2 sm:p-2.5 rounded-xl border-2 border-primary bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer">
-                                    <span class="material-symbols-outlined text-sm text-primary">credit_card</span>
-                                    <span>Credit / Debit Card</span>
+                                <button type="button" id="modal-tab-paypal" onclick="if(typeof setModalPaymentMethod==='function') setModalPaymentMethod('PayPal')" class="p-2 sm:p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-900 dark:text-white cursor-pointer">
+                                    <span class="material-symbols-outlined text-sm text-primary">account_balance_wallet</span>
+                                    <span>PayPal &amp; Cards</span>
                                 </button>
-                                <button type="button" id="modal-tab-paypal" onclick="if(typeof setModalPaymentMethod==='function') setModalPaymentMethod('PayPal')" class="p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer">
-                                    <span class="material-symbols-outlined text-sm">account_balance_wallet</span>
-                                    <span>PayPal</span>
+                                <button type="button" id="modal-tab-payoneer" onclick="if(typeof setModalPaymentMethod==='function') setModalPaymentMethod('Payoneer')" class="p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer">
+                                    <span class="material-symbols-outlined text-sm">receipt_long</span>
+                                    <span>Payoneer / ACH</span>
                                 </button>
+                            </div>
+
+                            <!-- PayPal Smart Buttons View -->
+                            <div id="modal-panel-paypal" class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 text-center space-y-2.5">
+                                <p class="text-xs text-slate-600 dark:text-slate-300 font-medium">Fast, 1-click settlement via PayPal balance or Debit/Credit Card:</p>
+                                <!-- Dynamic PayPal Smart Buttons Mounted Here -->
+                                <div id="modal-paypal-button-container" class="w-full min-h-[44px] flex flex-col justify-center"></div>
+                                <p class="text-[10.5px] text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1">
+                                    <span class="material-symbols-outlined text-xs text-emerald-500">verified_user</span>
+                                    <span>PayPal Buyer Protection · Zero transaction surcharges</span>
+                                </p>
+                            </div>
+
+                            <!-- Payoneer / Invoice Panel -->
+                            <div id="modal-panel-payoneer" class="hidden p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 text-left space-y-2.5">
+                                <div class="flex items-start gap-2.5">
+                                    <span class="material-symbols-outlined text-primary text-base mt-0.5">business</span>
+                                    <div>
+                                        <strong class="text-xs font-bold text-slate-900 dark:text-white block">Corporate &amp; B2B Billing (Payoneer / Wire)</strong>
+                                        <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">We will create your order immediately and send an official Payoneer / ACH invoice to your email.</p>
+                                    </div>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-primary/10 text-[11px] text-slate-700 dark:text-slate-300 space-y-1">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-500">Billing Email:</span>
+                                        <span class="font-mono font-bold">billing@dezandigitizing.com</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-500">Supported:</span>
+                                        <span>Payoneer Transfer, ACH Wire, International Wire</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1124,7 +1159,11 @@
                             <button type="button" onclick="closeNewOrderModal()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer transition-colors">
                                 Cancel
                             </button>
-                            <button type="submit" id="adaptive-order-submit-btn" class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0">
+                            <div id="modal-paypal-checkout-note" class="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                <span class="material-symbols-outlined text-sm text-primary">touch_app</span>
+                                <span>Click <strong>PayPal</strong> or <strong>Card</strong> above</span>
+                            </div>
+                            <button type="submit" id="adaptive-order-submit-btn" class="hidden px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0">
                                 <span class="material-symbols-outlined text-sm" id="order-submit-btn-icon">lock</span>
                                 <span id="order-submit-btn-text">Pay &amp; Place Order ($15.00)</span>
                             </button>
@@ -1274,13 +1313,6 @@
                         
                         <!-- Dynamic PayPal Smart Buttons Mounted Here -->
                         <div id="paypal-button-container" class="w-full min-h-[44px] flex flex-col justify-center"></div>
-
-                        <!-- Fallback / Sandbox Direct Button -->
-                        <div id="paypal-fallback-container" class="hidden pt-2 border-t border-slate-200 dark:border-slate-800">
-                            <button type="button" onclick="executeOrderPayment('PayPal')" class="w-full py-2.5 rounded-xl bg-[#ffc439] hover:bg-[#f6b92a] text-[#003087] font-black text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer">
-                                <span class="material-symbols-outlined text-sm">payments</span> Complete Payment (Direct Simulation)
-                            </button>
-                        </div>
                     </div>
 
                     <!-- Payoneer B2B / ACH Container -->
@@ -1682,6 +1714,7 @@
 
         // Guard check: client or admin only
         const currentUser = window.insforgeClient.requireAuth(['client', 'admin']);
+        var portalLayout = localStorage.getItem('dezan_client_layout') || 'grid';
         let selectedFile = null;
         let cachedOrders = [];
         let activeCheckoutOrderId = null;
@@ -1952,7 +1985,6 @@
             renderSectionsWithFilter();
         }
 
-        let portalLayout = localStorage.getItem('dezan_client_layout') || 'grid';
         function setPortalLayout(mode) {
             portalLayout = mode;
             try { localStorage.setItem('dezan_client_layout', mode); } catch (e) {}
@@ -2774,6 +2806,9 @@
         }
 
         function handlePlacementChange() {
+            if (typeof window.modalHandlePlacementChange === 'function') {
+                return window.modalHandlePlacementChange();
+            }
             const service = document.getElementById('selected-service-type')?.value || 'Digitizing';
             const placementSelect = service === 'PetPortrait'
                 ? document.getElementById('pet-placement')
@@ -2795,6 +2830,12 @@
 
             validatePlacementSize();
             calculateAdaptivePrice();
+        }
+
+        function handleFabricChange() {
+            if (typeof window.modalHandleFabricChange === 'function') {
+                return window.modalHandleFabricChange();
+            }
         }
 
         /**
@@ -3058,7 +3099,10 @@
         });
 
         async function handleAdaptiveOrderSubmit(e) {
-            e.preventDefault();
+            if (typeof window.handleModalSubmit === 'function') {
+                return window.handleModalSubmit(e);
+            }
+            if (e && typeof e.preventDefault === 'function') e.preventDefault();
             const submitBtn = document.getElementById('adaptive-order-submit-btn');
             const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
 
@@ -3107,7 +3151,29 @@
                     }
                 }
 
-                fabricType = document.getElementById('dig-fabric')?.value || 'Cotton / Pique Knit';
+                // Validate Fabric / Hat Type
+                const fabricSelect = document.getElementById('dig-fabric');
+                const selectedFabric = fabricSelect ? fabricSelect.value : '';
+                const isCap = placement.toLowerCase().includes('cap') || placement.toLowerCase().includes('hat');
+
+                if (!selectedFabric) {
+                    alert(isCap ? 'Please select a hat / cap type.' : 'Please select a fabric / garment material.');
+                    fabricSelect?.focus();
+                    return;
+                }
+
+                if (selectedFabric === 'Other / Custom') {
+                    const customFabricInput = document.getElementById('dig-custom-fabric');
+                    const customVal = (customFabricInput?.value || '').trim();
+                    if (!customVal) {
+                        alert(isCap ? 'Please enter your hat / cap type.' : 'Please enter your fabric / garment material.');
+                        customFabricInput?.focus();
+                        return;
+                    }
+                    fabricType = `Custom: ${customVal}`;
+                } else {
+                    fabricType = selectedFabric;
+                }
 
                 // Validate target size (ensures positive size if entered)
                 const isSizeValid = validatePlacementSize();
@@ -4047,17 +4113,41 @@
                             label: 'paypal',
                             height: 40
                         },
-                        createOrder: function(data, actions) {
-                            const amountVal = parseFloat(order.price || 15).toFixed(2);
-                            return actions.order.create({
-                                purchase_units: [{
-                                    description: `Dezan Digitizing ${order.is_quote ? 'Quote' : 'Order'} #${order.order_number}`,
-                                    amount: {
-                                        currency_code: 'USD',
-                                        value: amountVal
-                                    }
-                                }]
-                            });
+                        createOrder: async function(data, actions) {
+                            try {
+                                const session = JSON.parse(localStorage.getItem('dezan_session') || '{}');
+                                const token = session.token || session.accessToken;
+                                const headers = { 'Content-Type': 'application/json' };
+                                if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                                const res = await fetch('/api/paypal/create-order', {
+                                    method: 'POST',
+                                    headers,
+                                    body: JSON.stringify({
+                                        orderId: order.id || order.order_number,
+                                        amount: parseFloat(order.price || 15).toFixed(2),
+                                        currency: 'USD'
+                                    })
+                                });
+
+                                const result = await res.json();
+                                if (result.success && result.data && result.data.id) {
+                                    return result.data.id;
+                                }
+                                throw new Error(result.message || 'Server order creation failed');
+                            } catch (err) {
+                                console.warn('[PayPal Server Route Notice - Using Direct SDK]:', err.message);
+                                const amountVal = parseFloat(order.price || 15).toFixed(2);
+                                return actions.order.create({
+                                    purchase_units: [{
+                                        description: `Dezan Digitizing ${order.is_quote ? 'Quote' : 'Order'} #${order.order_number}`,
+                                        amount: {
+                                            currency_code: 'USD',
+                                            value: amountVal
+                                        }
+                                    }]
+                                });
+                            }
                         },
                         onApprove: async function(data, actions) {
                             try {
@@ -4067,21 +4157,53 @@
                                         <span>Confirming payment with production queue...</span>
                                     </div>
                                 `;
-                                const details = await actions.order.capture();
-                                const transactionId = details.id || data.orderID;
+
+                                const session = JSON.parse(localStorage.getItem('dezan_session') || '{}');
+                                const token = session.token || session.accessToken;
+                                const headers = { 'Content-Type': 'application/json' };
+                                if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                                let transactionId = data.orderID;
+
+                                // Capture payment securely via server-side API route
+                                try {
+                                    const captureRes = await fetch('/api/paypal/capture-order', {
+                                        method: 'POST',
+                                        headers,
+                                        body: JSON.stringify({
+                                            paypalOrderId: data.orderID,
+                                            orderId: order.id || order.order_number
+                                        })
+                                    });
+                                    const captureResult = await captureRes.json();
+                                    if (captureResult.success && captureResult.data && captureResult.data.captureId) {
+                                        transactionId = captureResult.data.captureId;
+                                    } else {
+                                        const details = await actions.order.capture().catch(() => null);
+                                        if (details && details.id) transactionId = details.id;
+                                    }
+                                } catch (serverCaptureErr) {
+                                    console.warn('[PayPal Server Capture Fallback]:', serverCaptureErr.message);
+                                    const details = await actions.order.capture();
+                                    transactionId = details.id || data.orderID;
+                                }
+
                                 await completeSuccessfulPayment(order, 'PayPal', transactionId);
                             } catch (err) {
                                 console.error('[PayPal Capture Error]:', err);
                                 alert(`Payment capture notice: ${err.message}`);
-                                if (fallback) fallback.classList.remove('hidden');
                             }
                         },
                         onError: function(err) {
                             console.warn('[PayPal SDK Notice]:', err);
                             container.innerHTML = `
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Fast settlement via PayPal balance or card.</p>
+                                <div class="py-2 text-center text-xs text-rose-600 dark:text-rose-400 space-y-2">
+                                    <p>PayPal encountered an issue. Please try again.</p>
+                                    <button type="button" onclick="initPayPalForOrder(cachedOrders.find(o => o.id === currentCheckoutOrderId || o.order_number === currentCheckoutOrderId))" class="px-3 py-1.5 rounded-lg bg-primary text-slate-950 font-bold text-xs inline-flex items-center gap-1 cursor-pointer">
+                                        <span class="material-symbols-outlined text-sm">refresh</span> Try Again
+                                    </button>
+                                </div>
                             `;
-                            if (fallback) fallback.classList.remove('hidden');
                         },
                         onCancel: function(data) {
                             console.log('[PayPal Payment Cancelled]:', data);
@@ -4093,11 +4215,15 @@
                     throw new Error('PayPal Buttons unavailable');
                 }
             } catch (err) {
-                console.warn('[PayPal Fallback Active]:', err.message);
+                console.warn('[PayPal Gateway Notice]:', err.message);
                 container.innerHTML = `
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Fast settlement via PayPal balance or card.</p>
+                    <div class="py-2 text-center text-xs text-rose-600 dark:text-rose-400 space-y-2">
+                        <p>Unable to connect to PayPal gateway (${err.message}).</p>
+                        <button type="button" onclick="initPayPalForOrder(cachedOrders.find(o => o.id === currentCheckoutOrderId || o.order_number === currentCheckoutOrderId))" class="px-3 py-1.5 rounded-lg bg-primary text-slate-950 font-bold text-xs inline-flex items-center gap-1 cursor-pointer">
+                            <span class="material-symbols-outlined text-sm">refresh</span> Retry Connection
+                        </button>
+                    </div>
                 `;
-                if (fallback) fallback.classList.remove('hidden');
             }
         }
 
@@ -4146,33 +4272,6 @@
             } catch (err) {
                 console.error('[Payment Settlement Error]:', err);
                 alert(`Payment settled, but UI update encountered a notice: ${err.message}`);
-            }
-        }
-
-        async function executeOrderPayment(method) {
-            if (!currentCheckoutOrderId) return;
-            const order = cachedOrders.find(o => o.id === currentCheckoutOrderId || o.order_number === currentCheckoutOrderId);
-            if (!order) return;
-
-            const payBtn = event?.currentTarget;
-            let originalText = '';
-            if (payBtn) {
-                originalText = payBtn.innerHTML;
-                payBtn.disabled = true;
-                payBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">sync</span> Processing...';
-            }
-
-            try {
-                const simulatedTxId = 'TXN_' + Math.random().toString(36).substring(2, 10).toUpperCase();
-                await completeSuccessfulPayment(order, method, simulatedTxId);
-            } catch (err) {
-                console.error('Payment error:', err);
-                alert(`Payment error: ${err.message}`);
-            } finally {
-                if (payBtn) {
-                    payBtn.disabled = false;
-                    payBtn.innerHTML = originalText;
-                }
             }
         }
 

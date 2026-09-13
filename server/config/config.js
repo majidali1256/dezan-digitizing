@@ -40,6 +40,21 @@ const config = {
     email: {
         adminEmail: process.env.ADMIN_EMAIL || 'fdezan91@gmail.com',
         fromAddress: process.env.SMTP_FROM || `"Dezan Digitizing" <${process.env.SMTP_USER || 'notifications@dezandigitizing.com'}>`
+    },
+    paypal: {
+        clientId: process.env.PAYPAL_CLIENT_ID || '',
+        clientSecret: process.env.PAYPAL_CLIENT_SECRET || '',
+        currency: process.env.PAYPAL_CURRENCY || 'USD',
+        get isProduction() {
+            if (process.env.PAYPAL_MODE === 'sandbox' || process.env.PAYPAL_ENV === 'sandbox') return false;
+            if (process.env.PAYPAL_MODE === 'live' || process.env.PAYPAL_ENV === 'live' || process.env.PAYPAL_ENV === 'production') return true;
+            return process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
+        },
+        get baseUrl() {
+            return this.isProduction
+                ? 'https://api-m.paypal.com'
+                : 'https://api-m.sandbox.paypal.com';
+        }
     }
 };
 

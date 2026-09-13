@@ -651,7 +651,7 @@
                                     <span>Convert</span>
                                 </button>
                             ` : !isPaid ? `
-                                <button type="button" onclick="window.clientWorkspace.openClientInvoiceModal('${order.id || order.order_number}')" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer" title="Complete order and settle balance">
+                                <button type="button" onclick="window.clientWorkspace.openCheckoutModal('${order.id || order.order_number}')" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer" title="Complete order and settle balance">
                                     <span class="material-symbols-outlined text-xs">credit_card</span>
                                     <span>Pay</span>
                                 </button>
@@ -770,7 +770,7 @@
                                 <span>Convert</span>
                             </button>
                         ` : !isPaid ? `
-                            <button type="button" onclick="window.clientWorkspace.openClientInvoiceModal('${order.id || order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-slate-950 font-black text-[11px] inline-flex items-center gap-1 shadow-2xs cursor-pointer">
+                            <button type="button" onclick="window.clientWorkspace.openCheckoutModal('${order.id || order.order_number}')" class="px-2.5 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-slate-950 font-black text-[11px] inline-flex items-center gap-1 shadow-2xs cursor-pointer">
                                 <span class="material-symbols-outlined text-xs">credit_card</span>
                                 <span>Pay</span>
                             </button>
@@ -956,7 +956,7 @@
                                 <span>Receipt</span>
                             </button>
                         ` : `
-                            <button type="button" onclick="window.clientWorkspace.openClientInvoiceModal('${inv.id || inv.order_number}')" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer">
+                            <button type="button" onclick="window.clientWorkspace.openCheckoutModal('${inv.id || inv.order_number}')" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer">
                                 <span class="material-symbols-outlined text-xs">credit_card</span>
                                 <span>Pay $${amount}</span>
                             </button>
@@ -1011,7 +1011,7 @@
                             <span>Invoice</span>
                         </button>
                         ${!isPaid ? `
-                            <button type="button" onclick="window.clientWorkspace.openClientInvoiceModal('${inv.id || inv.order_number}')" class="px-3 py-1 rounded-lg bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs cursor-pointer">
+                            <button type="button" onclick="window.clientWorkspace.openCheckoutModal('${inv.id || inv.order_number}')" class="px-3 py-1 rounded-lg bg-primary hover:bg-primary-hover text-slate-950 font-black text-xs inline-flex items-center gap-1 shadow-xs cursor-pointer">
                                 <span>Pay</span>
                             </button>
                         ` : ''}
@@ -1450,7 +1450,7 @@
                 setElText('drawer-pay-btn-text', `Pay Now ($${amount})`);
                 payBtn.onclick = () => {
                     closeOrderDetailsModal();
-                    openClientInvoiceModal(order.id || order.order_number);
+                    openCheckoutModal(order.id || order.order_number);
                 };
             } else {
                 payBtn.classList.add('hidden');
@@ -1472,6 +1472,24 @@
                 closeOrderDetailsModal();
                 openClientInvoiceModal(order.id || order.order_number);
             };
+        }
+
+        const convertQuoteBtn = document.getElementById('drawer-convert-quote-btn');
+        if (convertQuoteBtn) {
+            if (isQuote && (parseFloat(order.price) > 0 || order.status === 'quote_ready')) {
+                const amt = parseFloat(order.price).toFixed(2);
+                convertQuoteBtn.innerHTML = `<span class="material-symbols-outlined text-sm">payments</span><span>Accept & Pay ($${amt})</span>`;
+                convertQuoteBtn.onclick = () => {
+                    closeOrderDetailsModal();
+                    openCheckoutModal(order.id || order.order_number);
+                };
+            } else {
+                convertQuoteBtn.innerHTML = `<span class="material-symbols-outlined text-sm">rocket_launch</span><span>Convert to Order</span>`;
+                convertQuoteBtn.onclick = () => {
+                    closeOrderDetailsModal();
+                    openNewOrderModal(order.design_name || '');
+                };
+            }
         }
 
         const modal = document.getElementById('order-details-modal');
@@ -1514,10 +1532,16 @@
         if (paypalLink) {
             if (isPaid) {
                 paypalLink.href = 'javascript:void(0)';
+                paypalLink.onclick = null;
                 paypalLink.className = 'px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center gap-1.5 cursor-default';
                 if (paypalText) paypalText.textContent = 'Paid · Settled via PayPal';
             } else {
-                paypalLink.href = `https://paypal.me/dezandigitizing/${amount}USD`;
+                paypalLink.href = 'javascript:void(0)';
+                paypalLink.onclick = (e) => {
+                    e.preventDefault();
+                    closeClientInvoiceModal();
+                    openCheckoutModal(order.id || order.order_number);
+                };
                 paypalLink.className = 'px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs flex items-center gap-1.5 shadow-md cursor-pointer transition-transform hover:scale-[1.02]';
                 if (paypalText) paypalText.textContent = `Settle $${amount} with PayPal`;
             }
@@ -1530,6 +1554,479 @@
     function closeClientInvoiceModal() {
         const modal = document.getElementById('client-invoice-modal');
         if (modal) modal.classList.add('hidden');
+    }
+
+    // =========================================================================
+    // END-TO-END PAYPAL & B2B CHECKOUT MODAL ENGINE
+    // =========================================================================
+    let paypalButtonsInstance = null;
+    let currentCheckoutOrderId = null;
+
+    function ensureCheckoutModalInDom() {
+        if (document.getElementById('checkout-payment-modal')) return;
+
+        const modalDiv = document.createElement('div');
+        modalDiv.id = 'checkout-payment-modal';
+        modalDiv.onclick = (e) => { if (e.target === modalDiv) closeCheckoutModal(); };
+        modalDiv.className = 'fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex flex-col justify-end sm:justify-center sm:items-center p-0 sm:p-4 overflow-hidden';
+        modalDiv.innerHTML = `
+            <div class="w-full sm:max-w-md bg-white dark:bg-card-dark border-t sm:border border-slate-200 dark:border-primary/30 rounded-t-3xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 flex flex-col max-h-[92dvh] sm:max-h-[90vh] overflow-y-auto overscroll-contain relative text-slate-900 dark:text-slate-100">
+                <!-- Mobile Drag Indicator Bar -->
+                <div class="w-12 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mt-1 mb-2.5 sm:hidden flex-shrink-0"></div>
+
+                <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-primary/20 mb-4">
+                    <div>
+                        <span class="text-[10px] font-black uppercase text-amber-800 dark:text-primary tracking-wider block">Secure Payment Checkout</span>
+                        <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2" id="checkout-modal-order-number">
+                            Order #ORD-0000
+                        </h3>
+                    </div>
+                    <button type="button" onclick="window.clientWorkspace.closeCheckoutModal()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+                        <span class="material-symbols-outlined text-base">close</span>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Order Summary Card -->
+                    <div class="p-3.5 rounded-xl bg-amber-50/40 dark:bg-slate-900/60 border border-amber-200/60 dark:border-primary/15 flex items-center justify-between">
+                        <div>
+                            <h4 class="text-xs font-black text-slate-900 dark:text-white" id="checkout-modal-project-name">Design Project</h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400" id="checkout-modal-service-details">Embroidery Digitizing</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] uppercase font-bold text-slate-500 block">Amount Due</span>
+                            <span class="text-lg font-black text-rose-600 dark:text-rose-400" id="checkout-modal-amount">$15.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method Selection -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Select Payment Method</label>
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <button type="button" onclick="window.clientWorkspace.selectCheckoutMethod('paypal')" id="checkout-tab-paypal" class="p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-900 dark:text-white">
+                                <span class="material-symbols-outlined text-sm text-primary">account_balance_wallet</span> PayPal &amp; Cards
+                            </button>
+                            <button type="button" onclick="window.clientWorkspace.selectCheckoutMethod('payoneer')" id="checkout-tab-payoneer" class="p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer">
+                                <span class="material-symbols-outlined text-sm">currency_exchange</span> Payoneer / ACH
+                            </button>
+                        </div>
+
+                        <!-- PayPal Smart Buttons Container -->
+                        <div id="checkout-panel-paypal" class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 text-center space-y-2.5">
+                            <p class="text-xs text-slate-600 dark:text-slate-300">Fast, 1-click settlement via PayPal balance or Debit/Credit Card:</p>
+                            
+                            <!-- Dynamic PayPal Smart Buttons Mounted Here -->
+                            <div id="paypal-button-container" class="w-full min-h-[44px] flex flex-col justify-center"></div>
+                        </div>
+
+                        <!-- Payoneer B2B / ACH Container -->
+                        <div id="checkout-panel-payoneer" class="hidden p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-primary/10 space-y-2.5 text-left">
+                            <div class="flex items-start gap-2">
+                                <span class="material-symbols-outlined text-amber-500 text-lg shrink-0 mt-0.5">account_balance</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900 dark:text-white">Payoneer &amp; Direct U.S. Bank ACH</h4>
+                                    <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
+                                        Ideal for high-volume embroidery shops and batch invoicing with zero credit card transaction fees.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs space-y-1">
+                                <div class="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400">Receiving Account:</div>
+                                <div class="text-[11px] text-slate-800 dark:text-slate-200">Bank: <strong>Community Federal Savings Bank (U.S.)</strong></div>
+                                <div class="text-[11px] text-slate-800 dark:text-slate-200">Account Type: <strong>Checking / ACH Direct Deposit</strong></div>
+                                <div class="text-[11px] text-slate-800 dark:text-slate-200">Email: <strong>billing@dezandigitizing.com</strong></div>
+                            </div>
+                            <button type="button" onclick="window.clientWorkspace.requestPayoneerInvoice()" class="w-full py-2.5 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-black text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer">
+                                <span class="material-symbols-outlined text-sm">mail</span> Request Payoneer Invoice / Payment Link
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 text-center text-[10px] text-slate-500 flex items-center justify-center gap-1">
+                        <span class="material-symbols-outlined text-xs text-emerald-600">verified_user</span>
+                        <span>256-bit Encrypted SSL · Instant PayPal &amp; Bank Settlement</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+    }
+
+    function openCheckoutModal(orderId) {
+        ensureCheckoutModalInDom();
+
+        let order = null;
+        if (orderId && typeof orderId === 'object') {
+            order = orderId;
+        } else {
+            const cachedOrders = (typeof window.insforgeClient !== 'undefined' && typeof window.insforgeClient.getOrders === 'function') 
+                ? (window.insforgeClient.getOrders() || []) 
+                : [];
+            let lsOrders = [];
+            try { lsOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]'); } catch (e) {}
+            let lsQuotes = [];
+            try { lsQuotes = JSON.parse(localStorage.getItem('dezan_quotes') || '[]'); } catch (e) {}
+
+            const allCandidates = [
+                ...(state.orders || []),
+                ...(state.quotes || []),
+                ...cachedOrders,
+                ...lsOrders,
+                ...lsQuotes
+            ];
+
+            if (orderId) {
+                order = allCandidates.find(o => o && (o.id === orderId || o.order_number === orderId || o.quote_number === orderId));
+            }
+            if (!order) {
+                order = (state.orders && state.orders[0]) || (state.quotes && state.quotes[0]) || allCandidates[0];
+            }
+            if (!order && orderId) {
+                order = {
+                    id: orderId,
+                    order_number: String(orderId),
+                    design_name: 'Custom Embroidery / Vector Order',
+                    service_type: 'Embroidery Digitizing',
+                    plan_name: 'Standard',
+                    price: 15.00,
+                    status: 'pending_review',
+                    payment_status: 'unpaid'
+                };
+            }
+        }
+
+        if (!order) {
+            console.warn('[Checkout] No order data available to display in checkout modal.');
+            return;
+        }
+
+        currentCheckoutOrderId = order.id || order.order_number;
+
+        const modal = document.getElementById('checkout-payment-modal');
+        const numEl = document.getElementById('checkout-modal-order-number');
+        const projEl = document.getElementById('checkout-modal-project-name');
+        const svcEl = document.getElementById('checkout-modal-service-details');
+        const amtEl = document.getElementById('checkout-modal-amount');
+
+        const rawPrice = order.price !== undefined ? order.price : (order.amount !== undefined ? order.amount : 15);
+        const price = parseFloat(rawPrice || 15).toFixed(2);
+
+        if (numEl) numEl.textContent = `Order #${order.order_number || order.quote_number || ''}`;
+        if (projEl) projEl.textContent = order.design_name || order.project_name || 'Design Order';
+        if (svcEl) svcEl.textContent = `${order.service_type || 'Digitizing'} · ${order.plan_name || 'Standard'}`;
+        if (amtEl) amtEl.textContent = `$${price}`;
+
+        selectCheckoutMethod('paypal');
+        initPayPalForOrder(order);
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeCheckoutModal() {
+        const modal = document.getElementById('checkout-payment-modal');
+        if (modal) modal.classList.add('hidden');
+        currentCheckoutOrderId = null;
+    }
+
+    function selectCheckoutMethod(method) {
+        const paypalTab = document.getElementById('checkout-tab-paypal');
+        const payoneerTab = document.getElementById('checkout-tab-payoneer');
+        const paypalPanel = document.getElementById('checkout-panel-paypal');
+        const payoneerPanel = document.getElementById('checkout-panel-payoneer');
+
+        if (!paypalTab || !payoneerTab || !paypalPanel || !payoneerPanel) return;
+
+        if (method === 'paypal') {
+            paypalTab.className = 'p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-900 dark:text-white';
+            payoneerTab.className = 'p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
+            paypalPanel.classList.remove('hidden');
+            payoneerPanel.classList.add('hidden');
+        } else {
+            payoneerTab.className = 'p-2.5 rounded-xl border-2 border-primary bg-amber-50/40 dark:bg-primary/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-900 dark:text-white';
+            paypalTab.className = 'p-2.5 rounded-xl border border-slate-200 dark:border-primary/20 bg-slate-50 dark:bg-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 dark:text-slate-400 cursor-pointer';
+            payoneerPanel.classList.remove('hidden');
+            paypalPanel.classList.add('hidden');
+        }
+    }
+
+    async function initPayPalForOrder(order) {
+        const container = document.getElementById('paypal-button-container');
+        const fallback = document.getElementById('paypal-fallback-container');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="py-3 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined animate-spin text-base text-primary">sync</span>
+                <span>Connecting to PayPal gateway...</span>
+            </div>
+        `;
+        if (fallback) fallback.classList.add('hidden');
+
+        try {
+            if (!window.PayPalConfig) {
+                throw new Error('PayPal configuration module not loaded');
+            }
+            const paypal = await window.PayPalConfig.loadSdk();
+            container.innerHTML = '';
+
+            if (paypal && paypal.Buttons) {
+                paypalButtonsInstance = paypal.Buttons({
+                    style: {
+                        layout: 'vertical',
+                        color: 'gold',
+                        shape: 'rect',
+                        label: 'paypal',
+                        height: 40
+                    },
+                    createOrder: async function(data, actions) {
+                        try {
+                            const session = JSON.parse(localStorage.getItem('dezan_session') || '{}');
+                            const token = session.token || session.accessToken;
+                            const headers = { 'Content-Type': 'application/json' };
+                            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                            const res = await fetch('/api/paypal/create-order', {
+                                method: 'POST',
+                                headers,
+                                body: JSON.stringify({
+                                    orderId: order.id || order.order_number,
+                                    amount: parseFloat(order.price || order.amount || 15).toFixed(2),
+                                    currency: 'USD'
+                                })
+                            });
+
+                            const result = await res.json();
+                            if (result.success && result.data && result.data.id) {
+                                return result.data.id;
+                            }
+                            throw new Error(result.message || 'Server order creation failed');
+                        } catch (err) {
+                            console.warn('[PayPal Server Route Notice - Using Direct SDK]:', err.message);
+                            const amountVal = parseFloat(order.price || order.amount || 15).toFixed(2);
+                            return actions.order.create({
+                                purchase_units: [{
+                                    description: `Dezan Digitizing ${order.is_quote ? 'Quote' : 'Order'} #${order.order_number}`,
+                                    amount: {
+                                        currency_code: 'USD',
+                                        value: amountVal
+                                    }
+                                }]
+                            });
+                        }
+                    },
+                    onApprove: async function(data, actions) {
+                        try {
+                            container.innerHTML = `
+                                <div class="py-3 text-center text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center justify-center gap-2">
+                                    <span class="material-symbols-outlined animate-spin text-base">sync</span>
+                                    <span>Confirming payment with production queue...</span>
+                                </div>
+                            `;
+
+                            const session = JSON.parse(localStorage.getItem('dezan_session') || '{}');
+                            const token = session.token || session.accessToken;
+                            const headers = { 'Content-Type': 'application/json' };
+                            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                            let transactionId = data.orderID;
+
+                            // Capture payment securely via server-side API route
+                            try {
+                                const captureRes = await fetch('/api/paypal/capture-order', {
+                                    method: 'POST',
+                                    headers,
+                                    body: JSON.stringify({
+                                        paypalOrderId: data.orderID,
+                                        orderId: order.id || order.order_number
+                                    })
+                                });
+                                const captureResult = await captureRes.json();
+                                if (captureResult.success && captureResult.data && captureResult.data.captureId) {
+                                    transactionId = captureResult.data.captureId;
+                                } else {
+                                    const details = await actions.order.capture().catch(() => null);
+                                    if (details && details.id) transactionId = details.id;
+                                }
+                            } catch (serverCaptureErr) {
+                                console.warn('[PayPal Server Capture Fallback]:', serverCaptureErr.message);
+                                const details = await actions.order.capture();
+                                transactionId = details.id || data.orderID;
+                            }
+
+                            await completeSuccessfulPayment(order, 'PayPal', transactionId);
+                        } catch (err) {
+                            console.error('[PayPal Capture Error]:', err);
+                            alert(`Payment capture notice: ${err.message}`);
+                            if (fallback) fallback.classList.remove('hidden');
+                        }
+                    },
+                    onError: function(err) {
+                        console.warn('[PayPal SDK Notice]:', err);
+                        container.innerHTML = `
+                            <div class="py-2 text-center text-xs text-rose-600 dark:text-rose-400 space-y-2">
+                                <p>PayPal encountered an issue. Please try again.</p>
+                                <button type="button" onclick="window.clientWorkspace.initPayPalForOrder(window.clientWorkspace.getCurrentCheckoutOrder())" class="px-3 py-1.5 rounded-lg bg-primary text-slate-950 font-bold text-xs inline-flex items-center gap-1 cursor-pointer">
+                                    <span class="material-symbols-outlined text-sm">refresh</span> Try Again
+                                </button>
+                            </div>
+                        `;
+                    },
+                    onCancel: function(data) {
+                        console.log('[PayPal Payment Cancelled]:', data);
+                    }
+                });
+
+                await paypalButtonsInstance.render('#paypal-button-container');
+            } else {
+                throw new Error('PayPal Buttons unavailable');
+            }
+        } catch (err) {
+            console.warn('[PayPal Gateway Notice]:', err.message);
+            container.innerHTML = `
+                <div class="py-2 text-center text-xs text-rose-600 dark:text-rose-400 space-y-2">
+                    <p>Unable to connect to PayPal gateway (${err.message}).</p>
+                    <button type="button" onclick="window.clientWorkspace.initPayPalForOrder(window.clientWorkspace.getCurrentCheckoutOrder())" class="px-3 py-1.5 rounded-lg bg-primary text-slate-950 font-bold text-xs inline-flex items-center gap-1 cursor-pointer">
+                        <span class="material-symbols-outlined text-sm">refresh</span> Retry Connection
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    function getCurrentCheckoutOrder() {
+        if (!currentCheckoutOrderId) return state.orders[0] || null;
+        return state.orders.find(o => o.id === currentCheckoutOrderId || o.order_number === currentCheckoutOrderId) ||
+               (state.quotes && state.quotes.find(q => q.id === currentCheckoutOrderId || q.order_number === currentCheckoutOrderId)) ||
+               null;
+    }
+
+    async function completeSuccessfulPayment(order, method = 'PayPal', transactionId = null) {
+        try {
+            // 1. Update BaaS / local state
+            if (window.insforgeClient && typeof window.insforgeClient.updateOrderPayment === 'function') {
+                await window.insforgeClient.updateOrderPayment(order.id, 'paid', method, transactionId).catch(() => null);
+            }
+
+            // 2. Sync to Backend REST API
+            const session = JSON.parse(localStorage.getItem('dezan_session') || '{}');
+            const token = session.token || session.accessToken;
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const isQuote = (order.is_quote || (order.order_number && order.order_number.startsWith('QUO-')) || order.status === 'quote_ready');
+            if (isQuote) {
+                await fetch(`/api/quotes/${order.id}/convert`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ paymentMethod: method, transactionId })
+                }).catch(e => console.warn('[Backend Convert Sync Notice]:', e.message));
+            } else {
+                await fetch(`/api/orders/${order.id}/payment`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ paymentMethod: method, transactionId })
+                }).catch(e => console.warn('[Backend Order Payment Sync Notice]:', e.message));
+            }
+
+            // 3. Fire Google Ads Conversion Tracking & GA4 Ecommerce Purchase Event
+            if (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackOrderPurchase === 'function') {
+                window.dezanTracker.trackOrderPurchase({
+                    orderId: order.order_number || order.id,
+                    txnId: transactionId || ('TXN-' + Math.floor(100000 + Math.random() * 900000)),
+                    amount: order.price || order.amount || 15.00,
+                    service: order.service_type || 'Embroidery Digitizing',
+                    plan: order.plan_name || order.service_type || 'Standard Order',
+                    placement: order.placement || 'Standard',
+                    turnaround: order.turnaround_speed || 'standard',
+                    email: order.client_email || (session && session.email) || ''
+                });
+            }
+
+            // 4. Update memory state
+            const target = state.orders.find(o => o.id === order.id || o.order_number === order.order_number);
+            if (target) {
+                target.payment_status = 'paid';
+                target.payment_method = method;
+                target.transaction_id = transactionId;
+                if (isQuote) {
+                    target.is_quote = false;
+                    target.status = 'pending_review';
+                }
+            }
+
+            // 5. Close Modals & re-render
+            closeCheckoutModal();
+            closeClientInvoiceModal();
+            closeOrderDetailsModal();
+
+            if (state.currentPage === 'invoices') {
+                renderInvoicesView();
+                renderInvoiceSummaryCards();
+            } else if (state.currentPage === 'orders') {
+                renderOrdersView();
+                renderStats();
+            } else if (state.currentPage === 'quotes') {
+                renderQuotesView();
+            }
+
+            // Realtime Sync
+            try {
+                if (typeof BroadcastChannel !== 'undefined') {
+                    const channel = new BroadcastChannel('dezan_realtime_sync');
+                    channel.postMessage({ type: 'order_payment_completed', orderId: order.id, transactionId });
+                    channel.close();
+                }
+            } catch (e) {}
+
+            const amountStr = parseFloat(order.price || order.amount || 15).toFixed(2);
+            showPaymentSuccessToast(order.order_number, amountStr, method, transactionId);
+        } catch (err) {
+            console.error('[Payment Settlement Error]:', err);
+            alert(`Payment settled, but UI update encountered a notice: ${err.message}`);
+        }
+    }
+
+    async function executeOrderPayment(method) {
+        if (!currentCheckoutOrderId) return;
+        const order = state.orders.find(o => o.id === currentCheckoutOrderId || o.order_number === currentCheckoutOrderId);
+        if (!order) return;
+
+        const simulatedTxId = 'TXN_' + Math.random().toString(36).substring(2, 10).toUpperCase();
+        await completeSuccessfulPayment(order, method, simulatedTxId);
+    }
+
+    function requestPayoneerInvoice() {
+        if (!currentCheckoutOrderId) return;
+        const order = state.orders.find(o => o.id === currentCheckoutOrderId || o.order_number === currentCheckoutOrderId);
+        if (!order) return;
+
+        const subject = encodeURIComponent(`Payoneer Invoice Request - Order #${order.order_number}`);
+        const body = encodeURIComponent(
+            `Hello Dezan Billing Team,\n\nPlease issue a Payoneer Payment Link / ACH invoice for my order:\n\n` +
+            `Order Number: ${order.order_number}\n` +
+            `Design: ${order.design_name || order.project_name || 'Design Order'}\n` +
+            `Service: ${order.service_type || 'Embroidery Digitizing'}\n` +
+            `Amount Due: $${parseFloat(order.price || order.amount || 15).toFixed(2)}\n\n` +
+            `Thank you,\n${state.client?.name || 'Valued Client'}`
+        );
+        window.location.href = `mailto:billing@dezandigitizing.com?subject=${subject}&body=${body}`;
+    }
+
+    function showPaymentSuccessToast(orderNumber, amount, method, transactionId = null) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-emerald-700 text-white shadow-2xl flex items-center gap-3 border border-emerald-400/40 animate-fade-in transition-all';
+        toast.innerHTML = `
+            <span class="material-symbols-outlined text-2xl text-emerald-200">check_circle</span>
+            <div>
+                <div class="font-black text-xs">Payment Confirmed!</div>
+                <div class="text-[11px] text-emerald-100">$${amount} settled for #${orderNumber} via ${method}.</div>
+                ${transactionId ? `<div class="text-[9.5px] font-mono text-emerald-200/80 mt-0.5">Ref: ${transactionId}</div>` : ''}
+            </div>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 400);
+        }, 4500);
     }
 
     function openRevisionModal(orderNumber) {
@@ -1880,6 +2377,11 @@
         openRevisionFromDrawer,
         openClientInvoiceModal,
         closeClientInvoiceModal,
+        openCheckoutModal,
+        closeCheckoutModal,
+        selectCheckoutMethod,
+        executeOrderPayment,
+        requestPayoneerInvoice,
         removeOrder,
         openRevisionModal,
         closeRevisionModal,

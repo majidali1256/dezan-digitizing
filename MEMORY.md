@@ -356,7 +356,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 - `/portfolio.html`: High-resolution gallery and customer feedback showcase.
 - `/pricing.html`: Dedicated flat-rate Pricing showcase in responsive 2-column grid layout, strictly adhering to Dezan's brand color scheme (Dezan Gold `#d4af35` / `#9a7810`, Dark Luxury `#201d12`, Card Dark `#16140c`, Warm Canvas `#f8f7f6`):
   - **Brand Color Harmonization**: Eliminated all mismatched amber/brown shades (`text-amber-800`, `text-amber-950`, `bg-amber-500/10`, `border-amber-400`, `to-amber-600`) in favor of brand tokens `text-primary`, `bg-primary/10`, `border-primary/25`, ensuring 100% aesthetic consistency with `index.html` and `services.html`.
-  - **Hero**: "QUALITY DIGITIZING. REAL PEOPLE.", "Simple Flat-Rate Pricing", subtitle "Professional embroidery digitizing with clean, honest pricing.", 3 circular icon badges (Next Day Turnaround, Digitized by hand - no auto conversion, Order history and online downloads), and real stitch proof embroidery patch visual floating freely with zero bounding box or card border.
+  - **Hero**: "QUALITY DIGITIZING. REAL PEOPLE.", "Simple Flat-Rate Pricing", subtitle "Know your digitizing cost before you quote your customer. Our flat rates make it easy to price jobs, place orders, and keep production moving.", 3 circular icon badges (Next Day Turnaround, Digitized by hand - no auto conversion, Order history and online downloads), and real stitch proof embroidery patch visual floating freely with zero bounding box or card border.
   - **Digitizing Pricing Grid & Cards**: Responsive 3-column desktop layout (`max-w-6xl`) and sleek horizontal mobile cards:
     - Card 1: **$15 Hat / Left Chest Logos** (Up to 5.5 inches) with compact bespoke SVG icon featuring baseball cap and collared polo shirt.
     - Card 2: **$25 Larger Designs** (Over 5.5 inches) with compact bespoke SVG icon featuring varsity/bomber jacket and back embroidery emblem.
@@ -374,7 +374,16 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
       - Immediately below the hero, the "OUR PRICING / Digitizing Pricing" header and both pricing cards (`Hat / Left Chest Logos $15` and `Larger Designs $25`) display as sleek, horizontal pill rows (`flex items-center justify-between`) followed by the compact trust bar ("Flat rate pricing you can depend on.") and subtle tagline ("BRANDS LOOK BETTER HERE").
       - **Dynamic Authentication Banner Placement & Styling**: Restored to its original placement right inside the Hero section (immediately above Section 1: Digitizing Pricing). Styled with consistent emerald green glow styling on both laptop and mobile (`rgba(6,78,59,0.18)` gradient, `rgba(16,185,129,0.45)` border, and green glow box-shadow) with deep forest green action buttons (`bg-[#064e3b]`) for both unauthenticated Sign In prompt and authenticated Client banner.
       - Zero vertical scrolling required to view prices on mobile viewports (e.g. 390x844).
-    - **Desktop Grid Parity**: Larger screens (`md:`) seamlessly render the full 2-column feature checklist cards with action buttons and spacious trust bars.
+    - **Interactive Frequently Asked Questions (FAQ) Section (`#faq`)**:
+    - Placed directly between "What's Included" and the final order CTA.
+    - Features accessible accordion architecture (`window.toggleFaq`, `aria-expanded`, `.faq-content.open` grid height transition, rotating chevrons, number badges `01`–`04`, gold highlight rings on active cards).
+    - **General U.S. Digitizing Cost**:
+      - `How much does embroidery digitizing cost in the U.S.?`: "Standard embroidery digitizing at Dezan starts at $15 for hat and left chest designs up to 5.5 inches. Larger embroidery designs over 5.5 inches are $25."
+    - **Service-Specific Questions Divider & Headings**:
+      - `How much does hat digitizing cost in the U.S.?`: "Cap and hat embroidery digitizing is $15 flat for standard designs up to 5.5 inches wide. 3D puff setup is included when suitable for the artwork."
+      - `How much does left chest digitizing cost in the U.S.?`: "Standard left chest embroidery digitizing is $15 flat for designs up to 5.5 inches."
+      - `How much does jacket back digitizing cost in the U.S.?`: "Large embroidery designs over 5.5 inches are $25 flat, with separate pricing for highly realistic or specialty artwork."
+    - **SEO Structured Data**: Added dedicated Schema.org `FAQPage` JSON-LD markup to `<head>` for rich search snippet ranking on U.S. digitizing price queries.
   - **Strictly Pricing Only**: Zero embedded order forms or quote submission inputs. Authenticated client banners and action buttons route to `client-portal.html` (for logged-in clients) or `portal-login.html?redirect=...` (for unauthenticated visitors).
   - **Instant Visibility & Zero CLS**: Removed `.reveal` opacity blocking so all cards and sections render immediately across all devices, with full light/dark mode contrast parity verified via Playwright visual verification across Desktop (1440x900), Tablet (834x1112), and Mobile (390x844).
 - `/contact.html`: Contact form for general inquiries, and interactive "Request a Custom Quote" portal showcase (`#custom-quote-section`). Features mobile-optimized `#quote-login-prompt` and `#quote-client-banner` with strict `items-stretch sm:items-center` flex alignment, full-width wrapping copy, nested emerald bolt icon badge (curing horizontal centering displacement outside container), responsive `grid-cols-3` step cards with proportional micro-padding, and full touch-target buttons.
@@ -441,17 +450,12 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
       - Header: `Order confirmed! #DZ-1048`
       - Subtitle: `Your payment was successful and your order has been submitted.`
       - Summary Card: "Order Summary", Label: "Order Number", Status: `Paid & Confirmed` (emerald badge), Amount: `$15.00` / `$25.00`.
-      - Fallback note: `Or keep this Order ID for reference — finished files will arrive in your email.`
-    - **For Custom Quotes**:
-      - Header: `Quote requested! #QUO-4321`
-      - Subtitle: `Your request has been submitted. Our master digitizers will review your artwork and estimate stitch counts within 1 hour.`
-      - Summary Card: "Quote Summary", Label: "Quote Number", Status: `Quote Submitted · Free Review` (amber badge), Amount: `Free · Pending Appraisal`.
-      - Fallback note: `Or keep this Quote ID for reference — your custom stitch appraisal will arrive in your email within 1 hour.`
-    - **Frictionless Account Claiming Card (Both Orders & Quotes)**:
+    - **Direct Account Creation Card (Both Orders & Quotes)**:
       - Clean inline card directly under the confirmation:
         `Create a password to access your orders/quotes anytime`
         `Password: ______  Confirm Password: ______`
         `[ Create My Account ]`
+      - **Mandatory Direct Step**: Removed the `Optional` badge and optional fallback notes ("Or keep this Order ID for reference...") to present account creation as the primary required step for accessing orders, downloads, and tracking.
       - Pre-populates the customer's guest email (e.g. `david.miller@example.com`).
   - **Automatic Retroactive Linking (`insforgeClient.claimGuestOrders`)**:
     - When an unauthenticated visitor submits multiple orders and quotes as a guest (e.g. `john@gmail.com`), their records persist in the InsForge PostgreSQL `orders` table with `client_id: null`.
@@ -1007,12 +1011,42 @@ The Worker Studio provides an isolated, production-focused environment for embro
     - **Order Mode**: Displays real-time calculated price (e.g. `$15.00`), payment selection tabs, and checkout CTA (`Pay & Place Order ($15.00)`).
     - **Quote Mode**: Dynamically switches headers ("Request a Free Quote"), adapts step subtitles, displays a $0 upfront explanation box, and sets CTA to `Submit Free Custom Quote`.
 - **2-Stage Adaptive Specification Workflow**:
-  - **Stage 1 (Clean Service Choice)**: Visual interactive cards for `Embroidery Digitizing` (DST, EMB, PES, Left Chest, Caps, 3D Puff) and `Vector Art Conversion` (AI, EPS, SVG, PDF, Clean Curves, Color Separation).
-  - **Stage 2 (Adaptive Technical Requirements)**:
+  - **Stage 1 (Clean Service Choice & Minimal Visual Design)**:
+    - High-conversion interactive cards for **Embroidery Digitizing**, **Vector Art Conversion**, and **Realistic / Pet Portrait Digitizing**.
+    - **Streamlined Visual Clarity**: Removed cluttered file extension badges (`.DST .PES .EXP`, `.AI .EPS .SVG .PDF`, `.DST .PES .EXP .EMB`) from Stage 1 cards to give the screen a clean, spacious, uncluttered aesthetic on mobile and desktop.
+    - Preserves core feature pills (`Left Chest / Hats / Jacket Back`, `3D Puff`, `Print-ready Vectors`, `Pets, Animals & Fur`, `Photorealistic Shading`).
+    - Customer file format choices remain exclusively in Stage 2 (Order Details), where required machine format checkboxes (`.DST`, `.PES`, `EMB`, `.EXP`, `.AI`, etc.) are actively configured with zero clutter.
+    - Synchronized across both `js/order-quote-modal.js` and `client-portal.html` and verified with Playwright (`scripts/verify_step1_clean_cards.js`).
     - **Target Placement & Pricing**:
       - Options: `Left Chest — $15`, `Cap / Hat Front — $15`, `Jacket Back / Large — $25`, and `Custom Placement`.
       - Removed options: `Sleeve / Visor` and `Patches / Badges` completely removed.
       - **Custom Placement**: Dynamically reveals extra text input field `#dig-custom-placement` ("Custom Placement Details", placeholder: `e.g. patch , visor , apron, tote bag, etc.`) for manual entry.
+    - **Dynamic Placement-Linked Fabric & Hat Type Architecture**:
+      - **Contextual Field Title & Dynamic Filtering**:
+        - When **Cap / Hat Front** is selected:
+          - Field label dynamically changes from `Fabric / Garment Material *` to **`Hat / Cap Type *`**.
+          - Exclusively displays hat-related options: `Structured Cap`, `Unstructured Cap / Dad Hat`, `Trucker / Mesh Cap`, `Snapback`, `Fitted Cap`, `Performance / Athletic Cap`, `Beanie / Knit Hat`, and `Other / Custom`.
+          - Unrelated garments (Cotton Polo, Fleece Hoodie, Denim, Leather) are strictly filtered out.
+          - Initial prompt option: `Select hat / cap type`.
+          - Selecting `Other / Custom` dynamically opens an inline text field `#custom-fabric-container` with label `Please enter hat / cap type *` and placeholder `e.g. 5-Panel Camper, Visor, Bucket Hat...`.
+        - When **Left Chest** is selected:
+          - Field label: `Fabric / Garment Material *`.
+          - Initial prompt option: `Select fabric / garment material`.
+          - Options: `Polo / Pique Knit`, `T-Shirt`, `Hoodie / Sweatshirt`, `Performance / Dri-Fit`, `Workwear`, `Jacket`, `Other / Custom`.
+        - When **Jacket Back / Large** is selected:
+          - Field label: `Fabric / Garment Material *`.
+          - Options: `Jacket`, `Denim`, `Heavy Twill / Workwear`, `Hoodie / Fleece`, `Leather`, `Other / Custom`.
+        - When **Custom Placement** is selected:
+          - Field label: `Fabric / Garment Material *`.
+          - Options: `Cotton / Pique Knit`, `T-Shirt / Jersey`, `Hoodie / Fleece`, `Cap / Hat`, `Jacket / Outerwear`, `Workwear / Heavy Twill`, `Patches / Leather / Substrate`, `Other / Custom`.
+      - **Automatic Placement Reset Rule**:
+        - Changing placement after selecting a material/hat type automatically wipes incompatible choices and resets the dropdown to the unselected prompt (`Select hat / cap type` or `Select fabric / garment material`).
+        - Automatically hides and clears the `#custom-fabric-container` and text input.
+        - Prevents submitting invalid combinations (e.g. Cap with Polo material).
+      - **Stage 1 -> Step 2 Validation & Review Summary Parity**:
+        - Moving to Review requires a valid material or hat type; selecting `Other / Custom` requires entering the custom description.
+        - In Step 2 Review summary, label dynamically displays `Hat / Cap Type` when placement is cap, and `Garment / Material` for garments.
+      - **Synchronized Across**: Standalone engine (`js/order-quote-modal.js`) and embedded portal flow (`client-portal.html`). Verified via automated 58-assertion Playwright suite (`scripts/verify_dynamic_placement_materials.js`).
     - **Target Size & Adaptive Large Design Pricing**:
       - Single manual size input: `Target Size: [ e.g. 4.0 Tall / Wide ] [ in ]` (with `in` / `cm` unit toggle).
       - **Dynamic Large Design Rule ($25 over 5.5″ wide)**:
@@ -2691,5 +2725,101 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - Visual artifacts generated in `tests/visual_proofs/`:
     - `clean_link_tiktok_redirected_home.png`
     - `clean_link_instagram_redirected_pricing.png`
+
+## 47. Secure Server-Side PayPal Live Secret & REST API Architecture (Implemented & Verified)
+
+### Architecture & Security Guarantees
+- **Strict Server-Side Isolation**: The PayPal Live Client Secret (`PAYPAL_CLIENT_SECRET`) is stored **strictly as a server-side environment variable** in Vercel and backend Node.js configuration (`server/config/config.js`). It is **never** committed to Git, bundled into JavaScript files, exposed in HTML markup, or stored under any variable beginning with `NEXT_PUBLIC_`.
+- **Environment Separation**:
+  - **Production Mode** (`NODE_ENV === 'production'` or `VERCEL_ENV === 'production'`):
+    - Base URL: `https://api-m.paypal.com`
+    - Live PayPal credentials (`PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET`) are strictly and exclusively used.
+  - **Development / Preview / Testing**:
+    - Base URL: `https://api-m.sandbox.paypal.com`
+    - Defaults to Sandbox test credentials.
+- **Server API Endpoints**:
+  1. `GET /api/paypal/config`:
+     - Safely returns public client parameters: `{ success: true, data: { clientId, currency, environment } }`.
+     - Strictly omits `clientSecret` from any response.
+  2. `POST /api/paypal/create-order`:
+     - Validates order authenticity in PostgreSQL (`public.orders`) to prevent front-end price tampering.
+     - Performs server-to-server OAuth 2.0 authorization against PayPal API (`POST /v1/oauth2/token`) with token caching.
+     - Creates order via PayPal REST API v2 (`POST /v2/checkout/orders`).
+     - Returns `{ id: paypalOrderId, status }`.
+  3. `POST /api/paypal/capture-order`:
+     - Server-side capture call to PayPal REST API v2 (`POST /v2/checkout/orders/{id}/capture`).
+     - Verifies `capture.status === 'COMPLETED'`.
+     - Automatically updates PostgreSQL `orders` record (`payment_status = 'paid'`, `payment_method = 'PayPal'`, `transaction_id = captureId`).
+     - Asynchronously sends order confirmation email to customer and new order dispatch alert to admin via `emailService`.
+- **Frontend Integration**:
+  - `js/paypal-config.js`: Dynamically fetches public configuration from `/api/paypal/config` and initializes the PayPal JS SDK with the environment's Client ID.
+  - `client-portal.html`: Updated `paypal.Buttons` implementation so `createOrder` calls `POST /api/paypal/create-order` and `onApprove` calls `POST /api/paypal/capture-order`.
+  - **Unified Client Workspace Integration (`js/client-workspace.js`)**:
+    - Created dynamic checkout modal injector `ensureCheckoutModalInDom()` with dual tabs:
+      1. **PayPal & Debit/Credit Card**: PayPal Smart Buttons mounted dynamically via `paypal.Buttons`.
+      2. **Payoneer & Direct U.S. Bank ACH**: B2B wire and ACH information for high-volume embroidery shops with 1-click invoice request dispatch.
+    - Updated `openCheckoutModal(orderId)` with resilient order resolution across `state.orders`, `state.quotes`, cached InsForge orders, and localStorage.
+    - Integrated checkout triggers across:
+      - `client-invoices.html`: Unpaid invoice cards and table rows launch the checkout modal.
+      - `client-orders.html`: Unpaid order cards and table rows launch the checkout modal.
+      - `client-quotes.html`: Approved quotes with pricing display "Accept & Pay ($X.XX)" button launching checkout.
+      - Order detail drawer and invoice preview modal.
+    - Capturing payment on a quote automatically promotes the record in PostgreSQL from `is_quote = true` to `is_quote = false`, with status transitioned to `pending_review` and `payment_status = 'paid'`, alerting the production digitizer queue.
+- **Vercel Setup Instructions**:
+  - Add in Vercel Project Settings under **Settings > Environment Variables**:
+    - `PAYPAL_CLIENT_ID`: Live Client ID (Production) / Sandbox Client ID (Preview/Dev)
+    - `PAYPAL_CLIENT_SECRET`: Live Secret (Production) / Sandbox Secret (Preview/Dev)
+- **Automated Verification (`tests/paypal.test.js` & Playwright E2E)**:
+  - 19/19 automated test suite passing (`npm test`).
+  - Headless Playwright browser verification confirmed checkout modal rendering, tab switching, and clean close across `client-invoices.html`, `client-orders.html`, and `client-quotes.html`.
+  - Codebase-wide security scan confirms zero client secrets across all frontend HTML and JS files.
+
+### Automated Account Creation Email Invitation System (Guest Order & Quote Workflows)
+- **Problem Solved**:
+  - Previously, guest customers who completed checkout were prompted to create a password on `order-success.html`, but if they navigated away or closed the tab, they had no direct mechanism in their email to create their account later.
+- **Implementation Highlights**:
+  1. **Dedicated Account Setup Email (`emailService.sendAccountInviteEmail`)**:
+     - Automatically dispatched to any guest customer without an existing `public.profiles` account when they place an order, make a PayPal payment, or submit a quote request.
+     - Subject: `🔐 Create Your Account to Access Order [ORD-XXXX] · Dezan Digitizing` (or Quote).
+     - Contains luxury gold Dezan styling, clear deliverable access specifications (.DST, .PES, .EMB, .PDF), and a 1-click CTA: `Create Your Account & Set Password →`.
+     - Uses secure query parameters: `portal-login.html?tab=register&email=...&order=...&name=...` (or `&quote=...`).
+  2. **Enhanced Transactional Emails (`sendOrderConfirmation` & `sendQuoteEstimationAlert`)**:
+     - Both emails feature prominent Dezan gold account setup cards with direct registration links.
+  3. **New API Endpoint (`POST /api/auth/send-account-invite`)**:
+     - Accepts `{ email, customerName, orderNumber, quoteNumber }`.
+     - Validates profile status in PostgreSQL and dispatches the invitation email asynchronously.
+  4. **Frontend Integration on `order-success.html` & `app.js`**:
+     - Integrated email delivery notification card directly below the account creation form:
+       `"We also emailed an account setup link to [email]."`
+     - Added a "Resend Email" button calling `/api/auth/send-account-invite` with instant visual feedback (`#resend-invite-feedback`).
+  5. **Smart Auto-Claim Portal Registration (`portal-login.html`)**:
+     - Automatically switches to the `Create Account` tab when arriving with `?tab=register` or `?tab=signup`.
+     - Pre-fills email (`#signup-email`) and customer name (`#signup-name`).
+     - Supports both `&order=...` and `&quote=...` parameters, displaying the `#order-claim-notice` banner:
+       `"Catalog Linking Active: Your order ORD-XXXX (or quote request QUO-XXXX) and stitch files will be automatically added to your client catalog upon registration."`
+     - Auto-focuses the password field for immediate friction-free account creation.
+### 48. Step 3 Checkout Payment Guard & Real PayPal Smart Buttons Integration (Implemented & Verified)
+- **Problem Solved**:
+  - Previously, clicking "PayPal" in Step 3 of the Order & Quote modal (`js/order-quote-modal.js` and `client-portal.html`) only visually highlighted a CSS tab. Clicking "Pay & Place Order" invoked `handleAdaptiveOrderSubmit()`, which directly inserted the order into PostgreSQL as `paid` without ever charging the customer or opening the PayPal gateway.
+- **Implementation Highlights**:
+  1. **Embedded PayPal Smart Buttons in Modal Step 3 (`#modal-paypal-button-container`)**:
+     - Dynamically mounted via `window.initModalPayPal()` whenever Step 3 is viewed and PayPal is selected.
+     - Automatically renders official PayPal and Pay Later/Card buttons using `window.PayPalConfig.loadSdk()`.
+     - Added concurrency/debounce guards (`isModalPayPalMounting`) and existing-button detection to prevent duplicate rendering or container-removal errors during rapid tab switching.
+  2. **Strict Direct Submission Prevention Guard**:
+     - The direct submit button (`#adaptive-order-submit-btn`) is automatically hidden (`classList.add('hidden')`) when in PayPal payment mode.
+     - In its place, a clear directional indicator is displayed: `"Click PayPal or Card above"`.
+     - Added a hard programmatic guard inside `handleAdaptiveOrderSubmit()` that immediately intercepts any direct form submission while PayPal is active:
+       `"Please click the PayPal or Debit/Credit Card button above to complete your payment."`
+  3. **Verified Server-Side Payment Capture**:
+     - Clicking the PayPal button invokes `createOrder`, validating job reference and artwork file presence, calculating the live price, and calling `POST /api/paypal/create-order` with the exact dollar amount.
+     - On user authorization, `onApprove` displays an authentic capture loader and calls `POST /api/paypal/capture-order`.
+     - Only after `capture.status === 'COMPLETED'` does `window.finalizeModalOrder()` create the PostgreSQL order record with verified `payment_status = 'paid'`, `payment_method = 'PayPal'`, and the authentic `transactionId`.
+  4. **Multi-Payment & Quote Mode Transitions**:
+     - Switching to **Payoneer / ACH** hides the PayPal buttons and reveals the `"Submit Order & Request Invoice ($XX.XX)"` submit button (`payment_status = 'unpaid'`).
+     - Switching to **Free Quote Mode** hides payment panels and reveals the `"Submit Free Custom Quote"` button (`payment_status = 'unpaid'`, `$0.00`).
+  5. **Verification**:
+     - Verified end-to-end with Playwright browser testing, confirming modal step progression, container mounting, direct submit blocking, tab switching, and quote mode unhiding. Real screenshot saved to `scratch/step3_paypal_modal_verified.png`.
+     - Full automated test suite passes (19/19 tests in `npm test`).
 
 

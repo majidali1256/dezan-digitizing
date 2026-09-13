@@ -146,9 +146,6 @@
 
             <!-- Post-Payment Account Claiming Card (High Conversion Widget) -->
             <div id="guest-claim-account-card" class="bg-white dark:bg-card-dark rounded-2xl p-6 md:p-8 border-2 border-primary/40 shadow-md text-left mb-8 relative overflow-hidden">
-                <div class="absolute top-0 right-0 bg-primary text-background-dark px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-bl-xl">
-                    Optional
-                </div>
                 <div class="flex items-center gap-3 mb-2">
                     <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
                         <span class="material-symbols-outlined text-2xl">lock_open</span>
@@ -185,9 +182,19 @@
                         <span class="material-symbols-outlined text-base">person_add</span>
                         <span>Create My Account</span>
                     </button>
-                    <p id="claim-fallback-note" class="text-[11px] text-slate-500 text-center">
-                        Or keep this Order ID for reference — finished files will arrive in your email.
-                    </p>
+
+                    <!-- Email Delivery Notice & Direct Email Account Setup -->
+                    <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-primary/20 text-xs text-slate-700 dark:text-slate-300 mt-2">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-base shrink-0">mark_email_read</span>
+                            <span>We also emailed an account setup link to <strong id="claim-notice-email" class="text-primary font-mono">your email</strong>.</span>
+                        </div>
+                        <button type="button" id="resend-invite-btn" onclick="window.resendAccountInviteEmail()" class="text-[11px] font-bold text-primary hover:underline shrink-0 cursor-pointer">
+                            Resend Email
+                        </button>
+                    </div>
+                    <div id="resend-invite-feedback" class="hidden text-center text-xs text-emerald-600 dark:text-emerald-400 font-bold mt-1"></div>
+                    <p id="claim-fallback-note" class="hidden"></p>
                 </div>
             </div>
 

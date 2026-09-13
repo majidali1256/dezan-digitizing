@@ -199,7 +199,8 @@ html.dark {
 /* ============================================
    PayPal Button Container
    ============================================ */
-#paypal-button-container {
+#paypal-button-container,
+#modal-paypal-button-container {
     border-radius: 12px;
     overflow: hidden;
 }

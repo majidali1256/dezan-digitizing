@@ -128,10 +128,27 @@ const requestQuote = async (req, res) => {
         const createdQuote = insertRes.rows[0];
 
         // Trigger asynchronous email alerts (Client Confirmation + Admin Notification to fdezan91@gmail.com)
-        emailService.sendQuoteEstimationAlert(createdQuote, finalClientEmail.toLowerCase().trim())
+        const normalizedClientEmail = finalClientEmail.toLowerCase().trim();
+        emailService.sendQuoteEstimationAlert(createdQuote, normalizedClientEmail)
             .catch(e => console.warn('[Quote Email Warning]:', e.message));
         emailService.sendNewQuoteAdminAlert(createdQuote)
             .catch(e => console.warn('[Quote Admin Alert Warning]:', e.message));
+
+        // If client does not have an account yet, send dedicated account creation invite email
+        (async () => {
+            try {
+                const userCheck = await query('SELECT id FROM public.profiles WHERE LOWER(email) = $1', [normalizedClientEmail]);
+                if (userCheck.rows.length === 0) {
+                    await emailService.sendAccountInviteEmail({
+                        email: normalizedClientEmail,
+                        customerName: clientName || '',
+                        quoteNumber: createdQuote.order_number || createdQuote.quote_number
+                    });
+                }
+            } catch (inviteErr) {
+                console.warn('[Quote Account Invite Warning]:', inviteErr.message);
+            }
+        })();
 
         return success(res, createdQuote, 'Quote request submitted successfully. Admin will appraise shortly.', 201);
     } catch (err) {
@@ -280,7 +297,23 @@ const convertQuoteToOrder = async (req, res) => {
         try {
             const clientEmail = convertedOrder.client_email || (user && user.email);
             if (clientEmail) {
-                emailService.sendOrderConfirmation(convertedOrder, clientEmail).catch(e => console.warn('[Email Warning]:', e.message));
+                const normEmail = clientEmail.toLowerCase().trim();
+                emailService.sendOrderConfirmation(convertedOrder, normEmail).catch(e => console.warn('[Email Warning]:', e.message));
+
+                (async () => {
+                    try {
+                        const userCheck = await query('SELECT id FROM public.profiles WHERE LOWER(email) = $1', [normEmail]);
+                        if (userCheck.rows.length === 0) {
+                            await emailService.sendAccountInviteEmail({
+                                email: normEmail,
+                                customerName: convertedOrder.client_name || '',
+                                orderNumber: convertedOrder.order_number
+                            });
+                        }
+                    } catch (inviteErr) {
+                        console.warn('[Account Invite Trigger Warning]:', inviteErr.message);
+                    }
+                })();
             }
             emailService.sendNewOrderAdminAlert(convertedOrder).catch(e => console.warn('[Email Warning]:', e.message));
         } catch (e) {

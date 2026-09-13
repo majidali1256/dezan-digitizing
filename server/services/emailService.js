@@ -14,30 +14,59 @@ class EmailService {
     constructor() {
         this.transporter = null;
         this.adminEmail = process.env.ADMIN_EMAIL || config.email?.adminEmail || 'fdezan91@gmail.com';
-        this.fromAddress = `"Dezan Digitizing" <${process.env.SMTP_USER || 'notifications@dezandigitizing.com'}>`;
+        this.fromAddress = `"Dezan Digitizing" <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || 'notifications@dezandigitizing.com'}>`;
         this.initTransporter();
     }
 
     initTransporter() {
-        if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+        const host = process.env.SMTP_HOST;
+        const user = process.env.SMTP_USER;
+        const pass = process.env.SMTP_PASS;
+
+        if (user && pass) {
             try {
-                this.transporter = nodemailer.createTransport({
-                    host: process.env.SMTP_HOST,
-                    port: parseInt(process.env.SMTP_PORT || '587', 10),
-                    secure: process.env.SMTP_SECURE === 'true',
-                    auth: {
-                        user: process.env.SMTP_USER,
-                        pass: process.env.SMTP_PASS
-                    }
+                if ((host && host.includes('gmail.com')) || (!host && user.includes('@gmail.com'))) {
+                    this.transporter = nodemailer.createTransport({
+                        service: 'gmail',
+                        auth: {
+                            user: user,
+                            pass: pass
+                        }
+                    });
+                    console.log('📧 [EmailService] Gmail SMTP transporter configured for user:', user);
+                } else {
+                    this.transporter = nodemailer.createTransport({
+                        host: host || 'smtp.gmail.com',
+                        port: parseInt(process.env.SMTP_PORT || '587', 10),
+                        secure: process.env.SMTP_SECURE === 'true',
+                        auth: {
+                            user: user,
+                            pass: pass
+                        }
+                    });
+                    console.log('📧 [EmailService] Custom SMTP transporter configured with host:', host, 'for:', user);
+                }
+
+                // Verify credentials asynchronously
+                this.transporter.verify().then(() => {
+                    console.log('✅ [EmailService] SMTP connection verified successfully! Ready to deliver real emails.');
+                }).catch(err => {
+                    console.error('❌ [EmailService] SMTP verification failed with error:', err.message);
                 });
-                console.log('📧 [EmailService] SMTP transporter initialized with host:', process.env.SMTP_HOST);
             } catch (err) {
                 console.warn('⚠️ [EmailService] Failed to initialize SMTP transporter:', err.message);
                 this.transporter = null;
             }
         } else {
-            console.log('ℹ️ [EmailService] SMTP credentials not set; running in dev/simulation mode with console logging.');
+            console.log('ℹ️ [EmailService] Real email sending is currently inactive (SMTP_USER / SMTP_PASS missing in .env.local). Running in simulation mode.');
         }
+    }
+
+    /**
+     * Check whether real outbound SMTP is configured
+     */
+    isConfigured() {
+        return !!this.transporter;
     }
 
     /**
@@ -54,7 +83,8 @@ class EmailService {
         if (sentEmailsLog.length > 50) sentEmailsLog.pop();
 
         if (!this.transporter) {
-            console.log(`\n📨 [Simulated Email Sent] To: ${to} | Subject: "${subject}"`);
+            console.log(`\n📨 [Simulated Email (Not Sent)] To: ${to} | Subject: "${subject}"`);
+            console.log(`   💡 NOTE: Real delivery is simulated because SMTP_USER & SMTP_PASS are missing in .env.local / Vercel.`);
             return { success: true, simulated: true, to, subject };
         }
 
@@ -159,10 +189,10 @@ class EmailService {
 
             <p style="font-size: 13px; color: #94a3b8;">Standard turnaround is 12–24 hours. You can track live production progress and download your stitch files (.DST, .EMB, .PDF) as soon as they are ready.</p>
 
-            <div style="margin-top: 24px; padding: 20px; border-radius: 12px; background: rgba(212, 175, 53, 0.08); border: 1px dashed rgba(212, 175, 53, 0.35); text-align: center;">
-                <h4 style="margin: 0 0 8px 0; color: #d4af35; font-size: 15px; font-weight: 800;">✨ Add This Order to Your Permanent Design Catalog</h4>
-                <p style="margin: 0 0 14px 0; font-size: 13px; color: #cbd5e1; line-height: 1.5;">Create your free client account using this email to organize all your stitch files in your personal catalog, submit free sew-out revisions, and re-order with 1-click.</p>
-                <a href="${claimUrl}" style="display: inline-block; padding: 11px 24px; background: #d4af35; color: #0d0c07; text-decoration: none; font-weight: 900; font-size: 13px; border-radius: 8px;">Create Free Account & Claim Order &rarr;</a>
+            <div style="margin-top: 24px; padding: 22px; border-radius: 12px; background: rgba(212, 175, 53, 0.08); border: 1px dashed rgba(212, 175, 53, 0.4); text-align: center;">
+                <h4 style="margin: 0 0 8px 0; color: #d4af35; font-size: 15px; font-weight: 800;">✨ Create Your Password & Access Your Orders</h4>
+                <p style="margin: 0 0 14px 0; font-size: 13px; color: #cbd5e1; line-height: 1.5;">Create your client account using this email to organize your stitch files in your personal catalog, submit free sew-out revisions, and download deliverables anytime.</p>
+                <a href="${claimUrl}" style="display: inline-block; padding: 12px 26px; background: #d4af35; color: #0d0c07; text-decoration: none; font-weight: 900; font-size: 13px; border-radius: 8px;">Create Account & Claim Order &rarr;</a>
             </div>
         `;
         const actionBtn = `<a href="${trackUrl}" class="btn-cta">Track Order & Download Files &rarr;</a>`;
@@ -170,7 +200,7 @@ class EmailService {
         return this.sendMail({
             to: clientEmail,
             subject,
-            html: this.wrapTemplate({ title: subject, preheader: `Order ${order.order_number} confirmed. Track progress or create account.`, content, actionBtn }),
+            html: this.wrapTemplate({ title: subject, preheader: `Order ${order.order_number} confirmed. Create your account to download files & track progress.`, content, actionBtn }),
             text: `Your order ${order.order_number} has been created! Track live progress and get ready files at: ${trackUrl} — Or create your account to add to your catalog: ${claimUrl}`
         });
     }
@@ -425,25 +455,82 @@ class EmailService {
      */
     async sendQuoteEstimationAlert(quote, clientEmail) {
         if (!clientEmail) return;
-        const subject = `Free Quote Estimate: ${quote.quote_number || quote.id} · Dezan Digitizing`;
+        const quoteNum = quote.quote_number || quote.order_number || quote.id;
+        const subject = `Free Quote Estimate: ${quoteNum} · Dezan Digitizing`;
+        const claimUrl = `https://dezan-digitizing.vercel.app/portal-login.html?tab=register&email=${encodeURIComponent(clientEmail)}&quote=${quoteNum}&name=${encodeURIComponent(quote.customer_name || quote.client_name || '')}`;
+
         const content = `
             <div class="badge">Quote Received</div>
             <h2 style="color: #ffffff; margin-top: 0; font-size: 20px;">We are reviewing your artwork</h2>
             <p>Thank you for submitting a quote request. Our head digitizer is analyzing your design for stitch estimation and color sequencing.</p>
 
             <div class="info-card">
-                <div class="info-row"><span class="info-label">Quote Reference</span><span class="info-val" style="color: #d4af35;">${quote.quote_number || quote.id}</span></div>
-                <div class="info-row"><span class="info-label">Design Name</span><span class="info-val">${quote.design_name || 'Artwork'}</span></div>
+                <div class="info-row"><span class="info-label">Quote Reference</span><span class="info-val" style="color: #d4af35;">${quoteNum}</span></div>
+                <div class="info-row"><span class="info-label">Design Name</span><span class="info-val">${quote.design_name || quote.project_name || 'Artwork'}</span></div>
                 <div class="info-row"><span class="info-label">Estimated Turnaround</span><span class="info-val">2–4 Hours</span></div>
             </div>
+
+            <div style="margin-top: 24px; padding: 20px; border-radius: 12px; background: rgba(212, 175, 53, 0.08); border: 1px dashed rgba(212, 175, 53, 0.35); text-align: center;">
+                <h4 style="margin: 0 0 8px 0; color: #d4af35; font-size: 15px; font-weight: 800;">✨ Create Your Free Account to Track Quote & Approve</h4>
+                <p style="margin: 0 0 14px 0; font-size: 13px; color: #cbd5e1; line-height: 1.5;">Create your client password to track your appraisal in real time, view stitch calculations, and approve production with 1-click.</p>
+                <a href="${claimUrl}" style="display: inline-block; padding: 11px 24px; background: #d4af35; color: #0d0c07; text-decoration: none; font-weight: 900; font-size: 13px; border-radius: 8px;">Create Free Account & View Quote &rarr;</a>
+            </div>
         `;
-        const actionBtn = `<a href="https://dezan-digitizing.vercel.app/client-quotes.html" class="btn-cta">View Quotes in Portal &rarr;</a>`;
+        const actionBtn = `<a href="${claimUrl}" class="btn-cta">View Quotes in Portal &rarr;</a>`;
 
         return this.sendMail({
             to: clientEmail,
             subject,
-            html: this.wrapTemplate({ title: subject, preheader: `Quote received for ${quote.design_name || 'artwork'}`, content, actionBtn }),
-            text: `Quote ${quote.quote_number || quote.id} received. View details at https://dezan-digitizing.vercel.app/client-quotes.html`
+            html: this.wrapTemplate({ title: subject, preheader: `Quote received for ${quote.design_name || quote.project_name || 'artwork'}. Create your account to view estimate.`, content, actionBtn }),
+            text: `Quote ${quoteNum} received. Create your account to view details and approve: ${claimUrl}`
+        });
+    }
+
+    /**
+     * 6. Send Dedicated Account Creation Invitation Email
+     * Allows guest customers to create their password and connect their orders from their email inbox.
+     */
+    async sendAccountInviteEmail({ email, customerName, orderNumber, quoteNumber }) {
+        if (!email) return;
+        const refLabel = orderNumber ? `Order ${orderNumber}` : quoteNumber ? `Quote ${quoteNumber}` : 'Your Dezan Account';
+        const subject = `🔐 Create Your Account to Access ${refLabel} · Dezan Digitizing`;
+        const claimUrl = `https://dezan-digitizing.vercel.app/portal-login.html?tab=register&email=${encodeURIComponent(email)}${orderNumber ? `&order=${encodeURIComponent(orderNumber)}` : ''}${quoteNumber ? `&quote=${encodeURIComponent(quoteNumber)}` : ''}${customerName ? `&name=${encodeURIComponent(customerName)}` : ''}`;
+
+        const content = `
+            <div class="badge">Account Setup</div>
+            <h2 style="color: #ffffff; margin-top: 0; font-size: 20px;">Set up your client account</h2>
+            <p>Hello ${customerName || 'Valued Client'},</p>
+            <p>Thank you for choosing Dezan Digitizing. ${orderNumber ? `Your order <strong>${orderNumber}</strong> has been logged into our master queue.` : quoteNumber ? `Your quote request <strong>${quoteNumber}</strong> is currently being reviewed.` : 'Your designs have been logged into our system.'}</p>
+            <p>To access your embroidery stitch files, download production deliverables (.DST, .PES, .EMB, .PDF), request free revisions, and track progress anytime, please create your password below:</p>
+
+            <div class="info-card">
+                <div class="info-row"><span class="info-label">Account Email</span><span class="info-val" style="color: #d4af35;">${email}</span></div>
+                <div class="info-row"><span class="info-label">Associated Item</span><span class="info-val">${refLabel}</span></div>
+                <div class="info-row"><span class="info-label">Deliverable Access</span><span class="info-val">.DST, .PES, .EMB, .PDF Approval</span></div>
+                <div class="info-row"><span class="info-label">Client Benefits</span><span class="info-val" style="color: #10b981;">Free Revisions · 1-Click Reorders</span></div>
+            </div>
+
+            <p style="font-size: 13px; color: #94a3b8;">Your account takes less than 30 seconds to set up. Your orders and designs will be automatically linked to your private catalog as soon as you choose a password.</p>
+
+            <div style="text-align: center; margin: 28px 0 16px 0;">
+                <a href="${claimUrl}" class="btn-cta" style="display: inline-block; margin: 0; padding: 14px 32px; font-size: 15px;">Create Your Account & Set Password &rarr;</a>
+            </div>
+
+            <p style="font-size: 12px; color: #64748b; margin-top: 20px; word-break: break-all;">
+                Button not loading? Copy and paste this link into your browser:<br>
+                <a href="${claimUrl}" style="color: #d4af35; text-decoration: underline;">${claimUrl}</a>
+            </p>
+        `;
+
+        return this.sendMail({
+            to: email,
+            subject,
+            html: this.wrapTemplate({
+                title: subject,
+                preheader: `Create your password to access ${refLabel} and download ready stitch files.`,
+                content
+            }),
+            text: `Create your Dezan Digitizing account to access ${refLabel}:\n\n${claimUrl}\n\nSet your password to download files (.DST, .PES, .EMB, .PDF) and manage orders.`
         });
     }
 
