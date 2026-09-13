@@ -13,15 +13,20 @@
 (function() {
     'use strict';
 
+    const isLocalhost = typeof window !== 'undefined' && 
+        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+    const LIVE_CLIENT_ID = 'BAAZCK8sjpq6lmHZ2GSQL9ig6DZt0HUD4Kx78GiV-uwpX1P_o5z-Lw6AamZSOx5kV8QfN47QqZBRdwE02c';
+
     const PayPalConfig = {
-        // Production PayPal Client ID (public-facing, safe for browser)
+        // Auto-switch: Sandbox on localhost, Live on production domains
         clientId: (typeof window !== 'undefined' && window.DEZAN_PAYPAL_CLIENT_ID) || 
                   (typeof window !== 'undefined' && window.ENV && window.ENV.PAYPAL_CLIENT_ID) || 
-                  'BAAZCK8sjpq6lmHZ2GSQL9ig6DZt0HUD4Kx78GiV-uwpX1P_o5z-Lw6AamZSOx5kV8QfN47QqZBRdwE02c',
+                  (isLocalhost ? 'sb' : LIVE_CLIENT_ID),
         
         currency: 'USD',
         intent: 'capture',
-        environment: 'production',
+        environment: isLocalhost ? 'sandbox' : 'production',
         isLoaded: false,
         isLoading: false,
         _loadPromise: null,
