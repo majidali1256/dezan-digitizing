@@ -1,110 +1,26 @@
 # ==============================================================================
-# Cloudflare Pages Clean URLs & Server Rewrites
-# Guarantees instant 200 responses for clean URLs, sub-pages, and portal routes
-# NOTE: Never use recursive wildcards (e.g. /path/* /path.html) as Cloudflare's
-# clean URLs engine detects these as potential infinite loops and rejects builds.
+# Cloudflare Pages — Alias Redirects Only
+# Cloudflare's built-in Clean URLs automatically serves .html files and
+# directory index.html files. Only TRUE ALIASES are defined here (where the
+# URL slug differs from the actual filename).
 # ==============================================================================
 
-# 1. Primary Public Marketing Routes
-/order                     /order.html                     200
-/order/                    /order.html                     200
-/pricing                   /pricing.html                   200
-/pricing/                  /pricing.html                   200
-/services                  /services.html                  200
-/services/                 /services.html                  200
-/portfolio                 /portfolio.html                 200
-/portfolio/                /portfolio.html                 200
-/about                     /about.html                     200
-/about/                    /about.html                     200
-/contact                   /contact.html                   200
-/contact/                  /contact.html                   200
-/privacy                   /privacy.html                   200
-/privacy/                  /privacy.html                   200
-/terms                     /terms.html                     200
-/terms/                    /terms.html                     200
-/refund-policy             /refund-policy.html             200
-/refund-policy/            /refund-policy.html             200
-/profile                   /profile.html                   200
-/profile/                  /profile.html                   200
-/order-success             /order-success.html             200
-/order-success/            /order-success.html             200
-
-# 2. Authentication & Order Tracking Shortcuts
-/portal-login              /portal-login.html              200
-/portal-login/             /portal-login.html              200
+# Authentication Shortcuts (slug ≠ filename)
 /login                     /portal-login.html              200
 /login/                    /portal-login.html              200
 /signin                    /portal-login.html              200
 /signin/                   /portal-login.html              200
 /dashboard                 /portal-login.html              200
 /dashboard/                /portal-login.html              200
-/track-order               /track-order.html               200
-/track-order/              /track-order.html               200
+
+# Order Tracking Shortcut
 /track                     /track-order.html               200
 /track/                    /track-order.html               200
 
-# 3. Dedicated Service Landing Hubs
-/embroidery-digitizing     /embroidery-digitizing/index.html 200
-/embroidery-digitizing/    /embroidery-digitizing/index.html 200
-/vector-art-conversion     /vector-art-conversion/index.html 200
-/vector-art-conversion/    /vector-art-conversion/index.html 200
-/stitch-lab                /stitch-lab/index.html          200
-/stitch-lab/               /stitch-lab/index.html          200
-
-# 4. Portal Workspaces (Role-Based Dashboards)
+# Portal Workspace Shortcuts (slug ≠ filename)
 /admin                     /admin-portal.html              200
 /admin/                    /admin-portal.html              200
-/admin-portal              /admin-portal.html              200
-/admin-portal/             /admin-portal.html              200
-/admin-orders              /admin-orders.html              200
-/admin-orders/             /admin-orders.html              200
-/admin-clients             /admin-clients.html             200
-/admin-clients/            /admin-clients.html             200
-/admin-catalog             /admin-catalog.html             200
-/admin-catalog/            /admin-catalog.html             200
-/admin-team                /admin-team.html                200
-/admin-team/               /admin-team.html                200
-
 /client                    /client-portal.html             200
 /client/                   /client-portal.html             200
-/client-portal             /client-portal.html             200
-/client-portal/            /client-portal.html             200
-/client-orders             /client-orders.html             200
-/client-orders/            /client-orders.html             200
-/client-quotes             /client-quotes.html             200
-/client-quotes/            /client-quotes.html             200
-/client-invoices           /client-invoices.html           200
-/client-invoices/          /client-invoices.html           200
-/client-profile            /client-profile.html            200
-/client-profile/           /client-profile.html            200
-
 /worker                    /worker-portal.html             200
 /worker/                   /worker-portal.html             200
-/worker-portal             /worker-portal.html             200
-/worker-portal/            /worker-portal.html             200
-/worker-tasks              /worker-tasks.html              200
-/worker-tasks/             /worker-tasks.html              200
-/worker-archive            /worker-archive.html            200
-/worker-archive/           /worker-archive.html            200
-/worker-specs              /worker-specs.html              200
-/worker-specs/             /worker-specs.html              200
-/worker-settings           /worker-settings.html           200
-/worker-settings/          /worker-settings.html           200
-
-# 5. Social Media Attribution Ingestion Routes
-/facebook                  /facebook/index.html            200
-/facebook/                 /facebook/index.html            200
-/fb                        /fb/index.html                  200
-/fb/                       /fb/index.html                  200
-/instagram                 /instagram/index.html           200
-/instagram/                /instagram/index.html           200
-/ig                        /ig/index.html                  200
-/ig/                       /ig/index.html                  200
-/tiktok                    /tiktok/index.html              200
-/tiktok/                   /tiktok/index.html              200
-/youtube                   /youtube/index.html             200
-/youtube/                  /youtube/index.html             200
-/yt                        /yt/index.html                  200
-/yt/                       /yt/index.html                  200
-/pinterest                 /pinterest/index.html           200
-/pinterest/                /pinterest/index.html           200
