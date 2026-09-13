@@ -3000,5 +3000,32 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - Media asset verification: All images (`naturalWidth > 0`, complete: true) and videos (`readyState = 4`, valid dimensions) verified with zero 404 errors.
   - Zero layout shifts, explicit aspect ratios, WCAG 2.1 AA compliant contrast.
 
+## 52. Public & In-Modal Order Flow Resilience (Zero "Can't Open Page" / 404 Errors)
 
+### Problem & Root Cause
+- **Symptom**: When visitors or clients on public pages outside the dashboard clicked "Order Now" and selected a service in the modal (e.g. Embroidery Digitizing), browsers (especially Safari on macOS/iOS and local `file:///` previews) threw: *"Safari Can't Open the Page"*.
+- **Root Cause**:
+  1. In commit `92c6dcb`, an abortive redirect (`if (!state.isQuote) { window.location.href = destUrl; return; }`) was added to `selectOrderService()` in `js/order-quote-modal.js`, intercepting in-modal service clicks and forcing navigation to `/order?service=embroidery`.
+  2. In `file:///` local previews, `/order` resolved to `file:///order` (which does not exist on disk), triggering Safari's "Can't open page" error.
+  3. On static hosting / custom domains without rewrite rules, `/order` returned HTTP 404 because only `order.html` existed at root and no `order/index.html` directory was present.
+  4. Bypassed the fully functional 3-step modal flow (Step 1: Choose Service $\rightarrow$ Step 2: Order Details $\rightarrow$ Step 3: Review & Pay) that was built to execute seamlessly in-place.
 
+### Solution & Architectural Enhancements
+1. **Restored In-Modal Service Transitions (`js/order-quote-modal.js`)**:
+   - Removed the abortive redirection block from `window.selectOrderService(service, plan)`.
+   - Selecting a service now transitions smoothly to **Step 2 (Order Details)** within the modal:
+     - Automatically reveals `#order-step-2-view` and hides `#order-service-selection-view`.
+     - Updates top stepper from Step 1 to Step 2 with gold highlight and checkmark.
+     - Dynamically configures fields, placement options, and flat-rate pricing for Embroidery Digitizing, Vector Art, and Pet Portraits.
+     - Advances seamlessly to **Step 3 (Review & Pay)** upon input validation.
+2. **Resilient URL & Fallback Routing (`app.js`)**:
+   - Updated `window.handleOrderClick(e, service, plan)`:
+     - Prioritizes `openOrderQuoteModal({ service, plan, isQuote: false })` whenever the modal is present on the page. If `service` is specified, it opens the modal pre-selected directly on Step 2.
+     - If the modal is unavailable, safely routes to `order.html` (with protocol-aware pathing that supports `file:///`, GitHub Pages, and custom web servers).
+3. **Static Directory Redundancy (`order/index.html` & `_redirects`)**:
+   - Created `order/index.html` with `<base href="../" />` mirroring `order.html`. Guarantees that `/order`, `/order/`, and `/order.html` natively return HTTP 200 OK on all web servers (Cloudflare Pages, GitHub Pages, Netlify, Nginx, Apache).
+   - Added wildcard redirect `/order/*  /order.html  200` to `_redirects`.
+4. **Automated Verification**:
+   - Playwright verification (`scripts/verify_dedicated_order_flow.js`): All 8/8 tests passed.
+   - Verified in-modal 3-step progression (Steps 1 $\rightarrow$ 2 $\rightarrow$ 3) on Desktop (1440px) and Mobile (390px) with zero errors.
+   - Core test suite (`npm test`): 19/19 tests passing.

@@ -86,15 +86,14 @@ async function runVerification() {
 
         // Click "Embroidery Digitizing" card inside modal
         console.log('  → Clicking Embroidery Digitizing card...');
-        await Promise.all([
-            page.waitForURL(url => url.pathname.includes('/order') || url.pathname.includes('/order.html')),
-            page.click('button[onclick*="selectOrderService(\'Digitizing\')"]')
-        ]);
+        await page.click('button[onclick*="selectOrderService(\'Digitizing\')"]');
+        await page.waitForTimeout(400);
 
-        const currentUrl = page.url();
-        console.log(`  ✔ Navigated to dedicated order page: ${currentUrl}`);
-        assert.ok(currentUrl.includes('service=embroidery'), 'URL must contain ?service=embroidery');
-        assert.ok(currentUrl.includes('gclid=TEST_CLICK_ID_999'), 'Attribution gclid must be preserved in URL');
+        const step2Visible = await page.isVisible('#order-step-2-view');
+        const bannerText = await page.innerText('#service-banner-title');
+        console.log(`  ✔ In-modal Step 2 revealed smoothly: ${step2Visible} (Service: ${bannerText})`);
+        assert.ok(step2Visible, 'Step 2 Order Details must be visible inside modal');
+        assert.strictEqual(bannerText, 'Embroidery Digitizing', 'Banner title must show Embroidery Digitizing');
         passedTests++;
 
         // =========================================================================
