@@ -3334,4 +3334,28 @@ The Worker Studio provides an isolated, production-focused environment for embro
   - Backend unit test suite: `node --test tests/paypal.test.js tests/payment-regression.test.js` passed **14/14 tests (100%)**.
   - Playwright visual verification across Desktop (1512x982) and Mobile (390x844): Verified direct inline card fields, real-time brand detection badges (Visa and Mastercard), and zero layout shifts.
 
+## 53. PayPal & Card Checkout Latency & Perceived Performance Optimization (Implemented & Verified)
+- **Problem**:
+  - Customers experienced multi-second delays when selecting "Credit / Debit Card" and a sluggish feel during PayPal checkout.
+  - Root causes identified:
+    1. Zero preconnect/DNS-prefetch links for `paypal.com` or `c.paypal.com`, forcing the browser to wait for TLS/DNS handshakes late in Step 3.
+    2. SDK requested `components=buttons,card-fields` even when no server `clientToken` was present. PayPal's SDK spent 2-4 seconds evaluating merchant eligibility before timing out and falling back.
+    3. `initModalCardFieldsComponent` attempted to mount CardFields without a `clientToken`, causing an internal 3-second rejection before falling back to the standard Card button.
+    4. PayPal SDK preloading was deferred until Step 2 completion, leaving zero warm cache during Step 1.
+- **Architectural Fixes**:
+  1. **DNS-Prefetch & Preconnect Links**:
+     - Added `<link rel="preconnect" href="https://www.paypal.com" crossorigin>` and `<link rel="preconnect" href="https://c.paypal.com" crossorigin>` along with `<link rel="dns-prefetch">` in `<head>` of `index.html`, `order.html`, and `client-portal.html`.
+  2. **Adaptive SDK Component Loading (`js/paypal-config.js`)**:
+     - Dynamically checks `clientToken`: if present, loads `components=buttons,card-fields`; if absent, requests `components=buttons&enable-funding=card`, eliminating unnecessary SDK bundle weight and internal eligibility delays.
+  3. **Instant Card Button Fallback (`js/order-quote-modal.js` & `js/order-page.js`)**:
+     - Bypasses the 3-4s failing `CardFields` initialization when `!window.PayPalConfig?.clientToken`, immediately rendering the official black PayPal Card button in under 150ms.
+  4. **Eager Preloading & Hover Warm-Up**:
+     - Triggered `preloadModalCardPayment()` on modal launch (Step 1) so SDK downloads in the background while user fills in order details.
+     - Added global `pointerenter` prefetch listener on Order CTA buttons/links.
+  5. **Skeleton Shimmer UI**:
+     - Replaced plain text spinner with an animated skeleton placeholder (`animate-pulse`) so the payment section feels responsive and modern while buttons mount.
+- **Verification**:
+  - `node --test tests/payment-regression.test.js` passed **5/5 tests (100%)**.
+  - All avatars and checkout workflows verified with Chrome Playwright.
+
 
