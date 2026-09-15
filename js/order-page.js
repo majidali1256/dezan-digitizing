@@ -1396,9 +1396,9 @@
             const paypal = await Promise.race([sdkPromise, timeoutPromise]);
 
             if (isCard) {
-                // Try initializing CardFields directly
+                // Try initializing CardFields directly ONLY if account has a server-generated clientToken
                 let isCardFieldsReady = false;
-                if (paypal && paypal.CardFields) {
+                if (paypal && paypal.CardFields && window.PayPalConfig?.clientToken) {
                     isCardFieldsReady = await initOrderPageCardFieldsComponent(paypal);
                 }
 
@@ -1426,9 +1426,11 @@
             }
 
             container.innerHTML = `
-                <div class="text-xs text-slate-400 flex items-center justify-center gap-2 py-3">
-                    <span class="material-symbols-outlined text-base animate-spin text-primary">progress_activity</span>
-                    <span>Connecting to secure PayPal gateway...</span>
+                <div class="space-y-2 py-1 animate-pulse">
+                    <div class="w-full h-11 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined animate-spin text-sm text-primary">sync</span>
+                        <span>Loading secure ${isCard ? 'card' : 'PayPal'} checkout...</span>
+                    </div>
                 </div>
             `;
 
