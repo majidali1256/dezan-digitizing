@@ -3121,9 +3121,9 @@
             const paypal = await window.PayPalConfig.loadSdk();
 
             if (isCard) {
-                // Try initializing CardFields directly
+                // Try initializing CardFields directly ONLY if account has a server-generated clientToken
                 let isCardFieldsReady = false;
-                if (paypal && paypal.CardFields) {
+                if (paypal && paypal.CardFields && window.PayPalConfig?.clientToken) {
                     isCardFieldsReady = await initModalCardFieldsComponent(paypal);
                 }
 
@@ -3158,9 +3158,11 @@
             }
 
             container.innerHTML = `
-                <div class="flex items-center justify-center gap-2 py-3 text-xs text-slate-500 dark:text-slate-400">
-                    <span class="material-symbols-outlined animate-spin text-sm text-primary">sync</span>
-                    <span>Connecting to secure PayPal gateway...</span>
+                <div class="space-y-2 py-1 animate-pulse">
+                    <div class="w-full h-11 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined animate-spin text-sm text-primary">sync</span>
+                        <span>Loading secure ${isCard ? 'card' : 'PayPal'} checkout...</span>
+                    </div>
                 </div>
             `;
 
@@ -3565,6 +3567,11 @@
         } else {
             if (guestBlock) guestBlock.classList.remove('hidden');
             if (authBadge) authBadge.classList.add('hidden');
+        }
+
+        // Eagerly preload PayPal SDK in background for orders so Step 3 loads instantly
+        if (!isQuote && typeof window.preloadModalCardPayment === 'function') {
+            window.preloadModalCardPayment();
         }
 
         // Service & Plan determination
@@ -4415,10 +4422,18 @@
         }
     };
 
-    // Auto-mount modal on DOM ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', ensureModalElement);
-    } else {
-        ensureModalElement();
+    // Warm up payment connection & SDK as soon as user hovers/focuses an Order CTA button
+    if (typeof document !== 'undefined') {
+        document.addEventListener('pointerenter', function(e) {
+            const target = e.target && e.target.closest && e.target.closest('button, a');
+            if (!target) return;
+            const onclickAttr = target.getAttribute('onclick') || '';
+            const hrefAttr = target.getAttribute('href') || '';
+            if (onclickAttr.includes('Order') || onclickAttr.includes('order') || hrefAttr.includes('order.html')) {
+                if (typeof window.preloadModalCardPayment === 'function') {
+                    window.preloadModalCardPayment();
+                }
+            }
+        }, { passive: true, capture: true });
     }
 })();

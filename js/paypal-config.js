@@ -73,7 +73,8 @@
                     document.getElementById('dezan-paypal-sdk')?.remove();
                     const script = document.createElement('script');
                     script.id = 'dezan-paypal-sdk';
-                    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=${encodeURIComponent(currency)}&intent=capture&components=buttons,card-fields&enable-funding=card`;
+                    const components = clientToken ? 'buttons,card-fields' : 'buttons';
+                    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=${encodeURIComponent(currency)}&intent=capture&components=${components}&enable-funding=card`;
                     if (clientToken) {
                         script.setAttribute('data-client-token', clientToken);
                     }
