@@ -43,6 +43,9 @@
 
         function dismissBanner(choice) {
             localStorage.setItem(CONSENT_KEY, choice);
+            try {
+                window.dispatchEvent(new CustomEvent('dezan_cookie_consent_updated', { detail: { choice } }));
+            } catch (_) {}
             banner.classList.add('opacity-0', 'translate-y-8');
             setTimeout(() => {
                 banner.remove();

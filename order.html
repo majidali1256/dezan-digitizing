@@ -613,7 +613,7 @@
                     <!-- Side-by-Side Cards: PayPal & Credit Card -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <!-- 1. PayPal Card -->
-                        <div id="modal-tab-paypal" onclick="window.setPaymentMethod('PayPal')" class="relative p-3.5 sm:p-4 rounded-2xl border-2 border-primary bg-amber-50/50 dark:bg-primary/10 ring-1 ring-primary/20 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between">
+                        <div id="modal-tab-paypal" onclick="window.setPaymentMethod('PayPal')" class="relative p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between">
                             <!-- Most Popular Badge -->
                             <div class="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100/90 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 text-[10.5px] font-black shadow-xs">
                                 <span>👑</span>
@@ -622,8 +622,8 @@
 
                             <div class="flex items-start gap-3">
                                 <!-- Radio circle -->
-                                <div id="modal-radio-paypal" class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900">
-                                    <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+                                <div id="modal-radio-paypal" class="w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>
                                 </div>
 
                                 <div class="pr-16 sm:pr-20">
@@ -680,15 +680,76 @@
                     <!-- Payment Action Box -->
                     <div id="modal-panel-payment" class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-card-dark border border-slate-200/90 dark:border-primary/20 text-center space-y-3 shadow-xs">
                         <p id="modal-payment-instruction" class="text-xs font-semibold text-slate-600 dark:text-slate-300">
-                            Fast, 1-click settlement via PayPal balance or PayPal Pay Later:
+                            Select your preferred payment method above to proceed:
                         </p>
 
                         <!-- Mount Point for PayPal Smart Buttons -->
                         <div id="modal-paypal-button-container" class="min-h-[48px] flex items-center justify-center">
-                            <div class="text-xs text-slate-400 flex items-center gap-2 py-3">
-                                <span class="material-symbols-outlined text-base animate-spin text-primary">progress_activity</span>
-                                <span>Connecting to secure PayPal gateway...</span>
+                            <div class="py-3 px-4 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-xs flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-base text-primary">touch_app</span>
+                                <span>Choose <strong>PayPal</strong> or <strong>Credit / Debit Card</strong> above</span>
                             </div>
+                        </div>
+
+                        <!-- Direct Inline Card Fields Container (PayPal CardFields) -->
+                        <div id="modal-card-fields-container" class="hidden text-left space-y-3 pt-1">
+                            <!-- Brand Indicator Header -->
+                            <div class="flex items-center justify-between px-1 text-xs">
+                                <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Card Details</span>
+                                <div id="modal-detected-card-brand" class="flex items-center gap-1.5 text-xs text-slate-400">
+                                    <span id="modal-brand-badge-visa" class="transition-all duration-200 font-black text-[#1434CB] italic text-xs opacity-35 px-1 py-0.5 rounded">VISA</span>
+                                    <span id="modal-brand-badge-mastercard" class="transition-all duration-200 inline-flex items-center opacity-35 px-1 py-0.5 rounded">
+                                        <svg class="w-5 h-3.5" viewBox="0 0 36 24" fill="none">
+                                            <circle cx="14" cy="12" r="10" fill="#EB001B"/>
+                                            <circle cx="22" cy="12" r="10" fill="#F79E1B" fill-opacity="0.88"/>
+                                        </svg>
+                                    </span>
+                                    <span id="modal-brand-badge-amex" class="transition-all duration-200 px-1 rounded bg-[#006FCF] text-white text-[8.5px] font-black leading-tight opacity-35">AMEX</span>
+                                    <span id="modal-brand-badge-discover" class="transition-all duration-200 font-black text-[#FF6000] text-[10px] opacity-35 px-1 py-0.5 rounded">DISCOVER</span>
+                                </div>
+                            </div>
+
+                            <!-- Card Number Field -->
+                            <div class="space-y-1">
+                                <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300">Card Number *</label>
+                                <div id="modal-card-number-field" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 transition-all flex items-center shadow-2xs"></div>
+                            </div>
+
+                            <!-- Expiry & CVV Row -->
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div class="space-y-1">
+                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300">Expiration Date *</label>
+                                    <div id="modal-card-expiry-field" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 transition-all flex items-center shadow-2xs"></div>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300">Security Code (CVV) *</label>
+                                    <div id="modal-card-cvv-field" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 transition-all flex items-center shadow-2xs"></div>
+                                </div>
+                            </div>
+
+                            <!-- Cardholder Name & Billing ZIP Row -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <div class="space-y-1">
+                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300">Name on Card</label>
+                                    <div id="modal-card-name-field" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 transition-all flex items-center shadow-2xs"></div>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300">Billing Postal / ZIP Code</label>
+                                    <div id="modal-card-postal-field" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 transition-all flex items-center shadow-2xs"></div>
+                                </div>
+                            </div>
+
+                            <!-- Card Validation / Gateway Error Message -->
+                            <div id="modal-card-fields-error" class="hidden p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-sm shrink-0">error</span>
+                                <span id="modal-card-fields-error-text">Please check your card details and try again.</span>
+                            </div>
+
+                            <!-- Direct Pay With Card Button -->
+                            <button id="modal-card-submit-btn" type="button" onclick="window.submitModalCardPayment()" class="w-full py-3 px-4 rounded-xl bg-slate-950 hover:bg-black text-white font-black text-xs sm:text-sm transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer mt-1">
+                                <span class="material-symbols-outlined text-base text-primary">lock</span>
+                                <span id="modal-card-submit-btn-text">Pay Now</span>
+                            </button>
                         </div>
 
                         <div class="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
@@ -699,16 +760,16 @@
                 </div>
 
                 <!-- Step 3 Bottom Navigation Actions -->
-                <div class="pt-2 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <button type="button" onclick="window.backToOrderDetailsStep()" class="px-5 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors cursor-pointer flex items-center justify-center gap-1.5">
+                <div class="pt-2 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 sticky bottom-3 z-20 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md p-3 rounded-2xl border border-slate-200/80 dark:border-primary/20 shadow-lg">
+                    <button type="button" onclick="window.backToOrderDetailsStep()" class="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors cursor-pointer flex items-center justify-center gap-1.5 shrink-0">
                         <span class="material-symbols-outlined text-sm">arrow_back</span>
                         <span>Edit Order Details</span>
                     </button>
-                    <div class="text-center sm:text-right">
-                        <span class="text-xs font-bold text-primary flex items-center justify-center sm:justify-end gap-1">
-                            <span class="material-symbols-outlined text-sm">touch_app</span>
-                            <span>Click PayPal or Card button above to complete order</span>
-                        </span>
+                    <div class="flex items-center justify-end">
+                        <button type="button" id="orderpage-step3-dynamic-cta" onclick="window.handleOrderPageDynamicCtaClick()" data-cta-state="continue" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs sm:text-sm font-black shadow-md shadow-primary/25 cursor-pointer transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]">
+                            <span class="material-symbols-outlined text-base" id="orderpage-step3-cta-icon">arrow_forward</span>
+                            <span id="orderpage-step3-cta-text">Continue to Payment &rarr;</span>
+                        </button>
                     </div>
                 </div>
             </div>

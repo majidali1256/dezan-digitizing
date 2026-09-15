@@ -20,9 +20,139 @@
         selectedService: 'Digitizing', // 'Digitizing' | 'Vectorizing'
         uploadedFiles: [],
         calculatedPrice: 15.00,
-        paymentMethod: 'Credit Card',
+        paymentMethod: null,
+        hasExplicitlySelectedMethod: false,
         isSubmitting: false
     };
+
+    // Idempotency tracking to prevent duplicate order creation or multiple conversion fires
+    const modalProcessedTxns = new Set();
+    let isFinalizingModalOrder = false;
+
+    /**
+     * Preserves entered checkout details in sessionStorage across step transitions and sessions
+     */
+    function saveModalOrderDraft() {
+        const modal = document.getElementById('new-order-modal');
+        if (!modal) return;
+        try {
+            const draft = {
+                serviceType: state.serviceType || state.selectedService,
+                isQuote: state.isQuote,
+                digJobName: modal.querySelector('#dig-job-name')?.value || '',
+                vecJobName: modal.querySelector('#vec-job-name')?.value || '',
+                digPlacement: modal.querySelector('#dig-placement')?.value || '',
+                petPlacement: modal.querySelector('#pet-placement')?.value || '',
+                digCustomPlacement: modal.querySelector('#dig-custom-placement')?.value || '',
+                digFabric: modal.querySelector('#dig-fabric')?.value || '',
+                digCustomFabric: modal.querySelector('#dig-custom-fabric')?.value || '',
+                digSize: modal.querySelector('#dig-size')?.value || '',
+                digSizeUnit: modal.querySelector('#dig-size-unit')?.value || 'in',
+                vecUse: modal.querySelector('#vec-use')?.value || '',
+                orderNotes: modal.querySelector('#order-notes')?.value || '',
+                clientName: modal.querySelector('#order-client-name')?.value || '',
+                clientEmail: modal.querySelector('#order-client-email')?.value || '',
+                turnaround: modal.querySelector('input[name="order-turnaround"]:checked')?.value || 'standard',
+                specialOptions: Array.from(modal.querySelectorAll('input[name="dig-special"]:checked')).map(cb => cb.value),
+                digFormats: Array.from(modal.querySelectorAll('input[name="dig-formats"]:checked')).map(cb => cb.value),
+                vecFormats: Array.from(modal.querySelectorAll('input[name="vec-formats"]:checked')).map(cb => cb.value),
+                timestamp: Date.now()
+            };
+            sessionStorage.setItem('dezan_modal_order_draft', JSON.stringify(draft));
+        } catch (_) {}
+    }
+
+    /**
+     * Restores draft form details when reopening or switching steps
+     */
+    function restoreModalOrderDraft() {
+        const modal = document.getElementById('new-order-modal');
+        if (!modal) return;
+        try {
+            const raw = sessionStorage.getItem('dezan_modal_order_draft');
+            if (!raw) return;
+            const draft = JSON.parse(raw);
+            if (!draft || (draft.timestamp && Date.now() - draft.timestamp > 86400000)) {
+                sessionStorage.removeItem('dezan_modal_order_draft');
+                return;
+            }
+
+            if (draft.digJobName) {
+                const el = modal.querySelector('#dig-job-name');
+                if (el && !el.value) el.value = draft.digJobName;
+            }
+            if (draft.vecJobName) {
+                const el = modal.querySelector('#vec-job-name');
+                if (el && !el.value) el.value = draft.vecJobName;
+            }
+            if (draft.digPlacement) {
+                const el = modal.querySelector('#dig-placement');
+                if (el) el.value = draft.digPlacement;
+            }
+            if (draft.petPlacement) {
+                const el = modal.querySelector('#pet-placement');
+                if (el) el.value = draft.petPlacement;
+            }
+            if (draft.digCustomPlacement) {
+                const el = modal.querySelector('#dig-custom-placement');
+                if (el && !el.value) el.value = draft.digCustomPlacement;
+            }
+            if (draft.digFabric) {
+                const el = modal.querySelector('#dig-fabric');
+                if (el) el.value = draft.digFabric;
+            }
+            if (draft.digCustomFabric) {
+                const el = modal.querySelector('#dig-custom-fabric');
+                if (el && !el.value) el.value = draft.digCustomFabric;
+            }
+            if (draft.digSize) {
+                const el = modal.querySelector('#dig-size');
+                if (el && !el.value) el.value = draft.digSize;
+            }
+            if (draft.digSizeUnit) {
+                const el = modal.querySelector('#dig-size-unit');
+                if (el) el.value = draft.digSizeUnit;
+            }
+            if (draft.vecUse) {
+                const el = modal.querySelector('#vec-use');
+                if (el) el.value = draft.vecUse;
+            }
+            if (draft.orderNotes) {
+                const el = modal.querySelector('#order-notes');
+                if (el && !el.value) el.value = draft.orderNotes;
+            }
+            if (draft.clientName) {
+                const el = modal.querySelector('#order-client-name');
+                if (el && !el.value) el.value = draft.clientName;
+            }
+            if (draft.clientEmail) {
+                const el = modal.querySelector('#order-client-email');
+                if (el && !el.value) el.value = draft.clientEmail;
+            }
+            if (draft.turnaround) {
+                const radio = modal.querySelector(`input[name="order-turnaround"][value="${draft.turnaround}"]`);
+                if (radio) radio.checked = true;
+            }
+            if (Array.isArray(draft.specialOptions) && draft.specialOptions.length > 0) {
+                draft.specialOptions.forEach(val => {
+                    const cb = modal.querySelector(`input[name="dig-special"][value="${val}"]`);
+                    if (cb) cb.checked = true;
+                });
+            }
+            if (Array.isArray(draft.digFormats) && draft.digFormats.length > 0) {
+                draft.digFormats.forEach(val => {
+                    const cb = modal.querySelector(`input[name="dig-formats"][value="${val}"]`);
+                    if (cb) cb.checked = true;
+                });
+            }
+            if (Array.isArray(draft.vecFormats) && draft.vecFormats.length > 0) {
+                draft.vecFormats.forEach(val => {
+                    const cb = modal.querySelector(`input[name="vec-formats"][value="${val}"]`);
+                    if (cb) cb.checked = true;
+                });
+            }
+        } catch (_) {}
+    }
 
     function getSession() {
         try {
@@ -40,7 +170,18 @@
     function ensureModalElement() {
         let existing = document.getElementById('new-order-modal');
         if (existing) {
-            if (existing.querySelector('#modal-mode-order-btn') && existing.querySelector('#order-step-3-view')) {
+            if (existing.querySelector('#modal-mode-order-btn') && existing.querySelector('#order-step-3-view') && existing.querySelector('#order-step-4-confirmation-view')) {
+                const form = existing.querySelector('#adaptive-order-form');
+                if (form && !form._autoSaveBound) {
+                    let draftTimer = null;
+                    const debouncedSave = () => {
+                        clearTimeout(draftTimer);
+                        draftTimer = setTimeout(saveModalOrderDraft, 400);
+                    };
+                    form.addEventListener('input', debouncedSave);
+                    form.addEventListener('change', debouncedSave);
+                    form._autoSaveBound = true;
+                }
                 return existing;
             }
             // If existing is legacy or incomplete markup, replace it with the unified modal
@@ -788,6 +929,16 @@
 
                                 <!-- Payment Method Selector (Order Mode Only) -->
                                 <div id="order-payment-terms-box" class="space-y-3">
+                                    <!-- Payment Error Banner (Shown on failure) -->
+                                    <div id="modal-payment-error-banner" class="hidden p-3.5 sm:p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs space-y-1.5">
+                                        <div class="flex items-center gap-2 font-bold text-xs sm:text-sm">
+                                            <span class="material-symbols-outlined text-base">error</span>
+                                            <span>Payment Not Completed</span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-700 dark:text-slate-300" id="modal-payment-error-text">We were unable to verify your payment.</p>
+                                        <p class="text-[11px] text-slate-500 dark:text-slate-400">All your project specifications and uploaded artwork are safely preserved. Please choose your payment method below to try again.</p>
+                                    </div>
+
                                     <!-- Header: Choose Payment Method -->
                                     <div class="flex items-center gap-3">
                                         <div class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-primary/20 flex items-center justify-center text-slate-800 dark:text-primary shadow-xs shrink-0">
@@ -802,7 +953,7 @@
                                     <!-- Side-by-Side Cards: PayPal & Credit Card -->
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <!-- 1. PayPal Card -->
-                                        <div id="modal-tab-paypal" onclick="window.setModalPaymentMethod('PayPal')" class="relative p-3.5 sm:p-4 rounded-2xl border-2 border-primary bg-amber-50/50 dark:bg-primary/10 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between">
+                                        <div id="modal-tab-paypal" onclick="window.setModalPaymentMethod('PayPal')" class="relative p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between">
                                             <!-- Most Popular Badge -->
                                             <div class="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100/90 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 text-[10.5px] font-black shadow-xs">
                                                 <span>👑</span>
@@ -811,8 +962,8 @@
 
                                             <div class="flex items-start gap-3">
                                                 <!-- Radio circle -->
-                                                <div id="modal-radio-paypal" class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900">
-                                                    <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+                                                <div id="modal-radio-paypal" class="w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900">
+                                                    <div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>
                                                 </div>
 
                                                 <div class="pr-16 sm:pr-20">
@@ -867,10 +1018,78 @@
                                     </div>
 
                                     <!-- Active Payment Action Area -->
-                                    <div id="modal-panel-payment" class="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-primary/10 text-center space-y-2.5">
-                                        <p id="modal-payment-instruction" class="text-xs text-slate-600 dark:text-slate-300 font-medium">Fast, 1-click settlement via PayPal balance or PayPal Pay Later:</p>
+                                    <div id="modal-panel-payment" class="p-3.5 sm:p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-primary/10 text-center space-y-3">
+                                        <p id="modal-payment-instruction" class="text-xs text-slate-600 dark:text-slate-300 font-medium">Select your preferred payment method above to proceed:</p>
+                                        
                                         <!-- Dynamic PayPal Smart Buttons Mounted Here -->
-                                        <div id="modal-paypal-button-container" class="w-full min-h-[44px] flex flex-col justify-center"></div>
+                                        <div id="modal-paypal-button-container" class="w-full min-h-[44px] flex flex-col justify-center">
+                                            <div class="py-3 px-4 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-xs flex items-center justify-center gap-2">
+                                                <span class="material-symbols-outlined text-base text-primary">touch_app</span>
+                                                <span>Choose <strong>PayPal</strong> or <strong>Credit / Debit Card</strong> above</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Direct Inline Card Fields Container (PayPal CardFields) -->
+                                        <div id="modal-card-fields-container" class="hidden text-left space-y-3 pt-1">
+                                            <!-- Brand Indicator Header -->
+                                            <div class="flex items-center justify-between px-1 text-xs">
+                                                <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Card Details</span>
+                                                <div id="modal-detected-card-brand" class="flex items-center gap-1.5 text-xs text-slate-400">
+                                                    <span id="modal-brand-badge-visa" class="transition-all duration-200 font-black text-[#1434CB] italic text-xs opacity-35 px-1 py-0.5 rounded">VISA</span>
+                                                    <span id="modal-brand-badge-mastercard" class="transition-all duration-200 inline-flex items-center opacity-35 px-1 py-0.5 rounded">
+                                                        <svg class="w-5 h-3.5" viewBox="0 0 36 24" fill="none">
+                                                            <circle cx="14" cy="12" r="10" fill="#EB001B"/>
+                                                            <circle cx="22" cy="12" r="10" fill="#F79E1B" fill-opacity="0.88"/>
+                                                        </svg>
+                                                    </span>
+                                                    <span id="modal-brand-badge-amex" class="transition-all duration-200 px-1 rounded bg-[#006FCF] text-white text-[8.5px] font-black leading-tight opacity-35">AMEX</span>
+                                                    <span id="modal-brand-badge-discover" class="transition-all duration-200 font-black text-[#FF6000] text-[10px] opacity-35 px-1 py-0.5 rounded">DISCOVER</span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Card Number Field -->
+                                            <div class="space-y-1">
+                                                <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300">Card Number *</label>
+                                                <div id="modal-card-number-field" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 transition-all flex items-center shadow-2xs"></div>
+                                            </div>
+
+                                            <!-- Expiry & CVV Row -->
+                                            <div class="grid grid-cols-2 gap-2.5">
+                                                <div class="space-y-1">
+                                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300">Expiration Date *</label>
+                                                    <div id="modal-card-expiry-field" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 transition-all flex items-center shadow-2xs"></div>
+                                                </div>
+                                                <div class="space-y-1">
+                                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300">Security Code (CVV) *</label>
+                                                    <div id="modal-card-cvv-field" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 transition-all flex items-center shadow-2xs"></div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Cardholder Name & Billing ZIP Row -->
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                                <div class="space-y-1">
+                                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300">Name on Card</label>
+                                                    <div id="modal-card-name-field" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 transition-all flex items-center shadow-2xs"></div>
+                                                </div>
+                                                <div class="space-y-1">
+                                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300">Billing Postal / ZIP Code</label>
+                                                    <div id="modal-card-postal-field" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 transition-all flex items-center shadow-2xs"></div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Card Validation / Gateway Error Message -->
+                                            <div id="modal-card-fields-error" class="hidden p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-1.5">
+                                                <span class="material-symbols-outlined text-sm shrink-0">error</span>
+                                                <span id="modal-card-fields-error-text">Please check your card details and try again.</span>
+                                            </div>
+
+                                            <!-- Direct Pay With Card Button -->
+                                            <button id="modal-card-submit-btn" type="button" onclick="window.submitModalCardPayment()" class="w-full py-3 px-4 rounded-xl bg-slate-950 hover:bg-black text-white font-black text-xs sm:text-sm transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer mt-1">
+                                                <span class="material-symbols-outlined text-base text-primary">lock</span>
+                                                <span id="modal-card-submit-btn-text">Pay Now</span>
+                                            </button>
+                                        </div>
+
                                         <p class="text-[10.5px] text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1">
                                             <span class="material-symbols-outlined text-xs text-emerald-500">verified_user</span>
                                             <span>256-bit Encrypted SSL · Zero transaction surcharges</span>
@@ -895,24 +1114,158 @@
                             </div>
 
                             <!-- Step 3 Sticky Form Action Buttons -->
-                            <div class="flex-shrink-0 px-4 py-3 sm:px-6 sm:py-3.5 border-t border-slate-200 dark:border-primary/15 bg-white dark:bg-card-dark flex items-center justify-between gap-2 shadow-lg sm:shadow-none pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-                                <button type="button" onclick="window.backToOrderDetailsStep()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer transition-colors flex items-center gap-1">
+                            <div class="flex-shrink-0 px-3.5 sm:px-6 py-2.5 sm:py-3.5 border-t border-slate-200 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex items-center justify-between gap-2 shadow-lg sm:shadow-none pb-[max(0.75rem,env(safe-area-inset-bottom))] sticky bottom-0 z-20">
+                                <button type="button" onclick="window.backToOrderDetailsStep()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer transition-colors flex items-center gap-1 shrink-0">
                                     <span class="material-symbols-outlined text-sm">arrow_back</span>
-                                    <span>Edit Details</span>
+                                    <span class="hidden xs:inline sm:inline">Edit Details</span>
+                                    <span class="xs:hidden sm:hidden">Edit</span>
                                 </button>
                                 <div class="flex items-center gap-2">
-                                    <button type="button" onclick="window.closeOrderQuoteModal()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer transition-colors">
+                                    <button type="button" onclick="window.closeOrderQuoteModal()" class="hidden sm:inline-flex px-3 py-2 sm:py-2.5 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 text-xs font-semibold cursor-pointer transition-colors">
                                         Cancel
                                     </button>
-                                    <div id="modal-paypal-checkout-note" class="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                                        <span class="material-symbols-outlined text-sm text-primary">touch_app</span>
-                                        <span>Click <strong>PayPal</strong> or <strong>Card</strong> above</span>
-                                    </div>
-                                    <button type="submit" id="adaptive-order-submit-btn" class="hidden px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0">
-                                        <span class="material-symbols-outlined text-sm" id="order-submit-btn-icon">lock</span>
-                                        <span id="order-submit-btn-text">Pay &amp; Place Order ($15.00)</span>
+                                    <!-- Dynamic Sticky Review & Pay CTA -->
+                                    <button type="button" id="modal-step3-dynamic-cta" onclick="window.handleStep3DynamicCtaClick()" data-cta-state="continue" class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs sm:text-sm font-black shadow-md shadow-primary/25 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0 active:scale-[0.98]">
+                                        <span class="material-symbols-outlined text-base" id="modal-step3-cta-icon">arrow_forward</span>
+                                        <span id="modal-step3-cta-text">Continue to Payment &rarr;</span>
+                                    </button>
+                                    <!-- Quote Mode Submit Button -->
+                                    <button type="submit" id="adaptive-order-submit-btn" class="hidden px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs sm:text-sm font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0">
+                                        <span class="material-symbols-outlined text-base" id="order-submit-btn-icon">send</span>
+                                        <span id="order-submit-btn-text">Submit Free Custom Quote</span>
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- STEP 4 VIEW: ORDER CONFIRMATION -->
+                        <div id="order-step-4-confirmation-view" class="hidden flex-1 flex flex-col overflow-hidden">
+                            <!-- Scrollable Confirmation Body -->
+                            <div class="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-4 sm:space-y-5">
+                                <!-- Success Animation & Main Hero -->
+                                <div class="text-center pt-2 pb-1">
+                                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-500/30 mb-3 shadow-inner">
+                                        <span class="material-symbols-outlined text-emerald-500 text-4xl sm:text-5xl font-black">check_circle</span>
+                                    </div>
+                                    <span id="modal-success-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-black border border-emerald-500/20 mb-2">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                                        Payment Verified · Order Queued
+                                    </span>
+                                    <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight" id="modal-success-title">
+                                        Order Confirmed!
+                                    </h3>
+                                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-sm mx-auto" id="modal-success-subhead">
+                                        Thank you! Your order has been placed and assigned to our master digitizing team.
+                                    </p>
+                                </div>
+
+                                <!-- Order Identification & Quick Copy Bar -->
+                                <div class="p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/10 border border-primary/30 flex items-center justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <span class="text-[10px] sm:text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Order Number</span>
+                                        <span class="text-base sm:text-lg font-black text-primary font-mono tracking-tight truncate block" id="modal-success-order-num">#DZ-1048</span>
+                                    </div>
+                                    <button type="button" onclick="window.copyModalOrderNumber()" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-primary/30 text-xs font-bold text-slate-800 dark:text-slate-200 hover:text-primary transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0" id="modal-copy-order-btn">
+                                        <span class="material-symbols-outlined text-sm">content_copy</span>
+                                        <span id="modal-copy-order-text">Copy</span>
+                                    </button>
+                                </div>
+
+                                <!-- Order Summary Card -->
+                                <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-primary/20 space-y-2.5 text-xs text-slate-700 dark:text-slate-300">
+                                    <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-primary/15">
+                                        <span class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-primary text-base">receipt_long</span>
+                                            Order Summary
+                                        </span>
+                                        <span class="text-[11px] font-mono text-slate-500 dark:text-slate-400" id="modal-success-txn-id">TXN-884192</span>
+                                    </div>
+                                    <div class="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-800/80">
+                                        <span class="text-slate-500 dark:text-slate-400">Service:</span>
+                                        <span class="font-semibold text-slate-900 dark:text-white" id="modal-success-service">Embroidery Digitizing</span>
+                                    </div>
+                                    <div class="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-800/80">
+                                        <span class="text-slate-500 dark:text-slate-400">Placement:</span>
+                                        <span class="font-semibold text-slate-900 dark:text-white" id="modal-success-placement">Left Chest</span>
+                                    </div>
+                                    <div class="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-800/80">
+                                        <span class="text-slate-500 dark:text-slate-400">Turnaround Speed:</span>
+                                        <span class="font-semibold text-slate-900 dark:text-white" id="modal-success-turnaround">Standard (12-24 hrs)</span>
+                                    </div>
+                                    <div class="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-800/80">
+                                        <span class="text-slate-500 dark:text-slate-400">Delivery Email:</span>
+                                        <span class="font-semibold text-slate-900 dark:text-white truncate max-w-[200px]" id="modal-success-email">customer@example.com</span>
+                                    </div>
+                                    <div class="flex justify-between pt-1 text-sm font-bold text-slate-900 dark:text-white">
+                                        <span>Amount Paid:</span>
+                                        <span class="text-base font-black text-primary font-mono" id="modal-success-amount">$15.00 USD</span>
+                                    </div>
+                                </div>
+
+                                <!-- Next Steps Timeline -->
+                                <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-primary/20 space-y-3">
+                                    <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-primary text-base">schedule</span>
+                                        What Happens Next?
+                                    </h4>
+                                    <div class="space-y-2.5 text-xs text-slate-600 dark:text-slate-400">
+                                        <div class="flex items-start gap-2.5">
+                                            <span class="w-5 h-5 rounded-full bg-primary/20 text-primary font-black text-[11px] flex items-center justify-center shrink-0 mt-0.5">1</span>
+                                            <p>Our master digitizers review your design and stitch parameters within <strong class="text-slate-900 dark:text-white">1 hour</strong>.</p>
+                                        </div>
+                                        <div class="flex items-start gap-2.5">
+                                            <span class="w-5 h-5 rounded-full bg-primary/20 text-primary font-black text-[11px] flex items-center justify-center shrink-0 mt-0.5">2</span>
+                                            <p>A confirmation email and formal receipt has been dispatched to your email.</p>
+                                        </div>
+                                        <div class="flex items-start gap-2.5">
+                                            <span class="w-5 h-5 rounded-full bg-primary/20 text-primary font-black text-[11px] flex items-center justify-center shrink-0 mt-0.5">3</span>
+                                            <p>Your production stitch files (.DST, .EMB, .PES, etc.) & high-res PDF proof sheet will be sent directly to your inbox.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Guest Account Setup Card (Optional) -->
+                                <div id="modal-guest-setup-card" class="p-4 sm:p-5 rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-amber-500/5 to-primary/10 space-y-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="material-symbols-outlined text-primary text-xl">lock_open</span>
+                                        <div>
+                                            <h5 class="text-xs sm:text-sm font-black text-slate-900 dark:text-white">Track this order anytime</h5>
+                                            <p class="text-[11px] text-slate-500 dark:text-slate-400">Set a password to download your files and access order history in the Client Portal.</p>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <input type="password" id="modal-claim-password" placeholder="Create a password (min. 6 characters)" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-primary/30 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary">
+                                        <button type="button" onclick="window.submitModalGuestAccountClaim()" class="w-full py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs transition-all cursor-pointer shadow-xs flex items-center justify-center gap-1.5" id="modal-claim-btn">
+                                            <span class="material-symbols-outlined text-sm">person_add</span>
+                                            <span>Create Portal Account</span>
+                                        </button>
+                                        <div id="modal-claim-feedback" class="hidden text-xs font-bold text-center py-1"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Authenticated Portal Link (Shown if logged in) -->
+                                <div id="modal-auth-shortcut-card" class="hidden p-4 rounded-2xl bg-white dark:bg-slate-900 border border-primary/30 flex items-center justify-between gap-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="material-symbols-outlined text-primary text-xl">dashboard</span>
+                                        <div>
+                                            <span class="text-xs font-bold text-slate-900 dark:text-white block">Order Added to Dashboard</span>
+                                            <span class="text-[11px] text-slate-500 dark:text-slate-400">Track progress & stitch downloads in your workspace.</span>
+                                        </div>
+                                    </div>
+                                    <a href="client-portal.html" class="px-3.5 py-1.5 rounded-xl bg-primary text-background-dark font-bold text-xs hover:brightness-110 transition-all shrink-0">Open Portal</a>
+                                </div>
+                            </div>
+
+                            <!-- Step 4 Sticky Footer -->
+                            <div class="flex-shrink-0 px-3.5 sm:px-6 py-2.5 sm:py-3.5 border-t border-slate-200 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex items-center justify-between gap-2 sticky bottom-0 z-20 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+                                <button type="button" onclick="window.startAnotherModalOrder()" class="px-3.5 sm:px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer transition-colors flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">add</span>
+                                    <span>Place Another Order</span>
+                                </button>
+                                <button type="button" onclick="window.closeOrderQuoteModal()" class="px-5 sm:px-6 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs sm:text-sm font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-sm">check</span>
+                                    <span>Done</span>
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -970,6 +1323,18 @@
                 if (typeof window.validatePlacementSize === 'function') window.validatePlacementSize();
                 if (typeof window.calculateAdaptivePrice === 'function') window.calculateAdaptivePrice();
             });
+        }
+
+        const form = modal.querySelector('#adaptive-order-form');
+        if (form && !form._autoSaveBound) {
+            let draftTimer = null;
+            const debouncedSave = () => {
+                clearTimeout(draftTimer);
+                draftTimer = setTimeout(saveModalOrderDraft, 400);
+            };
+            form.addEventListener('input', debouncedSave);
+            form.addEventListener('change', debouncedSave);
+            form._autoSaveBound = true;
         }
 
         document.body.appendChild(modal);
@@ -1080,6 +1445,32 @@
                 stepLabel3.className = activeLabelClass;
                 stepLabel3.textContent = reviewText;
             }
+        } else if (stepNum === 4) {
+            if (progressBar) progressBar.style.width = '100%';
+
+            if (stepCircle1) {
+                stepCircle1.innerHTML = '<span class="material-symbols-outlined text-sm font-bold">check</span>';
+                stepCircle1.className = activeCircleClass;
+            }
+            if (stepLabel1) stepLabel1.className = activeLabelClass;
+
+            if (stepCircle2) {
+                stepCircle2.innerHTML = '<span class="material-symbols-outlined text-sm font-bold">check</span>';
+                stepCircle2.className = activeCircleClass;
+            }
+            if (stepLabel2) {
+                stepLabel2.className = activeLabelClass;
+                stepLabel2.textContent = detailsText;
+            }
+
+            if (stepCircle3) {
+                stepCircle3.innerHTML = '<span class="material-symbols-outlined text-sm font-bold">check</span>';
+                stepCircle3.className = 'w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-xs sm:text-sm shadow-xs transition-all ring-4 ring-white dark:ring-card-dark';
+            }
+            if (stepLabel3) {
+                stepLabel3.className = 'text-[9.5px] sm:text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 sm:mt-1 whitespace-nowrap transition-colors';
+                stepLabel3.textContent = state.isQuote ? 'Quote Submitted' : 'Confirmed';
+            }
         }
     }
     window.updateStepperState = updateStepperState;
@@ -1169,7 +1560,11 @@
             if (submitBtnIcon) submitBtnIcon.textContent = 'lock';
             window.calculateAdaptivePrice();
             if (typeof window.setModalPaymentMethod === 'function') {
-                window.setModalPaymentMethod(state.paymentMethod || 'PayPal');
+                if (state.hasExplicitlySelectedMethod && state.paymentMethod) {
+                    window.setModalPaymentMethod(state.paymentMethod);
+                } else if (typeof window.resetModalPaymentTabs === 'function') {
+                    window.resetModalPaymentTabs();
+                }
             }
         }
     };
@@ -1224,14 +1619,32 @@
             if (petPricingBlock) petPricingBlock.classList.add('hidden');
         }
 
+        // Synchronize project/job name between services to preserve user entry
+        const vecJobName = modal.querySelector('#vec-job-name');
+        if (service === 'Vectorizing') {
+            if (vecJobName && !vecJobName.value && digJobName && digJobName.value) {
+                vecJobName.value = digJobName.value;
+            }
+        } else {
+            if (digJobName && !digJobName.value && vecJobName && vecJobName.value) {
+                digJobName.value = vecJobName.value;
+            }
+        }
+
+        if (typeof renderArtworkFileChips === 'function') {
+            renderArtworkFileChips();
+        }
+
         if (selectionView) selectionView.classList.add('hidden');
         if (formView) formView.classList.remove('hidden');
 
-        // Show Step 2 View and hide Step 3 View
+        // Show Step 2 View and hide Step 3 and Step 4 Views
         const step2View = modal.querySelector('#order-step-2-view');
         const step3View = modal.querySelector('#order-step-3-view');
+        const step4View = modal.querySelector('#order-step-4-confirmation-view');
         if (step2View) step2View.classList.remove('hidden');
         if (step3View) step3View.classList.add('hidden');
+        if (step4View) step4View.classList.add('hidden');
 
         // Dynamic Stepper Transition: Step 1 -> Step 2
         updateStepperState(2);
@@ -1683,21 +2096,33 @@
         const submitBtnText = modal.querySelector('#order-submit-btn-text');
 
         const submitBtn = modal.querySelector('#adaptive-order-submit-btn');
-        const checkoutNote = modal.querySelector('#modal-paypal-checkout-note');
+        const dynamicCta = modal.querySelector('#modal-step3-dynamic-cta');
 
         if (isQuote) {
             if (reviewPriceBox) reviewPriceBox.classList.add('hidden');
             if (paymentTermsBox) paymentTermsBox.classList.add('hidden');
             if (quoteModeBox) quoteModeBox.classList.remove('hidden');
             if (submitBtn) submitBtn.classList.remove('hidden');
-            if (checkoutNote) checkoutNote.classList.add('hidden');
+            if (dynamicCta) dynamicCta.classList.add('hidden');
             if (submitBtnIcon) submitBtnIcon.textContent = 'send';
             if (submitBtnText) submitBtnText.textContent = 'Submit Free Custom Quote';
         } else {
             if (reviewPriceBox) reviewPriceBox.classList.remove('hidden');
             if (paymentTermsBox) paymentTermsBox.classList.remove('hidden');
             if (quoteModeBox) quoteModeBox.classList.add('hidden');
-            window.setModalPaymentMethod(state.paymentMethod || 'PayPal');
+            if (submitBtn) submitBtn.classList.add('hidden');
+            if (dynamicCta) dynamicCta.classList.remove('hidden');
+
+            if (typeof window.resetModalPaymentTabs === 'function') {
+                window.resetModalPaymentTabs();
+            }
+
+            // Preload PayPal SDK & CardFields component in background for instant display
+            if (typeof window.preloadModalCardPayment === 'function') {
+                window.preloadModalCardPayment();
+            } else if (window.PayPalConfig && typeof window.PayPalConfig.loadSdk === 'function') {
+                window.PayPalConfig.loadSdk().catch(() => {});
+            }
         }
 
         // 3. Switch View: Step 2 -> Step 3
@@ -1707,7 +2132,27 @@
         if (step3View) {
             step3View.classList.remove('hidden');
             const scrollable = step3View.querySelector('.overflow-y-auto');
-            if (scrollable) scrollable.scrollTop = 0;
+            if (scrollable) {
+                scrollable.scrollTop = 0;
+                if (!scrollable._ctaScrollBound) {
+                    let ticking = false;
+                    scrollable.addEventListener('scroll', () => {
+                        if (!ticking) {
+                            window.requestAnimationFrame(() => {
+                                if (typeof window.updateStep3DynamicCta === 'function') {
+                                    window.updateStep3DynamicCta();
+                                }
+                                ticking = false;
+                            });
+                            ticking = true;
+                        }
+                    }, { passive: true });
+                    scrollable._ctaScrollBound = true;
+                }
+            }
+            if (typeof window.updateStep3DynamicCta === 'function') {
+                window.updateStep3DynamicCta();
+            }
         }
 
         // Update Stepper to Step 3
@@ -2150,6 +2595,10 @@
             submitBtnText.textContent = `Pay & Place Order (${formattedPrice})`;
         }
 
+        if (typeof window.updateStep3DynamicCta === 'function') {
+            window.updateStep3DynamicCta();
+        }
+
         return basePrice;
     };
     window.calculateModalPrice = window.calculateAdaptivePrice;
@@ -2209,6 +2658,10 @@
     }
 
     let modalPayPalButtonsInstance = null;
+    let modalCardFieldsInstance = null;
+    let modalCardFieldsRendered = false;
+    let modalCardFieldInstances = {};
+    let isModalCardSubmitting = false;
     let isModalPayPalMounting = false;
     let pendingPayPalMethod = null;
     let uploadedArtworkFilesCache = [];
@@ -2259,39 +2712,386 @@
     }
 
     /**
-     * Mount and initialize PayPal Smart Buttons in Step 3
+     * Update detected card brand visual indicators (Visa, Mastercard, AMEX, Discover)
+     */
+    function updateModalCardBrandBadges(brand) {
+        const b = (brand || '').toLowerCase();
+        const isVisa = b.includes('visa');
+        const isMastercard = b.includes('master');
+        const isAmex = b.includes('american') || b.includes('amex');
+        const isDiscover = b.includes('discover');
+        const hasMatch = isVisa || isMastercard || isAmex || isDiscover;
+
+        const modal = ensureModalElement();
+        const elVisa = modal.querySelector('#modal-brand-badge-visa');
+        const elMaster = modal.querySelector('#modal-brand-badge-mastercard');
+        const elAmex = modal.querySelector('#modal-brand-badge-amex');
+        const elDiscover = modal.querySelector('#modal-brand-badge-discover');
+
+        if (!hasMatch) {
+            if (elVisa) elVisa.className = 'transition-all duration-200 font-black text-[#1434CB] italic text-xs opacity-35 px-1 py-0.5 rounded';
+            if (elMaster) elMaster.className = 'transition-all duration-200 inline-flex items-center opacity-35 px-1 py-0.5 rounded';
+            if (elAmex) elAmex.className = 'transition-all duration-200 px-1 rounded bg-[#006FCF] text-white text-[8.5px] font-black leading-tight opacity-35';
+            if (elDiscover) elDiscover.className = 'transition-all duration-200 font-black text-[#FF6000] text-[10px] opacity-35 px-1 py-0.5 rounded';
+            return;
+        }
+
+        if (elVisa) elVisa.className = `transition-all duration-200 font-black text-[#1434CB] italic text-xs px-1 py-0.5 rounded ${isVisa ? 'opacity-100 scale-110 ring-1 ring-[#1434CB]/40 bg-blue-50/70 dark:bg-blue-900/30' : 'opacity-25 grayscale'}`;
+        if (elMaster) elMaster.className = `transition-all duration-200 inline-flex items-center px-1 py-0.5 rounded ${isMastercard ? 'opacity-100 scale-110 ring-1 ring-amber-500/40 bg-amber-50/70 dark:bg-amber-900/30' : 'opacity-25 grayscale'}`;
+        if (elAmex) elAmex.className = `transition-all duration-200 px-1 rounded bg-[#006FCF] text-white text-[8.5px] font-black leading-tight ${isAmex ? 'opacity-100 scale-110 ring-1 ring-blue-500/60 shadow-xs' : 'opacity-25 grayscale'}`;
+        if (elDiscover) elDiscover.className = `transition-all duration-200 font-black text-[#FF6000] text-[10px] px-1 py-0.5 rounded ${isDiscover ? 'opacity-100 scale-110 ring-1 ring-orange-500/40 bg-orange-50/70 dark:bg-orange-900/30' : 'opacity-25 grayscale'}`;
+    }
+
+    /**
+     * Display a clean card validation or processing error message
+     */
+    function showModalCardError(msg) {
+        const modal = ensureModalElement();
+        const errorBox = modal.querySelector('#modal-card-fields-error');
+        const errorText = modal.querySelector('#modal-card-fields-error-text');
+        if (errorBox && errorText) {
+            errorText.textContent = msg || 'Please verify your card details and try again.';
+            errorBox.classList.remove('hidden');
+            errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    /**
+     * Create PayPal Order on Server (Used by both Buttons and CardFields)
+     */
+    async function createModalPaymentOrder(preferredMethod) {
+        const modal = ensureModalElement();
+        const serviceType = state.serviceType || modal.querySelector('#selected-service-type')?.value || 'Digitizing';
+        let projectName = '';
+        if (serviceType === 'Digitizing' || serviceType === 'PetPortrait') {
+            projectName = modal.querySelector('#dig-job-name')?.value.trim();
+            if (!projectName) {
+                alert('Please provide a Job Name / Reference in Order Details.');
+                window.backToOrderDetailsStep();
+                modal.querySelector('#dig-job-name')?.focus();
+                throw new Error('Missing job name');
+            }
+        } else {
+            projectName = modal.querySelector('#vec-job-name')?.value.trim();
+            if (!projectName) {
+                alert('Please provide a Job Name / Reference in Order Details.');
+                window.backToOrderDetailsStep();
+                modal.querySelector('#vec-job-name')?.focus();
+                throw new Error('Missing job name');
+            }
+        }
+
+        // Validate contact details
+        const session = getSession();
+        const clientEmailInput = modal.querySelector('#order-client-email');
+        const clientNameInput = modal.querySelector('#order-client-name');
+        const clientEmail = (session && session.email) || (clientEmailInput ? clientEmailInput.value.trim() : '');
+        const clientName = (session && (session.full_name || session.name)) || (clientNameInput ? clientNameInput.value.trim() : '') || 'Customer';
+
+        if (!clientEmail || !clientEmail.includes('@')) {
+            alert('Please provide a valid delivery email address.');
+            window.backToOrderDetailsStep();
+            modal.querySelector('#order-client-email')?.focus();
+            throw new Error('Missing email');
+        }
+
+        const calculatedPrice = window.calculateAdaptivePrice ? window.calculateAdaptivePrice() : 15.00;
+
+        // Pre-upload artwork files
+        await uploadModalArtworkFiles();
+
+        const res = await fetch('/api/paypal/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                amount: calculatedPrice,
+                currency: 'USD',
+                orderDetails: {
+                    projectName: projectName,
+                    serviceType: serviceType,
+                    clientName: clientName,
+                    clientEmail: clientEmail
+                }
+            })
+        });
+
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.message || 'Failed to initialize PayPal order on server');
+        }
+
+        const json = await res.json();
+        if (!json.success || !json.data) {
+            throw new Error(json.message || 'Invalid response from PayPal server');
+        }
+
+        return json.data.id || json.data.orderID;
+    }
+
+    /**
+     * Capture PayPal Order on Server and Finalize Database Record
+     */
+    async function captureModalPaymentOrder(orderId, isCard) {
+        let processingOverlay = document.getElementById('modal-paypal-processing-overlay');
+        if (!processingOverlay) {
+            processingOverlay = document.createElement('div');
+            processingOverlay.id = 'modal-paypal-processing-overlay';
+            processingOverlay.className = 'fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-white text-center';
+            processingOverlay.innerHTML = `
+                <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                <h4 class="text-lg font-black tracking-tight mb-1">Verifying Payment &amp; Finalizing Order...</h4>
+                <p class="text-xs text-slate-300 max-w-sm">Please do not close this window while we secure your digitizing order.</p>
+            `;
+            document.body.appendChild(processingOverlay);
+        }
+
+        try {
+            const captureRes = await fetch('/api/paypal/capture-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paypalOrderId: orderId })
+            });
+
+            const captureJson = await captureRes.json().catch(() => ({}));
+            if (!captureRes.ok || !captureJson.success) {
+                throw new Error(captureJson.message || 'Failed to capture payment');
+            }
+
+            const captureData = captureJson.data || {};
+            const transactionId = captureData.captureId || captureData.id || orderId;
+
+            await finalizeModalOrder({
+                paymentStatus: 'paid',
+                paymentMethod: isCard ? 'CreditCard' : 'PayPal',
+                transactionId: transactionId,
+                paypalCaptureData: captureData
+            });
+
+        } catch (captureErr) {
+            console.error('Payment capture error:', captureErr);
+            if (isCard) {
+                showModalCardError(captureErr.message || 'Payment could not be verified by the gateway.');
+            } else if (typeof window.showModalPaymentError === 'function') {
+                window.showModalPaymentError(captureErr.message || 'Payment could not be verified by the gateway.');
+            } else {
+                alert(`Payment could not be verified: ${captureErr.message}. If your account was debited, please contact support@dezandigitizing.com.`);
+            }
+            throw captureErr;
+        } finally {
+            if (processingOverlay) processingOverlay.remove();
+        }
+    }
+
+    /**
+     * Initialize PayPal CardFields (Advanced Credit and Debit Card Payments)
+     */
+    async function initModalCardFieldsComponent(paypal) {
+        const modal = ensureModalElement();
+        const cardFieldsContainer = modal.querySelector('#modal-card-fields-container');
+        if (!cardFieldsContainer || !paypal || typeof paypal.CardFields !== 'function') {
+            return false;
+        }
+
+        if (modalCardFieldsRendered && modalCardFieldsInstance) {
+            return true;
+        }
+
+        try {
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const cardFields = paypal.CardFields({
+                createOrder: async () => {
+                    return await createModalPaymentOrder('Card');
+                },
+                onApprove: async (data) => {
+                    await captureModalPaymentOrder(data.orderID, true);
+                },
+                onError: (err) => {
+                    console.error('[CardFields Error]:', err);
+                    showModalCardError(err.message || 'Payment could not be completed with this card.');
+                },
+                style: {
+                    'input': {
+                        'font-size': '14px',
+                        'font-family': 'Inter, system-ui, -apple-system, sans-serif',
+                        'color': isDarkMode ? '#f1f5f9' : '#0f172a'
+                    },
+                    '.invalid': {
+                        'color': '#ef4444'
+                    }
+                }
+            });
+
+            if (typeof cardFields.isEligible === 'function' && !cardFields.isEligible()) {
+                console.warn('[PayPal CardFields not eligible for current account/session]');
+                return false;
+            }
+
+            modalCardFieldsInstance = cardFields;
+
+            // Clear target containers
+            const numContainer = modal.querySelector('#modal-card-number-field');
+            const expContainer = modal.querySelector('#modal-card-expiry-field');
+            const cvvContainer = modal.querySelector('#modal-card-cvv-field');
+            const nameContainer = modal.querySelector('#modal-card-name-field');
+            const postContainer = modal.querySelector('#modal-card-postal-field');
+
+            if (numContainer) numContainer.innerHTML = '';
+            if (expContainer) expContainer.innerHTML = '';
+            if (cvvContainer) cvvContainer.innerHTML = '';
+            if (nameContainer) nameContainer.innerHTML = '';
+            if (postContainer) postContainer.innerHTML = '';
+
+            const numberField = cardFields.NumberField({ placeholder: '•••• •••• •••• ••••' });
+            const expiryField = cardFields.ExpiryField({ placeholder: 'MM / YY' });
+            const cvvField = cardFields.CVVField({ placeholder: 'CVC / CVV' });
+            const nameField = cardFields.NameField({ placeholder: 'Name on card' });
+            const postalField = cardFields.PostalCodeField({ placeholder: 'Billing ZIP / Postal' });
+
+            modalCardFieldInstances = { numberField, expiryField, cvvField, nameField, postalField };
+
+            // Real-time card brand detection listeners
+            const handleBrandChange = (event) => {
+                const detectedBrand = (event && event.cards && event.cards[0]?.type) || event?.cardType || '';
+                updateModalCardBrandBadges(detectedBrand);
+            };
+
+            if (typeof cardFields.on === 'function') {
+                try { cardFields.on('cardTypeChange', handleBrandChange); } catch(e) {}
+            }
+            if (typeof numberField.on === 'function') {
+                try { numberField.on('cardTypeChange', handleBrandChange); } catch(e) {}
+                try { numberField.on('change', (e) => {
+                    if (e && (e.cards || e.cardType)) handleBrandChange(e);
+                }); } catch(e) {}
+            }
+
+            const renderPromises = [];
+            if (numContainer && typeof numberField.render === 'function') {
+                renderPromises.push(numberField.render('#modal-card-number-field'));
+            }
+            if (expContainer && typeof expiryField.render === 'function') {
+                renderPromises.push(expiryField.render('#modal-card-expiry-field'));
+            }
+            if (cvvContainer && typeof cvvField.render === 'function') {
+                renderPromises.push(cvvField.render('#modal-card-cvv-field'));
+            }
+            if (nameContainer && typeof nameField.render === 'function') {
+                renderPromises.push(nameField.render('#modal-card-name-field'));
+            }
+            if (postContainer && typeof postalField.render === 'function') {
+                renderPromises.push(postalField.render('#modal-card-postal-field'));
+            }
+
+            await Promise.all(renderPromises);
+            modalCardFieldsRendered = true;
+            return true;
+        } catch (cardInitErr) {
+            console.warn('[PayPal CardFields initialization note]:', cardInitErr.message);
+            modalCardFieldsInstance = null;
+            modalCardFieldsRendered = false;
+            return false;
+        }
+    }
+
+    /**
+     * Preload PayPal SDK & CardFields component in background as soon as Step 3 opens
+     */
+    window.preloadModalCardPayment = async function() {
+        try {
+            if (!window.PayPalConfig) {
+                await new Promise((resolve, reject) => {
+                    const existing = document.getElementById('dezan-paypal-config-script');
+                    if (existing) {
+                        if (window.PayPalConfig) return resolve(window.PayPalConfig);
+                        existing.addEventListener('load', () => resolve(window.PayPalConfig));
+                        existing.addEventListener('error', () => resolve(null));
+                        return;
+                    }
+                    const sc = document.createElement('script');
+                    sc.id = 'dezan-paypal-config-script';
+                    const srcPath = typeof window.resolveAppPath === 'function' ? window.resolveAppPath('js/paypal-config.js') : '/js/paypal-config.js';
+                    sc.src = srcPath;
+                    sc.onload = () => resolve(window.PayPalConfig);
+                    sc.onerror = () => resolve(null);
+                    document.head.appendChild(sc);
+                });
+            }
+
+            if (window.PayPalConfig && typeof window.PayPalConfig.loadSdk === 'function') {
+                const paypal = await window.PayPalConfig.loadSdk();
+                if (paypal && paypal.CardFields) {
+                    await initModalCardFieldsComponent(paypal);
+                }
+            }
+        } catch (e) {
+            console.warn('[PayPal Card Preload Note]:', e.message);
+        }
+    };
+
+    /**
+     * Submit payment using PayPal direct CardFields
+     */
+    window.submitModalCardPayment = async function() {
+        if (isModalCardSubmitting) return;
+        const modal = ensureModalElement();
+        const errorBox = modal.querySelector('#modal-card-fields-error');
+        const submitBtn = modal.querySelector('#modal-card-submit-btn');
+        const submitBtnText = modal.querySelector('#modal-card-submit-btn-text');
+
+        if (errorBox) errorBox.classList.add('hidden');
+
+        if (!modalCardFieldsInstance || typeof modalCardFieldsInstance.submit !== 'function') {
+            showModalCardError('Card payment fields are initializing. Please wait a moment and click Pay again.');
+            return;
+        }
+
+        try {
+            isModalCardSubmitting = true;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            }
+            if (submitBtnText) {
+                submitBtnText.textContent = 'Processing Card Payment...';
+            }
+
+            await modalCardFieldsInstance.submit().catch(err => {
+                throw err;
+            });
+        } catch (err) {
+            console.error('[Card Submission Error]:', err);
+            showModalCardError(err.message || 'Please check your card details and try again.');
+        } finally {
+            isModalCardSubmitting = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+            const price = state.calculatedPrice || 15.00;
+            const priceStr = (price % 1 === 0) ? `$${Math.round(price)}` : `$${Number(price).toFixed(2)}`;
+            if (submitBtnText) {
+                submitBtnText.textContent = `Pay ${priceStr} Now`;
+            }
+        }
+    };
+
+    /**
+     * Mount and initialize PayPal in Step 3 (Buttons or Direct CardFields)
      */
     window.initModalPayPal = async function(preferredMethod) {
         const modal = ensureModalElement();
         const container = modal.querySelector('#modal-paypal-button-container');
+        const cardContainer = modal.querySelector('#modal-card-fields-container');
         if (!container) return;
 
         const currentMethod = (preferredMethod === 'Card' || preferredMethod === 'CreditCard' || state.paymentMethod === 'Card') ? 'Card' : 'PayPal';
         const isCard = currentMethod === 'Card';
-
-        // If buttons are already mounted and active in the container, do not re-render
-        if (modalPayPalButtonsInstance && container.children.length > 0 && container.dataset.renderedMethod === currentMethod && !container.textContent.includes('Connecting') && !container.textContent.includes('Notice') && !container.textContent.includes('Could not load') && !container.textContent.includes('Delayed')) {
-            return;
-        }
 
         if (isModalPayPalMounting) {
             pendingPayPalMethod = currentMethod;
             return;
         }
         isModalPayPalMounting = true;
-
-        // Clean up previous instance before mounting anew
-        if (modalPayPalButtonsInstance && typeof modalPayPalButtonsInstance.close === 'function') {
-            try { await modalPayPalButtonsInstance.close(); } catch(e) {}
-            modalPayPalButtonsInstance = null;
-        }
-
-        container.innerHTML = `
-            <div class="flex items-center justify-center gap-2 py-3 text-xs text-slate-500 dark:text-slate-400">
-                <span class="material-symbols-outlined animate-spin text-sm text-primary">sync</span>
-                <span>Connecting to secure PayPal gateway...</span>
-            </div>
-        `;
 
         try {
             // Auto-load paypal-config.js if not preloaded on the page
@@ -2320,11 +3120,49 @@
 
             const paypal = await window.PayPalConfig.loadSdk();
 
-            if (!paypal || !paypal.Buttons) {
-                throw new Error('PayPal Buttons component not available');
+            if (isCard) {
+                // Try initializing CardFields directly
+                let isCardFieldsReady = false;
+                if (paypal && paypal.CardFields) {
+                    isCardFieldsReady = await initModalCardFieldsComponent(paypal);
+                }
+
+                if (isCardFieldsReady && cardContainer) {
+                    // DIRECT CARD CHECKOUT: Display secure fields immediately with zero second button!
+                    container.classList.add('hidden');
+                    cardContainer.classList.remove('hidden');
+                    const price = state.calculatedPrice || 15.00;
+                    const priceStr = (price % 1 === 0) ? `$${Math.round(price)}` : `$${Number(price).toFixed(2)}`;
+                    const submitBtnText = modal.querySelector('#modal-card-submit-btn-text');
+                    if (submitBtnText) submitBtnText.textContent = `Pay ${priceStr} Now`;
+                    return;
+                }
+
+                // If CardFields is not eligible on this merchant account, fall back seamlessly to PayPal Card button
+                if (cardContainer) cardContainer.classList.add('hidden');
+                container.classList.remove('hidden');
+            } else {
+                // PayPal Method Selected
+                if (cardContainer) cardContainer.classList.add('hidden');
+                container.classList.remove('hidden');
             }
 
-            container.innerHTML = '';
+            // Fallback / PayPal Smart Buttons rendering
+            if (modalPayPalButtonsInstance && container.children.length > 0 && container.dataset.renderedMethod === currentMethod && !container.textContent.includes('Connecting') && !container.textContent.includes('Notice') && !container.textContent.includes('Could not load') && !container.textContent.includes('Delayed')) {
+                return;
+            }
+
+            if (modalPayPalButtonsInstance && typeof modalPayPalButtonsInstance.close === 'function') {
+                try { await modalPayPalButtonsInstance.close(); } catch(e) {}
+                modalPayPalButtonsInstance = null;
+            }
+
+            container.innerHTML = `
+                <div class="flex items-center justify-center gap-2 py-3 text-xs text-slate-500 dark:text-slate-400">
+                    <span class="material-symbols-outlined animate-spin text-sm text-primary">sync</span>
+                    <span>Connecting to secure PayPal gateway...</span>
+                </div>
+            `;
 
             const buttonOptions = {
                 style: {
@@ -2335,118 +3173,10 @@
                     height: 44
                 },
                 createOrder: async function(data, actions) {
-                    // 1. Validate fields from Step 1 and Step 2
-                    const serviceType = state.serviceType || modal.querySelector('#selected-service-type')?.value || 'Digitizing';
-                    let projectName = '';
-                    if (serviceType === 'Digitizing' || serviceType === 'PetPortrait') {
-                        projectName = modal.querySelector('#dig-job-name')?.value.trim();
-                        if (!projectName) {
-                            alert('Please provide a Job Name / Reference in Order Details.');
-                            window.backToOrderDetailsStep();
-                            modal.querySelector('#dig-job-name')?.focus();
-                            throw new Error('Missing job name');
-                        }
-                    } else {
-                        projectName = modal.querySelector('#vec-job-name')?.value.trim();
-                        if (!projectName) {
-                            alert('Please provide a Job Name / Reference in Order Details.');
-                            window.backToOrderDetailsStep();
-                            modal.querySelector('#vec-job-name')?.focus();
-                            throw new Error('Missing job name');
-                        }
-                    }
-
-                    // Validate contact details
-                    const session = getSession();
-                    const clientEmailInput = modal.querySelector('#order-client-email');
-                    const clientNameInput = modal.querySelector('#order-client-name');
-                    const clientEmail = (session && session.email) || (clientEmailInput ? clientEmailInput.value.trim() : '');
-                    const clientName = (session && (session.full_name || session.name)) || (clientNameInput ? clientNameInput.value.trim() : '') || 'Customer';
-
-                    if (!clientEmail || !clientEmail.includes('@')) {
-                        alert('Please provide a valid delivery email address.');
-                        window.backToOrderDetailsStep();
-                        modal.querySelector('#order-client-email')?.focus();
-                        throw new Error('Missing email');
-                    }
-
-                    const calculatedPrice = window.calculateAdaptivePrice ? window.calculateAdaptivePrice() : 15.00;
-
-                    // Pre-upload files
-                    await uploadModalArtworkFiles();
-
-                    const res = await fetch('/api/paypal/create-order', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            amount: calculatedPrice,
-                            currency: 'USD',
-                            orderDetails: {
-                                projectName: projectName,
-                                serviceType: serviceType,
-                                clientName: clientName,
-                                clientEmail: clientEmail
-                            }
-                        })
-                    });
-
-                    if (!res.ok) {
-                        const errData = await res.json().catch(() => ({}));
-                        throw new Error(errData.message || 'Failed to initialize PayPal order on server');
-                    }
-
-                    const json = await res.json();
-                    if (!json.success || !json.data) {
-                        throw new Error(json.message || 'Invalid response from PayPal server');
-                    }
-
-                    return json.data.id || json.data.orderID;
+                    return await createModalPaymentOrder(currentMethod);
                 },
                 onApprove: async function(data, actions) {
-                    let processingOverlay = document.getElementById('modal-paypal-processing-overlay');
-                    if (!processingOverlay) {
-                        processingOverlay = document.createElement('div');
-                        processingOverlay.id = 'modal-paypal-processing-overlay';
-                        processingOverlay.className = 'fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-white text-center';
-                        processingOverlay.innerHTML = `
-                            <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-                            <h4 class="text-lg font-black tracking-tight mb-1">Verifying Payment &amp; Finalizing Order...</h4>
-                            <p class="text-xs text-slate-300 max-w-sm">Please do not close this window while we secure your digitizing order.</p>
-                        `;
-                        document.body.appendChild(processingOverlay);
-                    }
-
-                    try {
-                        const captureRes = await fetch('/api/paypal/capture-order', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                paypalOrderId: data.orderID
-                            })
-                        });
-
-                        const captureJson = await captureRes.json().catch(() => ({}));
-                        if (!captureRes.ok || !captureJson.success) {
-                            throw new Error(captureJson.message || 'Failed to capture payment');
-                        }
-
-                        const captureData = captureJson.data || {};
-                        const transactionId = captureData.captureId || captureData.id || data.orderID;
-
-                        await finalizeModalOrder({
-                            paymentStatus: 'paid',
-                            paymentMethod: isCard ? 'CreditCard' : 'PayPal',
-                            transactionId: transactionId,
-                            paypalCaptureData: captureData
-                        });
-
-                    } catch (captureErr) {
-                        console.error('Payment capture error:', captureErr);
-                        alert(`Payment could not be verified: ${captureErr.message}. If your account was debited, please contact support@dezandigitizing.com.`);
-                    } finally {
-                        const overlay = document.getElementById('modal-paypal-processing-overlay');
-                        if (overlay) overlay.remove();
-                    }
+                    await captureModalPaymentOrder(data.orderID, isCard);
                 },
                 onCancel: function(data) {
                     console.log('Payment cancelled by client');
@@ -2481,13 +3211,13 @@
 
             modalPayPalButtonsInstance = paypal.Buttons(buttonOptions);
             if (typeof modalPayPalButtonsInstance.isEligible === 'function' && !modalPayPalButtonsInstance.isEligible()) {
-                // If specific funding source is not eligible in current locale, fallback to standard buttons
                 delete buttonOptions.fundingSource;
                 buttonOptions.style.color = 'gold';
                 buttonOptions.style.label = 'paypal';
                 modalPayPalButtonsInstance = paypal.Buttons(buttonOptions);
             }
 
+            container.innerHTML = '';
             if (modal.querySelector('#modal-paypal-button-container')) {
                 await modalPayPalButtonsInstance.render('#modal-paypal-button-container');
                 container.dataset.renderedMethod = currentMethod;
@@ -2524,9 +3254,204 @@
     };
 
     /**
+     * Resets payment selection cards to neutral (unselected) state
+     */
+    window.resetModalPaymentTabs = function() {
+        state.hasExplicitlySelectedMethod = false;
+        state.paymentMethod = null;
+
+        const modal = ensureModalElement();
+        const cardPaypal = modal.querySelector('#modal-tab-paypal') || modal.querySelector('#modal-card-paypal');
+        const cardCard = modal.querySelector('#modal-tab-card') || modal.querySelector('#modal-card-card');
+        const radioPaypal = modal.querySelector('#modal-radio-paypal');
+        const radioCard = modal.querySelector('#modal-radio-card');
+        const instruction = modal.querySelector('#modal-payment-instruction');
+        const container = modal.querySelector('#modal-paypal-button-container');
+        const cardContainer = modal.querySelector('#modal-card-fields-container');
+        const errorBox = modal.querySelector('#modal-card-fields-error');
+
+        if (cardPaypal) {
+            cardPaypal.className = 'relative p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between';
+        }
+        if (radioPaypal) {
+            radioPaypal.className = 'w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900';
+            radioPaypal.innerHTML = '<div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>';
+        }
+
+        if (cardCard) {
+            cardCard.className = 'relative p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between';
+        }
+        if (radioCard) {
+            radioCard.className = 'w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900';
+            radioCard.innerHTML = '<div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>';
+        }
+
+        if (instruction) {
+            instruction.textContent = 'Select your preferred payment method above to proceed:';
+        }
+
+        if (cardContainer) {
+            cardContainer.classList.add('hidden');
+        }
+
+        if (errorBox) {
+            errorBox.classList.add('hidden');
+        }
+
+        updateModalCardBrandBadges(null);
+
+        if (container) {
+            container.classList.remove('hidden');
+            container.innerHTML = `
+                <div class="py-3 px-4 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-xs flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-base text-primary">touch_app</span>
+                    <span>Choose <strong>PayPal</strong> or <strong>Credit / Debit Card</strong> above</span>
+                </div>
+            `;
+            delete container.dataset.renderedMethod;
+        }
+
+        if (typeof window.updateStep3DynamicCta === 'function') {
+            window.updateStep3DynamicCta();
+        }
+    };
+
+    /**
+     * Updates Step 3 Dynamic Sticky CTA button text, icon, and appearance
+     */
+    window.updateStep3DynamicCta = function() {
+        const modal = ensureModalElement();
+        const ctaBtn = modal.querySelector('#modal-step3-dynamic-cta');
+        const ctaText = modal.querySelector('#modal-step3-cta-text');
+        const ctaIcon = modal.querySelector('#modal-step3-cta-icon');
+        if (!ctaBtn) return;
+
+        if (state.isQuote) {
+            ctaBtn.classList.add('hidden');
+            return;
+        }
+        ctaBtn.classList.remove('hidden');
+
+        const step3View = modal.querySelector('#order-step-3-view');
+        const scrollContainer = step3View ? step3View.querySelector('.overflow-y-auto') : null;
+        const paymentBox = modal.querySelector('#order-payment-terms-box') || modal.querySelector('#modal-panel-payment');
+
+        let isPaymentVisible = false;
+        if (scrollContainer && paymentBox) {
+            const cRect = scrollContainer.getBoundingClientRect();
+            const pRect = paymentBox.getBoundingClientRect();
+            isPaymentVisible = (pRect.top < cRect.bottom - 35) && (pRect.bottom > cRect.top + 35);
+        }
+
+        const price = state.calculatedPrice || 15.00;
+        const priceStr = (price % 1 === 0) ? `$${Math.round(price)}` : `$${Number(price).toFixed(2)}`;
+
+        if (!isPaymentVisible) {
+            ctaBtn.className = 'px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs sm:text-sm font-black shadow-md shadow-primary/25 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0 active:scale-[0.98]';
+            if (ctaText) ctaText.textContent = 'Continue to Payment →';
+            if (ctaIcon) {
+                ctaIcon.textContent = 'arrow_forward';
+                ctaIcon.className = 'material-symbols-outlined text-base animate-pulse';
+            }
+            ctaBtn.setAttribute('data-cta-state', 'continue');
+        } else if (!state.hasExplicitlySelectedMethod) {
+            ctaBtn.className = 'px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-black shadow-md shadow-amber-500/25 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0 active:scale-[0.98]';
+            if (ctaText) ctaText.textContent = 'Choose Payment Method';
+            if (ctaIcon) {
+                ctaIcon.textContent = 'payments';
+                ctaIcon.className = 'material-symbols-outlined text-base';
+            }
+            ctaBtn.setAttribute('data-cta-state', 'choose');
+        } else {
+            const isPayPal = state.paymentMethod === 'PayPal';
+            if (isPayPal) {
+                ctaBtn.className = 'px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-[#FFC439] hover:bg-[#f5b82e] text-[#003087] text-xs sm:text-sm font-black shadow-md shadow-amber-400/30 border border-amber-400/50 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0 active:scale-[0.98]';
+                if (ctaText) ctaText.textContent = `Pay ${priceStr} with PayPal`;
+                if (ctaIcon) {
+                    ctaIcon.textContent = 'lock';
+                    ctaIcon.className = 'material-symbols-outlined text-base';
+                }
+                ctaBtn.setAttribute('data-cta-state', 'paypal');
+            } else {
+                ctaBtn.className = 'px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 text-xs sm:text-sm font-black shadow-md shadow-slate-900/20 border border-slate-700/50 dark:border-slate-200 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0 active:scale-[0.98]';
+                if (ctaText) ctaText.textContent = `Pay ${priceStr} by Card`;
+                if (ctaIcon) {
+                    ctaIcon.textContent = 'credit_card';
+                    ctaIcon.className = 'material-symbols-outlined text-base';
+                }
+                ctaBtn.setAttribute('data-cta-state', 'card');
+            }
+        }
+    };
+
+    /**
+     * Handles clicks on the dynamic sticky CTA button in Step 3
+     */
+    window.handleStep3DynamicCtaClick = function() {
+        const modal = ensureModalElement();
+        const ctaBtn = modal.querySelector('#modal-step3-dynamic-cta');
+        const ctaState = ctaBtn?.getAttribute('data-cta-state') || 'continue';
+        const paymentBox = modal.querySelector('#order-payment-terms-box');
+        const paymentArea = modal.querySelector('#modal-panel-payment');
+
+        if (ctaState === 'continue') {
+            const target = paymentBox || paymentArea;
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            setTimeout(() => {
+                if (typeof window.updateStep3DynamicCta === 'function') {
+                    window.updateStep3DynamicCta();
+                }
+            }, 350);
+            return;
+        }
+
+        if (ctaState === 'choose') {
+            if (paymentBox) {
+                paymentBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            const tabPaypal = modal.querySelector('#modal-tab-paypal');
+            const tabCard = modal.querySelector('#modal-tab-card');
+            [tabPaypal, tabCard].forEach(tab => {
+                if (tab) {
+                    tab.classList.add('ring-4', 'ring-primary/40');
+                    setTimeout(() => tab.classList.remove('ring-4', 'ring-primary/40'), 1200);
+                }
+            });
+            return;
+        }
+
+        if (ctaState === 'card') {
+            const cardContainer = modal.querySelector('#modal-card-fields-container');
+            const cardSubmitBtn = modal.querySelector('#modal-card-submit-btn');
+            if (cardContainer && !cardContainer.classList.contains('hidden') && cardSubmitBtn) {
+                cardSubmitBtn.click();
+                return;
+            }
+        }
+
+        if (ctaState === 'paypal' || ctaState === 'card') {
+            if (paymentArea) {
+                paymentArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                paymentArea.classList.add('ring-4', 'ring-primary/40');
+                setTimeout(() => paymentArea.classList.remove('ring-4', 'ring-primary/40'), 1200);
+            }
+            const container = modal.querySelector('#modal-paypal-button-container');
+            if (container) {
+                const clickable = container.querySelector('button, [role="button"], input[type="submit"]');
+                if (clickable) {
+                    clickable.click();
+                }
+            }
+        }
+    };
+
+    /**
      * Payment method selection: PayPal vs Credit / Debit Card (Side-by-Side)
      */
     window.setModalPaymentMethod = function(method) {
+        state.hasExplicitlySelectedMethod = true;
         state.paymentMethod = (method === 'Card' || method === 'CreditCard') ? 'Card' : 'PayPal';
         const modal = ensureModalElement();
         const cardPaypal = modal.querySelector('#modal-tab-paypal') || modal.querySelector('#modal-card-paypal');
@@ -2535,7 +3460,6 @@
         const radioCard = modal.querySelector('#modal-radio-card');
         const instruction = modal.querySelector('#modal-payment-instruction');
         const submitBtn = modal.querySelector('#adaptive-order-submit-btn');
-        const checkoutNote = modal.querySelector('#modal-paypal-checkout-note');
 
         if (state.paymentMethod === 'Card') {
             // Card Selected (Gold Border & Filled Radio)
@@ -2557,7 +3481,7 @@
             }
 
             if (instruction) {
-                instruction.textContent = 'Pay securely with any major credit or debit card (Visa, Mastercard, AMEX):';
+                instruction.textContent = 'Enter your card details below to complete payment securely:';
             }
         } else {
             // PayPal Selected (Gold Border & Filled Radio)
@@ -2584,10 +3508,14 @@
         }
 
         if (submitBtn) submitBtn.classList.add('hidden');
-        if (checkoutNote) checkoutNote.classList.remove('hidden');
 
-        // Render appropriate buttons for selected method
+        // Render appropriate buttons or direct card fields for selected method
         window.initModalPayPal(state.paymentMethod);
+
+        // Update the dynamic sticky CTA immediately
+        if (typeof window.updateStep3DynamicCta === 'function') {
+            window.updateStep3DynamicCta();
+        }
 
         if (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackAddPaymentInfo === 'function') {
             window.dezanTracker.trackAddPaymentInfo(state.paymentMethod, {
@@ -2704,7 +3632,10 @@
             window.switchOrderServiceChoice();
         }
 
-        state.uploadedFiles = [];
+        if (options.reset) {
+            state.uploadedFiles = [];
+        }
+        restoreModalOrderDraft();
         renderArtworkFileChips();
         window.calculateAdaptivePrice();
 
@@ -2755,6 +3686,8 @@
             try { modalPayPalButtonsInstance.close(); } catch(e) {}
             modalPayPalButtonsInstance = null;
         }
+        modalCardFieldsRendered = false;
+        modalCardFieldsInstance = null;
         const modal = document.getElementById('new-order-modal');
         if (modal) {
             modal.classList.add('hidden');
@@ -2960,6 +3893,195 @@
     window.handleModalSubmit = window.handleAdaptiveOrderSubmit;
 
     /**
+     * Non-destructive payment error display banner inside Modal Step 3
+     */
+    window.showModalPaymentError = function(msg) {
+        const modal = ensureModalElement();
+        const banner = modal.querySelector('#modal-payment-error-banner');
+        const text = modal.querySelector('#modal-payment-error-text');
+        if (banner && text) {
+            text.textContent = msg || 'Payment could not be completed. Your order specifications and files have been preserved. Please try again or select another payment method.';
+            banner.classList.remove('hidden');
+            banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            alert(msg || 'Payment failed. Your specifications are preserved. Please try again.');
+        }
+    };
+
+    /**
+     * In-Modal Step 4 Order Confirmation Screen
+     */
+    window.showModalConfirmationStep = function(createdRecord, details) {
+        const modal = ensureModalElement();
+        const formView = modal.querySelector('#adaptive-order-form');
+        const selectionView = modal.querySelector('#order-service-selection-view');
+        const step2View = modal.querySelector('#order-step-2-view');
+        const step3View = modal.querySelector('#order-step-3-view');
+        const step4View = modal.querySelector('#order-step-4-confirmation-view');
+        const headerDesc = modal.querySelector('#order-modal-header-desc');
+
+        if (selectionView) selectionView.classList.add('hidden');
+        if (step2View) step2View.classList.add('hidden');
+        if (step3View) step3View.classList.add('hidden');
+        if (step4View) step4View.classList.remove('hidden');
+        if (formView) formView.classList.remove('hidden');
+
+        // Transition stepper to Step 4 (100% completed)
+        updateStepperState(4);
+
+        if (headerDesc) {
+            headerDesc.textContent = details.isQuote ? 'Your custom quote request has been received.' : 'Your order is confirmed and currently queued for production.';
+        }
+
+        const orderNum = createdRecord.order_number || createdRecord.id || 'DZ-CONFIRMED';
+        const txnId = details.transactionId || createdRecord.transactionId || createdRecord.payment_reference || '';
+        const price = parseFloat(details.price || details.amount || createdRecord.price || 15.00);
+        const priceStr = `$${price.toFixed(2)} USD`;
+        const service = details.serviceType || createdRecord.service_type || 'Embroidery Digitizing';
+        const placement = details.placement || createdRecord.placement || 'Standard';
+        const turnaround = details.turnaroundSpeed || createdRecord.turnaround_speed || 'standard';
+        const isRush = turnaround.toLowerCase().includes('rush');
+        const clientEmail = details.clientEmail || createdRecord.client_email || '';
+
+        const orderNumEl = modal.querySelector('#modal-success-order-num');
+        if (orderNumEl) orderNumEl.textContent = orderNum.startsWith('#') ? orderNum : `#${orderNum}`;
+
+        const txnIdEl = modal.querySelector('#modal-success-txn-id');
+        if (txnIdEl) {
+            if (txnId) {
+                txnIdEl.textContent = `TXN: ${txnId}`;
+                txnIdEl.classList.remove('hidden');
+            } else {
+                txnIdEl.classList.add('hidden');
+            }
+        }
+
+        const serviceEl = modal.querySelector('#modal-success-service');
+        if (serviceEl) serviceEl.textContent = service;
+
+        const placementEl = modal.querySelector('#modal-success-placement');
+        if (placementEl) placementEl.textContent = placement;
+
+        const turnaroundEl = modal.querySelector('#modal-success-turnaround');
+        if (turnaroundEl) turnaroundEl.textContent = isRush ? 'Rush Priority (2-4 Hours)' : 'Standard (12-24 Hours)';
+
+        const emailEl = modal.querySelector('#modal-success-email');
+        if (emailEl) emailEl.textContent = clientEmail || 'Customer Email';
+
+        const amountEl = modal.querySelector('#modal-success-amount');
+        if (amountEl) {
+            amountEl.textContent = details.isQuote ? 'Free Appraisal ($0.00)' : priceStr;
+        }
+
+        if (details.isQuote) {
+            const badge = modal.querySelector('#modal-success-badge');
+            if (badge) badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Quote Request Received · Free Review';
+            const title = modal.querySelector('#modal-success-title');
+            if (title) title.textContent = 'Quote Request Submitted!';
+            const subhead = modal.querySelector('#modal-success-subhead');
+            if (subhead) subhead.textContent = 'Thank you! Our master digitizers will evaluate your artwork and email your custom quotation within 1 hour.';
+        }
+
+        // Handle Guest Password Claim vs Authenticated Shortcut
+        const session = getSession();
+        const guestCard = modal.querySelector('#modal-guest-setup-card');
+        const authCard = modal.querySelector('#modal-auth-shortcut-card');
+        if (session) {
+            if (guestCard) guestCard.classList.add('hidden');
+            if (authCard) authCard.classList.remove('hidden');
+        } else {
+            if (guestCard) {
+                guestCard.classList.remove('hidden');
+                guestCard.setAttribute('data-client-email', clientEmail);
+            }
+            if (authCard) authCard.classList.add('hidden');
+        }
+
+        // Scroll step 4 to top
+        const scrollContainer = step4View ? step4View.querySelector('.overflow-y-auto') : null;
+        if (scrollContainer) scrollContainer.scrollTop = 0;
+    };
+
+    /**
+     * Copy confirmed order number to clipboard with visual feedback
+     */
+    window.copyModalOrderNumber = function() {
+        const modal = ensureModalElement();
+        const numEl = modal.querySelector('#modal-success-order-num');
+        const textEl = modal.querySelector('#modal-copy-order-text');
+        if (!numEl) return;
+        const raw = numEl.textContent.replace('#', '').trim();
+        navigator.clipboard.writeText(raw).then(() => {
+            if (textEl) {
+                const prev = textEl.textContent;
+                textEl.textContent = 'Copied!';
+                setTimeout(() => { textEl.textContent = prev; }, 2000);
+            }
+        }).catch(() => {});
+    };
+
+    /**
+     * Reset modal to Step 1 to place another order
+     */
+    window.startAnotherModalOrder = function() {
+        const modal = ensureModalElement();
+        const step4View = modal.querySelector('#order-step-4-confirmation-view');
+        const selectionView = modal.querySelector('#order-service-selection-view');
+        const formView = modal.querySelector('#adaptive-order-form');
+
+        if (step4View) step4View.classList.add('hidden');
+        if (selectionView) selectionView.classList.remove('hidden');
+        if (formView) {
+            formView.classList.add('hidden');
+            formView.reset();
+        }
+        state.uploadedFiles = [];
+        uploadedArtworkFilesCache = [];
+        if (typeof selectedArtworkFiles !== 'undefined') selectedArtworkFiles = [];
+        sessionStorage.removeItem('dezan_modal_order_draft');
+        updateStepperState(1);
+        if (selectionView) selectionView.scrollTop = 0;
+    };
+
+    /**
+     * Guest account creation from in-modal confirmation screen
+     */
+    window.submitModalGuestAccountClaim = async function() {
+        const modal = ensureModalElement();
+        const passInput = modal.querySelector('#modal-claim-password');
+        const feedback = modal.querySelector('#modal-claim-feedback');
+        const guestCard = modal.querySelector('#modal-guest-setup-card');
+        const email = guestCard?.getAttribute('data-client-email') || '';
+        const password = (passInput?.value || '').trim();
+
+        if (!password || password.length < 6) {
+            if (feedback) {
+                feedback.textContent = 'Password must be at least 6 characters.';
+                feedback.className = 'text-xs font-bold text-rose-500 text-center py-1 block';
+            }
+            return;
+        }
+
+        try {
+            if (window.insforgeClient && typeof window.insforgeClient.register === 'function') {
+                await window.insforgeClient.register({ email: email, password: password, name: 'Customer' });
+            }
+            if (feedback) {
+                feedback.textContent = 'Account created! You can now access your Client Portal.';
+                feedback.className = 'text-xs font-bold text-emerald-500 text-center py-1 block';
+            }
+            if (passInput) passInput.disabled = true;
+            const btn = modal.querySelector('#modal-claim-btn');
+            if (btn) btn.classList.add('hidden');
+        } catch (err) {
+            if (feedback) {
+                feedback.textContent = err.message || 'Could not create account. Please contact support.';
+                feedback.className = 'text-xs font-bold text-rose-500 text-center py-1 block';
+            }
+        }
+    };
+
+    /**
      * Finalizes order/quote creation in the database and broadcasts events
      */
     window.finalizeModalOrder = async function(paymentOverrides = {}) {
@@ -2967,273 +4089,243 @@
         const isQuote = state.isQuote;
         const session = getSession();
 
-        const serviceType = state.serviceType || modal.querySelector('#selected-service-type')?.value || 'Digitizing';
-        let projectName = '';
-        let placement = 'Standard';
-        let fabricType = '';
-        let sizing = 'Standard';
-        let fileFormat = 'DST, EMB';
-        let specialOptions = [];
+        const incomingTxn = paymentOverrides.transactionId || null;
 
-        if (serviceType === 'Digitizing' || serviceType === 'PetPortrait') {
-            projectName = (modal.querySelector('#dig-job-name')?.value || '').trim() || 'Custom Embroidery Order';
-            if (serviceType === 'PetPortrait') {
-                const petPlacementSelect = modal.querySelector('#pet-placement');
-                const rawPlacement = petPlacementSelect?.value || 'Left Chest';
-                if (rawPlacement.includes('Other') || rawPlacement.includes('Custom')) {
-                    placement = `Custom Placement: ${(modal.querySelector('#dig-custom-placement')?.value || '').trim() || 'Custom'}`;
-                } else {
-                    placement = rawPlacement;
-                }
-            } else {
-                const rawPlacement = modal.querySelector('#dig-placement')?.value || 'Left Chest — $15';
-                if (rawPlacement.includes('Custom')) {
-                    placement = `Custom Placement: ${(modal.querySelector('#dig-custom-placement')?.value || '').trim() || 'Custom'}`;
-                } else {
-                    placement = rawPlacement.split('—')[0].trim();
-                }
-            }
-
-            const fabricSelect = modal.querySelector('#dig-fabric');
-            const selectedFabric = fabricSelect ? fabricSelect.value : '';
-            if (selectedFabric === 'Other / Custom') {
-                fabricType = `Custom: ${(modal.querySelector('#dig-custom-fabric')?.value || '').trim() || 'Custom'}`;
-            } else {
-                fabricType = selectedFabric || 'Standard Fabric';
-            }
-
-            const sizeVal = (modal.querySelector('#dig-size')?.value || '').trim();
-            const unit = modal.querySelector('#dig-size-unit')?.value || 'in';
-            sizing = sizeVal ? (sizeVal.toLowerCase().includes(unit.toLowerCase()) ? sizeVal : `${sizeVal} ${unit}`) : 'Standard';
-
-            const checkedFormats = Array.from(modal.querySelectorAll('input[name="dig-formats"]:checked')).map(cb => cb.value);
-            fileFormat = checkedFormats.length > 0 ? checkedFormats.join(', ') : '.DST';
-            specialOptions = Array.from(modal.querySelectorAll('input[name="dig-special"]:checked')).map(cb => cb.value);
-        } else {
-            projectName = (modal.querySelector('#vec-job-name')?.value || '').trim() || 'Vector Artwork';
-            placement = modal.querySelector('#vec-use')?.value || 'Screen Printing';
-            fabricType = 'Vector Scalable';
-            sizing = 'Resolution Independent Vector';
-            const checkedVecFormats = Array.from(modal.querySelectorAll('input[name="vec-formats"]:checked')).map(cb => cb.value);
-            fileFormat = checkedVecFormats.length > 0 ? checkedVecFormats.join(', ') : 'AI, EPS, PDF';
+        // Idempotency check 1: Already running finalization
+        if (isFinalizingModalOrder) {
+            console.warn('[Checkout Guard] finalizeModalOrder is already running. Duplicate call prevented.');
+            return false;
         }
 
-        const instructions = (modal.querySelector('#order-notes')?.value || '').trim();
-        const turnaroundSpeed = isQuote ? 'standard' : (modal.querySelector('input[name="order-turnaround"]:checked')?.value || 'standard');
-        const calculatedPrice = isQuote ? 0 : window.calculateAdaptivePrice();
-
-        let planName = '';
-        if (serviceType === 'PetPortrait') {
-            const activeRadio = modal.querySelector('input[name="pet-pricing-tier"]:checked');
-            const tierLabel = activeRadio?.value === 'large' ? 'Over 5.5"' : 'Up to 5.5"';
-            planName = isQuote 
-                ? `Realistic / Pet Portrait Quote - ${placement}`
-                : `Realistic / Pet Portrait (${tierLabel}) - ${placement}`;
-        } else if (serviceType === 'Digitizing') {
-            planName = isQuote 
-                ? `Digitizing Quote - ${placement}`
-                : `Embroidery - ${placement}`;
-        } else {
-            planName = isQuote 
-                ? `Vector Quote - ${placement}`
-                : `Vector - ${placement}`;
+        // Idempotency check 2: Transaction ID already processed in this session
+        if (incomingTxn && modalProcessedTxns.has(incomingTxn)) {
+            console.warn(`[Checkout Guard] Transaction ${incomingTxn} was already finalized. Duplicate call prevented.`);
+            return false;
         }
 
-        const clientNameInput = modal.querySelector('#order-client-name');
-        const clientEmailInput = modal.querySelector('#order-client-email');
-        const clientName = (session && (session.full_name || session.name)) || (clientNameInput ? clientNameInput.value.trim() : '') || 'Customer';
-        const clientEmail = (session && session.email) || (clientEmailInput ? clientEmailInput.value.trim() : '') || '';
+        isFinalizingModalOrder = true;
 
-        const combinedInstructions = [
-            `Service: ${serviceType === 'PetPortrait' ? 'Realistic / Pet Portrait Digitizing' : serviceType}`,
-            `Sizing: ${sizing}`,
-            `Fabric: ${fabricType}`,
-            specialOptions.length > 0 ? `Special: ${specialOptions.join(', ')}` : '',
-            instructions ? `Notes: ${instructions}` : ''
-        ].filter(Boolean).join('\n');
-
-        // Pre-upload files
-        const rawArtworkFiles = await uploadModalArtworkFiles();
-
-        const paymentStatus = paymentOverrides.paymentStatus || (isQuote ? 'unpaid' : (state.paymentMethod === 'Payoneer' ? 'unpaid' : 'paid'));
-        const paymentMethod = paymentOverrides.paymentMethod || (isQuote ? 'Quote Request' : state.paymentMethod);
-        const transactionId = paymentOverrides.transactionId || null;
-
-        const orderPayload = {
-            isQuote: isQuote,
-            is_quote: isQuote,
-            status: isQuote ? 'quote_requested' : 'pending_review',
-            serviceType: serviceType === 'PetPortrait' ? 'Realistic / Pet Portrait' : (serviceType === 'Digitizing' ? 'Digitizing' : 'Vectorizing'),
-            planName: planName,
-            projectName: projectName,
-            placement: placement,
-            fabricType: fabricType,
-            sizing: sizing,
-            fileFormat: fileFormat,
-            specialOptions: specialOptions,
-            turnaroundSpeed: turnaroundSpeed,
-            instructions: combinedInstructions,
-            rawArtworkFiles: rawArtworkFiles,
-            price: isQuote ? null : calculatedPrice,
-            amount: calculatedPrice,
-            paymentStatus: paymentStatus,
-            paymentMethod: paymentMethod,
-            transactionId: transactionId,
-            payment_reference: transactionId,
-            clientName: clientName,
-            clientEmail: clientEmail,
-            clientId: session?.id || session?.userId || null,
-            attribution: (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.getAttribution === 'function') ? window.dezanTracker.getAttribution() : {}
-        };
-
-        let createdRecord = null;
-        if (window.insforgeClient && typeof window.insforgeClient.createOrder === 'function') {
-            createdRecord = await window.insforgeClient.createOrder(orderPayload);
-        } else {
-            const orderNum = (isQuote ? 'QUO-' : 'DZ-') + Math.floor(1000 + Math.random() * 9000);
-            createdRecord = {
-                id: (isQuote ? 'quo_' : 'ord_') + Date.now(),
-                order_number: orderNum,
-                ...orderPayload,
-                created_at: new Date().toISOString()
-            };
-            try {
-                const localOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
-                localOrders.unshift(createdRecord);
-                localStorage.setItem('dezan_orders', JSON.stringify(localOrders));
-            } catch (e) {}
-        }
-
-        // Realtime sync broadcast
         try {
-            if (typeof BroadcastChannel !== 'undefined') {
-                const channel = new BroadcastChannel('dezan_realtime_sync');
-                channel.postMessage({
-                    type: 'order_created',
-                    order: createdRecord,
-                    timestamp: Date.now()
-                });
-                channel.close();
-            }
-        } catch (e) {}
+            const serviceType = state.serviceType || modal.querySelector('#selected-service-type')?.value || 'Digitizing';
+            let projectName = '';
+            let placement = 'Standard';
+            let fabricType = '';
+            let sizing = 'Standard';
+            let fileFormat = 'DST, EMB';
+            let specialOptions = [];
 
-        // Broadcast live in-app notifications
-        if (window.dezanNotificationEngine && createdRecord) {
-            const orderNum = createdRecord.order_number || 'DZ-NEW';
-            if (isQuote) {
-                window.dezanNotificationEngine.broadcastToRole('admin', {
-                    orderId: orderNum,
-                    type: 'quote_new',
-                    category: 'quotes',
-                    title: 'New Free Quote Request',
-                    message: `Customer ${orderPayload.clientName || 'Guest'} requested a quote for ${orderPayload.serviceType || 'Digitizing'}.`,
-                    meta: 'Free Appraisal Pending',
-                    clientName: orderPayload.clientName,
-                    actionLabel: 'Appraise Quote',
-                    actionType: 'view_quotes',
-                    accent: 'sky',
-                    icon: 'request_quote'
-                });
-                window.dezanNotificationEngine.broadcastToRole('client', {
-                    orderId: orderNum,
-                    type: 'quote_requested',
-                    category: 'quotes',
-                    title: 'Custom Quote Request Submitted',
-                    message: `Your artwork has been submitted for free estimation (#${orderNum}). Estimated review: 1 hour.`,
-                    meta: '100% Free Review · Zero Obligation',
-                    actionLabel: 'View Quotes',
-                    actionType: 'view_quote',
-                    accent: 'sky',
-                    icon: 'request_quote'
-                });
+            if (serviceType === 'Digitizing' || serviceType === 'PetPortrait') {
+                projectName = (modal.querySelector('#dig-job-name')?.value || '').trim() || 'Custom Embroidery Order';
+                if (serviceType === 'PetPortrait') {
+                    const petPlacementSelect = modal.querySelector('#pet-placement');
+                    const rawPlacement = petPlacementSelect?.value || 'Left Chest';
+                    if (rawPlacement.includes('Other') || rawPlacement.includes('Custom')) {
+                        placement = `Custom Placement: ${(modal.querySelector('#dig-custom-placement')?.value || '').trim() || 'Custom'}`;
+                    } else {
+                        placement = rawPlacement;
+                    }
+                } else {
+                    const rawPlacement = modal.querySelector('#dig-placement')?.value || 'Left Chest — $15';
+                    if (rawPlacement.includes('Custom')) {
+                        placement = `Custom Placement: ${(modal.querySelector('#dig-custom-placement')?.value || '').trim() || 'Custom'}`;
+                    } else {
+                        placement = rawPlacement.split('—')[0].trim();
+                    }
+                }
+
+                const fabricSelect = modal.querySelector('#dig-fabric');
+                const selectedFabric = fabricSelect ? fabricSelect.value : '';
+                if (selectedFabric === 'Other / Custom') {
+                    fabricType = `Custom: ${(modal.querySelector('#dig-custom-fabric')?.value || '').trim() || 'Custom'}`;
+                } else {
+                    fabricType = selectedFabric || 'Standard Fabric';
+                }
+
+                const sizeVal = (modal.querySelector('#dig-size')?.value || '').trim();
+                const unit = modal.querySelector('#dig-size-unit')?.value || 'in';
+                sizing = sizeVal ? (sizeVal.toLowerCase().includes(unit.toLowerCase()) ? sizeVal : `${sizeVal} ${unit}`) : 'Standard';
+
+                const checkedFormats = Array.from(modal.querySelectorAll('input[name="dig-formats"]:checked')).map(cb => cb.value);
+                fileFormat = checkedFormats.length > 0 ? checkedFormats.join(', ') : '.DST';
+                specialOptions = Array.from(modal.querySelectorAll('input[name="dig-special"]:checked')).map(cb => cb.value);
             } else {
-                window.dezanNotificationEngine.broadcastToRole('admin', {
-                    orderId: orderNum,
-                    type: 'order_new',
-                    category: 'orders',
-                    title: 'New Customer Order Placed',
-                    message: `Order #${orderNum} placed for ${orderPayload.projectName || orderPayload.serviceType} ($${orderPayload.price || '15.00'}).`,
-                    meta: `$${orderPayload.price || '15.00'} · ${orderPayload.placement || 'Standard'} · Turnaround 12-24h`,
-                    clientName: orderPayload.clientName,
-                    actionLabel: 'Assign Digitizer',
-                    actionType: 'assign_order',
-                    accent: 'amber',
-                    icon: 'add_shopping_cart'
-                });
-                window.dezanNotificationEngine.broadcastToRole('client', {
-                    orderId: orderNum,
-                    type: 'order_confirmed',
-                    category: 'production',
-                    title: paymentStatus === 'paid' ? 'Order Confirmed & Queued' : 'Order Placed (Invoice Pending)',
-                    message: paymentStatus === 'paid' 
-                        ? `Your payment was confirmed for #${orderNum}. Our master digitizers are preparing your files.`
-                        : `Order #${orderNum} received. An invoice will be sent for payment.`,
-                    meta: 'In Queue · Turnaround 12-24h',
-                    actionLabel: 'Track Order',
-                    actionType: 'track_order',
-                    accent: 'emerald',
-                    icon: 'receipt_long'
-                });
-            }
-        }
-
-        window.closeOrderQuoteModal();
-        modal.querySelector('#adaptive-order-form')?.reset();
-        state.uploadedFiles = [];
-        uploadedArtworkFilesCache = [];
-        if (typeof selectedArtworkFiles !== 'undefined') selectedArtworkFiles = [];
-        state.isSubmitting = false;
-
-        // Context-specific redirection or in-place update
-        const isClientWorkspace = typeof window.clientWorkspace !== 'undefined' || 
-                                 document.body.dataset.clientPage !== undefined ||
-                                 window.location.pathname.includes('client-');
-
-        if (isClientWorkspace) {
-            if (window.insforgeClient && typeof window.insforgeClient.showToast === 'function') {
-                window.insforgeClient.showToast(
-                    isQuote ? 'Quote Requested' : (paymentStatus === 'paid' ? 'Payment Confirmed & Order Placed' : 'Order Placed Successfully'),
-                    isQuote ? `Ticket #${createdRecord.order_number} has been recorded.` : (paymentStatus === 'paid' ? `Payment captured via PayPal. Order #${createdRecord.order_number} queued.` : `Order #${createdRecord.order_number} submitted. Invoice pending.`),
-                    isQuote ? 'request_quote' : (paymentStatus === 'paid' ? 'verified' : 'check_circle'),
-                    'success'
-                );
+                projectName = (modal.querySelector('#vec-job-name')?.value || '').trim() || 'Vector Artwork';
+                placement = modal.querySelector('#vec-use')?.value || 'Screen Printing';
+                fabricType = 'Vector Scalable';
+                sizing = 'Resolution Independent Vector';
+                const checkedVecFormats = Array.from(modal.querySelectorAll('input[name="vec-formats"]:checked')).map(cb => cb.value);
+                fileFormat = checkedVecFormats.length > 0 ? checkedVecFormats.join(', ') : 'AI, EPS, PDF';
             }
 
-            if (isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackQuoteLead === 'function') {
-                window.dezanTracker.trackQuoteLead({
-                    quoteId: createdRecord.order_number || createdRecord.id,
-                    email: clientEmail,
-                    service: serviceType,
-                    project: projectName
-                });
-            } else if (!isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackOrderPurchase === 'function') {
-                window.dezanTracker.trackOrderPurchase({
-                    orderId: createdRecord.order_number || createdRecord.id,
-                    txnId: transactionId || ('TXN-' + Math.floor(100000 + Math.random() * 900000)),
-                    amount: calculatedPrice,
-                    service: serviceType,
-                    plan: planName,
-                    placement: placement,
-                    turnaround: turnaroundSpeed,
-                    email: clientEmail
-                });
+            const instructions = (modal.querySelector('#order-notes')?.value || '').trim();
+            const turnaroundSpeed = isQuote ? 'standard' : (modal.querySelector('input[name="order-turnaround"]:checked')?.value || 'standard');
+            const calculatedPrice = isQuote ? 0 : window.calculateAdaptivePrice();
+
+            let planName = '';
+            if (serviceType === 'PetPortrait') {
+                const activeRadio = modal.querySelector('input[name="pet-pricing-tier"]:checked');
+                const tierLabel = activeRadio?.value === 'large' ? 'Over 5.5"' : 'Up to 5.5"';
+                planName = isQuote 
+                    ? `Realistic / Pet Portrait Quote - ${placement}`
+                    : `Realistic / Pet Portrait (${tierLabel}) - ${placement}`;
+            } else if (serviceType === 'Digitizing') {
+                planName = isQuote 
+                    ? `Digitizing Quote - ${placement}`
+                    : `Embroidery - ${placement}`;
+            } else {
+                planName = isQuote 
+                    ? `Vector Quote - ${placement}`
+                    : `Vector - ${placement}`;
             }
 
-            if (window.clientWorkspace && typeof window.clientWorkspace.loadOrders === 'function') {
-                await window.clientWorkspace.loadOrders();
-            } else if (typeof renderOrders === 'function') {
-                await renderOrders();
-            }
-        } else {
-            if (isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackQuoteLead === 'function') {
-                window.dezanTracker.trackQuoteLead({
-                    quoteId: createdRecord.order_number || createdRecord.id,
-                    email: clientEmail,
-                    service: serviceType,
-                    project: projectName
-                });
+            const clientNameInput = modal.querySelector('#order-client-name');
+            const clientEmailInput = modal.querySelector('#order-client-email');
+            const clientName = (session && (session.full_name || session.name)) || (clientNameInput ? clientNameInput.value.trim() : '') || 'Customer';
+            const clientEmail = (session && session.email) || (clientEmailInput ? clientEmailInput.value.trim() : '') || '';
+
+            const combinedInstructions = [
+                `Service: ${serviceType === 'PetPortrait' ? 'Realistic / Pet Portrait Digitizing' : serviceType}`,
+                `Sizing: ${sizing}`,
+                `Fabric: ${fabricType}`,
+                specialOptions.length > 0 ? `Special: ${specialOptions.join(', ')}` : '',
+                instructions ? `Notes: ${instructions}` : ''
+            ].filter(Boolean).join('\n');
+
+            // Pre-upload files
+            const rawArtworkFiles = await uploadModalArtworkFiles();
+
+            const paymentStatus = paymentOverrides.paymentStatus || (isQuote ? 'unpaid' : (state.paymentMethod === 'Payoneer' ? 'unpaid' : 'paid'));
+            const paymentMethod = paymentOverrides.paymentMethod || (isQuote ? 'Quote Request' : state.paymentMethod);
+            const transactionId = incomingTxn || null;
+
+            const orderPayload = {
+                isQuote: isQuote,
+                is_quote: isQuote,
+                status: isQuote ? 'quote_requested' : 'pending_review',
+                serviceType: serviceType === 'PetPortrait' ? 'Realistic / Pet Portrait' : (serviceType === 'Digitizing' ? 'Digitizing' : 'Vectorizing'),
+                planName: planName,
+                projectName: projectName,
+                placement: placement,
+                fabricType: fabricType,
+                sizing: sizing,
+                fileFormat: fileFormat,
+                specialOptions: specialOptions,
+                turnaroundSpeed: turnaroundSpeed,
+                instructions: combinedInstructions,
+                rawArtworkFiles: rawArtworkFiles,
+                price: isQuote ? null : calculatedPrice,
+                amount: calculatedPrice,
+                paymentStatus: paymentStatus,
+                paymentMethod: paymentMethod,
+                transactionId: transactionId,
+                payment_reference: transactionId,
+                clientName: clientName,
+                clientEmail: clientEmail,
+                clientId: session?.id || session?.userId || null,
+                attribution: (typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.getAttribution === 'function') ? window.dezanTracker.getAttribution() : {}
+            };
+
+            let createdRecord = null;
+            if (window.insforgeClient && typeof window.insforgeClient.createOrder === 'function') {
+                createdRecord = await window.insforgeClient.createOrder(orderPayload);
+            } else {
+                const orderNum = (isQuote ? 'QUO-' : 'DZ-') + Math.floor(1000 + Math.random() * 9000);
+                createdRecord = {
+                    id: (isQuote ? 'quo_' : 'ord_') + Date.now(),
+                    order_number: orderNum,
+                    ...orderPayload,
+                    created_at: new Date().toISOString()
+                };
+                try {
+                    const localOrders = JSON.parse(localStorage.getItem('dezan_orders') || '[]');
+                    localOrders.unshift(createdRecord);
+                    localStorage.setItem('dezan_orders', JSON.stringify(localOrders));
+                } catch (e) {}
             }
 
+            if (incomingTxn) {
+                modalProcessedTxns.add(incomingTxn);
+            }
+
+            // Realtime sync broadcast
+            try {
+                if (typeof BroadcastChannel !== 'undefined') {
+                    const channel = new BroadcastChannel('dezan_realtime_sync');
+                    channel.postMessage({
+                        type: 'order_created',
+                        order: createdRecord,
+                        timestamp: Date.now()
+                    });
+                    channel.close();
+                }
+            } catch (e) {}
+
+            // Broadcast live in-app notifications
+            if (window.dezanNotificationEngine && createdRecord) {
+                const orderNum = createdRecord.order_number || 'DZ-NEW';
+                if (isQuote) {
+                    window.dezanNotificationEngine.broadcastToRole('admin', {
+                        orderId: orderNum,
+                        type: 'quote_new',
+                        category: 'quotes',
+                        title: 'New Free Quote Request',
+                        message: `Customer ${orderPayload.clientName || 'Guest'} requested a quote for ${orderPayload.serviceType || 'Digitizing'}.`,
+                        meta: 'Free Appraisal Pending',
+                        clientName: orderPayload.clientName,
+                        actionLabel: 'Appraise Quote',
+                        actionType: 'view_quotes',
+                        accent: 'sky',
+                        icon: 'request_quote'
+                    });
+                    window.dezanNotificationEngine.broadcastToRole('client', {
+                        orderId: orderNum,
+                        type: 'quote_requested',
+                        category: 'quotes',
+                        title: 'Custom Quote Request Submitted',
+                        message: `Your artwork has been submitted for free estimation (#${orderNum}). Estimated review: 1 hour.`,
+                        meta: '100% Free Review · Zero Obligation',
+                        actionLabel: 'View Quotes',
+                        actionType: 'view_quote',
+                        accent: 'sky',
+                        icon: 'request_quote'
+                    });
+                } else {
+                    window.dezanNotificationEngine.broadcastToRole('admin', {
+                        orderId: orderNum,
+                        type: 'order_new',
+                        category: 'orders',
+                        title: 'New Customer Order Placed',
+                        message: `Order #${orderNum} placed for ${orderPayload.projectName || orderPayload.serviceType} ($${orderPayload.price || '15.00'}).`,
+                        meta: `$${orderPayload.price || '15.00'} · ${orderPayload.placement || 'Standard'} · Turnaround 12-24h`,
+                        clientName: orderPayload.clientName,
+                        actionLabel: 'Assign Digitizer',
+                        actionType: 'assign_order',
+                        accent: 'amber',
+                        icon: 'add_shopping_cart'
+                    });
+                    window.dezanNotificationEngine.broadcastToRole('client', {
+                        orderId: orderNum,
+                        type: 'order_confirmed',
+                        category: 'production',
+                        title: paymentStatus === 'paid' ? 'Order Confirmed & Queued' : 'Order Placed (Invoice Pending)',
+                        message: paymentStatus === 'paid' 
+                            ? `Your payment was confirmed for #${orderNum}. Our master digitizers are preparing your files.`
+                            : `Order #${orderNum} received. An invoice will be sent for payment.`,
+                        meta: 'In Queue · Turnaround 12-24h',
+                        actionLabel: 'Track Order',
+                        actionType: 'track_order',
+                        accent: 'emerald',
+                        icon: 'receipt_long'
+                    });
+                }
+            }
+
+            // Clear draft upon successful order finalization
+            try {
+                sessionStorage.removeItem('dezan_modal_order_draft');
+            } catch (_) {}
+
+            // Save last guest order in sessionStorage
             try {
                 sessionStorage.setItem('dezan_last_guest_order', JSON.stringify({
                     id: createdRecord.id,
@@ -3250,19 +4342,76 @@
                 }));
             } catch (_) {}
 
-            const query = new URLSearchParams({
-                orderId: createdRecord.order_number || createdRecord.id,
-                service: serviceType,
-                plan: planName,
-                placement: placement || 'Standard',
-                turnaround: turnaroundSpeed || 'standard',
-                project: projectName,
-                email: clientEmail,
-                amount: calculatedPrice.toFixed(2),
-                type: isQuote ? 'quote' : 'order',
-                txn: transactionId || ''
+            // ===================================================================
+            //  CONVERSION TRACKING: GA4 / GTM / Google Ads
+            //  Only fires after payment is confirmed and order is created!
+            // ===================================================================
+            if (isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackQuoteLead === 'function') {
+                window.dezanTracker.trackQuoteLead({
+                    quoteId: createdRecord.order_number || createdRecord.id,
+                    email: clientEmail,
+                    service: serviceType,
+                    project: projectName
+                });
+            } else if (!isQuote && typeof window !== 'undefined' && window.dezanTracker && typeof window.dezanTracker.trackOrderPurchase === 'function') {
+                window.dezanTracker.trackOrderPurchase({
+                    orderId: createdRecord.order_number || createdRecord.id,
+                    txnId: transactionId || ('TXN-' + Math.floor(100000 + Math.random() * 900000)),
+                    amount: calculatedPrice,
+                    service: serviceType,
+                    service_type: serviceType,
+                    plan: planName,
+                    placement: placement,
+                    turnaround: turnaroundSpeed,
+                    rush_status: turnaroundSpeed.toLowerCase().includes('rush') ? 'rush' : 'standard',
+                    email: clientEmail
+                });
+            }
+
+            // Context-specific actions: if in Client Workspace, reload orders
+            const isClientWorkspace = typeof window.clientWorkspace !== 'undefined' || 
+                                     document.body.dataset.clientPage !== undefined ||
+                                     window.location.pathname.includes('client-');
+
+            if (isClientWorkspace) {
+                if (window.insforgeClient && typeof window.insforgeClient.showToast === 'function') {
+                    window.insforgeClient.showToast(
+                        isQuote ? 'Quote Requested' : 'Payment Confirmed & Order Placed',
+                        isQuote ? `Ticket #${createdRecord.order_number} has been recorded.` : `Payment captured. Order #${createdRecord.order_number} queued.`,
+                        isQuote ? 'request_quote' : 'verified',
+                        'success'
+                    );
+                }
+                if (window.clientWorkspace && typeof window.clientWorkspace.loadOrders === 'function') {
+                    await window.clientWorkspace.loadOrders();
+                } else if (typeof renderOrders === 'function') {
+                    await renderOrders();
+                }
+            }
+
+            // Transition to In-Modal Step 4 Confirmation Screen
+            window.showModalConfirmationStep(createdRecord, {
+                serviceType: serviceType,
+                planName: planName,
+                projectName: projectName,
+                placement: placement,
+                turnaroundSpeed: turnaroundSpeed,
+                clientEmail: clientEmail,
+                price: calculatedPrice,
+                transactionId: transactionId,
+                isQuote: isQuote
             });
-            window.location.href = `order-success.html?${query.toString()}`;
+
+            return createdRecord;
+
+        } catch (err) {
+            console.error('Finalize order error:', err);
+            if (typeof window.showModalPaymentError === 'function') {
+                window.showModalPaymentError(err.message || 'Order could not be finalized. Your specifications and files have been preserved.');
+            }
+            throw err;
+        } finally {
+            isFinalizingModalOrder = false;
         }
     };
 

@@ -81,7 +81,11 @@ async function createOrder({ orderId, amount, currency, description }) {
                     value: formattedAmount
                 }
             }
-        ]
+        ],
+        application_context: {
+            shipping_preference: 'NO_SHIPPING',
+            user_action: 'PAY_NOW'
+        }
     };
 
     const response = await fetch(`${baseUrl}/v2/checkout/orders`, {
@@ -169,8 +173,35 @@ function getPublicClientConfig() {
     };
 }
 
+/**
+ * Safely generate a PayPal client token for CardFields / Advanced Cards
+ * @returns {Promise<string|null>} client token or null if unable
+ */
+async function generateClientToken() {
+    try {
+        const accessToken = await generateAccessToken();
+        const { baseUrl } = config.paypal;
+        const res = await fetch(`${baseUrl}/v1/identity/generate-token`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Accept-Language': 'en_US',
+                'Content-Type': 'application/json'
+            }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            return data.client_token || null;
+        }
+    } catch (err) {
+        console.warn('[PayPal Client Token Notice]:', err.message);
+    }
+    return null;
+}
+
 module.exports = {
     generateAccessToken,
+    generateClientToken,
     createOrder,
     captureOrder,
     getPublicClientConfig

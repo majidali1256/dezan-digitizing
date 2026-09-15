@@ -1125,3 +1125,27 @@ a, button, input, select, textarea, [role="button"] {
     transition-duration: 0.15s !important;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
+
+/* ============================================
+   Video Testimonial Component
+   ============================================ */
+@keyframes goldPlayPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(212, 175, 53, 0.65);
+    }
+    70% {
+        box-shadow: 0 0 0 18px rgba(212, 175, 53, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(212, 175, 53, 0);
+    }
+}
+
+.video-play-pulse {
+    animation: goldPlayPulse 2.4s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.testimonial-quote-mark {
+    font-family: Georgia, serif;
+    line-height: 0.7;
+}

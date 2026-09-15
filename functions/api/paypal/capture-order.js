@@ -87,6 +87,16 @@ export async function onRequestPost(context) {
                     const found = await checkRes.json();
                     if (Array.isArray(found) && found.length > 0) {
                         const existing = found[0];
+                        const capturedVal = parseFloat(primaryCapture.amount?.value || 0);
+                        const expectedVal = parseFloat(existing.price || 0);
+                        if (expectedVal > 0 && capturedVal < (expectedVal - 0.05)) {
+                            console.error(`[PayPal Capture Mismatch] Captured: ${capturedVal}, Expected: ${expectedVal}`);
+                            return new Response(JSON.stringify({
+                                success: false,
+                                message: 'Payment capture rejected: captured amount does not match expected order total.'
+                            }), { status: 400, headers: corsHeaders() });
+                        }
+
                         const isQuote = existing.is_quote === true ||
                                         existing.status === 'quote_ready' ||
                                         (existing.order_number && existing.order_number.startsWith('QUO-'));

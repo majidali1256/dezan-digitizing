@@ -10,15 +10,14 @@ const config = {
     port: process.env.PORT || 5001,
     nodeEnv: process.env.NODE_ENV || 'development',
     db: {
-        connectionString: process.env.DATABASE_URL || 
-            'postgresql://postgres:a6fa65ff1e2acbae2971ff270e563972@e8rw998g.us-east.database.insforge.app:5432/insforge?sslmode=require',
+        connectionString: process.env.DATABASE_URL || '',
         ssl: {
-            rejectUnauthorized: false
+            rejectUnauthorized: process.env.NODE_ENV === 'production'
         }
     },
     jwt: {
-        secret: process.env.JWT_SECRET || 'dezan_digitizing_jwt_secret_token_secure_key_2026',
-        expiresIn: process.env.JWT_EXPIRES_IN || '365d'
+        secret: process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'dev_jwt_secret_change_in_production'),
+        expiresIn: process.env.JWT_EXPIRES_IN || '7d'
     },
     cors: {
         origin: process.env.CORS_ORIGIN || '*'

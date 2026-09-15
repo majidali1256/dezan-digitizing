@@ -87,6 +87,10 @@ test('Workers routes payment config, validation, preflight, and static assets', 
         assert.equal(res.status, 400);
     }
     assert.equal((await worker.fetch(new Request('https://example.com/api/paypal/config', { method: 'OPTIONS' }), env)).status, 204);
+    const health = await worker.fetch(new Request('https://example.com/api/health'), env);
+    assert.equal(health.status, 200);
+    const trackMissing = await worker.fetch(new Request('https://example.com/api/orders/track'), env);
+    assert.equal(trackMissing.status, 400);
     assert.equal(await (await worker.fetch(new Request('https://example.com/'), env)).text(), 'hero unchanged');
 });
 

@@ -17,7 +17,8 @@
         serviceSlug: 'embroidery',
         serviceType: 'Digitizing',
         serviceName: 'Embroidery Digitizing',
-        paymentMethod: 'PayPal',
+        paymentMethod: null,
+        hasExplicitlySelectedMethod: false,
         turnaround: 'standard',
         basePrice: 15.00,
         rushFee: 5.00,
@@ -745,8 +746,30 @@
             });
         }
 
-        // Initialize PayPal Smart Buttons
-        initPayPalButtons(state.paymentMethod);
+        // Reset payment tabs to neutral state
+        resetPaymentTabs();
+        window.updateOrderPageDynamicCta();
+
+        if (!window._orderPageScrollBound) {
+            let ticking = false;
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        window.updateOrderPageDynamicCta();
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }, { passive: true });
+            window._orderPageScrollBound = true;
+        }
+
+        // Preload PayPal SDK & CardFields component in background for instant display
+        if (typeof preloadOrderPageCardPayment === 'function') {
+            preloadOrderPageCardPayment();
+        } else if (window.PayPalConfig && typeof window.PayPalConfig.loadSdk === 'function') {
+            window.PayPalConfig.loadSdk().catch(() => {});
+        }
     };
 
     global.backToOrderDetailsStep = function() {
@@ -799,6 +822,303 @@
     // -------------------------------------------------------------
     // 7. Side-by-Side Payment Selector & Smart Buttons
     // -------------------------------------------------------------
+    let orderPageCardFieldsInstance = null;
+    let orderPageCardFieldsRendered = false;
+    let isOrderPageCardSubmitting = false;
+
+    /**
+     * Update detected card brand visual indicators (Visa, Mastercard, AMEX, Discover)
+     */
+    function updateOrderPageCardBrandBadges(brand) {
+        const b = (brand || '').toLowerCase();
+        const isVisa = b.includes('visa');
+        const isMastercard = b.includes('master');
+        const isAmex = b.includes('american') || b.includes('amex');
+        const isDiscover = b.includes('discover');
+        const hasMatch = isVisa || isMastercard || isAmex || isDiscover;
+
+        const elVisa = document.getElementById('modal-brand-badge-visa');
+        const elMaster = document.getElementById('modal-brand-badge-mastercard');
+        const elAmex = document.getElementById('modal-brand-badge-amex');
+        const elDiscover = document.getElementById('modal-brand-badge-discover');
+
+        if (!hasMatch) {
+            if (elVisa) elVisa.className = 'transition-all duration-200 font-black text-[#1434CB] italic text-xs opacity-35 px-1 py-0.5 rounded';
+            if (elMaster) elMaster.className = 'transition-all duration-200 inline-flex items-center opacity-35 px-1 py-0.5 rounded';
+            if (elAmex) elAmex.className = 'transition-all duration-200 px-1 rounded bg-[#006FCF] text-white text-[8.5px] font-black leading-tight opacity-35';
+            if (elDiscover) elDiscover.className = 'transition-all duration-200 font-black text-[#FF6000] text-[10px] opacity-35 px-1 py-0.5 rounded';
+            return;
+        }
+
+        if (elVisa) elVisa.className = `transition-all duration-200 font-black text-[#1434CB] italic text-xs px-1 py-0.5 rounded ${isVisa ? 'opacity-100 scale-110 ring-1 ring-[#1434CB]/40 bg-blue-50/70 dark:bg-blue-900/30' : 'opacity-25 grayscale'}`;
+        if (elMaster) elMaster.className = `transition-all duration-200 inline-flex items-center px-1 py-0.5 rounded ${isMastercard ? 'opacity-100 scale-110 ring-1 ring-amber-500/40 bg-amber-50/70 dark:bg-amber-900/30' : 'opacity-25 grayscale'}`;
+        if (elAmex) elAmex.className = `transition-all duration-200 px-1 rounded bg-[#006FCF] text-white text-[8.5px] font-black leading-tight ${isAmex ? 'opacity-100 scale-110 ring-1 ring-blue-500/60 shadow-xs' : 'opacity-25 grayscale'}`;
+        if (elDiscover) elDiscover.className = `transition-all duration-200 font-black text-[#FF6000] text-[10px] px-1 py-0.5 rounded ${isDiscover ? 'opacity-100 scale-110 ring-1 ring-orange-500/40 bg-orange-50/70 dark:bg-orange-900/30' : 'opacity-25 grayscale'}`;
+    }
+
+    /**
+     * Display a clean card validation or processing error message
+     */
+    function showOrderPageCardError(msg) {
+        const errorBox = document.getElementById('modal-card-fields-error');
+        const errorText = document.getElementById('modal-card-fields-error-text');
+        if (errorBox && errorText) {
+            errorText.textContent = msg || 'Please verify your card details and try again.';
+            errorBox.classList.remove('hidden');
+            errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    /**
+     * Initialize PayPal CardFields (Advanced Credit and Debit Card Payments)
+     */
+    async function initOrderPageCardFieldsComponent(paypal) {
+        const cardFieldsContainer = document.getElementById('modal-card-fields-container');
+        if (!cardFieldsContainer || !paypal || typeof paypal.CardFields !== 'function') {
+            return false;
+        }
+
+        if (orderPageCardFieldsRendered && orderPageCardFieldsInstance) {
+            return true;
+        }
+
+        try {
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const cardFields = paypal.CardFields({
+                createOrder: async () => {
+                    const price = state.totalPrice || 15.00;
+                    const jobName = (document.getElementById('dig-job-name')?.value || 'Custom Order').trim();
+                    const clientName = (document.getElementById('order-client-name')?.value || 'Customer').trim();
+                    const clientEmail = (document.getElementById('order-client-email')?.value || '').trim();
+
+                    const res = await fetch('/api/paypal/create-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            amount: price.toFixed(2),
+                            currency: 'USD',
+                            orderDetails: {
+                                projectName: jobName,
+                                serviceType: state.serviceName,
+                                clientName: clientName,
+                                clientEmail: clientEmail
+                            }
+                        })
+                    });
+
+                    if (!res.ok) {
+                        const errData = await res.json().catch(() => ({}));
+                        throw new Error(errData.message || 'Failed to initialize card order');
+                    }
+
+                    const data = await res.json();
+                    return data.paypalOrderId || data.id || data.data?.id;
+                },
+                onApprove: async (data) => {
+                    let processingOverlay = document.getElementById('orderpage-processing-overlay');
+                    if (!processingOverlay) {
+                        processingOverlay = document.createElement('div');
+                        processingOverlay.id = 'orderpage-processing-overlay';
+                        processingOverlay.className = 'fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-white text-center';
+                        processingOverlay.innerHTML = `
+                            <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                            <h4 class="text-lg font-black tracking-tight mb-1">Verifying Payment &amp; Finalizing Order...</h4>
+                            <p class="text-xs text-slate-300 max-w-sm">Please do not close this window while we secure your digitizing order.</p>
+                        `;
+                        document.body.appendChild(processingOverlay);
+                    }
+
+                    try {
+                        const captureRes = await fetch('/api/paypal/capture-order', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paypalOrderId: data.orderID })
+                        });
+
+                        const captureData = await captureRes.json().catch(() => ({}));
+                        if (!captureRes.ok || !captureData.success) {
+                            throw new Error(captureData.message || 'Payment capture could not be confirmed.');
+                        }
+
+                        await finalizeOrder({
+                            paymentStatus: 'paid',
+                            paymentMethod: 'CreditCard',
+                            transactionId: captureData.transactionId || data.orderID
+                        });
+                    } catch (err) {
+                        console.error('[Payment Capture Error]:', err);
+                        showOrderPageCardError(err.message || 'Payment capture error');
+                    } finally {
+                        if (processingOverlay) processingOverlay.remove();
+                    }
+                },
+                onError: (err) => {
+                    console.error('[CardFields Error]:', err);
+                    showOrderPageCardError(err.message || 'Payment could not be completed with this card.');
+                },
+                style: {
+                    'input': {
+                        'font-size': '14px',
+                        'font-family': 'Inter, system-ui, -apple-system, sans-serif',
+                        'color': isDarkMode ? '#f1f5f9' : '#0f172a'
+                    },
+                    '.invalid': {
+                        'color': '#ef4444'
+                    }
+                }
+            });
+
+            if (typeof cardFields.isEligible === 'function' && !cardFields.isEligible()) {
+                console.warn('[PayPal CardFields not eligible for current account/session]');
+                return false;
+            }
+
+            orderPageCardFieldsInstance = cardFields;
+
+            // Clear target containers
+            const numContainer = document.getElementById('modal-card-number-field');
+            const expContainer = document.getElementById('modal-card-expiry-field');
+            const cvvContainer = document.getElementById('modal-card-cvv-field');
+            const nameContainer = document.getElementById('modal-card-name-field');
+            const postContainer = document.getElementById('modal-card-postal-field');
+
+            if (numContainer) numContainer.innerHTML = '';
+            if (expContainer) expContainer.innerHTML = '';
+            if (cvvContainer) cvvContainer.innerHTML = '';
+            if (nameContainer) nameContainer.innerHTML = '';
+            if (postContainer) postContainer.innerHTML = '';
+
+            const numberField = cardFields.NumberField({ placeholder: '•••• •••• •••• ••••' });
+            const expiryField = cardFields.ExpiryField({ placeholder: 'MM / YY' });
+            const cvvField = cardFields.CVVField({ placeholder: 'CVC / CVV' });
+            const nameField = cardFields.NameField({ placeholder: 'Name on card' });
+            const postalField = cardFields.PostalCodeField({ placeholder: 'Billing ZIP / Postal' });
+
+            // Brand detection listeners
+            const handleBrandChange = (event) => {
+                const detectedBrand = (event && event.cards && event.cards[0]?.type) || event?.cardType || '';
+                updateOrderPageCardBrandBadges(detectedBrand);
+            };
+
+            if (typeof cardFields.on === 'function') {
+                try { cardFields.on('cardTypeChange', handleBrandChange); } catch(e) {}
+            }
+            if (typeof numberField.on === 'function') {
+                try { numberField.on('cardTypeChange', handleBrandChange); } catch(e) {}
+                try { numberField.on('change', (e) => {
+                    if (e && (e.cards || e.cardType)) handleBrandChange(e);
+                }); } catch(e) {}
+            }
+
+            const renderPromises = [];
+            if (numContainer && typeof numberField.render === 'function') {
+                renderPromises.push(numberField.render('#modal-card-number-field'));
+            }
+            if (expContainer && typeof expiryField.render === 'function') {
+                renderPromises.push(expiryField.render('#modal-card-expiry-field'));
+            }
+            if (cvvContainer && typeof cvvField.render === 'function') {
+                renderPromises.push(cvvField.render('#modal-card-cvv-field'));
+            }
+            if (nameContainer && typeof nameField.render === 'function') {
+                renderPromises.push(nameField.render('#modal-card-name-field'));
+            }
+            if (postContainer && typeof postalField.render === 'function') {
+                renderPromises.push(postalField.render('#modal-card-postal-field'));
+            }
+
+            await Promise.all(renderPromises);
+            orderPageCardFieldsRendered = true;
+            return true;
+        } catch (cardInitErr) {
+            console.warn('[PayPal CardFields Mount Note]:', cardInitErr.message);
+            orderPageCardFieldsInstance = null;
+            orderPageCardFieldsRendered = false;
+            return false;
+        }
+    }
+
+    /**
+     * Preload PayPal SDK & CardFields component on order page
+     */
+    async function preloadOrderPageCardPayment() {
+        try {
+            if (!window.PayPalConfig) {
+                await new Promise((resolve) => {
+                    const existing = document.getElementById('dezan-paypal-config-script');
+                    if (existing) {
+                        if (window.PayPalConfig) return resolve(window.PayPalConfig);
+                        existing.addEventListener('load', () => resolve(window.PayPalConfig));
+                        existing.addEventListener('error', () => resolve(null));
+                        return;
+                    }
+                    const sc = document.createElement('script');
+                    sc.id = 'dezan-paypal-config-script';
+                    const srcPath = typeof window.resolveAppPath === 'function' ? window.resolveAppPath('js/paypal-config.js') : '/js/paypal-config.js';
+                    sc.src = srcPath;
+                    sc.onload = () => resolve(window.PayPalConfig);
+                    sc.onerror = () => resolve(null);
+                    document.head.appendChild(sc);
+                });
+            }
+
+            if (window.PayPalConfig && typeof window.PayPalConfig.loadSdk === 'function') {
+                const paypal = await window.PayPalConfig.loadSdk();
+                if (paypal && paypal.CardFields) {
+                    await initOrderPageCardFieldsComponent(paypal);
+                }
+            }
+        } catch (e) {
+            console.warn('[PayPal Preload Note]:', e.message);
+        }
+    }
+
+    /**
+     * Submit payment using PayPal direct CardFields
+     */
+    global.submitModalCardPayment = async function() {
+        if (isOrderPageCardSubmitting) return;
+        const errorBox = document.getElementById('modal-card-fields-error');
+        const submitBtn = document.getElementById('modal-card-submit-btn');
+        const submitBtnText = document.getElementById('modal-card-submit-btn-text');
+
+        if (errorBox) errorBox.classList.add('hidden');
+
+        if (!orderPageCardFieldsInstance || typeof orderPageCardFieldsInstance.submit !== 'function') {
+            showOrderPageCardError('Card payment fields are initializing. Please wait a moment and click Pay again.');
+            return;
+        }
+
+        try {
+            isOrderPageCardSubmitting = true;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            }
+            if (submitBtnText) {
+                submitBtnText.textContent = 'Processing Card Payment...';
+            }
+
+            await orderPageCardFieldsInstance.submit().catch(err => {
+                throw err;
+            });
+        } catch (err) {
+            console.error('[Card Submission Error]:', err);
+            showOrderPageCardError(err.message || 'Please check your card details and try again.');
+        } finally {
+            isOrderPageCardSubmitting = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+            const price = state.totalPrice || 15;
+            const priceStr = (price % 1 === 0) ? `$${Math.round(price)}` : `$${Number(price).toFixed(2)}`;
+            if (submitBtnText) {
+                submitBtnText.textContent = `Pay ${priceStr} Now`;
+            }
+        }
+    };
+
     global.setPaymentMethod = function(method) {
         state.paymentMethod = (method === 'Card' || method === 'CreditCard') ? 'Card' : 'PayPal';
 
@@ -828,7 +1148,7 @@
             }
 
             if (instruction) {
-                instruction.textContent = 'Pay securely with any major credit or debit card (Visa, Mastercard, AMEX):';
+                instruction.textContent = 'Enter your card details below to complete payment securely:';
             }
         } else {
             // PayPal Selected
@@ -862,27 +1182,188 @@
             });
         }
 
+        state.hasExplicitlySelectedMethod = true;
+        window.updateOrderPageDynamicCta();
         initPayPalButtons(state.paymentMethod);
+    };
+
+    function resetPaymentTabs() {
+        state.hasExplicitlySelectedMethod = false;
+        state.paymentMethod = null;
+
+        const tabPaypal = document.getElementById('modal-tab-paypal');
+        const tabCard = document.getElementById('modal-tab-card');
+        const radioPaypal = document.getElementById('modal-radio-paypal');
+        const radioCard = document.getElementById('modal-radio-card');
+        const instruction = document.getElementById('modal-payment-instruction');
+        const container = document.getElementById('modal-paypal-button-container');
+        const cardContainer = document.getElementById('modal-card-fields-container');
+        const errorBox = document.getElementById('modal-card-fields-error');
+
+        if (tabPaypal) {
+            tabPaypal.className = 'relative p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between';
+        }
+        if (radioPaypal) {
+            radioPaypal.className = 'w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900';
+            radioPaypal.innerHTML = '<div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>';
+        }
+
+        if (tabCard) {
+            tabCard.className = 'relative p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between';
+        }
+        if (radioCard) {
+            radioCard.className = 'w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900';
+            radioCard.innerHTML = '<div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>';
+        }
+
+        if (instruction) {
+            instruction.textContent = 'Select your preferred payment method above to proceed:';
+        }
+
+        if (cardContainer) {
+            cardContainer.classList.add('hidden');
+        }
+
+        if (errorBox) {
+            errorBox.classList.add('hidden');
+        }
+
+        updateOrderPageCardBrandBadges(null);
+
+        if (container) {
+            container.classList.remove('hidden');
+            container.innerHTML = `
+                <div class="py-3 px-4 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-xs flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-base text-primary">touch_app</span>
+                    <span>Choose <strong>PayPal</strong> or <strong>Credit / Debit Card</strong> above</span>
+                </div>
+            `;
+            state.paypalMountedMethod = null;
+        }
+
+        window.updateOrderPageDynamicCta();
+    }
+
+    window.updateOrderPageDynamicCta = function() {
+        const ctaBtn = document.getElementById('orderpage-step3-dynamic-cta');
+        const ctaText = document.getElementById('orderpage-step3-cta-text');
+        const ctaIcon = document.getElementById('orderpage-step3-cta-icon');
+        if (!ctaBtn) return;
+
+        const paymentBox = document.getElementById('modal-panel-payment');
+        let isPaymentVisible = false;
+        if (paymentBox) {
+            const pRect = paymentBox.getBoundingClientRect();
+            const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+            isPaymentVisible = (pRect.top < windowHeight - 40) && (pRect.bottom > 40);
+        }
+
+        const price = state.totalPrice || 15;
+        const priceStr = (price % 1 === 0) ? `$${Math.round(price)}` : `$${Number(price).toFixed(2)}`;
+
+        if (!isPaymentVisible) {
+            ctaBtn.className = 'w-full sm:w-auto px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs sm:text-sm font-black shadow-md shadow-primary/25 cursor-pointer transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]';
+            if (ctaText) ctaText.textContent = 'Continue to Payment →';
+            if (ctaIcon) {
+                ctaIcon.textContent = 'arrow_forward';
+                ctaIcon.className = 'material-symbols-outlined text-base animate-pulse';
+            }
+            ctaBtn.setAttribute('data-cta-state', 'continue');
+        } else if (!state.hasExplicitlySelectedMethod) {
+            ctaBtn.className = 'w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-black shadow-md shadow-amber-500/25 cursor-pointer transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]';
+            if (ctaText) ctaText.textContent = 'Choose Payment Method';
+            if (ctaIcon) {
+                ctaIcon.textContent = 'payments';
+                ctaIcon.className = 'material-symbols-outlined text-base';
+            }
+            ctaBtn.setAttribute('data-cta-state', 'choose');
+        } else {
+            const isPayPal = state.paymentMethod === 'PayPal';
+            if (isPayPal) {
+                ctaBtn.className = 'w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#FFC439] hover:bg-[#f5b82e] text-[#003087] text-xs sm:text-sm font-black shadow-md shadow-amber-400/30 border border-amber-400/50 cursor-pointer transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]';
+                if (ctaText) ctaText.textContent = `Pay ${priceStr} with PayPal`;
+                if (ctaIcon) {
+                    ctaIcon.textContent = 'lock';
+                    ctaIcon.className = 'material-symbols-outlined text-base';
+                }
+                ctaBtn.setAttribute('data-cta-state', 'paypal');
+            } else {
+                ctaBtn.className = 'w-full sm:w-auto px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 text-xs sm:text-sm font-black shadow-md shadow-slate-900/20 border border-slate-700/50 dark:border-slate-200 cursor-pointer transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]';
+                if (ctaText) ctaText.textContent = `Pay ${priceStr} by Card`;
+                if (ctaIcon) {
+                    ctaIcon.textContent = 'credit_card';
+                    ctaIcon.className = 'material-symbols-outlined text-base';
+                }
+                ctaBtn.setAttribute('data-cta-state', 'card');
+            }
+        }
+    };
+
+    window.handleOrderPageDynamicCtaClick = function() {
+        const ctaBtn = document.getElementById('orderpage-step3-dynamic-cta');
+        const ctaState = ctaBtn?.getAttribute('data-cta-state') || 'continue';
+        const paymentBox = document.getElementById('modal-panel-payment');
+
+        if (ctaState === 'continue') {
+            if (paymentBox) {
+                paymentBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            setTimeout(() => {
+                window.updateOrderPageDynamicCta();
+            }, 350);
+            return;
+        }
+
+        if (ctaState === 'choose') {
+            if (paymentBox) {
+                paymentBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            const tabPaypal = document.getElementById('modal-tab-paypal');
+            const tabCard = document.getElementById('modal-tab-card');
+            [tabPaypal, tabCard].forEach(tab => {
+                if (tab) {
+                    tab.classList.add('ring-4', 'ring-primary/40');
+                    setTimeout(() => tab.classList.remove('ring-4', 'ring-primary/40'), 1200);
+                }
+            });
+            return;
+        }
+
+        if (ctaState === 'card') {
+            const cardContainer = document.getElementById('modal-card-fields-container');
+            const cardSubmitBtn = document.getElementById('modal-card-submit-btn');
+            if (cardContainer && !cardContainer.classList.contains('hidden') && cardSubmitBtn) {
+                cardSubmitBtn.click();
+                return;
+            }
+        }
+
+        if (ctaState === 'paypal' || ctaState === 'card') {
+            if (paymentBox) {
+                paymentBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                paymentBox.classList.add('ring-4', 'ring-primary/40');
+                setTimeout(() => paymentBox.classList.remove('ring-4', 'ring-primary/40'), 1200);
+            }
+            const container = document.getElementById('modal-paypal-button-container');
+            if (container) {
+                const clickable = container.querySelector('button, [role="button"], input[type="submit"]');
+                if (clickable) {
+                    clickable.click();
+                }
+            }
+        }
     };
 
     async function initPayPalButtons(preferredMethod) {
         preferredMethod = preferredMethod || state.paymentMethod;
         const container = document.getElementById('modal-paypal-button-container');
+        const cardContainer = document.getElementById('modal-card-fields-container');
         if (!container) return;
 
-        if (state.paypalMountedMethod === preferredMethod && container.children.length > 0) {
-            return;
-        }
+        const isCard = preferredMethod === 'Card';
 
         if (state.isMountingPayPal) return;
         state.isMountingPayPal = true;
-
-        container.innerHTML = `
-            <div class="text-xs text-slate-400 flex items-center justify-center gap-2 py-3">
-                <span class="material-symbols-outlined text-base animate-spin text-primary">progress_activity</span>
-                <span>Connecting to secure PayPal gateway...</span>
-            </div>
-        `;
 
         try {
             if (!window.PayPalConfig) {
@@ -908,20 +1389,51 @@
                 throw new Error('PayPal SDK configuration not loaded');
             }
 
-            // Race SDK load against 6.5s timeout so client is never stuck
             const sdkPromise = window.PayPalConfig.loadSdk();
             const timeoutPromise = new Promise((_, reject) => {
                 setTimeout(() => reject(new Error('PayPal gateway response delayed on current network.')), 6500);
             });
             const paypal = await Promise.race([sdkPromise, timeoutPromise]);
 
-            if (!paypal || !paypal.Buttons) {
-                throw new Error('PayPal Buttons engine unavailable');
+            if (isCard) {
+                // Try initializing CardFields directly
+                let isCardFieldsReady = false;
+                if (paypal && paypal.CardFields) {
+                    isCardFieldsReady = await initOrderPageCardFieldsComponent(paypal);
+                }
+
+                if (isCardFieldsReady && cardContainer) {
+                    // Direct card fields: immediate display without second button!
+                    container.classList.add('hidden');
+                    cardContainer.classList.remove('hidden');
+                    const price = state.totalPrice || 15;
+                    const priceStr = (price % 1 === 0) ? `$${Math.round(price)}` : `$${Number(price).toFixed(2)}`;
+                    const submitBtnText = document.getElementById('modal-card-submit-btn-text');
+                    if (submitBtnText) submitBtnText.textContent = `Pay ${priceStr} Now`;
+                    return;
+                }
+
+                // Fallback to PayPal card button if CardFields is not eligible
+                if (cardContainer) cardContainer.classList.add('hidden');
+                container.classList.remove('hidden');
+            } else {
+                if (cardContainer) cardContainer.classList.add('hidden');
+                container.classList.remove('hidden');
             }
+
+            if (state.paypalMountedMethod === preferredMethod && container.children.length > 0) {
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="text-xs text-slate-400 flex items-center justify-center gap-2 py-3">
+                    <span class="material-symbols-outlined text-base animate-spin text-primary">progress_activity</span>
+                    <span>Connecting to secure PayPal gateway...</span>
+                </div>
+            `;
 
             container.innerHTML = '';
 
-            const isCard = preferredMethod === 'Card';
             const buttonConfig = {
                 style: {
                     layout: 'vertical',
@@ -935,6 +1447,8 @@
                 createOrder: async function() {
                     const price = state.totalPrice || 15.00;
                     const jobName = (document.getElementById('dig-job-name')?.value || 'Custom Order').trim();
+                    const clientName = (document.getElementById('order-client-name')?.value || 'Customer').trim();
+                    const clientEmail = (document.getElementById('order-client-email')?.value || '').trim();
 
                     try {
                         const res = await fetch('/api/paypal/create-order', {
@@ -943,7 +1457,12 @@
                             body: JSON.stringify({
                                 amount: price.toFixed(2),
                                 currency: 'USD',
-                                description: `${state.serviceName} - ${jobName}`
+                                orderDetails: {
+                                    projectName: jobName,
+                                    serviceType: state.serviceName,
+                                    clientName: clientName,
+                                    clientEmail: clientEmail
+                                }
                             })
                         });
 
@@ -953,7 +1472,7 @@
                         }
 
                         const data = await res.json();
-                        return data.paypalOrderId || data.id;
+                        return data.paypalOrderId || data.id || data.data?.id;
                     } catch (err) {
                         console.error('[PayPal createOrder Error]:', err);
                         alert(`Unable to initialize checkout: ${err.message}. Please try again.`);
@@ -981,7 +1500,6 @@
                             throw new Error(captureData.message || 'Payment capture could not be confirmed.');
                         }
 
-                        // Finalize order in InsForge Database
                         await finalizeOrder({
                             paymentStatus: 'paid',
                             paymentMethod: preferredMethod === 'Card' ? 'CreditCard' : 'PayPal',
@@ -1015,7 +1533,6 @@
 
             const buttons = paypal.Buttons(buttonConfig);
             if (typeof buttons.isEligible === 'function' && !buttons.isEligible()) {
-                // Fallback to standard buttons if standalone card is ineligible
                 delete buttonConfig.fundingSource;
                 await paypal.Buttons(buttonConfig).render(container);
             } else {

@@ -291,12 +291,34 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
      - Suite 4: Master Admin logs in and loads live Postgres orders table.
      - Suite 5: Production Digitizer logs in, renders live task queue, with verified **ZERO PII leaks** (customer emails, billing).
 
+### 4.11 Client Video Testimonial Section & Zero-Initial-Load Architecture (`index.html`)
+- **Objective & Placement**:
+  - Integrate a real client video testimonial directly above the written Facebook reviews on `index.html` (`#video-testimonial-section`).
+  - Visitors watch an authentic video review from commercial embroidery shop owner **Karen Parmenter Giddings** sharing how Dezan Digitizing's files helped win "Best of Show" at her local county fair, transitioning seamlessly into written client reviews below.
+- **Web-Optimized Media Processing**:
+  - **Video Transcoding**: Compressed source `VIDEO 6.MOV` (43.3 MB ProRes/HEVC 120fps) into high-performance web-standard H.264 MP4 (`videos/client-testimonial-karen-giddings.mp4`, 1280x720, 30 fps, CRF 26, AAC audio 128k, `-movflags +faststart`) resulting in **5.58 MB** (an **87.1% bandwidth reduction** with immediate stream start).
+  - **Universal WebP Poster**: Extracted clean, smiling studio frame with embroidery machinery and thread racks as high-quality WebP (`reviews/karen-parmenter-giddings-video-poster.webp`, 1280x720, 95.9 KB).
+- **Zero-Initial-Load Click-to-Play Performance Engine**:
+  - To prevent slowing down the homepage, **0 bytes of video are downloaded on initial page load**.
+  - A lightweight facade (`#client-video-facade`) renders the WebP poster with dark gradient scrim, "Customer Review" badge, duration pill ("0:26"), and radiant pulsing gold play button (`.video-play-pulse`).
+  - Clicking the facade dynamically mounts the native `<video controls autoplay playsinline>` element (`#client-active-video`), streaming the video strictly on-demand.
+- **60/40 Split Feature Card & High-Trust Proof Details**:
+  - Left Column (7 cols): 16:9 responsive video player with award badge `"Best of Show" County Fair Winner` and `Sound On 🔊` indicator.
+  - Right Column (5 cols): Authentic client review card featuring Karen's profile photo, commercial shop badge, verified pill, 5 gold stars, pull quote with highlighted county fair achievement, 3 key proof bullet points, and direct `Order Digitizing` conversion button.
+- **Modular Extensibility (`app.js`)**:
+  - Configured with `window.CLIENT_VIDEO_TESTIMONIALS` data array and `window.loadClientVideoTestimonial(indexOrId)` helper.
+  - Swapping testimonials or adding multiple client videos in the future is achievable by editing data objects without restructuring HTML/CSS.
+- **Schema.org VideoObject Structured Data**:
+  - Embedded JSON-LD `VideoObject` in `<head>` of `index.html` detailing thumbnail URL, upload date, duration (PT26S), and content URL for Google rich video search indexing.
+- **Automated Verification**:
+  - Playwright visual tests across Desktop (1512x982), Tablet (834x1112), and Mobile (390x844) verified zero initial video requests, flawless click-to-play mounting, and full light/dark theme contrast compliance ($\ge 4.5:1$).
+
 ---
 
 ## 5. Site Map & Route Architecture
 
 ### Public Marketing Pages
-- `/index.html`: Home page (Title: `Embroidery Digitizing Services | Dezan Digitizing®️`; Hero with Before/After Comparison Slider: zero bounding box or card border around the astronaut patch, allowing the slider divider line to sweep end-to-end across the full artwork; on mobile view, astronaut slider is calibrated to `max-w-[285px]` (~14% reduction) leaving optimal space for the text block; DEZAN brand eyebrow shifted upward; 2-line headline `Professional Embroidery Digitizing` & `and Vector Art Services` enlarged by 12-15% (`text-[19.5px]` on mobile) strictly on two non-wrapping lines; value proposition `Production-ready embroidery files at just $15.` increased by 8-10% (`text-[13.5px]`) with clean unadorned typography (no underlines) and prominent ultra-bold gold emphasis on `just $15.` (`font-black`); supporting copy `Fast turnaround | Premium quality` maintained as compact secondary text; bespoke 3-button horizontal row matching reference design: 1. Solid Gold Primary `Order Now` + `Flat Rates` with shopping bag icon badge, 2. Soft-tinted `View Pricing` with tag icon badge, 3. Soft-tinted `Get Quote` with document icon badge; Live Feedback Carousel; Trust reviews; Portfolio section (`#portfolio`) streamlined to exactly 4 primary services in a balanced 4-column responsive grid (`grid-cols-2 sm:grid-cols-4`): 1. Custom Hats (`images/custom-hats.webp?v=4`), 2. Jacket Backs (`images/jacket-backs.webp?v=4`), 3. Left Chest (`images/left-chest-logos.webp?v=4`), 4. Pet Portraits (`images/pet-embroidery.webp?v=4`), with 3D puff and vector art removed from this teaser grid; the dedicated **"Why Choose Dezan Digitizing?"** section highlighting manual craftsmanship, production-ready stitch files, fast turnaround, and free revisions with 4 How-It-Works styled circular icon feature cards; and the modern, interactive **"Frequently Asked Questions" (FAQ) Accordion** at the bottom of the page featuring 5 rows with CSS grid transitions, rotating gold-accented chevrons, accessible `aria-expanded` attributes, and responsive typography).
+- `/index.html`: Home page (Title: `Embroidery Digitizing Services | Dezan Digitizing®️`; Hero with Before/After Comparison Slider; **Specialized Work Categories** 4-placement Teaser linking to dedicated subpages; Live Feedback Carousel with 39 stitchout photos; Featured Client Video Testimonial (`#video-testimonial-section`) with Karen Parmenter Giddings; Written Facebook Reviews masonry with dedicated WebP avatars; "Why Choose Dezan Digitizing?"; and interactive FAQ Accordion).
 - `/about.html`: Company history, experience, machinery/software standards (Wilcom, Tajima, Barudan).
 - `/services.html` (`/services`): **Main Services Navigation Hub**. Displays the two core pillars with 100% clickable cards (image, heading, CTA):
   - **Embroidery Digitizing Card**: Direct link to `/embroidery-digitizing/` with CTA `Explore Embroidery Digitizing →`.
@@ -305,10 +327,22 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - **Clean & Fast**: Free of excessive SEO paragraphs, functioning as a high-converting, visual service navigation hub.
 
 ### Dedicated SEO Service Pillar & Specialist Architecture
-1. **Embroidery Digitizing Main Pillar (`/embroidery-digitizing/`)**:
-   - Primary SEO landing page for commercial embroidery digitizing.
-   - 12 Modular Sections: Breadcrumbs (`Home → Services → Embroidery Digitizing`), Hero/H1, Short Intro, Price Preview ($15 / $25), Real digitized $\rightarrow$ stitched result (American Flag Hiker Cap), 5-Specialist Service Category Grid (crawlable links), Real Work Gallery, 4-Step Process ("How it Works"), Technical Information (needle calibration, pull compensation), Supported Formats (.DST, .EMB, .PES, .EXP, .JEF, .VP3, etc.), Client Testimonials & Stitch-outs, Comprehensive FAQ Accordion, Related Services Strip, and Final Order / Quote CTA.
-   - Backward-compatibility redirect: `embroidery-digitizing.html` cleanly redirects to canonical `/embroidery-digitizing/`.
+1. **Embroidery Digitizing Main Pillar (`/embroidery-digitizing/`) & Mirror (`embroidery-digitizing.html`)**:
+   - **Revamped Copy & SEO Architecture (Sept 2026)**: Replaced overly dense, intimidating technical jargon with clean, natural phrasing preferred by U.S. embroidery shops while strengthening organic SEO signals and maintaining the signature Dark Luxury / clean light visual theme.
+   - **SEO Title**: `Embroidery Digitizing Services from $15 | Dezan Digitizing`
+   - **Meta Description**: `Professional embroidery digitizing for hats, left chest logos, jacket backs, 3D puff and more. Production-ready embroidery files start at $15 with 12–24 hour turnaround.`
+   - **Hero Structure**: Small label `EMBROIDERY DIGITIZING FOR SHOPS`, H1 `Professional Embroidery Digitizing Services`, clear shop-oriented copy, CTAs (`Order Embroidery Digitizing` & `Get Free Quote`), and verified metrics (`50,000+ Files Digitized`, `12–24 hr Standard Turnaround`).
+   - **Core Modular Sections**:
+     1. Breadcrumbs (`Home → Services → Embroidery Digitizing`) & Hero.
+     2. **Built for Embroidery Production**: `Digitizing for the Placement You Actually Need` highlighting placement-tailored files (caps, flat garments, 3D puff).
+     3. **Common Placement Grid (`#common-placements`)**: 6 crawlable cards linking to Cap & Hat Digitizing, Left Chest Digitizing, Jacket Back & Large Digitizing, 3D Puff Digitizing, Realistic & Pet Portrait Digitizing, and Patches & Appliqué.
+     4. **File Formats**: `Embroidery Files for the Machines You Use` featuring `DST · PES · EXP · JEF · VP3 · CND · EMB` and `PDF production sheet available` badge.
+     5. **Simple Order Process**: 4 steps (`01 — Send Your Artwork`, `02 — We Digitize Your Design`, `03 — File Review`, `04 — Download & Stitch`).
+     6. **Flat-Rate Pricing**: `Hat / Left Chest — $15` (with explicit disclaimer distinguishing 5.5" flat pricing width from physical cap hoop limits), `Jacket Back / Large — $25`, `Realistic / Pet Portrait — $25–$40`.
+     7. **Real Work Proof**: `Digitized Files in Production` with side-by-side stitch integrity proof and customer production sewout gallery.
+     8. **Accessible FAQ (`#faq`)**: 5 crawlable `<details>` accordions in DOM mirrored in `FAQPage` JSON-LD schema (What is digitizing, Formats provided, Hat vs left chest files, Turnaround time, Pricing).
+     9. **Final High-Converting CTA Box**: `Order Embroidery Digitizing` and `Get Free Quote`.
+   - **Mirror Synchronization**: `embroidery-digitizing.html` in root kept identical to `embroidery-digitizing/index.html` with authoritative canonical `https://dezandigitizing.com/embroidery-digitizing/`.
 
 2. **Dedicated Embroidery Specialist Pages (5 Dedicated URLs & Reusable 11-Section Template)**:
    - Built with independent `<title>`, `<meta name="description">`, `<h1>`, canonical tag, OG tags, image alt text, and placement-specific FAQs.
@@ -402,8 +436,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
       - `How much does jacket back digitizing cost in the U.S.?`: "Large embroidery designs over 5.5 inches are $25 flat, with separate pricing for highly realistic or specialty artwork."
     - **SEO Structured Data**: Added dedicated Schema.org `FAQPage` JSON-LD markup to `<head>` for rich search snippet ranking on U.S. digitizing price queries.
   - **Strictly Pricing Only**: Zero embedded order forms or quote submission inputs. Authenticated client banners and action buttons route to `client-portal.html` (for logged-in clients) or `portal-login.html?redirect=...` (for unauthenticated visitors).
-  - **Instant Visibility & Zero CLS**: Removed `.reveal` opacity blocking so all cards and sections render immediately across all devices, with full light/dark mode contrast parity verified via Playwright visual verification across Desktop (1440x900), Tablet (834x1112), and Mobile (390x844).
-- `/contact.html`: Contact form for general inquiries, and interactive "Request a Custom Quote" portal showcase (`#custom-quote-section`). Features mobile-optimized `#quote-login-prompt` and `#quote-client-banner` with strict `items-stretch sm:items-center` flex alignment, full-width wrapping copy, nested emerald bolt icon badge (curing horizontal centering displacement outside container), responsive `grid-cols-3` step cards with proportional micro-padding, and full touch-target buttons.
+- `/contact.html`: Simplified, ultra-clean Contact page consisting strictly of **Business Email** and a minimal **Contact Form** (Name, Email Address, Message, Send Message). Physical address and phone number completely eliminated from the DOM, JSON-LD Schema.org, and visuals. Direct email routing to business inbox (`fdezan91@gmail.com`) with customer email set in the `Reply-To` header for direct mail-client replies (no website thread retention). Lightweight, friction-free spam protection powered by hidden honeypot (`botcheck`). Immediate in-place confirmation banner (*"Message sent successfully. We’ll get back to you shortly."*) upon submission with zero page redirection. Business email `fdezan91@gmail.com` clearly visible in both the contact showcase card and the website footer.
 - `/terms.html`: Dedicated **Terms of Service** governing:
   - 17 exact clauses: 01. Our Services (digital files only, no physical apparel), 02. Orders and Payment (upfront payment, confirmation criteria, complex art surcharges), 03. Turnaround Time (12-24h standard, 1-2 days jacket backs), 04. Customer Artwork and Authorization (client copyright warranty & indemnification), 05. Embroidery Limitations (physical scale & micro-detail simplifications), 06. Embroidery Results and Production Variables (operator/machine factors disclaimer), 07. Test Stitch Recommendation (mandatory testing before bulk runs, non-liability for blanks), 08. Revisions (free adjustments for genuine errors vs change fees), 09. File Formats (.DST, .PES, .EXP, .JEF, etc.), 10. Digital Delivery (email, account dashboard), 11. Customer Review and Approval, 12. Refunds and Cancellations (governed by Refund & Privacy Policy), 13. Intellectual Property (client retains artwork, Dezan retains processes & backup copies), 14. Limitation of Liability (capped at service fee paid), 15. Payment Disputes (pre-dispute contact request & evidence sharing), 16. Changes to Terms, 17. Contact Us (`Dezan Digitizing`, `DezanDigitizing.com`, `fdezan91@gmail.com`).
 - `/privacy.html`: Dedicated **Refund & Privacy Policy** containing:
@@ -481,7 +514,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
     - If a client is already authenticated, clicking "Order Now" on marketing pages opens the full 2-stage order wizard in `client-portal.html?action=new_order`, and clicking "Get Quote" opens `client-portal.html?action=request_quote`.
 
 ### Role-Based Order Portal (Implemented & Live)
-- `/portal-login.html`: Unified authentication page with automatic role routing, order intent banners, simplified client-only registration (role field removed; all public signups are assigned `role: 'client'`), **Continue with Google** social auth (official multi-color Google SVG icon, centered divider, Google Account Chooser modal `#google-account-modal`, and backend endpoint `POST /api/auth/google` with auto-client registration and guest order claiming), and strict staff & client authentication (Master Admin: `admin@dezandigitizing.com` / `Wasif8899@@@`, Digitizer: `digitizer@dezandigitizing.com` / `Pakistan6677@@@`, Demo Client: `client@falconapparel.com`).
+- `/portal-login.html`: Unified authentication page with automatic role routing, order intent banners, simplified client-only registration (role field removed; all public signups are assigned `role: 'client'`), **Continue with Google** social auth (official multi-color Google SVG icon, centered divider, Google Account Chooser modal `#google-account-modal`, and backend endpoint `POST /api/auth/google` with auto-client registration and guest order claiming), and strict staff & client authentication (Master Admin: `admin@dezandigitizing.com` / `[SECURE_CREDENTIAL]`, Digitizer: `digitizer@dezandigitizing.com` / `[SECURE_CREDENTIAL]`, Demo Client: `client@falconapparel.com`).
 
 #### Client Portal Suite (Modular Multi-Page Architecture)
 Powered by shared stylesheet [`client-workspace.css`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/client-workspace.css) and shared controller [`js/client-workspace.js`](file:///Users/macbookair/VS%20CODE%20PROJECTS/DEZAN%20Desitizing/js/client-workspace.js):
@@ -780,10 +813,10 @@ To prevent data leakage via browser DevTools:
       - 100% verified with automated Playwright headless test (`scratch/test_single_digitizer_workflow.js`): verified toggle ON, direct auto-assignment to Digitizer, immediate presence in worker portal active queue, toggle OFF, and 1-click batch assignment.
 - **Strict Staff Credentials & Role-Based Authentication (`portal-login.html`, `server/controllers/authController.js`, `js/insforge-client.js`)**:
   - Only two internal staff roles exist:
-    1. **Master Admin**: `fdezan91@gmail.com` (Primary Operational Admin Inbox & Account) & `admin@dezandigitizing.com` / `Wasif8899@@@` (display name: **Felix Dezan (Admin)**)
+    1. **Master Admin**: `fdezan91@gmail.com` (Primary Operational Admin Inbox & Account) & `admin@dezandigitizing.com` / `[SECURE_CREDENTIAL]` (display name: **Felix Dezan (Admin)**)
        - Registered in PostgreSQL `auth.users` (`id: 00000000-0000-0000-0000-000000000002`, `is_project_admin: true`) and `public.profiles` (`role: 'admin'`).
-       - Supports direct password authentication (`Wasif8899@@@`) and 1-click Google OAuth authentication with immediate `role: 'admin'` resolution.
-    2. **Digitizer**: `digitizer@dezandigitizing.com` / `Pakistan6677@@@` (display name: strictly **Digitizer**)
+       - Supports direct password authentication and 1-click Google OAuth authentication with immediate `role: 'admin'` resolution.
+    2. **Digitizer**: `digitizer@dezandigitizing.com` / `[SECURE_CREDENTIAL]` (display name: strictly **Digitizer**)
   - All old demo worker accounts permanently removed from PostgreSQL DB and client-side code.
   - Password enforcement strictly verified: only the designated passwords function for staff accounts; invalid passwords return HTTP 401.
 - **Universal Admin Event Alert Architecture (`server/services/emailService.js`)**:
@@ -1109,11 +1142,11 @@ The Worker Studio provides an isolated, production-focused environment for embro
 - **Production User Accounts Provisioned & Verified**:
   - **Master Admin**:
     - Email: `ADMIN@dezandigitizing.com`
-    - Password: `Wasif8899@@@`
+    - Password: `[SECURE_CREDENTIAL]`
     - Role: `admin` (Full access to admin dashboard, live orders, invoicing, worker assignments, rates, customer tracking).
   - **Head Digitizer**:
     - Email: `DIGITIZER@dezandigitizing.com`
-    - Password: `Pakistan6677@@@`
+    - Password: `[SECURE_CREDENTIAL]`
     - Role: `digitizer` (Full access to worker portal, active tasks, stitch specs, file production upload, download archives).
   - Authenticated and verified via bcrypt hash in PostgreSQL `auth.users` and `public.profiles` (`scratch/test_prod_logins.js`).
   - Whitelist updated in `server/controllers/authController.js` and local fallback resolver in `js/insforge-client.js`.
@@ -3189,3 +3222,116 @@ The Worker Studio provides an isolated, production-focused environment for embro
    - Prevents `Missing script: "build"` errors when Cloudflare CI/CD runs the build command.
 3. **Committed and Pushed**:
    - Commits `31921d5` and `6836351` pushed to `origin/main`.
+
+---
+
+## 38. Modal Checkout + Google Ads & GA4 Conversion Tracking Architecture (Live & Verified)
+
+### Mandate & User Requirements
+- **Modal Popup Checkout Retention**: Keep the current order flow as a modal popup with a smooth user experience. A separate order page is NOT required.
+- **Conversion Firing Strictness**:
+  - Track completed purchases ONLY.
+  - Zero conversion fires when:
+    - User opens the order modal
+    - User selects a service
+    - User clicks "Proceed to Checkout" / "Proceed to Step 3"
+    - User clicks PayPal or Card button
+  - Conversion MUST fire ONLY after:
+    - Payment is successfully completed
+    - Order is created successfully in the database
+- **Purchase Event Payload Standard (GA4 / GTM / Google Ads)**:
+  - `transaction_id`: Order ID / Transaction reference
+  - `value`: Order amount in USD (numeric)
+  - `currency`: `'USD'`
+  - `service_type`: Selected service name (e.g. `'Digitizing'`)
+  - `placement`: Garment or hat placement (e.g. `'Cap / Hat Front'`)
+  - `rush_status`: `'rush'` or `'standard'`
+  - `items`: Structured item array `[{ item_id, item_name, item_category, item_variant, price, quantity: 1 }]`
+  - `user_data`: SHA-256 hashed customer email for Google Ads Enhanced Conversions
+- **Attribution Preservation**:
+  - Preserve `gclid`, `gbraid`, `wbraid`, and UTM parameters (`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`) from first visit to order completion across touchpoints (localStorage, sessionStorage, 90-day cookies).
+  - Pass attribution directly into the created database order and into the purchase conversion events.
+- **Checkout State Preservation**:
+  - Going back one step or switching between Step 1 (Choose Service), Step 2 (Order Details), and Step 3 (Review & Pay) must NEVER wipe user inputs, files, or placement.
+  - Form state automatically persisted in `sessionStorage` (`dezan_modal_order_draft`) with debounced auto-saving on input/change.
+- **Payment Return Handling & In-Modal Confirmation**:
+  - Success: Idempotent finalization (`isFinalizingModalOrder` guard and `modalProcessedTxns` set), order record created in database, conversion fired once, transition to in-modal Step 4 confirmation with Order Number, Transaction ID, summary card, next steps timeline, copy button, and optional guest portal password setup.
+  - Failure: Non-destructive error banner displayed in Step 3, files and form inputs preserved, user can retry immediately without losing anything.
+  - Duplicate prevention: `isOrderAlreadyConverted(orderId, txnId)` and `modalProcessedTxns` guarantee no duplicate orders or conversions.
+
+### Implemented Architecture & Key Modules
+1. **`js/analytics.js`**:
+   - `trackOrderPurchase(details)`: Dispatches direct `gtag('event', 'purchase', { ... })`, `dataLayer.push({ event: 'purchase', ecommerce: { ... } })`, `dataLayer.push({ event: 'conversion_order_paid', ... })`, and Google Ads conversion `gtag('event', 'conversion', ...)`.
+   - Direct delegation to `global.gtag` when defined, with fallback to `global.dataLayer.push(arguments)`.
+   - Dual-identifier deduplication: `isOrderAlreadyConverted(orderId, txnId)` and `markOrderConverted(orderId, txnId)` check and store both Order Number and Gateway Transaction ID.
+   - All funnel events (`trackOrderStarted`, `trackServiceSelected`, `trackBeginCheckout`, `trackAddPaymentInfo`) strictly fire funnel/ecommerce intent events without triggering purchase conversions.
+2. **`js/order-quote-modal.js`**:
+   - Integrated In-Modal Step 4 Confirmation View (`#order-step-4-confirmation-view`) and Non-Destructive Payment Error Banner (`#modal-payment-error-banner`).
+   - Idempotency guards (`isFinalizingModalOrder` and `modalProcessedTxns = new Set()`) prevent duplicate backend order submissions or repeated conversion dispatches.
+   - Step 4 Stepper State (`stepNum === 4`) with emerald checkmarks and "Confirmed" label.
+   - Debounced draft auto-saver (`saveModalOrderDraft()`) and restorer (`restoreModalOrderDraft()`).
+   - Helper methods: `window.showModalConfirmationStep`, `window.copyModalOrderNumber`, `window.startAnotherModalOrder`, `window.submitModalGuestAccountClaim`, `window.showModalPaymentError`.
+3. **`client-portal.html`**:
+   - Inline modal synchronized with `#modal-payment-error-banner` and `#order-step-4-confirmation-view`.
+
+### Automated End-to-End Verification
+- Script: `scripts/verify_checkout_tracking.js` executed in real headless Google Chrome:
+  - Test 1: Full attribution (`gclid`, `gbraid`, `wbraid`, UTMs) captured and persisted. (PASS)
+  - Test 2: Funnel navigation (modal open, service select, proceed to review, click PayPal) fired ZERO conversions. (PASS)
+  - Test 3: Back-and-forth navigation (Step 3 -> Step 2 -> Step 1 -> Step 2) preserved all entered form data. (PASS)
+  - Test 4: Completed order finalization fired exactly 1 GA4 purchase event, 1 Google Ads conversion event, 1 GTM dataLayer purchase event with all required parameters, and displayed in-modal Step 4 confirmation. (PASS)
+  - Test 5: Duplicate finalization attempt blocked with zero duplicate conversions fired. (PASS)
+  - Test 6: Desktop (1512x982) and Mobile (390x844) WebP screenshots captured successfully. (PASS)
+- Unit tests: `node --test tests/tracking.test.js` passed 11/11 tests.
+
+---
+
+## 15. Direct Credit/Debit Card Checkout Streamlining & Portfolio Cards Update (2026-09-15)
+
+### 1. Portfolio Cards Renaming & Arrow Wrapping Prevention
+- **Updated Pages**: `index.html` (lines 308–368) and `services.html` (lines 245–305).
+- **Titles and Subtitles**:
+  - Card 1: `Hat/Cap Logo Digitizing` (`3D Puff & Flat`)
+  - Card 2: `Jacket Back Logo Digitizing` (`Large Formats`)
+  - Card 3: `Left Chest Logo Digitizing` (`Polos & Uniforms`)
+  - Card 4: `Pet Portrait Digitizing` (`Detailed Shading`)
+- **Typography & Layout Alignment**: Wrapped the arrow indicator in `<span class="inline-block whitespace-nowrap">Digitizing <span class="material-symbols-outlined ...">arrow_forward</span></span>` to ensure the trailing arrow stays married to the final word on narrow mobile viewports (390px, 360px), eliminating orphaned arrows.
+
+### 2. Streamlined Direct Credit/Debit Card Checkout Flow
+- **Goal**: Eliminate the redundant second black "Debit or Credit Card" button so card fields appear directly underneath upon selecting "Credit / Debit Card", with zero physical shipping fields, instant component preloading, and real-time card brand detection.
+- **Side-by-Side Method Architecture**:
+  - PayPal and Credit/Debit Card remain two distinct options.
+  - Selecting "Credit / Debit Card" immediately displays inline secure card fields directly underneath:
+    * Card number
+    * Expiration date (MM / YY)
+    * Security code (CVV / CVC)
+    * Name on card
+    * Billing postal / ZIP code
+- **PayPal `CardFields` Integration**:
+  - Updated SDK loader script tag in `js/paypal-config.js` to `components=buttons,card-fields&enable-funding=card` and `data-client-token`.
+  - Backend support: `server/services/paypalService.js` and `server/controllers/paypalController.js` include `generateClientToken()` via PayPal OAuth `/v1/identity/generate-token`.
+  - Backend order creation specifies `application_context: { shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW' }`, completely removing physical shipping, delivery address, and apartment fields for digital services.
+- **Zero Wait Preloading (`preloadModalCardPayment` / `preloadOrderPageCardPayment`)**:
+  - As soon as Step 3 (Review & Pay) opens, the PayPal SDK and CardFields component initialize in the background.
+  - When the customer taps "Credit / Debit Card", fields appear instantly with 0ms delay.
+- **Real-Time Card Brand Detection**:
+  - Live indicator badges in `#modal-detected-card-brand` for **Visa**, **Mastercard**, **AMEX**, and **Discover**.
+  - `cardTypeChange` listener dynamically highlights the detected brand with full opacity, scale, and subtle accent ring, while muting other brands.
+- **Seamless Graceful Fallback**:
+  - If a merchant account or sandbox does not have Advanced Card Payments (ACDC) active (`isEligible() === false`), the system automatically falls back to `paypal.Buttons({ fundingSource: CARD })` in `#modal-paypal-button-container`, ensuring zero customer disruption.
+- **Dynamic Sticky CTA Synchronization**:
+  - Bottom sticky button reflects payment method: "Pay $15 with PayPal" vs "Pay $15 by Card".
+  - Tapping "Pay $15 by Card" directly triggers `#modal-card-submit-btn.click()` and `cardFields.submit()`.
+- **Files Modified**:
+  - `index.html` & `services.html`: Portfolio card titles and subtitles.
+  - `server/services/paypalService.js`: `application_context` (`NO_SHIPPING`, `PAY_NOW`) and `generateClientToken()`.
+  - `server/controllers/paypalController.js`: Pass `clientToken` via `GET /api/paypal/config`.
+  - `js/paypal-config.js`: `components=buttons,card-fields&enable-funding=card` and `data-client-token`.
+  - `order.html`: Injected `#modal-card-fields-container` markup into `#modal-panel-payment`.
+  - `js/order-quote-modal.js`: Direct inline CardFields, preloading on Step 3, card brand indicator, error display, and CTA sync.
+  - `js/order-page.js`: Direct inline CardFields, preloading, brand detection, and CTA sync for standalone order page.
+- **Verification**:
+  - Backend unit test suite: `node --test tests/paypal.test.js tests/payment-regression.test.js` passed **14/14 tests (100%)**.
+  - Playwright visual verification across Desktop (1512x982) and Mobile (390x844): Verified direct inline card fields, real-time brand detection badges (Visa and Mastercard), and zero layout shifts.
+
+

@@ -878,6 +878,10 @@ document.addEventListener("DOMContentLoaded", () => {
     initLightbox();
     initFeedbackSlider();
 
+    if (document.getElementById('video-testimonial-section')) {
+        initVideoTestimonial();
+    }
+
     // ===================================================================
     if (document.getElementById('hero-compare-slider')) {
         initCompareSlider();
@@ -1860,6 +1864,85 @@ function initFeedbackSlider() {
         }
         startAutoPlay();
     }, { passive: true });
+}
+
+// ===================================================================
+//  CLIENT VIDEO TESTIMONIALS CONTROLLER (Modular & Easy to Edit/Reuse)
+// ===================================================================
+window.CLIENT_VIDEO_TESTIMONIALS = [
+    {
+        id: "karen-giddings",
+        name: "Karen Parmenter Giddings",
+        role: "Commercial Embroidery Business Owner",
+        location: "United States",
+        verified: true,
+        achievement: "County Fair 'Best of Show' Winner",
+        quote: "This one got Best of Show in our local county fair! Shout out to Dezan Digitizing — he's awesome, their staff knows what they're doing and supported my business from the beginning by giving me clean digitized designs that I could use right now.",
+        videoSrc: "videos/client-testimonial-karen-giddings.mp4",
+        posterSrc: "reviews/karen-parmenter-giddings-video-poster.webp",
+        duration: "0:26"
+    }
+    // In the future, you can add more client testimonials here or swap the active one.
+];
+
+function initVideoTestimonial() {
+    const facade = document.getElementById('client-video-facade');
+    const container = document.getElementById('video-player-container');
+    if (!facade || !container) return;
+
+    function mountAndPlayVideo() {
+        const activeTestimonial = (window.CLIENT_VIDEO_TESTIMONIALS && window.CLIENT_VIDEO_TESTIMONIALS[0]) || {
+            videoSrc: "videos/client-testimonial-karen-giddings.mp4",
+            posterSrc: "reviews/karen-parmenter-giddings-video-poster.webp"
+        };
+
+        // Inject native video player on demand (0 bytes loaded before user click)
+        container.innerHTML = `
+            <video
+                id="client-active-video"
+                class="w-full h-full object-cover rounded-2xl bg-black"
+                controls
+                autoplay
+                playsinline
+                poster="${activeTestimonial.posterSrc}"
+            >
+                <source src="${activeTestimonial.videoSrc}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        `;
+
+        const video = document.getElementById('client-active-video');
+        if (video) {
+            video.play().catch(err => {
+                console.log("Autoplay was prevented by browser policy, ready for manual playback:", err);
+            });
+        }
+    }
+
+    facade.addEventListener('click', mountAndPlayVideo);
+
+    // Reusable helper: swap between different testimonials without touching the DOM structure
+    window.loadClientVideoTestimonial = function(indexOrId) {
+        let item = null;
+        if (typeof indexOrId === 'number') {
+            item = window.CLIENT_VIDEO_TESTIMONIALS[indexOrId];
+        } else if (typeof indexOrId === 'string') {
+            item = window.CLIENT_VIDEO_TESTIMONIALS.find(t => t.id === indexOrId);
+        }
+        if (!item) return;
+
+        const authorEl = document.getElementById('client-quote-author');
+        const roleEl = document.getElementById('client-quote-role');
+        const quoteEl = document.getElementById('client-quote-text');
+        const posterEl = document.getElementById('client-video-poster');
+        const durationEl = document.getElementById('client-video-duration-badge');
+
+        if (authorEl) authorEl.textContent = item.name;
+        if (roleEl) roleEl.textContent = item.role;
+        if (quoteEl) quoteEl.innerHTML = `"${item.quote}"`;
+        if (posterEl) posterEl.src = item.posterSrc;
+        if (durationEl) durationEl.textContent = item.duration || '0:26';
+    };
 }
 
 // ===================================================================

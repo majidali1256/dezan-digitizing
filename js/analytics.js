@@ -26,7 +26,11 @@
     // 2. Initialize dataLayer & gtag function
     global.dataLayer = global.dataLayer || [];
     function gtag() {
-        global.dataLayer.push(arguments);
+        if (typeof global.gtag === 'function' && global.gtag !== gtag) {
+            global.gtag.apply(global, arguments);
+        } else {
+            global.dataLayer.push(arguments);
+        }
     }
     global.gtag = global.gtag || gtag;
 
@@ -42,19 +46,28 @@
         'wait_for_update': 500
     });
 
+    function updateConsent(choice) {
+        const granted = choice === 'accepted';
+        gtag('consent', 'update', {
+            'ad_storage': granted ? 'granted' : 'denied',
+            'analytics_storage': granted ? 'granted' : 'denied',
+            'ad_user_data': granted ? 'granted' : 'denied',
+            'ad_personalization': granted ? 'granted' : 'denied'
+        });
+        if (config.debug) {
+            console.log('[Tracking Consent Updated]', choice);
+        }
+    }
+
     if (typeof window !== 'undefined') {
         window.addEventListener('storage', function (e) {
             if (e.key === 'dezan_cookie_consent') {
-                const granted = e.newValue === 'accepted';
-                gtag('consent', 'update', {
-                    'ad_storage': granted ? 'granted' : 'denied',
-                    'analytics_storage': granted ? 'granted' : 'denied',
-                    'ad_user_data': granted ? 'granted' : 'denied',
-                    'ad_personalization': granted ? 'granted' : 'denied'
-                });
-                if (config.debug) {
-                    console.log('[Tracking Consent Updated]', e.newValue);
-                }
+                updateConsent(e.newValue);
+            }
+        });
+        window.addEventListener('dezan_cookie_consent_updated', function (e) {
+            if (e.detail && e.detail.choice) {
+                updateConsent(e.detail.choice);
             }
         });
     }
@@ -462,21 +475,29 @@
         }
     }
 
-    function markOrderConverted(orderId) {
+    function markOrderConverted(orderId, txnId) {
         try {
             const list = getConvertedOrders();
-            if (!list.includes(orderId)) {
+            let changed = false;
+            if (orderId && !list.includes(orderId)) {
                 list.push(orderId);
-                if (list.length > 100) list.shift();
+                changed = true;
+            }
+            if (txnId && !list.includes(txnId)) {
+                list.push(txnId);
+                changed = true;
+            }
+            if (changed) {
+                if (list.length > 100) list.splice(0, list.length - 100);
                 localStorage.setItem('dezan_converted_orders', JSON.stringify(list));
             }
         } catch (_) {}
     }
 
-    function isOrderAlreadyConverted(orderId) {
-        if (!orderId) return false;
+    function isOrderAlreadyConverted(orderId, txnId) {
+        if (!orderId && !txnId) return false;
         const list = getConvertedOrders();
-        return list.includes(orderId);
+        return (orderId && list.includes(orderId)) || (txnId && list.includes(txnId));
     }
 
     // 11. Public Tracking API Implementation
@@ -497,7 +518,7 @@
          * Supports Google Ads Enhanced Conversions with hashed email.
          * 
          * @param {Object} details
-         * @param {string} details.orderId - Unique Order ID / Order Number (e.g. 'ORD-2026-1048')
+         * @param {string} details.orderId - Unique Order ID / Order Number (e.g. 'ORD-2026-1048' or 'DZ-1048')
          * @param {string} [details.txnId] - Payment Transaction ID
          * @param {number|string} details.amount - Order amount paid in USD (e.g. 15.00)
          * @param {string} [details.service] - Service name (e.g. 'Embroidery Digitizing')
@@ -511,24 +532,25 @@
             details = details || {};
             const orderId = (details.orderId || details.orderNumber || '').trim();
             const numAmount = parseFloat(details.amount) || 0;
-            const txnId = details.txnId || ('TXN-' + Math.floor(100000 + Math.random() * 900000));
+            const txnId = (details.txnId || details.transactionId || '').trim() || ('TXN-' + Math.floor(100000 + Math.random() * 900000));
             const email = (details.email || '').trim().toLowerCase();
-            const service = details.service || 'Embroidery Digitizing';
-            const plan = details.plan || service;
+            const service = details.service || details.service_type || 'Embroidery Digitizing';
+            const plan = details.plan || details.plan_name || service;
             const placement = details.placement || 'Standard Placement';
-            const turnaround = (details.turnaround || details.turnaroundSpeed || 'standard').toLowerCase();
+            const turnaround = (details.turnaround || details.turnaroundSpeed || details.turnaround_speed || 'standard').toLowerCase();
             const isRush = turnaround.includes('rush');
+            const rushStatus = isRush ? 'rush' : 'standard';
 
             if (!orderId) {
                 if (config.debug) console.warn('[Tracking] Cannot fire conversion without an orderId.');
                 return false;
             }
 
-            // Deduplication safeguard: Prevent multiple fires on refresh
-            if (isOrderAlreadyConverted(orderId)) {
+            // Deduplication safeguard: Prevent multiple fires on refresh or multiple button presses
+            if (isOrderAlreadyConverted(orderId, txnId)) {
                 if (config.debug) {
                     console.log(
-                        `%c[Tracking Safeguard] Order #${orderId} already fired conversion. Skipped duplicate to maintain ROAS integrity.`,
+                        `%c[Tracking Safeguard] Order #${orderId} (Txn: ${txnId}) already fired conversion. Skipped duplicate to maintain ROAS integrity.`,
                         'color: #f59e0b; font-weight: bold;'
                     );
                 }
@@ -556,13 +578,44 @@
                 value: numAmount,
                 currency: config.currency,
                 transaction_id: orderId,
+                service_type: service,
                 service_name: service,
                 placement: placement,
-                turnaround_speed: isRush ? 'rush' : 'standard',
-                user_data: userData
+                rush_status: rushStatus,
+                turnaround_speed: rushStatus,
+                user_data: userData,
+                gclid: attribution.gclid || undefined,
+                gbraid: attribution.gbraid || undefined,
+                wbraid: attribution.wbraid || undefined
             });
 
-            // 3. GA4 Ecommerce Standard Purchase Event
+            // 3. GA4 Ecommerce Direct Purchase Event via gtag
+            gtag('event', 'purchase', {
+                transaction_id: orderId,
+                affiliation: config.affiliation,
+                value: numAmount,
+                currency: config.currency,
+                tax: 0.00,
+                shipping: 0.00,
+                service_type: service,
+                placement: placement,
+                rush_status: rushStatus,
+                is_rush: isRush,
+                items: [{
+                    item_id: orderId,
+                    item_name: plan,
+                    item_category: service,
+                    item_variant: placement,
+                    price: numAmount,
+                    quantity: 1
+                }],
+                user_data: userData,
+                gclid: attribution.gclid || undefined,
+                gbraid: attribution.gbraid || undefined,
+                wbraid: attribution.wbraid || undefined
+            });
+
+            // 4. GA4 Ecommerce Standard Purchase Event via dataLayer (for GTM)
             const purchasePayload = {
                 event: 'purchase',
                 ecommerce: {
@@ -581,35 +634,57 @@
                         quantity: 1
                     }]
                 },
+                order_id: orderId,
+                transaction_id: orderId,
+                order_value: numAmount,
+                currency: config.currency,
+                service_type: service,
+                placement: placement,
+                rush_status: rushStatus,
+                rush_or_standard: rushStatus,
+                is_rush: isRush,
                 order_type: 'paid_order',
                 service_name: service,
-                placement: placement,
-                rush_or_standard: isRush ? 'rush' : 'standard',
                 user_data: userData,
-                ad_attribution: attribution
+                ad_attribution: attribution,
+                gclid: attribution.gclid || null,
+                gbraid: attribution.gbraid || null,
+                wbraid: attribution.wbraid || null,
+                utm_source: attribution.utm_source || null,
+                utm_medium: attribution.utm_medium || null,
+                utm_campaign: attribution.utm_campaign || null
             };
             global.dataLayer.push(purchasePayload);
 
-            // 4. Custom GTM Event
+            // 5. Custom GTM Conversion Event
             global.dataLayer.push({
                 event: 'conversion_order_paid',
                 order_id: orderId,
+                transaction_id: orderId,
+                txn_id: txnId,
                 order_value: numAmount,
+                value: numAmount,
                 currency: config.currency,
                 service_type: service,
                 plan_name: plan,
                 placement: placement,
-                rush_or_standard: isRush ? 'rush' : 'standard',
+                rush_status: rushStatus,
+                rush_or_standard: rushStatus,
                 client_email: email,
                 hashed_email: hashedEmail,
                 gclid: attribution.gclid || null,
+                gbraid: attribution.gbraid || null,
+                wbraid: attribution.wbraid || null,
+                utm_source: attribution.utm_source || null,
+                utm_medium: attribution.utm_medium || null,
+                utm_campaign: attribution.utm_campaign || null,
                 original_source: attribution.original_source,
                 last_source: attribution.last_source,
                 ad_attribution: attribution
             });
 
             // Mark order as converted in local storage
-            markOrderConverted(orderId);
+            markOrderConverted(orderId, txnId);
 
             if (config.debug) {
                 console.log(

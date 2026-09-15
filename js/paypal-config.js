@@ -43,6 +43,7 @@
                 this.clientId = json.data.clientId;
                 this.currency = json.data.currency || 'USD';
                 this.environment = json.data.environment;
+                this.clientToken = json.data.clientToken || null;
                 return json.data;
             } finally {
                 clearTimeout(timeoutId);
@@ -65,13 +66,17 @@
                 }
                 const clientId = options.clientId || this.clientId;
                 const currency = options.currency || this.currency;
+                const clientToken = options.clientToken || this.clientToken;
                 if (!clientId) throw new Error('Online payments are not configured yet. Please contact support.');
                 return new Promise((resolve, reject) => {
                     // A failed script will never emit another load event. Retry with a new one.
                     document.getElementById('dezan-paypal-sdk')?.remove();
                     const script = document.createElement('script');
                     script.id = 'dezan-paypal-sdk';
-                    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=${encodeURIComponent(currency)}&intent=capture&components=buttons&enable-funding=card`;
+                    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=${encodeURIComponent(currency)}&intent=capture&components=buttons,card-fields&enable-funding=card`;
+                    if (clientToken) {
+                        script.setAttribute('data-client-token', clientToken);
+                    }
                     script.async = true;
                     const finish = (error) => {
                         clearTimeout(timeoutId);
@@ -86,7 +91,7 @@
                     };
                     const timeoutId = setTimeout(() => finish(new Error('PayPal connection timed out. Please retry.')), 30000);
                     script.onload = () => finish(
-                        typeof window.paypal?.Buttons === 'function' ? null : new Error('PayPal payment buttons could not load. Please retry.')
+                        (typeof window.paypal?.Buttons === 'function' || typeof window.paypal?.CardFields === 'function') ? null : new Error('PayPal payment components could not load. Please retry.')
                     );
                     script.onerror = () => finish(new Error('Unable to connect to PayPal. Please check your connection and retry.'));
                     document.head.appendChild(script);

@@ -30,3 +30,8 @@ wrangler.jsonc
 .codex/**
 .insforge/**
 scripts/**
+migrations
+migrations/**
+*.md
+package.json
+package-lock.json

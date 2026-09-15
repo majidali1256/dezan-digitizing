@@ -75,7 +75,7 @@ describe('2. Authentication & RBAC', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 email: 'admin@dezandigitizing.com',
-                password: 'Wasif8899@@@'
+                password: process.env.TEST_ADMIN_PASSWORD || 'TestAdminPassword123!'
             })
         });
         assert.equal(res.status, 200);
@@ -92,7 +92,7 @@ describe('2. Authentication & RBAC', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 email: 'digitizer@dezandigitizing.com',
-                password: 'Pakistan6677@@@'
+                password: process.env.TEST_DIGITIZER_PASSWORD || 'TestDigitizerPassword123!'
             })
         });
         assert.equal(res.status, 200);

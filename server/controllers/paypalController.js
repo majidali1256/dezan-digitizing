@@ -19,7 +19,11 @@ const { success, error, badRequest, notFound, forbidden } = require('../utils/ap
 const getClientConfig = async (req, res) => {
     try {
         const publicConfig = paypalService.getPublicClientConfig();
-        return success(res, publicConfig, 'PayPal public configuration retrieved');
+        const clientToken = await paypalService.generateClientToken().catch(() => null);
+        return success(res, {
+            ...publicConfig,
+            clientToken: clientToken || undefined
+        }, 'PayPal public configuration retrieved');
     } catch (err) {
         console.error('[PayPal Get Config Error]:', err);
         return error(res, `Failed to retrieve PayPal configuration: ${err.message}`);

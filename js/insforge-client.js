@@ -581,52 +581,70 @@ class InsForgeClient {
             return { user: apiUser, error: null };
         }
 
-        // If the backend was reachable and returned an explicit authentication error, reject immediately
-        if (apiRes && !apiRes.success && apiRes.error && !apiRes.error.includes('Failed to fetch') && !apiRes.error.includes('NetworkError')) {
-            return { user: null, error: apiRes.error };
-        }
+        // 2. Direct InsForge BaaS authentication fallback
+        try {
+            const insRes = await fetch(`${this.baseUrl}/api/auth/sessions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': this.anonKey
+                },
+                body: JSON.stringify({ email: rawEmail, password })
+            });
 
-        // 2. Offline staff verification fallback (Strict Password Checks)
-        const OFFLINE_PASSWORDS = {
-            'admin@dezandigitizing.com': 'Wasif8899@@@',
-            'fdezan91@gmail.com': 'Wasif8899@@@',
-            'digitizer@dezandigitizing.com': 'Pakistan6677@@@'
-        };
+            if (insRes.ok) {
+                const insData = await insRes.json();
+                const sessionUser = insData.user || {};
+                const token = insData.accessToken;
+                if (token && typeof localStorage !== 'undefined') {
+                    localStorage.setItem('dezan_jwt_token', token);
+                }
 
-        if (rawEmail === 'admin@dezandigitizing.com' || rawEmail === 'fdezan91@gmail.com') {
-            if (password && password !== OFFLINE_PASSWORDS[rawEmail]) {
-                return { user: null, error: 'Invalid email or password' };
+                // Query profile for role and details
+                let role = 'client';
+                let displayName = sessionUser.name || rawEmail.split('@')[0];
+                let company = '';
+                let phone = '';
+
+                try {
+                    const profRes = await fetch(`${this.baseUrl}/api/database/records/profiles?id=eq.${sessionUser.id}`, {
+                        headers: {
+                            'apikey': this.anonKey,
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    if (profRes.ok) {
+                        const profs = await profRes.json();
+                        if (Array.isArray(profs) && profs[0]) {
+                            role = profs[0].role || role;
+                            displayName = profs[0].display_name || displayName;
+                            company = profs[0].company || company;
+                            phone = profs[0].phone || phone;
+                        }
+                    }
+                } catch (_) {}
+
+                const verifiedUser = {
+                    id: sessionUser.id,
+                    email: sessionUser.email || rawEmail,
+                    displayName,
+                    role,
+                    company,
+                    phone,
+                    status: 'active'
+                };
+                this.setSession(verifiedUser);
+                this.claimGuestOrders(verifiedUser.email, verifiedUser.id).catch(() => {});
+                return { user: verifiedUser, error: null };
+            } else {
+                const errData = await insRes.json().catch(() => ({}));
+                if (errData.message) {
+                    return { user: null, error: errData.message };
+                }
             }
-            const adminUser = {
-                id: rawEmail === 'fdezan91@gmail.com' ? '00000000-0000-0000-0000-000000000002' : '00000000-0000-0000-0000-000000000001',
-                email: rawEmail,
-                displayName: 'Felix Dezan (Admin)',
-                role: 'admin',
-                company: 'Dezan Digitizing HQ',
-                status: 'active'
-            };
-            this.setSession(adminUser);
-            return { user: adminUser, error: null };
-        }
+        } catch (_) {}
 
-        if (rawEmail === 'digitizer@dezandigitizing.com') {
-            if (password && password !== OFFLINE_PASSWORDS[rawEmail]) {
-                return { user: null, error: 'Invalid email or password' };
-            }
-            this.setSession(PRIMARY_DIGITIZER);
-            return { user: PRIMARY_DIGITIZER, error: null };
-        }
-
-        // 7. Check local registered users (all registered users are clients)
-        const registered = JSON.parse(localStorage.getItem('dezan_registered_users') || '[]');
-        const existing = registered.find(u => u.email.toLowerCase() === rawEmail);
-        if (existing) {
-            this.setSession(existing);
-            this.claimGuestOrders(existing.email, existing.id).catch(() => {});
-            return { user: existing, error: null };
-        }
-
-        return { user: null, error: apiRes.error || 'Invalid email or password. Please use a predefined staff login or sign up as a client.' };
+        return { user: null, error: (apiRes && apiRes.error) || 'Invalid email or password. Please verify your credentials.' };
     }
 
     // Public Sign Up (strictly creates client accounts; staff are predefined)

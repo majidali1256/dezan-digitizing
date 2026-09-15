@@ -9,6 +9,6 @@
     "assets": {
         "directory": ".",
         "binding": "ASSETS",
-        "run_worker_first": ["/api/paypal/*"]
+        "run_worker_first": ["/api/*"]
     }
 }

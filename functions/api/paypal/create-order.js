@@ -22,11 +22,39 @@ export async function onRequestPost(context) {
         const { orderId, amount, currency } = body;
         const config = getPayPalConfig(context.env);
 
+        const insforgeUrl = context.env.NEXT_PUBLIC_INSFORGE_URL || 'https://e8rw998g.us-east.insforge.app';
+        const insforgeKey = context.env.INSFORGE_API_KEY || context.env.NEXT_PUBLIC_INSFORGE_ANON_KEY || 'anon_a03544f925bc8c2e24164c92d6ee1a411c1226559f6dbcce44e28e8c5f1a1a50';
+
         let finalAmount = parseFloat(amount || 0).toFixed(2);
-        if (isNaN(parseFloat(finalAmount)) || parseFloat(finalAmount) <= 0) {
+
+        // Server-side authoritative price verification if orderId is provided
+        if (orderId && insforgeUrl) {
+            try {
+                const searchParam = `order_number=eq.${encodeURIComponent(orderId)}`;
+                const checkRes = await fetch(`${insforgeUrl}/api/database/records/orders?${searchParam}`, {
+                    headers: {
+                        'apikey': insforgeKey,
+                        'Authorization': `Bearer ${insforgeKey}`
+                    }
+                });
+                if (checkRes.ok) {
+                    const found = await checkRes.json();
+                    if (Array.isArray(found) && found.length > 0 && found[0].price) {
+                        const dbPrice = parseFloat(found[0].price);
+                        if (!isNaN(dbPrice) && dbPrice > 0) {
+                            finalAmount = dbPrice.toFixed(2);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('[PayPal Create Order DB Lookup Notice]:', e.message);
+            }
+        }
+
+        if (isNaN(parseFloat(finalAmount)) || parseFloat(finalAmount) < 10.00) {
             return new Response(JSON.stringify({
                 success: false,
-                message: 'A valid positive amount is required to create a payment order'
+                message: 'A valid order amount (minimum $10.00) is required to initialize payment.'
             }), {
                 status: 400,
                 headers: corsHeaders()

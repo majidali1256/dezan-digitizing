@@ -1076,6 +1076,18 @@
                             </div>
                         </div>
 
+                        <!-- Payment Error Banner (Hidden by default) -->
+                        <div id="modal-payment-error-banner" class="hidden p-3.5 sm:p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs flex items-start gap-3">
+                            <span class="material-symbols-outlined text-rose-500 text-lg shrink-0 mt-0.5">error</span>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-slate-900 dark:text-white">Payment Incomplete</h4>
+                                <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5" id="modal-payment-error-text">Payment was cancelled or could not be processed. Your details have been preserved. Please try again.</p>
+                            </div>
+                            <button type="button" onclick="document.getElementById('modal-payment-error-banner').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1">
+                                <span class="material-symbols-outlined text-sm">close</span>
+                            </button>
+                        </div>
+
                         <!-- Payment Method Selector (Order Mode Only) -->
                         <div id="order-payment-terms-box" class="space-y-3">
                             <!-- Header: Choose Payment Method -->
@@ -1092,7 +1104,7 @@
                             <!-- Side-by-Side Cards: PayPal & Credit Card -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <!-- 1. PayPal Card -->
-                                <div id="modal-tab-paypal" onclick="if(typeof setModalPaymentMethod==='function') setModalPaymentMethod('PayPal')" class="relative p-3.5 sm:p-4 rounded-2xl border-2 border-primary bg-amber-50/50 dark:bg-primary/10 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between">
+                                <div id="modal-tab-paypal" onclick="if(typeof setModalPaymentMethod==='function') setModalPaymentMethod('PayPal')" class="relative p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer select-none shadow-xs flex flex-col justify-between">
                                     <!-- Most Popular Badge -->
                                     <div class="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100/90 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 text-[10.5px] font-black shadow-xs">
                                         <span>👑</span>
@@ -1101,8 +1113,8 @@
 
                                     <div class="flex items-start gap-3">
                                         <!-- Radio circle -->
-                                        <div id="modal-radio-paypal" class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900">
-                                            <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+                                        <div id="modal-radio-paypal" class="w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center shrink-0 mt-0.5 transition-colors bg-white dark:bg-slate-900">
+                                            <div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>
                                         </div>
 
                                         <div class="pr-16 sm:pr-20">
@@ -1158,9 +1170,14 @@
 
                             <!-- Active Payment Action Area -->
                             <div id="modal-panel-payment" class="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-primary/10 text-center space-y-2.5">
-                                <p id="modal-payment-instruction" class="text-xs text-slate-600 dark:text-slate-300 font-medium">Fast, 1-click settlement via PayPal balance or PayPal Pay Later:</p>
+                                <p id="modal-payment-instruction" class="text-xs text-slate-600 dark:text-slate-300 font-medium">Select your preferred payment method above to proceed:</p>
                                 <!-- Dynamic PayPal Smart Buttons Mounted Here -->
-                                <div id="modal-paypal-button-container" class="w-full min-h-[44px] flex flex-col justify-center"></div>
+                                <div id="modal-paypal-button-container" class="w-full min-h-[44px] flex flex-col justify-center">
+                                    <div class="py-3 px-4 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-xs flex items-center justify-center gap-2">
+                                        <span class="material-symbols-outlined text-base text-primary">touch_app</span>
+                                        <span>Choose <strong>PayPal</strong> or <strong>Credit / Debit Card</strong> above</span>
+                                    </div>
+                                </div>
                                 <p class="text-[10.5px] text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1">
                                     <span class="material-symbols-outlined text-xs text-emerald-500">verified_user</span>
                                     <span>256-bit Encrypted SSL · Zero transaction surcharges</span>
@@ -1185,24 +1202,158 @@
                     </div>
 
                     <!-- Step 3 Sticky Form Action Buttons -->
-                    <div class="flex-shrink-0 px-4 py-3 sm:px-6 sm:py-3.5 border-t border-slate-200 dark:border-primary/15 bg-white dark:bg-card-dark flex items-center justify-between gap-2 shadow-lg sm:shadow-none pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-                        <button type="button" onclick="backToOrderDetailsStep()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer transition-colors flex items-center gap-1">
+                    <div class="flex-shrink-0 px-3.5 sm:px-6 py-2.5 sm:py-3.5 border-t border-slate-200 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex items-center justify-between gap-2 shadow-lg sm:shadow-none pb-[max(0.75rem,env(safe-area-inset-bottom))] sticky bottom-0 z-20">
+                        <button type="button" onclick="backToOrderDetailsStep()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer transition-colors flex items-center gap-1 shrink-0">
                             <span class="material-symbols-outlined text-sm">arrow_back</span>
-                            <span>Edit Details</span>
+                            <span class="hidden xs:inline sm:inline">Edit Details</span>
+                            <span class="xs:hidden sm:hidden">Edit</span>
                         </button>
                         <div class="flex items-center gap-2">
-                            <button type="button" onclick="closeNewOrderModal()" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer transition-colors">
+                            <button type="button" onclick="closeNewOrderModal()" class="hidden sm:inline-flex px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer transition-colors">
                                 Cancel
                             </button>
-                            <div id="modal-paypal-checkout-note" class="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                                <span class="material-symbols-outlined text-sm text-primary">touch_app</span>
-                                <span>Click <strong>PayPal</strong> or <strong>Card</strong> above</span>
-                            </div>
-                            <button type="submit" id="adaptive-order-submit-btn" class="hidden px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0">
+                            <!-- Dynamic Sticky Review & Pay CTA -->
+                            <button type="button" id="modal-step3-dynamic-cta" onclick="if(typeof window.handleStep3DynamicCtaClick==='function') window.handleStep3DynamicCtaClick()" data-cta-state="continue" class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs sm:text-sm font-black shadow-md shadow-primary/25 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0 active:scale-[0.98]">
+                                <span class="material-symbols-outlined text-base" id="modal-step3-cta-icon">arrow_forward</span>
+                                <span id="modal-step3-cta-text">Continue to Payment &rarr;</span>
+                            </button>
+                            <!-- Quote Mode Submit Button -->
+                            <button type="submit" id="adaptive-order-submit-btn" class="hidden px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs sm:text-sm font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5 flex-shrink-0">
                                 <span class="material-symbols-outlined text-sm" id="order-submit-btn-icon">lock</span>
                                 <span id="order-submit-btn-text">Pay &amp; Place Order ($15.00)</span>
                             </button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4 VIEW: ORDER CONFIRMATION -->
+                <div id="order-step-4-confirmation-view" class="hidden flex-1 flex flex-col overflow-hidden">
+                    <!-- Scrollable Confirmation Body -->
+                    <div class="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-4 sm:space-y-5">
+                        <!-- Success Animation & Main Hero -->
+                        <div class="text-center pt-2 pb-1">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-500/30 mb-3 shadow-inner">
+                                <span class="material-symbols-outlined text-emerald-500 text-4xl sm:text-5xl font-black">check_circle</span>
+                            </div>
+                            <span id="modal-success-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-black border border-emerald-500/20 mb-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                                Payment Verified · Order Queued
+                            </span>
+                            <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight" id="modal-success-title">
+                                Order Confirmed!
+                            </h3>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-sm mx-auto" id="modal-success-subhead">
+                                Thank you! Your order has been placed and assigned to our master digitizing team.
+                            </p>
+                        </div>
+
+                        <!-- Order Identification & Quick Copy Bar -->
+                        <div class="p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/10 border border-primary/30 flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <span class="text-[10px] sm:text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Order Number</span>
+                                <span class="text-base sm:text-lg font-black text-primary font-mono tracking-tight truncate block" id="modal-success-order-num">#DZ-1048</span>
+                            </div>
+                            <button type="button" onclick="window.copyModalOrderNumber()" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-primary/30 text-xs font-bold text-slate-800 dark:text-slate-200 hover:text-primary transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0" id="modal-copy-order-btn">
+                                <span class="material-symbols-outlined text-sm">content_copy</span>
+                                <span id="modal-copy-order-text">Copy</span>
+                            </button>
+                        </div>
+
+                        <!-- Order Summary Card -->
+                        <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-primary/20 space-y-2.5 text-xs text-slate-700 dark:text-slate-300">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-primary/15">
+                                <span class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-primary text-base">receipt_long</span>
+                                    Order Summary
+                                </span>
+                                <span class="text-[11px] font-mono text-slate-500 dark:text-slate-400" id="modal-success-txn-id">TXN-884192</span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-800/80">
+                                <span class="text-slate-500 dark:text-slate-400">Service:</span>
+                                <span class="font-semibold text-slate-900 dark:text-white" id="modal-success-service">Embroidery Digitizing</span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-800/80">
+                                <span class="text-slate-500 dark:text-slate-400">Placement:</span>
+                                <span class="font-semibold text-slate-900 dark:text-white" id="modal-success-placement">Left Chest</span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-800/80">
+                                <span class="text-slate-500 dark:text-slate-400">Turnaround Speed:</span>
+                                <span class="font-semibold text-slate-900 dark:text-white" id="modal-success-turnaround">Standard (12-24 hrs)</span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-800/80">
+                                <span class="text-slate-500 dark:text-slate-400">Delivery Email:</span>
+                                <span class="font-semibold text-slate-900 dark:text-white truncate max-w-[200px]" id="modal-success-email">customer@example.com</span>
+                            </div>
+                            <div class="flex justify-between pt-1 text-sm font-bold text-slate-900 dark:text-white">
+                                <span>Amount Paid:</span>
+                                <span class="text-base font-black text-primary font-mono" id="modal-success-amount">$15.00 USD</span>
+                            </div>
+                        </div>
+
+                        <!-- Next Steps Timeline -->
+                        <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-primary/20 space-y-3">
+                            <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-primary text-base">schedule</span>
+                                What Happens Next?
+                            </h4>
+                            <div class="space-y-2.5 text-xs text-slate-600 dark:text-slate-400">
+                                <div class="flex items-start gap-2.5">
+                                    <span class="w-5 h-5 rounded-full bg-primary/20 text-primary font-black text-[11px] flex items-center justify-center shrink-0 mt-0.5">1</span>
+                                    <p>Our master digitizers review your design and stitch parameters within <strong class="text-slate-900 dark:text-white">1 hour</strong>.</p>
+                                </div>
+                                <div class="flex items-start gap-2.5">
+                                    <span class="w-5 h-5 rounded-full bg-primary/20 text-primary font-black text-[11px] flex items-center justify-center shrink-0 mt-0.5">2</span>
+                                    <p>A confirmation email and formal receipt has been dispatched to your email.</p>
+                                </div>
+                                <div class="flex items-start gap-2.5">
+                                    <span class="w-5 h-5 rounded-full bg-primary/20 text-primary font-black text-[11px] flex items-center justify-center shrink-0 mt-0.5">3</span>
+                                    <p>Your production stitch files (.DST, .EMB, .PES, etc.) & high-res PDF proof sheet will be sent directly to your inbox.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Guest Account Setup Card (Optional) -->
+                        <div id="modal-guest-setup-card" class="p-4 sm:p-5 rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-amber-500/5 to-primary/10 space-y-3">
+                            <div class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-primary text-xl">lock_open</span>
+                                <div>
+                                    <h5 class="text-xs sm:text-sm font-black text-slate-900 dark:text-white">Track this order anytime</h5>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Set a password to download your files and access order history in the Client Portal.</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <input type="password" id="modal-claim-password" placeholder="Create a password (min. 6 characters)" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-primary/30 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary">
+                                <button type="button" onclick="window.submitModalGuestAccountClaim()" class="w-full py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-background-dark font-black text-xs transition-all cursor-pointer shadow-xs flex items-center justify-center gap-1.5" id="modal-claim-btn">
+                                    <span class="material-symbols-outlined text-sm">person_add</span>
+                                    <span>Create Portal Account</span>
+                                </button>
+                                <div id="modal-claim-feedback" class="hidden text-xs font-bold text-center py-1"></div>
+                            </div>
+                        </div>
+
+                        <!-- Authenticated Portal Link (Shown if logged in) -->
+                        <div id="modal-auth-shortcut-card" class="hidden p-4 rounded-2xl bg-white dark:bg-slate-900 border border-primary/30 flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-primary text-xl">dashboard</span>
+                                <div>
+                                    <span class="text-xs font-bold text-slate-900 dark:text-white block">Order Added to Dashboard</span>
+                                    <span class="text-[11px] text-slate-500 dark:text-slate-400">Track progress & stitch downloads in your workspace.</span>
+                                </div>
+                            </div>
+                            <a href="client-portal.html" class="px-3.5 py-1.5 rounded-xl bg-primary text-background-dark font-bold text-xs hover:brightness-110 transition-all shrink-0">Open Portal</a>
+                        </div>
+                    </div>
+
+                    <!-- Step 4 Sticky Footer -->
+                    <div class="flex-shrink-0 px-3.5 sm:px-6 py-2.5 sm:py-3.5 border-t border-slate-200 dark:border-primary/15 bg-white/95 dark:bg-card-dark/95 backdrop-blur-md flex items-center justify-between gap-2 sticky bottom-0 z-20 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+                        <button type="button" onclick="window.startAnotherModalOrder()" class="px-3.5 sm:px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer transition-colors flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">add</span>
+                            <span>Place Another Order</span>
+                        </button>
+                        <button type="button" onclick="window.closeOrderQuoteModal()" class="px-5 sm:px-6 py-2 rounded-xl bg-primary hover:bg-primary-hover text-background-dark text-xs sm:text-sm font-black shadow-md shadow-primary/20 cursor-pointer transition-all flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-sm">check</span>
+                            <span>Done</span>
+                        </button>
                     </div>
                 </div>              </div>
             </form>

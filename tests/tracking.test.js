@@ -292,7 +292,11 @@ test('Google Tag Manager & Conversion Tracking Architecture Tests', async (t) =>
         assert.strictEqual(purchaseEvent.client_email, normalized, 'client_email must be normalized');
     });
 
-    await t.test('8. Database Migration: All attribution columns exist in public.orders table', async () => {
+    await t.test('8. Database Migration: All attribution columns exist in public.orders table', async (tSub) => {
+        if (!process.env.DATABASE_URL) {
+            tSub.skip('DATABASE_URL not set in environment; skipping live DB schema check');
+            return;
+        }
         const pool = require('../server/config/db');
         const res = await pool.query(`
             SELECT column_name, data_type 
