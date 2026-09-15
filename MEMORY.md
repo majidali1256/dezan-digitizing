@@ -390,8 +390,20 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
      - Specialized in EVA foam embroidery, clean terminal capping, double-density satin capping, and zero foam bleed.
      - Real proof: Retro Astros Rainbow Cap on Orange Brim Snapback. Flat rate $15 (no extra charge for puff).
    - **Page 4: Jacket Back Digitizing (`/embroidery-digitizing/jacket-back-digitizing/`)**:
-     - Specialized in large format 10"-14" layouts, split tatami fills, density balancing to prevent bulletproof stiffness, and thread economy.
-     - Real proof: Doña's Tacos Mexican Folkloric Dancer on Black Satin/Fleece Bomber. Flat rate $25.
+      - Fully upgraded to the unified component system matching Cap & Hat and Left Chest pages.
+      - **SEO Metadata**: Title: `Jacket Back Embroidery Digitizing Services | Dezan Digitizing`, Meta Description: `Professional jacket back embroidery digitizing for large logos, team designs, workwear and full-back artwork. Production-ready files start at $25.`, Canonical: `https://dezandigitizing.com/embroidery-digitizing/jacket-back-digitizing/`.
+      - **Hero**: Flat rate $25, focused on large logos, team designs, club apparel, workwear, and full-back artwork.
+      - **Top Production Comparison (Section 2)**: Green Day Landscaping & Tree Service — Side-by-side CAD preview video (8s) (`videos/green-day-landscaping-digitized-preview.mp4`) and final stitch-out on heavy black canvas jacket (`images/green-day-landscaping-jacket-back-embroidery.webp`).
+      - **Standard Deliverables (Section 3)**: 4 compact cards (Large-format embroidery file, Machine formats included, Large design planning, Finished-size setup).
+      - **Service Overview (Section 4)**: 4 compact cards (Large Areas Need More Planning, Density Matters More at Large Sizes, Fabric Can Move During Long Runs, Production Time Matters).
+      - **Quality Assurance Checklist (Section 5)**: 4 items (Finished Size, Garment & Fabric, Large Fill Areas, Small Details at Large Scale; strictly avoids stating a universal maximum size).
+      - **Work Showcase (Section 6: Recent Jacket Back Projects)**:
+        1. **Case Study 1 (Martial Arts Club & Jumbo Frame)**: Evolution Karate Academy — 38s Tajima CAD simulation video (`videos/evolution-karate-academy-digitized-preview.mp4`) and finished stitch-out held in large magnetic sash frame (`images/evolution-karate-academy-large-frame-embroidery.webp`). Clean 1 video + 1 image 2-column layout with zero checkmark pills.
+        2. **Case Study 2 (Commercial Workwear Outerwear)**: Green Day Landscaping & Tree Service — 8s Tajima CAD software sequence video (`videos/green-day-landscaping-digitized-preview.mp4`) and delivered black canvas workwear jacket photo (`images/green-day-landscaping-jacket-back-embroidery.webp`). Clean 1 video + 1 image 2-column layout with zero checkmark pills.
+      - **Large-Format Production Details (Section 7)**: 4 compact cards (Balanced Stitch Coverage, Planned Stitch Direction, Practical Color Sequence, Built at Final Size).
+      - **Pricing / CTA (Section 8)**: $25 flat rate order hook calling `window.handleOrderClick(event, 'Digitizing', 'Jacket Back / Large — $25')`.
+      - **FAQ Section (Section 9)**: 6 comprehensive structured accordions with FAQPage JSON-LD.
+      - Responsive verified across Desktop (1440px) and Mobile (390px) with zero console errors and 100% WebP image payloads.
    - **Page 5: Pet Portrait Digitizing (`/embroidery-digitizing/pet-portrait-digitizing/`)**:
      - Specialized in realistic fur flow, multi-shade thread blending, facial anatomy contours, and hand-digitized realism.
      - Real proof: Boxer Dog Pet Portrait on Heavy Canvas Tote Bag. Flat rate $25 (≤5.5") / $40 (>5.5").
