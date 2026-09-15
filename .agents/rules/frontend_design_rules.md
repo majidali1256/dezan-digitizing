@@ -30,7 +30,10 @@ Whenever designing, implementing, modifying, or auditing any frontend web page, 
    - Verify all frontend work with real headless browser screenshots across Desktop (1512x982), Tablet (834x1112), and Mobile (390x844).
    - Catch visual bugs, layout overflows, clipping, or contrast defects before delivering results to the user.
 
-## 2. Universal WebP Image Optimization Standard (Always Follow)
-- **Universal Rule**: Whenever adding, creating, updating, or displaying pictures, illustrations, logos, mockups, or reviews, ALWAYS use the **WebP (`.webp`)** format.
-- **Performance & Fidelity**: WebP slashes network payloads by 70%+ compared to PNG/JPEG, accelerates loading speeds, and preserves 100% crystal-clear fidelity with full alpha channel transparency.
-- **Conversion Pipeline**: If raw graphics are introduced in PNG or JPEG format, immediately convert them to `.webp` with high quality (`quality=95, alpha_quality=100` for logos/vectors, `quality=85-90` for photography/renders) and update all references to `.webp`.
+## 2. Universal Image Optimization & WebP Standard (Always Follow)
+- **Optimized WebP by Default for Raster**: Use optimized WebP (`.webp`) for all raster website images (mockups, photos, stitchouts, textures, thumbnails). Slashes payloads by 70%+ while preserving crystal-clear visual quality and alpha transparency.
+- **Preserve SVG for Vector Graphics**: Preserve native SVG (`.svg`) for vector graphics, icons, badges, and line art. Do NOT rasterize clean SVG vectors to WebP.
+- **Retain Originals**: Always retain master/original files on disk as source assets and fallbacks. Never destroy original sources.
+- **Avoid Unnecessary Re-encoding**: Skip re-encoding assets that are already optimized WebP or clean SVG to prevent generation loss and compression artifacts.
+- **Pre-Replacement Verification**: Check visual quality, resolution, intrinsic dimensions, and aspect ratio before replacing or swapping assets in markup to ensure zero visual degradation and zero layout shift (CLS).
+
