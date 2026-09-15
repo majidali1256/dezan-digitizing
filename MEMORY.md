@@ -294,31 +294,31 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 ### 4.11 Client Video Testimonial Section & Zero-Initial-Load Architecture (`index.html`)
 - **Objective & Placement**:
   - Integrate a real client video testimonial directly above the written Facebook reviews on `index.html` (`#video-testimonial-section`).
-  - Visitors watch an authentic video review from commercial embroidery shop owner **Karen Parmenter Giddings** sharing how Dezan Digitizing's files helped win "Best of Show" at her local county fair, transitioning seamlessly into written client reviews below.
+  - Visitors watch an authentic video review from commercial embroidery creator **Marian Stevens** (`Digital creator · 760 followers`, Corvette Marian) sharing how Dezan Digitizing's embroidery files run cleanly and reliably on commercial embroidery machines.
 - **Web-Optimized Media Processing**:
-  - **Video Transcoding**: Compressed source `VIDEO 6.MOV` (43.3 MB ProRes/HEVC 120fps) into high-performance web-standard H.264 MP4 (`videos/client-testimonial-karen-giddings.mp4`, 1280x720, 30 fps, CRF 26, AAC audio 128k, `-movflags +faststart`) resulting in **5.58 MB** (an **87.1% bandwidth reduction** with immediate stream start).
-  - **Universal WebP Poster**: Extracted clean, smiling studio frame with embroidery machinery and thread racks as high-quality WebP (`reviews/karen-parmenter-giddings-video-poster.webp`, 1280x720, 95.9 KB).
+  - **Video Transcoding**: Compressed source video into high-performance web-standard H.264 MP4 (`videos/client-testimonial-karen-giddings.mp4`, 1280x720, 30 fps, CRF 26, AAC audio 128k, `-movflags +faststart`) resulting in **5.58 MB** (an **87.1% bandwidth reduction** with immediate stream start).
+  - **Universal WebP Poster & Avatar**: Extracted clean studio frame as high-quality WebP (`reviews/karen-parmenter-giddings-video-poster.webp`, 1280x720, 95.9 KB) and cropped authentic Corvette Marian circular logo avatar (`reviews/marian-stevens-avatar.webp`, 180x180 WebP).
 - **Zero-Initial-Load Click-to-Play Performance Engine**:
   - To prevent slowing down the homepage, **0 bytes of video are downloaded on initial page load**.
   - A lightweight facade (`#client-video-facade`) renders the WebP poster with dark gradient scrim, "Customer Review" badge, duration pill ("0:26"), and radiant pulsing gold play button (`.video-play-pulse`).
   - Clicking the facade dynamically mounts the native `<video controls autoplay playsinline>` element (`#client-active-video`), streaming the video strictly on-demand.
 - **60/40 Split Feature Card & High-Trust Proof Details**:
-  - Left Column (7 cols): 16:9 responsive video player with award badge `"Best of Show" County Fair Winner` and `Sound On 🔊` indicator.
-  - Right Column (5 cols): Authentic client review card featuring Karen's profile photo, commercial shop badge, verified pill, 5 gold stars, pull quote with highlighted county fair achievement, 3 key proof bullet points, and direct `Order Digitizing` conversion button.
+  - Left Column (7 cols): 16:9 responsive video player with badge `Verified Client Review` and `Sound On 🔊` indicator.
+  - Right Column (5 cols): Authentic client review card featuring Marian Stevens' real Corvette Marian circular avatar, creator title, Verified badge, 5 gold stars, clean concise quote (`"Shout out to Dezan Digitizing — amazing work with the digitizing! Clean stitch-outs every single time."`), and direct `Order Digitizing` conversion button. Uncluttered design without oversized marketing filler text or extra bullet points.
+- **Universal Customer Review Profile Picture Standard (`index.html` & `portfolio.html`)**:
+  - All 10 written review cards now use dedicated, crystal-clear 160x160 WebP image elements (`<img src="reviews/*-avatar.webp" ...>`).
+  - Replaced low-fidelity initial letter badges ("A", "C", "JS") and fragile CSS `background-size: 800%` crops with authentic, high-resolution human portrait photos for Ashlea Foxwell, Chris Velasquez, Judith Staponkus, Karen Parmenter Giddings, Jean Trinh Le, Erkan Koyuncu, Maralyn Kublek, Lisa Jenkins, Sandy Escobar, and Susan Michael.
 - **Modular Extensibility (`app.js`)**:
   - Configured with `window.CLIENT_VIDEO_TESTIMONIALS` data array and `window.loadClientVideoTestimonial(indexOrId)` helper.
-  - Swapping testimonials or adding multiple client videos in the future is achievable by editing data objects without restructuring HTML/CSS.
 - **Schema.org VideoObject Structured Data**:
   - Embedded JSON-LD `VideoObject` in `<head>` of `index.html` detailing thumbnail URL, upload date, duration (PT26S), and content URL for Google rich video search indexing.
-- **Automated Verification**:
-  - Playwright visual tests across Desktop (1512x982), Tablet (834x1112), and Mobile (390x844) verified zero initial video requests, flawless click-to-play mounting, and full light/dark theme contrast compliance ($\ge 4.5:1$).
 
 ---
 
 ## 5. Site Map & Route Architecture
 
 ### Public Marketing Pages
-- `/index.html`: Home page (Title: `Embroidery Digitizing Services | Dezan Digitizing®️`; Hero with Before/After Comparison Slider; **Specialized Work Categories** 4-placement Teaser linking to dedicated subpages; Live Feedback Carousel with 39 stitchout photos; Featured Client Video Testimonial (`#video-testimonial-section`) with Karen Parmenter Giddings; Written Facebook Reviews masonry with dedicated WebP avatars; "Why Choose Dezan Digitizing?"; and interactive FAQ Accordion).
+- `/index.html`: Home page (Title: `Embroidery Digitizing Services | Dezan Digitizing®️`; Hero with Before/After Comparison Slider; **Specialized Work Categories** 4-placement Teaser linking to dedicated subpages; Live Feedback Carousel with 39 stitchout photos; Featured Client Video Testimonial (`#video-testimonial-section`) with Marian Stevens; Written Facebook Reviews masonry with dedicated WebP avatars; "Why Choose Dezan Digitizing?"; and interactive FAQ Accordion).
 - `/about.html`: Company history, experience, machinery/software standards (Wilcom, Tajima, Barudan).
 - `/services.html` (`/services`): **Main Services Navigation Hub**. Displays the two core pillars with 100% clickable cards (image, heading, CTA):
   - **Embroidery Digitizing Card**: Direct link to `/embroidery-digitizing/` with CTA `Explore Embroidery Digitizing →`.

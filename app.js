@@ -1871,13 +1871,13 @@ function initFeedbackSlider() {
 // ===================================================================
 window.CLIENT_VIDEO_TESTIMONIALS = [
     {
-        id: "karen-giddings",
-        name: "Karen Parmenter Giddings",
-        role: "Commercial Embroidery Business Owner",
+        id: "marian-stevens",
+        name: "Marian Stevens",
+        role: "Digital creator · 760 followers",
         location: "United States",
         verified: true,
-        achievement: "County Fair 'Best of Show' Winner",
-        quote: "This one got Best of Show in our local county fair! Shout out to Dezan Digitizing — he's awesome, their staff knows what they're doing and supported my business from the beginning by giving me clean digitized designs that I could use right now.",
+        achievement: "Verified Client Review",
+        quote: "Shout out to Dezan Digitizing — amazing work with the digitizing! Clean stitch-outs every single time.",
         videoSrc: "videos/client-testimonial-karen-giddings.mp4",
         posterSrc: "reviews/karen-parmenter-giddings-video-poster.webp",
         duration: "0:26"
