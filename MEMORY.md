@@ -294,7 +294,7 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
 ### 4.11 Client Video Testimonial Section & Zero-Initial-Load Architecture (`index.html`)
 - **Objective & Placement**:
   - Integrate a real client video testimonial directly above the written Facebook reviews on `index.html` (`#video-testimonial-section`).
-  - Visitors watch an authentic video review from commercial embroidery creator **Marian Stevens** (`Digital creator · 760 followers`, Corvette Marian) sharing how Dezan Digitizing's embroidery files run cleanly and reliably on commercial embroidery machines.
+  - Visitors watch an authentic video review from commercial embroidery shop owner **Marian Stevens** (`Embroidery Shop Owner`, Corvette Marian) sharing how Dezan Digitizing's embroidery files run cleanly and reliably on commercial embroidery machines.
 - **Web-Optimized Media Processing**:
   - **Video Transcoding**: Compressed source video into high-performance web-standard H.264 MP4 (`videos/client-testimonial-karen-giddings.mp4`, 1280x720, 30 fps, CRF 26, AAC audio 128k, `-movflags +faststart`) resulting in **5.58 MB** (an **87.1% bandwidth reduction** with immediate stream start).
   - **Universal WebP Poster & Avatar**: Extracted clean studio frame as high-quality WebP (`reviews/karen-parmenter-giddings-video-poster.webp`, 1280x720, 95.9 KB) and cropped authentic Corvette Marian circular logo avatar (`reviews/marian-stevens-avatar.webp`, 180x180 WebP).
@@ -302,14 +302,17 @@ All UI components, portal views, and marketing sections must adhere to `.agents/
   - To prevent slowing down the homepage, **0 bytes of video are downloaded on initial page load**.
   - A lightweight facade (`#client-video-facade`) renders the WebP poster with dark gradient scrim, "Customer Review" badge, duration pill ("0:26"), and radiant pulsing gold play button (`.video-play-pulse`).
   - Clicking the facade dynamically mounts the native `<video controls autoplay playsinline>` element (`#client-active-video`), streaming the video strictly on-demand.
-- **60/40 Split Feature Card & High-Trust Proof Details**:
-  - Left Column (7 cols): 16:9 responsive video player with badge `Verified Client Review` and `Sound On 🔊` indicator.
-  - Right Column (5 cols): Authentic client review card featuring Marian Stevens' real Corvette Marian circular avatar, creator title, Verified badge, 5 gold stars, clean concise quote (`"Shout out to Dezan Digitizing — amazing work with the digitizing! Clean stitch-outs every single time."`), and direct `Order Digitizing` conversion button. Uncluttered design without oversized marketing filler text or extra bullet points.
+- **Unified Compact Video + Testimonial Component**:
+  - Designed as a single, connected, compact card component (`rounded-2xl border overflow-hidden`) with zero gap between the video and testimonial card.
+  - Mobile: Video sits flush on top (16:9 aspect ratio) with Marian Stevens' review card directly connected below, eliminating the awkward gap and drastically cutting vertical height for swift mobile scrolling.
+  - Desktop: 7/5 column grid side-by-side inside the unified container.
+  - Testimonial Details: Real Corvette Marian circular avatar, name Marian Stevens, updated title `Embroidery Shop Owner`, intact `Verified` badge, 5 gold stars (5.0 / 5.0 Rating), concise pull quote, and compact bottom bar (`Real client, real machine stitch-out.` on one line with `Order Digitizing →` button).
+  - Reduced empty vertical space below the testimonial card before the Written Client Reviews masonry.
 - **Universal Customer Review Profile Picture Standard (`index.html` & `portfolio.html`)**:
   - All 10 written review cards now use dedicated, crystal-clear 160x160 WebP image elements (`<img src="reviews/*-avatar.webp" ...>`).
   - Replaced low-fidelity initial letter badges ("A", "C", "JS") and fragile CSS `background-size: 800%` crops with authentic, high-resolution human portrait photos for Ashlea Foxwell, Chris Velasquez, Judith Staponkus, Karen Parmenter Giddings, Jean Trinh Le, Erkan Koyuncu, Maralyn Kublek, Lisa Jenkins, Sandy Escobar, and Susan Michael.
 - **Modular Extensibility (`app.js`)**:
-  - Configured with `window.CLIENT_VIDEO_TESTIMONIALS` data array and `window.loadClientVideoTestimonial(indexOrId)` helper.
+  - Configured with `window.CLIENT_VIDEO_TESTIMONIALS` data array and `window.loadClientVideoTestimonial(indexOrId)` helper, making it trivial to add more compact testimonial video blocks in the future.
 - **Schema.org VideoObject Structured Data**:
   - Embedded JSON-LD `VideoObject` in `<head>` of `index.html` detailing thumbnail URL, upload date, duration (PT26S), and content URL for Google rich video search indexing.
 
@@ -3354,8 +3357,65 @@ The Worker Studio provides an isolated, production-focused environment for embro
      - Added global `pointerenter` prefetch listener on Order CTA buttons/links.
   5. **Skeleton Shimmer UI**:
      - Replaced plain text spinner with an animated skeleton placeholder (`animate-pulse`) so the payment section feels responsive and modern while buttons mount.
+## 54. Left Chest Embroidery Digitizing Landing Page Architecture (Implemented & Verified)
+- **Objective**:
+  - Build the dedicated **Left Chest Embroidery Digitizing** landing page (`embroidery-digitizing/left-chest-digitizing/index.html`) using the exact same layout, component architecture, spacing, card density, CTA flows, FAQ accordions, and design tokens as the Cap & Hat Digitizing page (`embroidery-digitizing/cap-hat-digitizing/index.html`).
+- **Design System & Structural Replication (Exact 1:1 Mapping)**:
+  - **Zero Structural Deviations**: Replicated the component hierarchy, vertical padding (`pt-5 sm:pt-16 pb-4 sm:pb-10`), sticky navigation header, breadcrumb path (`Home / Services / Embroidery Digitizing / Left Chest Digitizing`), and bottom navigation.
+  - **Section 1: Hero Section**:
+    - Tag badge: `Specialized Placement: Corporate Apparel & Polos` with `dry_cleaning` icon.
+    - H1: `Left Chest <span class="text-primary">Embroidery Digitizing Services</span>`.
+    - Copy: Focused on polos, uniforms, work shirts, corporate apparel, small logos, and lettering.
+    - Primary CTA: `Order Left Chest Digitizing` ($15 flat rate) hooked to `window.handleOrderClick(event, 'Digitizing', 'Hat / Left Chest Logos')`.
+  - **Section 2: Production Comparison Section**:
+    - Layout: Identical 2-column side-by-side comparison (`From Digitized File to Final Stitch-Out`).
+    - Left Card: Autoplay looping video of Atkins Communications Group CAD stitch simulation (`videos/atkins-left-chest-digitized-preview.mp4`) with `0:08` duration badge and play/pause toggle.
+    - Right Card: High-resolution production stitch-out photo across Under Armour jackets, vests, hoodies, and Port Authority polos (`images/atkins-communications-left-chest-embroidery-batch.webp`).
+    - Divider text: "Same logo. Digitized for left chest apparel. Real stitched result."
+  - **Section 3: What You Get With Left Chest Digitizing**:
+    - 4 compact cards: `Left-Chest-Ready Embroidery File`, `Machine Formats Included`, `Small Detail Handling`, `Garment-Aware Setup`.
+  - **Section 4: Why Left Chest Digitizing Is Different**:
+    - 4 cards: `Small Size, Important Details`, `Different Fabrics Stitch Differently`, `Balanced Stitch Coverage`, `Built at the Size You Need`.
+  - **Section 5: Quality Assurance Checklist**:
+    - 4 cards: `Finished Size`, `Small Text`, `Garment Type`, `Fine Details`.
+  - **Section 6: Work Showcase / Recent Left Chest Projects**:
+    - **Case Study 1 (Atkins Communications Group — Polos & Outerwear)**:
+      - 30s case study video (`videos/atkins-communications-left-chest-case-study.mp4`) with custom play button overlay.
+      - Right side: Step 1 CAD Studio image (`images/atkins-digitized-software-preview.webp`) + Step 3 Finished Run image (`images/atkins-communications-left-chest-embroidery-batch.webp`).
+      - Summary banner: "One logo. One left-chest production file. Crisp results across polos, jackets, and fleece." + CTA button.
+    - **Case Study 2 (Appoquinimink High School Jaguars — School Crest & Gear)**:
+      - CAD simulation video (`videos/appoquinimink-crest-digitized-preview.mp4`).
+      - Right side (**Section 7: Production Detail Section**): 4 technical specification cards:
+        1. `Readable Small Lettering`
+        2. `Fabric-Specific Consideration`
+        3. `Balanced Coverage`
+        4. `Clean Production Path`
+      - Summary banner: "Zero guesswork. Production files built for commercial embroidery machines." + CTA button.
+  - **Section 8: Final CTA Section**:
+    - H2: `Left Chest Files Built for Everyday Production`.
+    - Subtitle: "Send your logo, finished size and garment type. We’ll prepare a production-ready embroidery file in the machine format you need."
+    - Button: `Order Left Chest Digitizing`.
+  - **Section 9: FAQ Section**:
+    - 6 interactive accessible `<details>` accordion items with questions regarding standard size (3”–4.5”), small lettering (down to 4mm), difference from hat files, included machine formats (DST, PES, EMB, EXP, JEF, VP3), $15 flat pricing, and 12–24h turnaround.
+  - **Related Services Strip & Unified Footer**:
+    - Breadcrumbs and sibling navigation linking back to All Embroidery Digitizing, Cap & Hat Digitizing, 3D Puff Digitizing, and Vector Art Conversion.
+- **Universal WebP & Video Optimization Standards**:
+  - `Video 7.MP4` transcoded via macOS `avconvert` to web-optimized MP4s: `videos/atkins-left-chest-digitized-preview.mp4` (8s loop, 5.8 MB) and `videos/atkins-communications-left-chest-case-study.mp4` (30s case study, 11 MB).
+  - `Video 8.MOV` transcoded to `videos/appoquinimink-crest-digitized-preview.mp4` (8.6s, 6.7 MB).
+  - User photos converted via Python `Pillow` at `quality=92, method=6` to `.webp`:
+    - `images/atkins-communications-left-chest-embroidery-batch.webp`
+    - `images/atkins-left-chest-polo-closeup.webp`
+    - `images/atkins-digitized-software-preview.webp`
+    - `images/appoquinimink-jaguars-left-chest-crest-embroidery.webp`
+    - `images/appoquinimink-crest-digitized-software-preview.webp`
+    - High-fidelity WebP poster frames extracted for all video players.
+- **SEO & Structured Data**:
+  - Schema.org JSON-LD `@graph` containing `Service`, `BreadcrumbList`, and `FAQPage`.
+  - Open Graph and Twitter Cards with canonical URL `https://dezandigitizing.com/embroidery-digitizing/left-chest-digitizing/`.
 - **Verification**:
-  - `node --test tests/payment-regression.test.js` passed **5/5 tests (100%)**.
-  - All avatars and checkout workflows verified with Chrome Playwright.
+  - Headless Chrome visual verification across Desktop (1400x900) and Mobile (390x844).
+  - Verified 100% of images load with `naturalWidth > 0` and zero HTTP 404s.
+  - Zero console or JavaScript errors.
+
 
 

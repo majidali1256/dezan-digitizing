@@ -441,9 +441,9 @@
             2. Update the text fields below (Author, Role, Quote)
             3. Or modify/add items in window.CLIENT_VIDEO_TESTIMONIALS in app.js
         -->
-        <section id="video-testimonial-section" class="py-10 sm:py-14 px-4 max-w-6xl mx-auto reveal">
+        <section id="video-testimonial-section" class="pt-6 pb-2 sm:pt-10 sm:pb-4 px-4 max-w-6xl mx-auto reveal">
             <!-- Header with Badge & Title -->
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-7 gap-3 sm:gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-4 sm:mb-6 gap-2 sm:gap-4">
                 <div>
                     <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/25 text-primary text-[11px] font-extrabold uppercase tracking-wider mb-2">
                         <span class="material-symbols-outlined text-sm">videocam</span>
@@ -465,131 +465,127 @@
                 </div>
             </div>
 
-            <!-- Main Feature Grid: Video (Left 7 Cols) + Testimonial Details (Right 5 Cols) -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
-                <!-- Video Player Card -->
-                <div class="lg:col-span-7 flex flex-col">
-                    <div class="relative bg-black rounded-2xl overflow-hidden shadow-lg border border-slate-200/90 dark:border-primary/25 group h-full flex items-center justify-center">
-                        <!-- Video Display Container (16:9 Aspect Ratio) -->
-                        <div id="video-player-container" class="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
-                            <!-- Click-to-Play Facade (Zero video bytes loaded on initial visit) -->
-                            <div id="client-video-facade" class="absolute inset-0 w-full h-full cursor-pointer z-10" role="button" tabindex="0" aria-label="Play client video testimonial from Marian Stevens">
-                                <img
-                                    id="client-video-poster"
-                                    src="reviews/karen-parmenter-giddings-video-poster.webp"
-                                    alt="Marian Stevens reviewing Dezan Digitizing in her embroidery shop"
-                                    title="Marian Stevens - Client Video Testimonial"
-                                    width="1280"
-                                    height="720"
-                                    loading="lazy"
-                                    decoding="async"
-                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                                />
-                                
-                                <!-- Scrim Gradient for badge & button contrast -->
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40 group-hover:via-black/10 transition-all"></div>
+            <!-- Unified Compact Testimonial Component -->
+            <div class="bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-primary/20 shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12 items-stretch">
+                <!-- Video Player Half (Top on mobile, Left on desktop) -->
+                <div class="lg:col-span-7 bg-black relative flex items-center justify-center overflow-hidden">
+                    <!-- Video Display Container (16:9 Aspect Ratio) -->
+                    <div id="video-player-container" class="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
+                        <!-- Click-to-Play Facade (Zero video bytes loaded on initial visit) -->
+                        <div id="client-video-facade" class="absolute inset-0 w-full h-full cursor-pointer z-10" role="button" tabindex="0" aria-label="Play client video testimonial from Marian Stevens">
+                            <img
+                                id="client-video-poster"
+                                src="reviews/karen-parmenter-giddings-video-poster.webp"
+                                alt="Marian Stevens reviewing Dezan Digitizing in her embroidery shop"
+                                title="Marian Stevens - Client Video Testimonial"
+                                width="1280"
+                                height="720"
+                                loading="lazy"
+                                decoding="async"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                            />
+                            
+                            <!-- Scrim Gradient for badge & button contrast -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40 group-hover:via-black/10 transition-all"></div>
 
-                                <!-- Top Badges Over Video -->
-                                <div class="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between z-20 pointer-events-none">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/65 backdrop-blur-md border border-white/20 text-white text-[11px] font-bold shadow-xs">
-                                        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                                        <span>Customer Review</span>
-                                    </span>
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-black/65 backdrop-blur-md border border-white/15 text-white/95 text-[11px] font-semibold shadow-xs">
-                                        <span class="material-symbols-outlined text-xs text-primary">schedule</span>
-                                        <span id="client-video-duration-badge">0:26</span>
-                                    </span>
+                            <!-- Top Badges Over Video -->
+                            <div class="absolute top-3 left-3 right-3 sm:top-3.5 sm:left-3.5 sm:right-3.5 flex items-center justify-between z-20 pointer-events-none">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-black/65 backdrop-blur-md border border-white/20 text-white text-[10px] sm:text-[11px] font-bold shadow-xs">
+                                    <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-primary animate-pulse"></span>
+                                    <span>Customer Review</span>
+                                </span>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-black/65 backdrop-blur-md border border-white/15 text-white/95 text-[10px] sm:text-[11px] font-semibold shadow-xs">
+                                    <span class="material-symbols-outlined text-xs text-primary">schedule</span>
+                                    <span id="client-video-duration-badge">0:26</span>
+                                </span>
+                            </div>
+
+                            <!-- Center Play Button & Watch Prompt -->
+                            <button
+                                id="client-video-play-btn"
+                                type="button"
+                                aria-label="Play video"
+                                class="absolute inset-0 m-auto w-18 h-18 sm:w-22 sm:h-22 rounded-full flex flex-col items-center justify-center focus:outline-none z-20 group/btn cursor-pointer"
+                            >
+                                <div class="w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-primary text-slate-950 flex items-center justify-center shadow-2xl transform group-hover/btn:scale-110 transition-transform duration-300 ring-4 ring-white/40 video-play-pulse">
+                                    <span class="material-symbols-outlined text-2xl sm:text-3xl ml-0.5 filled-icon">play_arrow</span>
                                 </div>
-
-                                <!-- Center Play Button & Watch Prompt -->
-                                <button
-                                    id="client-video-play-btn"
-                                    type="button"
-                                    aria-label="Play video"
-                                    class="absolute inset-0 m-auto w-20 h-20 sm:w-24 sm:h-24 rounded-full flex flex-col items-center justify-center focus:outline-none z-20 group/btn cursor-pointer"
-                                >
-                                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary text-slate-950 flex items-center justify-center shadow-2xl transform group-hover/btn:scale-110 transition-transform duration-300 ring-4 ring-white/40 video-play-pulse">
-                                        <span class="material-symbols-outlined text-3xl sm:text-4xl ml-1 filled-icon">play_arrow</span>
-                                    </div>
-                                    <div class="mt-3 px-3 py-1 rounded-full bg-black/80 backdrop-blur-md border border-white/15 text-white text-[11px] sm:text-xs font-bold tracking-wide shadow-xl flex items-center gap-1 whitespace-nowrap">
-                                        <span>Click to Watch Story</span>
-                                    </div>
-                                </button>
-
-                                <!-- Bottom Overlay Badges -->
-                                <div class="absolute bottom-3 left-3.5 right-3.5 z-20 pointer-events-none flex items-center justify-between text-white/95">
-                                    <div class="flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold">
-                                        <span class="material-symbols-outlined text-sm text-primary">award_star</span>
-                                        <span>Verified Client Review</span>
-                                    </div>
-                                    <span class="text-[10px] sm:text-[11px] text-white/70 font-medium bg-black/50 px-2 py-0.5 rounded backdrop-blur-xs">Sound On 🔊</span>
+                                <div class="mt-2 sm:mt-2.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-black/80 backdrop-blur-md border border-white/15 text-white text-[10px] sm:text-xs font-bold tracking-wide shadow-xl flex items-center gap-1 whitespace-nowrap">
+                                    <span>Click to Watch Story</span>
                                 </div>
+                            </button>
+
+                            <!-- Bottom Overlay Badges -->
+                            <div class="absolute bottom-2.5 left-3 right-3 sm:bottom-3 sm:left-3.5 sm:right-3.5 z-20 pointer-events-none flex items-center justify-between text-white/95">
+                                <div class="flex items-center gap-1.5 text-[10px] sm:text-xs font-semibold">
+                                    <span class="material-symbols-outlined text-xs sm:text-sm text-primary">award_star</span>
+                                    <span>Verified Client Review</span>
+                                </div>
+                                <span class="text-[9px] sm:text-[10px] text-white/70 font-medium bg-black/50 px-2 py-0.5 rounded backdrop-blur-xs">Sound On 🔊</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Client Story & Proof Card -->
-                <div class="lg:col-span-5 flex flex-col justify-between">
-                    <div class="bg-white dark:bg-card-dark rounded-2xl p-6 sm:p-7 border border-slate-200 dark:border-primary/20 shadow-sm flex flex-col justify-between h-full relative overflow-hidden">
-                        <!-- Decorative Quote Icon Watermark -->
-                        <div class="absolute top-2 right-4 text-primary/10 select-none pointer-events-none text-7xl font-serif leading-none">
-                            “
-                        </div>
+                <!-- Testimonial Content Half (Bottom on mobile, Right on desktop) -->
+                <div class="lg:col-span-5 p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between relative bg-white dark:bg-card-dark border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-primary/15">
+                    <!-- Decorative Quote Icon Watermark -->
+                    <div class="absolute top-1 right-3 text-primary/10 select-none pointer-events-none text-5xl sm:text-6xl font-serif leading-none">
+                        “
+                    </div>
 
-                        <div>
-                            <!-- Header: Client Avatar / Verified Pill -->
-                            <div class="flex items-center justify-between gap-3 mb-4">
-                                <div class="flex items-center gap-3">
-                                    <img src="reviews/marian-stevens-avatar.webp" alt="Marian Stevens" class="w-12 h-12 rounded-full shrink-0 object-cover border-2 border-primary/40 shadow-xs">
-                                    <div>
-                                        <h4 id="client-quote-author" class="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white leading-tight">
-                                            Marian Stevens
-                                        </h4>
-                                        <p id="client-quote-role" class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                                            Digital creator · 760 followers
-                                        </p>
-                                    </div>
+                    <div>
+                        <!-- Header: Client Avatar / Verified Pill -->
+                        <div class="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <img src="reviews/marian-stevens-avatar.webp" alt="Marian Stevens" class="w-10 h-10 sm:w-11 sm:h-11 rounded-full shrink-0 object-cover border-2 border-primary/40 shadow-xs">
+                                <div class="min-w-0">
+                                    <h4 id="client-quote-author" class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white leading-tight truncate">
+                                        Marian Stevens
+                                    </h4>
+                                    <p id="client-quote-role" class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5 truncate">
+                                        Embroidery Shop Owner
+                                    </p>
                                 </div>
-                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full shrink-0 border border-emerald-500/20">
-                                    <span class="material-symbols-outlined text-xs">verified</span>
-                                    <span>Verified</span>
-                                </span>
                             </div>
-
-                            <!-- Star Rating -->
-                            <div class="flex items-center gap-1 mb-4 text-primary">
-                                <span class="material-symbols-outlined text-base filled-icon">star</span>
-                                <span class="material-symbols-outlined text-base filled-icon">star</span>
-                                <span class="material-symbols-outlined text-base filled-icon">star</span>
-                                <span class="material-symbols-outlined text-base filled-icon">star</span>
-                                <span class="material-symbols-outlined text-base filled-icon">star</span>
-                                <span class="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1.5">5.0 / 5.0 Rating</span>
-                            </div>
-
-                            <!-- Pull Quote -->
-                            <blockquote id="client-quote-text" class="text-sm sm:text-base leading-relaxed text-slate-700 dark:text-slate-200 font-medium italic relative z-10 border-l-2 border-primary pl-3.5 my-4">
-                                "Shout out to Dezan Digitizing — amazing work with the digitizing! Clean stitch-outs every single time."
-                            </blockquote>
-                        </div>
-
-                        <!-- Bottom Action & Trust Note -->
-                        <div class="mt-6 pt-4 border-t border-slate-100 dark:border-primary/15 flex items-center justify-between gap-3">
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                                Real client, real machine stitch-out.
+                            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full shrink-0 border border-emerald-500/20">
+                                <span class="material-symbols-outlined text-xs">verified</span>
+                                <span>Verified</span>
                             </span>
-                            <button onclick="window.handleOrderClick ? window.handleOrderClick(event) : null" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-primary/15 hover:bg-primary text-primary hover:text-slate-950 font-bold text-xs transition-colors cursor-pointer">
-                                <span>Order Digitizing</span>
-                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                            </button>
                         </div>
+
+                        <!-- Star Rating -->
+                        <div class="flex items-center gap-0.5 mb-2 sm:mb-2.5 text-primary">
+                            <span class="material-symbols-outlined text-sm sm:text-base filled-icon">star</span>
+                            <span class="material-symbols-outlined text-sm sm:text-base filled-icon">star</span>
+                            <span class="material-symbols-outlined text-sm sm:text-base filled-icon">star</span>
+                            <span class="material-symbols-outlined text-sm sm:text-base filled-icon">star</span>
+                            <span class="material-symbols-outlined text-sm sm:text-base filled-icon">star</span>
+                            <span class="text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 ml-1">5.0 / 5.0 Rating</span>
+                        </div>
+
+                        <!-- Pull Quote -->
+                        <blockquote id="client-quote-text" class="text-xs sm:text-sm leading-snug sm:leading-relaxed text-slate-700 dark:text-slate-200 font-medium italic relative z-10 border-l-2 border-primary pl-2.5 sm:pl-3 my-1.5 sm:my-2">
+                            "Shout out to Dezan Digitizing — amazing work with the digitizing! Clean stitch-outs every single time."
+                        </blockquote>
+                    </div>
+
+                    <!-- Bottom Action & Trust Note -->
+                    <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-slate-100 dark:border-primary/15 flex items-center justify-between gap-2">
+                        <span class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium whitespace-nowrap">
+                            Real client, real machine stitch-out.
+                        </span>
+                        <button onclick="window.handleOrderClick ? window.handleOrderClick(event) : null" class="inline-flex items-center gap-1 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-lg bg-primary/15 hover:bg-primary text-primary hover:text-slate-950 font-bold text-xs transition-colors cursor-pointer shrink-0">
+                            <span>Order Digitizing</span>
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- ===== FACEBOOK REVIEWS (MASONRY) ===== -->
-        <section class="py-8 sm:py-10 px-4 max-w-6xl mx-auto reveal">
+        <section class="pt-4 sm:pt-6 pb-8 sm:pb-10 px-4 max-w-6xl mx-auto reveal">
             <h3 class="text-xl font-bold mb-6 border-l-4 border-primary pl-3">Written Client Reviews</h3>
             
             <div class="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">

@@ -1873,7 +1873,7 @@ window.CLIENT_VIDEO_TESTIMONIALS = [
     {
         id: "marian-stevens",
         name: "Marian Stevens",
-        role: "Digital creator · 760 followers",
+        role: "Embroidery Shop Owner",
         location: "United States",
         verified: true,
         achievement: "Verified Client Review",
